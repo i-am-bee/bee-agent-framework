@@ -1,0 +1,314 @@
+/**
+ * Copyright 2024 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import wiki from "wikipedia";
+import { Cache } from "@/cache/decoratorCache.js";
+import stringComparison from "string-comparison";
+import * as R from "remeda";
+import type { Page, pageFunctions, searchOptions } from "wikipedia";
+import { ArrayKeys, Common } from "@/internals/types.js";
+import {
+  SearchToolOptions,
+  SearchToolOutput,
+  SearchToolResult,
+  SearchToolRunOptions,
+} from "./base.js";
+import { asyncProperties } from "@/internals/helpers/promise.js";
+import { z } from "zod";
+import { Tool, ToolInput } from "@/tools/base.js";
+import Turndown from "turndown";
+// @ts-expect-error missing types
+import turndownPlugin from "joplin-turndown-plugin-gfm";
+
+wiki.default.setLang("en");
+
+export interface SearchOptions extends searchOptions {}
+
+export interface FilterOptions {
+  excludeOthersOnExactMatch?: boolean;
+  minPageNameSimilarity?: number;
+}
+
+export type PageFunctions = pageFunctions | "markdown";
+
+export interface ExtractionOptions {
+  fields?: PageFunctions[];
+}
+
+export interface OutputOptions {
+  maxSerializedLength?: number;
+  maxDescriptionLength?: number;
+}
+
+export interface WikipediaToolOptions extends SearchToolOptions {
+  filters?: FilterOptions;
+  search?: SearchOptions;
+  extraction?: ExtractionOptions;
+  output?: OutputOptions;
+}
+
+export interface WikipediaToolRunOptions extends SearchToolRunOptions {
+  filters?: FilterOptions;
+  search?: SearchOptions;
+  extraction?: ExtractionOptions;
+  output?: OutputOptions;
+}
+
+export interface WikipediaToolResult extends SearchToolResult {
+  fields: Record<string, unknown>;
+}
+
+export class WikipediaToolOutput extends SearchToolOutput<WikipediaToolResult> {
+  constructor(
+    public readonly results: WikipediaToolResult[],
+    protected readonly maxSerializedLength: number,
+  ) {
+    super(results);
+  }
+
+  static {
+    this.register();
+  }
+
+  @Cache()
+  getTextContent(): string {
+    const target = this.results.length === 1 ? this.results[0] : this.results;
+    const response = JSON.stringify(target);
+
+    return this.maxSerializedLength < Infinity
+      ? response.substring(0, this.maxSerializedLength)
+      : response;
+  }
+
+  createSnapshot() {
+    return {
+      results: this.results,
+      maxSerializedLength: this.maxSerializedLength,
+    };
+  }
+
+  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
+    Object.assign(this, snapshot);
+  }
+}
+
+export class WikipediaTool extends Tool<
+  WikipediaToolOutput,
+  WikipediaToolOptions,
+  WikipediaToolRunOptions
+> {
+  name = "Wikipedia";
+  description =
+    "Search a query on Wikipedia. Useful when you need to get information about famous people, places, companies, historical events, or other subjects.";
+
+  inputSchema() {
+    return z.object({
+      query: z
+        .string({ description: `Name of the wikipedia page, for example 'New York'` })
+        .min(1)
+        .max(128),
+    });
+  }
+
+  public constructor(public readonly config: WikipediaToolOptions = {}) {
+    super(config);
+  }
+
+  static {
+    this.register();
+  }
+
+  @Cache()
+  protected get _mappers(): Record<
+    PageFunctions,
+    (page: Page, runOptions: WikipediaToolRunOptions) => Promise<any>
+  > {
+    return {
+      categories: (page) => page.categories(),
+      content: (page) => page.content(),
+      html: (page) => page.html(),
+      markdown: async (page) => {
+        const html = await page.html().then((result) => {
+          const url = new URL(page.fullurl);
+          const base = `${url.protocol}//${[url.hostname, url.port].filter(Boolean).join(":")}`;
+          return (
+            result
+              // Missing a protocol
+              .replace(/(<img .*src=)"(\/\/.*)"/gm, `$1"${url.protocol}$2"`)
+              .replace(/(<a .*href=)"(\/\/.*)"/gm, `$1"${url.protocol}$2"`)
+
+              // Missing a hostname
+              .replace(/(<img .*src=)"(\/.*)"/gm, `$1"${base}$2"`)
+              .replace(/(<a .*href=)"(\/.*)"/gm, `$1"${base}$2"`)
+          );
+        });
+
+        const service = new Turndown();
+        service.use(turndownPlugin.gfm);
+        return service
+          .remove((node): boolean => {
+            switch (node.tagName.toLowerCase()) {
+              case "link":
+              case "style":
+                return true;
+              default:
+                return (
+                  [
+                    "toc",
+                    "reflist",
+                    "mw-references-wrap",
+                    "navbox",
+                    "navbox-styles",
+                    "mw-editsection",
+                    "sistersitebox",
+                    "navbox-inner",
+                    "refbegin",
+                    "notpageimage",
+                    "mw-file-element",
+                  ].some((cls) => node.className.includes(cls)) ||
+                  ["navigation"].some((role) => node.role === role)
+                );
+            }
+          })
+          .turndown(html);
+      },
+      images: (page) => page.images(),
+      intro: (page) => page.intro(),
+      infobox: (page) => page.infobox(),
+      links: (page) => page.links(),
+      coordinates: (page) => page.coordinates(),
+      langLinks: (page) => page.langLinks(),
+      references: (page) => page.references(),
+      related: (page) => page.related(),
+      summary: (page) => page.summary(),
+      tables: (page) => page.tables(),
+    };
+  }
+
+  @Cache()
+  protected get _defaultRunOptions(): WikipediaToolRunOptions {
+    return {
+      extraction: {
+        fields: ["markdown"],
+      },
+      filters: {
+        minPageNameSimilarity: 0.5,
+        excludeOthersOnExactMatch: true,
+      },
+      search: {
+        limit: 3,
+        suggestion: true,
+      },
+      output: {
+        maxSerializedLength: 25_000,
+        maxDescriptionLength: 250,
+      },
+    };
+  }
+
+  protected _createRunOptions(overrides?: WikipediaToolRunOptions): WikipediaToolRunOptions {
+    const baseKeys: ArrayKeys<Common<WikipediaToolRunOptions, WikipediaToolOptions>> = [
+      "filters",
+      "search",
+      "extraction",
+      "retryOptions",
+      "output",
+    ];
+
+    return R.pipe(
+      { ...this._defaultRunOptions },
+      R.mergeDeep(R.pick(this.options ?? {}, baseKeys)),
+      R.mergeDeep({ ...overrides }),
+    );
+  }
+
+  protected async _run(
+    { query: input }: ToolInput<WikipediaTool>,
+    _options?: WikipediaToolRunOptions,
+  ): Promise<WikipediaToolOutput> {
+    const runOptions = this._createRunOptions(_options);
+
+    const { results: searchRawResults, suggestion } = await wiki.default.search(input, {
+      suggestion: Boolean(_options?.search?.suggestion),
+      ...runOptions.search,
+    });
+
+    if (searchRawResults.length === 0 && suggestion && runOptions.search?.suggestion) {
+      return await this._run({ query: suggestion }, _options);
+    }
+
+    const bestCandidates = stringComparison.jaccardIndex
+      .sortMatch(
+        input,
+        searchRawResults.map((result) => result.title),
+      )
+      .map((result) => ({
+        pageId: searchRawResults[result.index].pageid,
+        score: result.rating,
+      }))
+      .filter((result) => result.score >= (runOptions.filters?.minPageNameSimilarity ?? 0))
+      .sort((a, b) => b.score - a.score);
+
+    if (bestCandidates.at(0)?.score === 1 && runOptions.filters?.excludeOthersOnExactMatch) {
+      bestCandidates.length = 1;
+    }
+
+    if (bestCandidates.length === 0) {
+      bestCandidates.push(...searchRawResults);
+    }
+
+    const results = await Promise.all(
+      bestCandidates.map(async ({ pageId }) => {
+        const page = await wiki.default.page(pageId, {
+          redirect: true,
+          preload: false,
+          fields: (runOptions?.extraction?.fields ?? []).filter(
+            (field): field is pageFunctions => field !== "markdown",
+          ),
+        });
+
+        return asyncProperties({
+          title: page.title,
+          description: ((): Promise<string> => {
+            const length = runOptions?.output?.maxDescriptionLength ?? 0;
+            return length <= 0
+              ? Promise.resolve("")
+              : page.content().then((content) => content.substring(0, length));
+          })(),
+          url: page.fullurl,
+          fields: asyncProperties(
+            R.mapToObj(runOptions?.extraction?.fields || [], (key) => [
+              key,
+              this._mappers[key](page, runOptions).catch(() => null),
+            ]),
+          ),
+        });
+      }),
+    );
+    return new WikipediaToolOutput(results, runOptions.output?.maxSerializedLength ?? Infinity);
+  }
+
+  createSnapshot() {
+    return {
+      ...super.createSnapshot(),
+      config: this.config,
+    };
+  }
+
+  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
+    super.loadSnapshot(snapshot);
+  }
+}

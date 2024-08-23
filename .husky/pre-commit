@@ -1,0 +1,2 @@
+yarn lint-staged
+CI=true yarn lint && yarn run test:unit && yarn copyright

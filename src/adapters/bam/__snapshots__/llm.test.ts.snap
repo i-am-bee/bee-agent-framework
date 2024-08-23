@@ -1,0 +1,833 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SDK LLM Output > Merging > Merges moderations 1`] = `
+{
+  "generated_text": "Text 0",
+  "generated_token_count": 3,
+  "input_text": "Hello world!",
+  "input_token_count": 4,
+  "moderations": {
+    "hap": [
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.98,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.33,
+        "success": true,
+      },
+    ],
+    "social_bias": [
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+    ],
+  },
+  "seed": 1230,
+  "stop_reason": "max_tokens",
+}
+`;
+
+exports[`SDK LLM Output > Merging > Merges moderations 2`] = `
+{
+  "hap": [
+    {
+      "flagged": true,
+      "position": {
+        "end": 777,
+        "start": 777,
+      },
+      "score": 0.75,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.98,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.33,
+      "success": true,
+    },
+  ],
+  "social_bias": [
+    {
+      "flagged": true,
+      "position": {
+        "end": 888,
+        "start": 888,
+      },
+      "score": 0.75,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+  ],
+}
+`;
+
+exports[`SDK LLM Output > Merging > Multiple chunks (2) 1`] = `
+{
+  "generated_text": "Text 0Text 1",
+  "generated_token_count": 6,
+  "input_text": "Hello world!",
+  "input_token_count": 4,
+  "moderations": {
+    "hap": [
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.98,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.33,
+        "success": true,
+      },
+    ],
+    "social_bias": [
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+    ],
+  },
+  "seed": 1230,
+  "stop_reason": "max_tokens",
+}
+`;
+
+exports[`SDK LLM Output > Merging > Multiple chunks (2) 2`] = `
+{
+  "hap": [
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.98,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.33,
+      "success": true,
+    },
+  ],
+  "social_bias": [
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+  ],
+}
+`;
+
+exports[`SDK LLM Output > Merging > Multiple chunks (5) 1`] = `
+{
+  "generated_text": "Text 0Text 1Text 2Text 3Text 4",
+  "generated_token_count": 15,
+  "input_text": "Hello world!",
+  "input_token_count": 4,
+  "moderations": {
+    "hap": [
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.98,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.33,
+        "success": true,
+      },
+    ],
+    "social_bias": [
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 2,
+          "start": 2,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 2,
+          "start": 2,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 4,
+          "start": 4,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 4,
+          "start": 4,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+    ],
+  },
+  "seed": 1230,
+  "stop_reason": "max_tokens",
+}
+`;
+
+exports[`SDK LLM Output > Merging > Multiple chunks (5) 2`] = `
+{
+  "hap": [
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.98,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.33,
+      "success": true,
+    },
+  ],
+  "social_bias": [
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 2,
+        "start": 2,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 2,
+        "start": 2,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 4,
+        "start": 4,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 4,
+        "start": 4,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+  ],
+}
+`;
+
+exports[`SDK LLM Output > Merging > Multiple chunks (6) 1`] = `
+{
+  "generated_text": "Text 0Text 1Text 2Text 3Text 4Text 5",
+  "generated_token_count": 18,
+  "input_text": "Hello world!",
+  "input_token_count": 4,
+  "moderations": {
+    "hap": [
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.98,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.33,
+        "success": true,
+      },
+    ],
+    "social_bias": [
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 2,
+          "start": 2,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 2,
+          "start": 2,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 4,
+          "start": 4,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 4,
+          "start": 4,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+    ],
+  },
+  "seed": 1230,
+  "stop_reason": "max_tokens",
+}
+`;
+
+exports[`SDK LLM Output > Merging > Multiple chunks (6) 2`] = `
+{
+  "hap": [
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.98,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.33,
+      "success": true,
+    },
+  ],
+  "social_bias": [
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 2,
+        "start": 2,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 2,
+        "start": 2,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 4,
+        "start": 4,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 4,
+        "start": 4,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+  ],
+}
+`;
+
+exports[`SDK LLM Output > Merging > Multiple chunks (10) 1`] = `
+{
+  "generated_text": "Text 0Text 1Text 2Text 3Text 4Text 5Text 6Text 7Text 8Text 9",
+  "generated_token_count": 30,
+  "input_text": "Hello world!",
+  "input_token_count": 4,
+  "moderations": {
+    "hap": [
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.98,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.33,
+        "success": true,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 6,
+          "start": 6,
+        },
+        "score": 0.98,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 6,
+          "start": 6,
+        },
+        "score": 0.33,
+        "success": true,
+      },
+    ],
+    "social_bias": [
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 0,
+          "start": 0,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 2,
+          "start": 2,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 2,
+          "start": 2,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 4,
+          "start": 4,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 4,
+          "start": 4,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 6,
+          "start": 6,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 6,
+          "start": 6,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 8,
+          "start": 8,
+        },
+        "score": 0.99,
+        "success": false,
+      },
+      {
+        "flagged": true,
+        "position": {
+          "end": 8,
+          "start": 8,
+        },
+        "score": 0.77,
+        "success": true,
+      },
+    ],
+  },
+  "seed": 1230,
+  "stop_reason": "max_tokens",
+}
+`;
+
+exports[`SDK LLM Output > Merging > Multiple chunks (10) 2`] = `
+{
+  "hap": [
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.98,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.33,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 6,
+        "start": 6,
+      },
+      "score": 0.98,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 6,
+        "start": 6,
+      },
+      "score": 0.33,
+      "success": true,
+    },
+  ],
+  "social_bias": [
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 0,
+        "start": 0,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 2,
+        "start": 2,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 2,
+        "start": 2,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 4,
+        "start": 4,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 4,
+        "start": 4,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 6,
+        "start": 6,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 6,
+        "start": 6,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 8,
+        "start": 8,
+      },
+      "score": 0.99,
+      "success": false,
+    },
+    {
+      "flagged": true,
+      "position": {
+        "end": 8,
+        "start": 8,
+      },
+      "score": 0.77,
+      "success": true,
+    },
+  ],
+}
+`;

@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "rootDir": ".",
+    "moduleResolution": "NodeNext",
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "useDefineForClassFields": true,
+    "incremental": false,
+    "moduleDetection": "auto",
+    "baseUrl": ".",
+    "types": ["node", "vitest/globals"],
+    "declarationMap": false,
+    "declaration": false,
+    "resolveJsonModule": true,
+    "sourceMap": false,
+    "allowJs": true,
+    "outDir": "./dist",
+    "removeComments": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@tests/*": ["./tests/*"]
+    },
+    "useUnknownInCatchVariables": false
+  }
+}
