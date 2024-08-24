@@ -20,8 +20,8 @@ The Bee framework makes it easy to build agentic worfklows with leading propriet
 - 👩‍💻 **Code interpreter**: Run code safely in a sandbox container.
 - 💾 **Memory**: Multiple strategies to optimize token spend.
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them without losing state.
-- 🔍 **Traceability**:  Get full visibility of your agent’s inner workings [link to docs page], log all running events and use our MLflow integration to debug performance [link to instructions to setup MLflow].
-- 🎛️ **Production-level** control with caching and error handling [link to docs]
+- 🔍 **Traceability**: Get full visibility of your agent’s inner workings, log all running events and use our MLflow integration (coming soon) to debug performance.
+- 🎛️ **Production-level** control with caching and error handling.
 - 🚧 (Coming soon) **Evaluation**: Run evaluation jobs with your own data source (custom csv or Airtable data).
 - 🚧 (Coming soon) **Model-agnostic support**: Change model providers in 1 line of code without breaking your agent’s functionality.
 - 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
@@ -35,11 +35,13 @@ The Bee framework makes it easy to build agentic worfklows with leading propriet
 npm install bee-agent-framework
 ```
 
+or
+
 ```shell
 yarn add bee-agent-framework
 ```
 
-#### Example
+### Example
 
 ```typescript
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent.js";
@@ -88,57 +90,55 @@ console.log(`Agent 🤖 : `, response.result.text);
 4. Start the code interpreter `yarn run infra:start-code-interpreter`.
 5. Start the agent `yarn run start:bee` (it runs ./examples/agents/bee.ts file).
 
-
 ### 🛠️ Tools
 
-| Name                                                                | Description                                                               |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `PythonTool`                                                        | Run arbitrary Python code in the remote environment.                      |
-| `WikipediaTool`                                                     | Search for data on Wikipedia.                                             |
-| `DuckDuckGoTool`                                                    | Search for data on DuckDuckGo.                                            |
-| `LLMTool`                                                           | Uses an LLM to process input data.                                        |
-| `DynamicTool`                                                       | Construct to create dynamic tools.                                        |
-| `ArXivTool`                                                         | Retrieves research articles published on arXiv.                           |
-| `WebCrawlerTool`                                                    | Retrieves content of an arbitrary website.                                |
-| `CustomTool`                                                        | Runs your own Python function in the remote environment.                  |
-| `OpenMeteoTool`                                                     | Retrieves current, previous, or upcoming weather for a given destination. |
+| Name                                                                      | Description                                                               |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `PythonTool`                                                              | Run arbitrary Python code in the remote environment.                      |
+| `WikipediaTool`                                                           | Search for data on Wikipedia.                                             |
+| `DuckDuckGoTool`                                                          | Search for data on DuckDuckGo.                                            |
+| `LLMTool`                                                                 | Uses an LLM to process input data.                                        |
+| `DynamicTool`                                                             | Construct to create dynamic tools.                                        |
+| `ArXivTool`                                                               | Retrieves research articles published on arXiv.                           |
+| `WebCrawlerTool`                                                          | Retrieves content of an arbitrary website.                                |
+| `CustomTool`                                                              | Runs your own Python function in the remote environment.                  |
+| `OpenMeteoTool`                                                           | Retrieves current, previous, or upcoming weather for a given destination. |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                           |
 
 ### 🔌️ Adapters (LLM - Inference providers)
 
-| Name                                                                     | Description                                                                             |
-|--------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| `Ollama`                                                                 | LLM + ChatLLM support ([example](./examples/llms/providers/ollama.ts))                  |
-| `LangChain`                                                              | Use any LLM that LangChain supports ([example](./examples/llms/providers/langchain.ts)) |
-| `WatsonX`                                                                | LLM + ChatLLM support ([example](./examples/llms/providers/watsonx.ts))                 |
-| `BAM (IBM Internal)`                                                                    | LLM + ChatLLM support ([example](./examples/llms/providers/bam.ts))                     |
+| Name                                                                      | Description                                                                             |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `Ollama`                                                                  | LLM + ChatLLM support ([example](./examples/llms/providers/ollama.ts))                  |
+| `LangChain`                                                               | Use any LLM that LangChain supports ([example](./examples/llms/providers/langchain.ts)) |
+| `WatsonX`                                                                 | LLM + ChatLLM support ([example](./examples/llms/providers/watsonx.ts))                 |
+| `BAM (IBM Internal)`                                                      | LLM + ChatLLM support ([example](./examples/llms/providers/bam.ts))                     |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                         |
-
 
 ### 📦 Modules
 
 The source directory (`src`) provides numerous modules that one can use.
 
-| Name           | Description                                                                                |
-| -------------- |--------------------------------------------------------------------------------------------|
-| **agents**     | Base classes defining the common interface for agent.                                      |
-| **llms**       | Base classes defining the common interface for text inference (standard or chat).          |
-| **template**   | Prompt Templating system based on `Mustache` with various improvements_.                   |
-| **memory**     | Various types of memories to use with agent.                                               |
-| **tools**      | Tools that an agent can use.                                                               |
-| **cache**      | Preset of different caching approaches that can be used together with tools.               |
-| **errors**     | Base framework error classes used by each module.                                          |
-| **adapters**   | Concrete implementations of given modules for different environments.                      |
-| **logger**     | Core component for logging all actions within the framework.                               |
+| Name           | Description                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| **agents**     | Base classes defining the common interface for agent.                                       |
+| **llms**       | Base classes defining the common interface for text inference (standard or chat).           |
+| **template**   | Prompt Templating system based on `Mustache` with various improvements\_.                   |
+| **memory**     | Various types of memories to use with agent.                                                |
+| **tools**      | Tools that an agent can use.                                                                |
+| **cache**      | Preset of different caching approaches that can be used together with tools.                |
+| **errors**     | Base framework error classes used by each module.                                           |
+| **adapters**   | Concrete implementations of given modules for different environments.                       |
+| **logger**     | Core component for logging all actions within the framework.                                |
 | **serializer** | Core component for the ability to serialize/deserialize modules into the serialized format. |
-| **version**    | Constants representing the framework (e.g., latest version)                                |
-| **internals**  | Modules used by other modules within the framework.                                        |
+| **version**    | Constants representing the framework (e.g., latest version)                                 |
+| **internals**  | Modules used by other modules within the framework.                                         |
 
-To see more in-depth explanation see (docs)(./docs/overview.md). 
+To see more in-depth explanation see [docs](./docs/overview.md).
 
 ## Tutorials
 
-🚧 Coming soon 🚧 
+🚧 Coming soon 🚧
 
 ## Roadmap
 
