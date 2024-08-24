@@ -43,6 +43,14 @@
   "files": [
     "dist/**/*"
   ],
+  "homepage": "https://github.com/i-am-bee/bee-agent-framework#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i-am-bee/bee-agent-framework.git"
+  },
+  "bugs": {
+    "url": "https://github.com/i-am-bee/bee-agent-framework/issues"
+  },
   "scripts": {
     "clean": "rimraf dist",
     "build": "yarn clean && yarn ts:check && tsup",
