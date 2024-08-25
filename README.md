@@ -18,7 +18,7 @@ The Bee framework makes it easy to build agentic worfklows with leading propriet
 
 - 🤖 **AI agents**: Use our powerful [Bee agent](https://github.com/i-am-bee/bee-agent-framework/tree/main?tab=readme-ov-file#get-started-with-bee) or [build your own](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#agents).
 - 🛠️ **Tools**: Use our [built-in tools](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#tools) or create your own in Javascript/Python.
-- 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-agent-framework/blob/main/docker-compose.yml).
+- 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
 - 💾 **Memory**: Multiple [strategies](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#memory) to optimize token spend.
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
 - 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our MLflow integration (coming soon) to debug performance.
