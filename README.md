@@ -7,22 +7,23 @@
   <a aria-label="Join the community on GitHub" href="https://github.com/i-am-bee/bee-agent-framework/discussions">
     <img alt="" src="https://img.shields.io/badge/Join%20the%20community-blueviolet.svg?style=for-the-badge&labelColor=000000&label=Bee">
   </a>
+  <h4 align="center">Open-source framework for building, deploying, and serving powerful agentic workflows at scale.</h4>  
 </p>
 
-Open-source framework for building, deploying, and serving powerful agentic workflows at scale.
+
 
 The Bee framework makes it easy to build agentic worfklows with leading proprietary and open-source models. We’re working on bringing model-agnostic support to any LLM to help developers avoid model provider lock-in and embrace the latest open-source LLMs.
 
 ## Key Features
 
-- 🤖 **AI agents**: Use our powerful Bee agent or build your own.
-- 🛠️ **Tools**: Use our built-in tools and create your own in Javascript or Python.
-- 👩‍💻 **Code interpreter**: Run code safely in a sandbox container.
-- 💾 **Memory**: Multiple strategies to optimize token spend.
-- ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them without losing state.
-- 🔍 **Traceability**: Get full visibility of your agent’s inner workings, log all running events and use our MLflow integration (coming soon) to debug performance.
-- 🎛️ **Production-level** control with caching and error handling.
-- 🚧 (Coming soon) **Evaluation**: Run evaluation jobs with your own data source (custom csv or Airtable data).
+- 🤖 **AI agents**: Use our powerful [Bee agent](https://github.com/i-am-bee/bee-agent-framework/tree/main?tab=readme-ov-file#get-started-with-bee) or [build your own](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#agents).
+- 🛠️ **Tools**: Use our [built-in tools](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#tools) or create your own in Javascript/Python.
+- 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-agent-framework/blob/main/docker-compose.yml).
+- 💾 **Memory**: Multiple [strategies](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#memory) to optimize token spend.
+- ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
+- 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our MLflow integration (coming soon) to debug performance.
+- 🎛️ **Production-level** control with [caching](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#cache) and [error handling](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#errors).
+- 🚧 (Coming soon) **Evaluation**: Run evaluation jobs with your own data source (custom csv or Airtable).
 - 🚧 (Coming soon) **Model-agnostic support**: Change model providers in 1 line of code without breaking your agent’s functionality.
 - 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
 - ... more on our [Roadmap](#roadmap)
@@ -154,17 +155,17 @@ To see more in-depth explanation see [docs](./docs/overview.md).
 
 The Bee Agent Framework is an open-source project and we ❤️ contributions.
 
-## Feature contributions
+### Feature contributions
 
 You can get started with any ticket market as “good first issue”.
 
-Have an idea for a new feature? We recommend you first talk to a maintainer prior to spending a lot of time making a pull request that may not align with the project roadmap.
+**Have an idea for a new feature?** We recommend you first talk to a maintainer prior to spending a lot of time making a pull request that may not align with the project roadmap.
 
-## Bugs
+### Bugs
 
 We are using [GitHub Issues](https://github.com/i-am-bee/bee-agent-framework/issues) to manage our public bugs. We keep a close eye on this, so before filing a new issue, please check to make sure it hasn't already been logged.
 
-## Code of conduct
+### Code of conduct
 
 This project and everyone participating in it are governed by the [Code of Conduct](./CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](./CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
 
