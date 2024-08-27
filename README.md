@@ -45,11 +45,11 @@ yarn add bee-agent-framework
 ### Example
 
 ```typescript
-import { BeeAgent } from "bee-agent-framework/agents/bee/agent.js";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat.js";
-import { TokenMemory } from "bee-agent-framework/memory/tokenMemory.js";
-import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch.js";
-import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo.js";
+import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
+import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
 const llm = new OllamaChatLLM(); // default is llama3.1 (7b), it is recommended to use 70b model
 const agent = new BeeAgent({
