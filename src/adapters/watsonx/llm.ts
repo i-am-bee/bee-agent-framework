@@ -175,7 +175,7 @@ function createApiClient({
     return {
       generate: `${pathPrefix}/text/generation?${queryParams}`,
       generate_stream: `${pathPrefix}/text/generation_stream?${queryParams}`,
-      tokenization: `${pathPrefix}/text/tokenization?${queryParams}`,
+      tokenization: `/ml/v1/text/tokenization?${queryParams}`,
       models: `/ml/v1/foundation_model_specs?${queryParams}`,
       deployment: deploymentId
         ? `/ml/v4/deployments/${deploymentId}?${createURLParams({ version, project_id: projectId, space_id: projectId ? undefined : spaceId })}`
@@ -322,6 +322,8 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
         body: JSON.stringify({
           input,
           model_id: this.modelId,
+          project_id: this.projectId,
+          space_id: this.projectId ? undefined : this.spaceId,
           parameters: {
             return_tokens: true,
           },
