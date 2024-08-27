@@ -12,7 +12,7 @@
 
 
 
-The Bee framework makes it easy to build agentic worfklows with leading proprietary and open-source models. We’re working on bringing model-agnostic support to any LLM to help developers avoid model provider lock-in and embrace the latest open-source LLMs.
+The Bee framework makes it easy to build agentic worfklows with leading open-source and proprietary models. We’re working on bringing model-agnostic support to any LLM to help developers avoid model provider lock-in.
 
 ## Key Features
 
