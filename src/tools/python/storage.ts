@@ -71,14 +71,21 @@ export class TemporaryStorage extends PythonStorage {
   }
 }
 
+interface Input {
+  localWorkingDir: PathLike;
+  interpreterWorkingDir: PathLike;
+  ignoredFiles?: Set<string>;
+}
+
 export class LocalPythonStorage extends PythonStorage {
-  constructor(
-    protected readonly input: {
-      localWorkingDir: PathLike;
-      interpreterWorkingDir: PathLike;
-    },
-  ) {
+  protected readonly input: Required<Input>;
+
+  constructor(input: Input) {
     super();
+    this.input = {
+      ...input,
+      ignoredFiles: input?.ignoredFiles ?? new Set([".gitkeep"]),
+    };
   }
 
   @Cache()
@@ -96,7 +103,7 @@ export class LocalPythonStorage extends PythonStorage {
     });
     return Promise.all(
       files
-        .filter((file) => file.isFile())
+        .filter((file) => file.isFile() && !this.input.ignoredFiles.has(file.name))
         .map(async (file) => ({
           filename: file.name,
           hash: await this.computeHash(path.join(this.input.localWorkingDir.toString(), file.name)),
