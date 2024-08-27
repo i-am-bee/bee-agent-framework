@@ -74,7 +74,7 @@
     "copyright": "./scripts/copyright.sh",
     "release": "release-it",
     "_ensure_env": "cp -n .env.template .env",
-    "_docker": "yarn _ensure_env && sh -c 'source ./.env && docker_cmd=$(which docker >/dev/null 2>&1 && printf docker || printf podman) && $docker_cmd \"$@\"' sh"
+    "_docker": "yarn _ensure_env && bash -c 'source ./.env && docker_cmd=$(which docker >/dev/null 2>&1 && printf docker || printf podman) && $docker_cmd \"$@\"' sh"
   },
   "dependencies": {
     "@ai-zen/node-fetch-event-source": "^2.1.4",
