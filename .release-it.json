@@ -8,6 +8,10 @@
       "infile": "CHANGELOG.md"
     }
   },
+  "git": {
+    "commitMessage": "chore: release ${version}",
+    "tagName": "v${version}"
+  },
   "npm": {
     "skipChecks": true,
     "publish": true
@@ -17,6 +21,7 @@
     "after:bump": ["yarn build"]
   },
   "github": {
-    "release": true
+    "release": true,
+    "releaseName": "v${version}"
   }
 }
