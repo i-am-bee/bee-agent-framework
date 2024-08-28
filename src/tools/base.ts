@@ -189,6 +189,7 @@ export abstract class Tool<
 
   protected toError(e: Error, context: any) {
     if (e instanceof ToolError) {
+      Object.assign(e.context, context);
       return e;
     } else {
       return new ToolError(`Tool "${this.name}" has occurred an error!`, [e], {

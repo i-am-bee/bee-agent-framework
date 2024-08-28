@@ -36,6 +36,7 @@ import {
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
 import { BeeIterationToolResult, BeeOutputParser } from "@/agents/bee/parser.js";
+import { AgentError } from "@/agents/base.js";
 
 export class BeeAgentRunnerFatalError extends BeeAgentError {
   isFatal = true;
@@ -50,7 +51,7 @@ export class BeeAgentRunner {
     protected readonly options: BeeRunOptions,
     public readonly memory: TokenMemory,
   ) {
-    this.failedAttemptsCounter = new RetryCounter(options?.execution?.totalMaxRetries);
+    this.failedAttemptsCounter = new RetryCounter(options?.execution?.totalMaxRetries, AgentError);
   }
 
   static async create(
