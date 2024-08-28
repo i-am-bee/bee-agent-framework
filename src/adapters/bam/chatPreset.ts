@@ -67,6 +67,44 @@ export const BAMChatLLMPreset = {
       },
     };
   },
+  "meta-llama/llama-3-70b-instruct": (): BAMChatLLMPreset => {
+    return {
+      base: {
+        parameters: {
+          decoding_method: "greedy",
+          max_new_tokens: 1500,
+          include_stop_sequence: false,
+          stop_sequences: ["<|eot_id|>"],
+        },
+      },
+      chat: {
+        messagesToPrompt: toBoundedFunction(
+          (messages: BaseMessage[]) => {
+            const template = new PromptTemplate({
+              variables: ["messages"],
+              template: `{{#messages}}{{#system}}<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+{{system}}<|eot_id|>{{/system}}{{#user}}<|start_header_id|>user<|end_header_id|>
+
+{{user}}<|eot_id|>{{/user}}{{#assistant}}<|start_header_id|>assistant<|end_header_id|>
+
+{{assistant}}<|eot_id|>{{/assistant}}{{/messages}}<|start_header_id|>assistant<|end_header_id|>
+`,
+            });
+
+            return template.render({
+              messages: messages.map((message) => ({
+                system: message.role === "system" ? [message.text] : [],
+                user: message.role === "user" ? [message.text] : [],
+                assistant: message.role === "assistant" ? [message.text] : [],
+              })),
+            });
+          },
+          [PromptTemplate],
+        ),
+      },
+    };
+  },
   "qwen/qwen2-72b-instruct": (): BAMChatLLMPreset => {
     return {
       base: {
