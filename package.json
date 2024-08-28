@@ -73,7 +73,7 @@
     "prepare": "husky",
     "copyright": "./scripts/copyright.sh",
     "release": "release-it",
-    "_ensure_env": "cp -n .env.template .env",
+    "_ensure_env": "cp -n .env.template .env || true",
     "_docker": "yarn _ensure_env && bash -c 'source ./.env && docker_cmd=$(which docker >/dev/null 2>&1 && printf docker || printf podman) && $docker_cmd \"$@\"' sh"
   },
   "dependencies": {
