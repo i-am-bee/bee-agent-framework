@@ -46,6 +46,7 @@ describe("Token Memory", () => {
   };
 
   it("Serializes", async () => {
+    vi.stubEnv("GENAI_API_KEY", "123");
     const instance = getInstance();
     await instance.add(
       BaseMessage.of({

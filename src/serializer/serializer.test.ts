@@ -19,7 +19,7 @@ import * as R from "remeda";
 import { FrameworkError } from "@/errors.js";
 import { AgentError } from "@/agents/base.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
-import { beforeEach, expect } from "vitest";
+import { beforeEach, expect, vi } from "vitest";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { BAMLLM } from "@/adapters/bam/llm.js";
 import { BAMChatLLM } from "@/adapters/bam/chat.js";
@@ -231,6 +231,7 @@ describe("Serializer", () => {
     });
 
     beforeEach(() => {
+      vi.unstubAllEnvs();
       Serializer.deregister(BaseMessage);
     });
 
@@ -264,6 +265,7 @@ describe("Serializer", () => {
     });
 
     it("Handles nested functions", () => {
+      vi.stubEnv("GENAI_API_KEY", "123");
       const { data } = JSON.parse(
         `{"kind":"token","data":"{\\"__version\\":\\"0.0.35\\",\\"__root\\":{\\"__serializer\\":true,\\"__class\\":\\"Object\\",\\"__ref\\":\\"18\\",\\"__value\\":{\\"tokensUsed\\":{\\"__serializer\\":true,\\"__class\\":\\"Number\\",\\"__ref\\":\\"19\\",\\"__value\\":\\"66\\"},\\"config\\":{\\"__serializer\\":true,\\"__class\\":\\"Object\\",\\"__ref\\":\\"9\\",\\"__value\\":{\\"maxTokens\\":{\\"__serializer\\":true,\\"__class\\":\\"Number\\",\\"__ref\\":\\"10\\",\\"__value\\":\\"7000\\"},\\"llm\\":{\\"__serializer\\":true,\\"__class\\":\\"BAMChatLLM\\",\\"__ref\\":\\"3\\",\\"__value\\":{\\"llm\\":{\\"__serializer\\":true,\\"__class\\":\\"BAMLLM\\",\\"__ref\\":\\"4\\",\\"__value\\":{\\"modelId\\":\\"qwen/qwen2-72b-instruct\\",\\"parameters\\":{\\"__serializer\\":true,\\"__class\\":\\"Object\\",\\"__ref\\":\\"5\\",\\"__value\\":{}},\\"executionOptions\\":{\\"__serializer\\":true,\\"__class\\":\\"Object\\",\\"__ref\\":\\"6\\",\\"__value\\":{}}}},\\"config\\":{\\"__serializer\\":true,\\"__class\\":\\"Object\\",\\"__ref\\":\\"7\\",\\"__value\\":{\\"messagesToPrompt\\":{\\"__serializer\\":true,\\"__class\\":\\"Function\\",\\"__ref\\":\\"8\\",\\"__value\\":{\\"name\\":\\"messagesToPrompt\\",\\"fn\\":\\"messagesToPrompt(messages){return llamaTemplate.render({messages:messages.map(message=>({system:message.role===\\\\\\"system\\\\\\"?[message.text]:[],user:message.role===\\\\\\"user\\\\\\"?[message.text]:[],assistant:message.role===\\\\\\"assistant\\\\\\"?[message.text]:[]}))})}\\"}}}}}}}},\\"messages\\":{\\"__serializer\\":true,\\"__class\\":\\"Array\\",\\"__ref\\":\\"11\\",\\"__value\\":[{\\"__serializer\\":true,\\"__class\\":\\"BaseMessage\\",\\"__ref\\":\\"12\\",\\"__value\\":{\\"role\\":\\"user\\",\\"text\\":\\"My name is Tom, what is my name?\\",\\"meta\\":{\\"__serializer\\":true,\\"__class\\":\\"Undefined\\",\\"__ref\\":\\"13\\"}}},{\\"__serializer\\":true,\\"__class\\":\\"BaseMessage\\",\\"__ref\\":\\"14\\",\\"__value\\":{\\"role\\":\\"assistant\\",\\"text\\":\\"Your name is Tom.\\",\\"meta\\":{\\"__serializer\\":true,\\"__class\\":\\"Undefined\\",\\"__ref\\":\\"15\\"}}},{\\"__serializer\\":true,\\"__class\\":\\"BaseMessage\\",\\"__ref\\":\\"16\\",\\"__value\\":{\\"role\\":\\"user\\",\\"text\\":\\"My name is Tom, what is my name?\\",\\"meta\\":{\\"__serializer\\":true,\\"__class\\":\\"Undefined\\",\\"__ref\\":\\"17\\"}}},{\\"__serializer\\":true,\\"__class\\":\\"BaseMessage\\",\\"__ref\\":\\"14\\",\\"__value\\":\\"__ref\\"}]}}}}"}`,
       );

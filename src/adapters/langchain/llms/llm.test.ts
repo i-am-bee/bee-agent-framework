@@ -18,8 +18,17 @@ import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { LangChainLLM } from "@/adapters/langchain/llms/llm.js";
 import { GenAIModel } from "@ibm-generative-ai/node-sdk/langchain";
 import { Client } from "@ibm-generative-ai/node-sdk";
+import { afterAll, beforeAll, vi } from "vitest";
 
 describe("Langchain LLM", () => {
+  beforeAll(() => {
+    vi.stubEnv("GENAI_API_KEY", "123");
+  });
+
+  afterAll(() => {
+    vi.unstubAllEnvs();
+  });
+
   const getInstance = () => {
     return new LangChainLLM(
       new GenAIModel({

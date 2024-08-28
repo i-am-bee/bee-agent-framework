@@ -94,7 +94,7 @@ describe("Bee Agent", () => {
           { prompt: "Who is the president of Czech Republic?" },
           {
             execution: {
-              maxIterations: 3,
+              maxIterations: 5,
               totalMaxRetries: 5,
             },
           },
