@@ -16,11 +16,15 @@
 
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { OpenAIChatLLM } from "@/adapters/openai/chat.js";
+import { OpenAI } from "openai";
 
 describe("OpenAI ChatLLM", () => {
   const getInstance = () => {
     return new OpenAIChatLLM({
       modelId: "gpt-4o",
+      client: new OpenAI({
+        apiKey: "123",
+      }),
     });
   };
 

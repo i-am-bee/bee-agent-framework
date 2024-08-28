@@ -18,11 +18,13 @@ import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { ChatOpenAI } from "@langchain/openai";
 import { LangChainChatLLM } from "@/adapters/langchain/llms/chat.js";
 
-describe("Adapter LangChain Chat LLM", () => {
+const apiKey = process.env.OPENAI_API_KEY;
+
+describe.runIf(Boolean(apiKey))("Adapter LangChain Chat LLM", () => {
   const createChatLLM = () => {
     const model = new ChatOpenAI({
       temperature: 0,
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey,
     });
     return new LangChainChatLLM(model);
   };
