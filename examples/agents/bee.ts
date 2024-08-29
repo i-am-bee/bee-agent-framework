@@ -49,7 +49,10 @@ const agent = new BeeAgent({
 
 const reader = createConsoleReader();
 if (codeInterpreterUrl) {
-  reader.write("🛠️ System", "Please ensure that the code interpreter is running.");
+  reader.write(
+    "🛠️ System",
+    `The code interpreter tool is enabled. Please ensure that it is running on ${codeInterpreterUrl}`,
+  );
 }
 
 try {
@@ -91,6 +94,20 @@ try {
         // emitter.match("*.*", async (data: unknown, event) => {
         //   logger.trace(event, `Received event "${event.path}"`);
         // });
+
+        // To get raw LLM input (uncomment following block)
+        // emitter.match(
+        //   (event) => event.creator === llm && event.name === "start",
+        //   async (data: InferCallbackValue<GenerateCallbacks["start"]>, event) => {
+        //     logger.trace(
+        //       event,
+        //       [
+        //         `Received LLM event "${event.path}"`,
+        //         JSON.stringify(data.input), // array of messages
+        //       ].join("\n"),
+        //     );
+        //   },
+        // );
       });
 
     reader.write(`Agent 🤖 : `, response.result.text);
