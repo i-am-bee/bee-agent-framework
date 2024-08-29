@@ -53,23 +53,23 @@ Tools MUST do the following:
 
 <!-- eslint-skip -->
 
-```typescript
-static {
-    this.register();
-}
-```
+  ```typescript
+  static {
+      this.register();
+  }
+  ```
 
 - Implement the `_run()` method:
 
 <!-- eslint-skip -->
 
-```typescript
-protected async _run(input: ToolInput<this>, options?: BaseToolRunOptions) {
-    // insert custom code here
-    // MUST: return an instance of the output type specified in the tool class definition
-    // MAY: throw an instance of ToolError upon unrecoverable error conditions encountered by the tool
-}
-```
+  ```typescript
+  protected async _run(input: ToolInput<this>, options?: BaseToolRunOptions) {
+      // insert custom code here
+      // MUST: return an instance of the output type specified in the tool class definition
+      // MAY: throw an instance of ToolError upon unrecoverable error conditions encountered by the tool
+  }
+  ```
 
 ### Using tools with agents
 
