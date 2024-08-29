@@ -1,9 +1,9 @@
 services:
   bee-code-interpreter:
-    image: "iambeeagent/bee-code-interpreter:latest"
+    image: "iambeeagent/bee-code-interpreter:0.0.3"
     environment:
       KUBECONFIG: /root/kubeconfig.yaml
-      APP_EXECUTOR_IMAGE: "iambeeagent/bee-code-executor:latest"
+      APP_EXECUTOR_IMAGE: "iambeeagent/bee-code-executor:0.0.3"
       APP_EXECUTOR_CONTAINER_RESOURCES: "{}"
       APP_FILE_STORAGE_PATH: "/storage"
     volumes:
@@ -27,7 +27,7 @@ services:
         else
           kubectl create job pull-image --image "$${APP_EXECUTOR_IMAGE}" -- /bin/sh -c "echo done";
         fi &&
-        kubectl wait --for=condition=complete job/pull-image --timeout 3600s &&
+        kubectl wait --for=condition=complete job/pull-image --timeout 1800s &&
         echo 'Image pulled successfully' &&
 
         python -m code_interpreter

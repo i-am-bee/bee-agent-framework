@@ -2515,7 +2515,7 @@ __metadata:
     "@types/turndown": "npm:^5.0.5"
     ajv: "npm:^8.17.1"
     ajv-formats: "npm:^3.0.1"
-    bee-proto: "npm:0.0.1"
+    bee-proto: "npm:0.0.2"
     dirty-json: "npm:0.9.2"
     dotenv: "npm:^16.4.5"
     duck-duck-scrape: "npm:^2.2.5"
@@ -2575,13 +2575,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"bee-proto@npm:0.0.1":
-  version: 0.0.1
-  resolution: "bee-proto@npm:0.0.1"
+"bee-proto@npm:0.0.2":
+  version: 0.0.2
+  resolution: "bee-proto@npm:0.0.2"
   dependencies:
     "@bufbuild/protobuf": "npm:^1.10.0"
     "@connectrpc/connect": "npm:^1.4.0"
-  checksum: 10c0/abb4828e4b4391346b352478e1aa4025cc1f9864ada0b50ed98d99bd61c61376f0937820711d33ab930954d48770cd186000db66634ad7a221e2d493b768b58c
+  checksum: 10c0/197a092b4a3e04c9c14853ad7f3122e10810186112c91a3911c666cb56bffa3bd1f172c5f4738b7371e8558b3b159944c9306b9042c58a01d4156eaf7594d0ac
   languageName: node
   linkType: hard
 
