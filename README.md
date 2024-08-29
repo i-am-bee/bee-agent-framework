@@ -10,8 +10,6 @@
   <h4 align="center">Open-source framework for building, deploying, and serving powerful agentic workflows at scale.</h4>  
 </p>
 
-
-
 The Bee framework makes it easy to build agentic worfklows with leading open-source and proprietary models. We’re working on bringing model-agnostic support to any LLM to help developers avoid model provider lock-in.
 
 ## Key Features

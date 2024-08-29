@@ -1,16 +1,32 @@
 // @ts-check
 
+// @ts-expect-error missing types
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 import unusedImports from "eslint-plugin-unused-imports";
+import markdown from "@eslint/markdown";
 
 export default tseslint.config(
+  {
+    ignores: ["node_modules/**", "dist/**"],
+  },
   eslint.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
   {
-    ignores: ["**/*.js"],
+    files: ["**/*.md/**"],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
+  {
+    ignores: ["**/*.md/**"],
     languageOptions: {
       parserOptions: {
         project: "./tsconfig.json",
@@ -60,6 +76,8 @@ export default tseslint.config(
       "unused-imports/no-unused-vars": "off",
     },
   },
+  // @ts-expect-error wrong types
+  ...markdown.configs.processor,
   prettierConfig,
   {
     rules: {
