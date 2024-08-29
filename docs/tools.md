@@ -51,21 +51,25 @@ Tools MUST do the following:
 
   The unnamed static block is executed when your tool is called for the first time. It is used for registering your tool to the agent and any other custom initialisation that may be required.
 
-  ```typescript
-  static {
-      this.register();
-  }
-  ```
+<!-- eslint-skip -->
+
+```typescript
+static {
+    this.register();
+}
+```
 
 - Implement the `_run()` method:
 
-  ```typescript
-  protected async _run(input: ToolInput<this>, options?: BaseToolRunOptions) {
-      // insert custom code here
-      // MUST: return an instance of the output type specified in the tool class definition
-      // MAY: throw an instance of ToolError upon unrecoverable error conditions encountered by the tool
-  }
-  ```
+<!-- eslint-skip -->
+
+```typescript
+protected async _run(input: ToolInput<this>, options?: BaseToolRunOptions) {
+    // insert custom code here
+    // MUST: return an instance of the output type specified in the tool class definition
+    // MAY: throw an instance of ToolError upon unrecoverable error conditions encountered by the tool
+}
+```
 
 ### Using tools with agents
 
