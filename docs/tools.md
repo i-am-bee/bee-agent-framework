@@ -24,6 +24,8 @@ Tools MUST do the following:
 
 - Be given a unique name:
 
+  Note: Convention and best practice is to set the tool's name to the name of its class
+
   ```typescript
   name = "MyNewTool";
   ```
