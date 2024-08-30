@@ -29,7 +29,7 @@ import {
 } from "@/llms/base.js";
 import { HttpError } from "@ibm-generative-ai/node-sdk";
 import * as R from "remeda";
-import { FrameworkError } from "@/errors.js";
+import { FrameworkError, ValueError } from "@/errors.js";
 import { Cache, CacheFn } from "@/cache/decoratorCache.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { safeSum } from "@/internals/helpers/number.js";
@@ -38,6 +38,7 @@ import { createURLParams, RestfulClient, RestfulClientError } from "@/internals/
 import { identity } from "remeda";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
+import { getEnv } from "@/internals/env.js";
 
 export interface WatsonXLLMOutputMeta {
   model_id: string;
@@ -183,6 +184,17 @@ function createApiClient({
     };
   })();
 
+  accessToken = accessToken || getEnv("WATSONX_ACCESS_TOKEN");
+  apiKey = apiKey || getEnv("WATSONX_API_KEY");
+  if (!accessToken && !apiKey) {
+    throw new ValueError(
+      [
+        `Neither "accessToken" nor "apiKey" has been provided.`,
+        `Either set them directly or put them in ENV ("WATSONX_ACCESS_TOKEN" / "WATSONX_API_KEY")`,
+      ].join("\n"),
+    );
+  }
+
   const getHeaders = CacheFn.create(async () => {
     const getAccessToken = async () => {
       if (accessToken) {
@@ -216,8 +228,8 @@ function createApiClient({
     const response = await getAccessToken();
     getHeaders.updateTTL(response.ttl);
     return new Headers({
-      Authorization: `Bearer ${response.token}`,
-      Accept: "application/json",
+      "Authorization": `Bearer ${response.token}`,
+      "Accept": "application/json",
       "Content-Type": "application/json",
     });
   });
