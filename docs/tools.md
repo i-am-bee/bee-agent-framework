@@ -16,6 +16,12 @@ Tools MUST do the following:
 
 - Implement the `Tool` class:
 
+  `MyNewToolOutput` is required, must be an implementation of `ToolOutput` such as `StringToolOutput` or `JSONToolOutput`
+
+  `ToolOptions` is optional (default BaseToolOptions), constructor parameters that are passed during tool creation
+
+  `ToolRunOptions` is optional (default BaseToolRunOptions), optional parameters that are passed to the run method
+
   ```typescript
   export class MyNewTool extends Tool<MyNewToolOutput, ToolOptions, ToolRunOptions> {
     // tool implementation
