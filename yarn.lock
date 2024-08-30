@@ -719,19 +719,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ibm-generative-ai/node-sdk@npm:~3.2.1":
-  version: 3.2.1
-  resolution: "@ibm-generative-ai/node-sdk@npm:3.2.1"
+"@ibm-generative-ai/node-sdk@npm:~3.2.3":
+  version: 3.2.3
+  resolution: "@ibm-generative-ai/node-sdk@npm:3.2.3"
   dependencies:
     "@ai-zen/node-fetch-event-source": "npm:^2.1.2"
     fetch-retry: "npm:^5.0.6"
     http-status-codes: "npm:^2.3.0"
     openapi-fetch: "npm:^0.8.2"
-    p-queue-compat: "npm:^1.0.225"
+    p-queue-compat: "npm:1.0.225"
     yaml: "npm:^2.3.3"
   peerDependencies:
     "@langchain/core": ">=0.1.0"
-  checksum: 10c0/4963f0b3ee27a881544b760358c34680db9d0edd833dcb2224967295367ec1086b553c7dabbecb674f25826ff8ed3b58430996a3d29f9565edbd50559b628888
+  checksum: 10c0/105cd6bbbdca245261532344e65b2e68f482769545ead6804e21217c00b45c1ebdac4390c93fe35364e42bf88891df3ded0b7d5587d5fbd1c0621e4416e07f38
   languageName: node
   linkType: hard
 
@@ -2508,7 +2508,7 @@ __metadata:
     "@connectrpc/connect-node": "npm:^1.4.0"
     "@eslint/js": "npm:^9.9.0"
     "@eslint/markdown": "npm:^6.0.0"
-    "@ibm-generative-ai/node-sdk": "npm:~3.2.1"
+    "@ibm-generative-ai/node-sdk": "npm:~3.2.3"
     "@langchain/community": "npm:~0.2.28"
     "@langchain/core": "npm:~0.2.27"
     "@langchain/langgraph": "npm:~0.0.34"
@@ -2575,7 +2575,7 @@ __metadata:
     zod: "npm:^3.23.8"
     zod-to-json-schema: "npm:^3.23.2"
   peerDependencies:
-    "@ibm-generative-ai/node-sdk": ~3.2.1
+    "@ibm-generative-ai/node-sdk": ~3.2.3
     "@langchain/community": ~0.2.28
     "@langchain/core": ~0.2.27
     "@langchain/langgraph": ~0.0.34
@@ -7301,7 +7301,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-queue-compat@npm:^1.0.225":
+"p-queue-compat@npm:1.0.225":
   version: 1.0.225
   resolution: "p-queue-compat@npm:1.0.225"
   dependencies:
