@@ -49,11 +49,11 @@ import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
-const llm = new OllamaChatLLM();        // default is llama3.1 (8B), it is recommended to use 70B model
+const llm = new OllamaChatLLM(); // default is llama3.1 (8B), it is recommended to use 70B model
 
 const agent = new BeeAgent({
-  llm,                                  // for more explore 'bee-agent-framework/adapters'
-  memory: new TokenMemory({ llm }),     // for more explore 'bee-agent-framework/memory'
+  llm, // for more explore 'bee-agent-framework/adapters'
+  memory: new TokenMemory({ llm }), // for more explore 'bee-agent-framework/memory'
   tools: [new DuckDuckGoSearchTool(), new OpenMeteoTool()], // for more explore 'bee-agent-framework/tools'
 });
 
@@ -156,11 +156,7 @@ To see more in-depth explanation see [docs](./docs/overview.md).
 
 The Bee Agent Framework is an open-source project and we ❤️ contributions.
 
-### Feature contributions
-
-You can get started with any ticket market as “good first issue”.
-
-**Have an idea for a new feature?** We recommend you first talk to a maintainer prior to spending a lot of time making a pull request that may not align with the project roadmap.
+If you'd like to contribute to Bee, please take a look at our [contribution guidelines](./CONTRIBUTING.md).
 
 ### Bugs
 
