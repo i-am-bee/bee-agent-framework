@@ -7,7 +7,7 @@
   <a aria-label="Join the community on GitHub" href="https://github.com/i-am-bee/bee-agent-framework/discussions">
     <img alt="" src="https://img.shields.io/badge/Join%20the%20community-blueviolet.svg?style=for-the-badge&labelColor=000000&label=Bee">
   </a>
-  <h4 align="center">Open-source framework for building, deploying, and serving powerful agentic workflows at scale.</h4>  
+  <h4 align="center">Open-source framework for building, deploying, and serving powerful agentic workflows at scale.</h4>
 </p>
 
 The Bee framework makes it easy to build agentic worfklows with leading open-source and proprietary models. We’re working on bringing model-agnostic support to any LLM to help developers avoid model provider lock-in.
@@ -15,7 +15,7 @@ The Bee framework makes it easy to build agentic worfklows with leading open-sou
 ## Key Features
 
 - 🤖 **AI agents**: Use our powerful [Bee agent](https://github.com/i-am-bee/bee-agent-framework/tree/main?tab=readme-ov-file#get-started-with-bee) or [build your own](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#agents).
-- 🛠️ **Tools**: Use our [built-in tools](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#tools) or create your own in Javascript/Python.
+- 🛠️ **Tools**: Use our [built-in tools](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#tools) or [create your own](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/tools.md) in Javascript/Python.
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
 - 💾 **Memory**: Multiple [strategies](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#memory) to optimize token spend.
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
