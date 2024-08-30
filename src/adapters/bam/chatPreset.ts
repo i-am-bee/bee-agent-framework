@@ -15,10 +15,8 @@
  */
 
 import { BAMChatLLMInputConfig } from "@/adapters/bam/chat.js";
-import { BaseMessage } from "@/llms/primitives/message.js";
-import { PromptTemplate } from "@/template.js";
 import { BAMLLMInput } from "@/adapters/bam/llm.js";
-import { toBoundedFunction } from "@/serializer/utils.js";
+import { LLMChatTemplates } from "@/adapters/shared/llmChatTemplates.js";
 
 interface BAMChatLLMPreset {
   chat: BAMChatLLMInputConfig;
@@ -27,6 +25,8 @@ interface BAMChatLLMPreset {
 
 export const BAMChatLLMPreset = {
   "meta-llama/llama-3-1-70b-instruct": (): BAMChatLLMPreset => {
+    const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("llama3.1");
+
     return {
       base: {
         parameters: {
@@ -34,111 +34,44 @@ export const BAMChatLLMPreset = {
           include_stop_sequence: false,
           max_new_tokens: 2048,
           repetition_penalty: 1.03,
-          stop_sequences: ["<|eot_id|>"],
+          stop_sequences: [...parameters.stop_sequence],
         },
       },
       chat: {
-        messagesToPrompt: toBoundedFunction(
-          (messages: BaseMessage[]) => {
-            const template = new PromptTemplate({
-              variables: ["messages"],
-              template: `{{#messages}}{{#system}}<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-
-{{system}}<|eot_id|>{{/system}}{{#user}}<|start_header_id|>user<|end_header_id|>
-
-{{user}}<|eot_id|>{{/user}}{{#assistant}}<|start_header_id|>assistant<|end_header_id|>
-
-{{assistant}}<|eot_id|>{{/assistant}}{{#ipython}}<|start_header_id|>ipython<|end_header_id|>
-
-{{ipython}}<|eot_id|>{{/ipython}}{{/messages}}<|start_header_id|>assistant<|end_header_id|>
-`,
-            });
-            return template.render({
-              messages: messages.map((message) => ({
-                system: message.role === "system" ? [message.text] : [],
-                user: message.role === "user" ? [message.text] : [],
-                assistant: message.role === "assistant" ? [message.text] : [],
-                ipython: message.role === "ipython" ? [message.text] : [],
-              })),
-            });
-          },
-          [PromptTemplate],
-        ),
+        messagesToPrompt: messagesToPrompt(template),
       },
     };
   },
   "meta-llama/llama-3-70b-instruct": (): BAMChatLLMPreset => {
+    const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("llama3");
+
     return {
       base: {
         parameters: {
           decoding_method: "greedy",
           max_new_tokens: 1500,
           include_stop_sequence: false,
-          stop_sequences: ["<|eot_id|>"],
+          stop_sequences: [...parameters.stop_sequence],
         },
       },
       chat: {
-        messagesToPrompt: toBoundedFunction(
-          (messages: BaseMessage[]) => {
-            const template = new PromptTemplate({
-              variables: ["messages"],
-              template: `{{#messages}}{{#system}}<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-
-{{system}}<|eot_id|>{{/system}}{{#user}}<|start_header_id|>user<|end_header_id|>
-
-{{user}}<|eot_id|>{{/user}}{{#assistant}}<|start_header_id|>assistant<|end_header_id|>
-
-{{assistant}}<|eot_id|>{{/assistant}}{{/messages}}<|start_header_id|>assistant<|end_header_id|>
-`,
-            });
-
-            return template.render({
-              messages: messages.map((message) => ({
-                system: message.role === "system" ? [message.text] : [],
-                user: message.role === "user" ? [message.text] : [],
-                assistant: message.role === "assistant" ? [message.text] : [],
-              })),
-            });
-          },
-          [PromptTemplate],
-        ),
+        messagesToPrompt: messagesToPrompt(template),
       },
     };
   },
   "qwen/qwen2-72b-instruct": (): BAMChatLLMPreset => {
+    const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("qwen2");
+
     return {
       base: {
         parameters: {
           decoding_method: "greedy",
           include_stop_sequence: false,
-          stop_sequences: ["<|im_end|>"],
+          stop_sequences: [...parameters.stop_sequence],
         },
       },
       chat: {
-        messagesToPrompt: toBoundedFunction(
-          (messages: BaseMessage[]) => {
-            const template = new PromptTemplate({
-              variables: ["messages"],
-              template: `{{#messages}}{{#system}}<|im_start|>system
-{{system}}<|im_end|>
-{{ end }}{{/system}}{{#user}}<|im_start|>user
-{{user}}<|im_end|>
-{{ end }}{{/user}}{{#assistant}}<|im_start|>assistant
-{{assistant}}<|im_end|>
-{{ end }}{{/assistant}}{{/messages}}<|im_start|>assistant
-`,
-            });
-
-            return template.render({
-              messages: messages.map((message) => ({
-                system: message.role === "system" ? [message.text] : [],
-                user: message.role === "user" ? [message.text] : [],
-                assistant: message.role === "assistant" ? [message.text] : [],
-              })),
-            });
-          },
-          [PromptTemplate],
-        ),
+        messagesToPrompt: messagesToPrompt(template),
       },
     };
   },
