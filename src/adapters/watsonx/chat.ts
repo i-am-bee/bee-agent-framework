@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { AsyncStream, GenerateCallbacks } from "@/llms/base.js";
+import { AsyncStream, GenerateCallbacks, LLMError } from "@/llms/base.js";
 import {
   WatsonXLLM,
   WatsonXLLMGenerateOptions,
   WatsonXLLMParameters,
   WatsonXLLMOutput,
+  WatsonXLLMInput,
 } from "@/adapters/watsonx/llm.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
@@ -29,6 +30,8 @@ import { transformAsyncIterable } from "@/internals/helpers/stream.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
+import { isFunction, isObjectType } from "remeda";
+import { WatsonXChatLLMPreset, WatsonXChatLLMPresetModel } from "@/adapters/watsonx/chatPreset.js";
 
 export class WatsonXChatLLMOutput extends ChatLLMOutput {
   public readonly raw: WatsonXLLMOutput;
@@ -157,5 +160,34 @@ export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput, WatsonXLLMPara
       return convertor.render({ messages });
     }
     return convertor(messages);
+  }
+
+  static fromPreset(
+    modelId: WatsonXChatLLMPresetModel,
+    overrides?: Omit<WatsonXLLMInput, "parameters" | "modelId"> & {
+      parameters?: WatsonXLLMParameters | ((value: WatsonXLLMParameters) => WatsonXLLMParameters);
+    },
+  ) {
+    const preset = WatsonXChatLLMPreset[modelId]?.();
+    if (!preset) {
+      throw new LLMError(`Model "${modelId}" does not exist in preset.`);
+    }
+
+    let parameters = preset.base.parameters ?? {};
+    if (isFunction(overrides?.parameters)) {
+      parameters = overrides?.parameters(parameters);
+    } else if (isObjectType(overrides?.parameters)) {
+      parameters = overrides?.parameters;
+    }
+
+    return new WatsonXChatLLM({
+      config: preset.chat,
+      llm: new WatsonXLLM({
+        ...preset.base,
+        ...overrides,
+        parameters,
+        modelId,
+      }),
+    });
   }
 }
