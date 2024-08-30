@@ -84,7 +84,7 @@ Tools MUST do the following:
 In order for a tool to be of some utility within an agent, you must enable the agent with knowledge of the tool. To do this, the tool code module must be imported into the agent and passed to the tools array during creation of a `BeeAgent`. An example can be found in the [bee agent](../examples/agents/bee.ts) or you can use a code snippet such as the one below that creates an agent with the built-in [ArXiv tool](../src/tools/arxiv.ts):
 
 ```typescript
-import { ArXivTool } from "@/tools/arxiv.js";
+import { ArXivTool } from "bee-agent-framework/tools/arxiv";
 
 const llm = new OllamaChatLLM({
   modelId: "insert-model-id-here",
