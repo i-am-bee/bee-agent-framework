@@ -105,11 +105,11 @@ const agent = new BeeAgent({
 
 ### Hello World
 
-The simplest form of an example tool is the [helloworld](../examples/tools/helloworld.ts) tool. This example implements the Tool class and will simply prepend the word "Hello" to a given input such as "Please give a special greeting to Bee!". It is not intended for usage with any agents since the functionality provided is highly trivial. However, it may serve as a starter template for writing new tools.
+The simplest form of an example tool is the [helloworld](../examples/tools/helloWorld.ts) tool. This example implements the Tool class and will simply prepend the word "Hello" to a given input such as "Please give a special greeting to Bee!". It is not intended for usage with any agents since the functionality provided is highly trivial. However, it may serve as a starter template for writing new tools.
 
 ### Open Library
 
-The [openlibrary](../examples/tools/helloworld.ts) tool allows an agent to query the [Open Library](https://openlibrary.org/) via its [book search API](https://openlibrary.org/dev/docs/api/search). This functionality injects knowledge about book metadata (not book content) into an agent. It serves as an example for several key aspects of tool creation:
+The [openlibrary](../examples/tools/openLibrary.ts) tool allows an agent to query the [Open Library](https://openlibrary.org/) via its [book search API](https://openlibrary.org/dev/docs/api/search). This functionality injects knowledge about book metadata (not book content) into an agent. It serves as an example for several key aspects of tool creation:
 
 - Implementing the `Tool` class
 - Specifying the input schema to a tool
