@@ -51,7 +51,7 @@ Tools MUST do the following:
 
 - Implement initialisation:
 
-  The unnamed static block is executed when your tool is called for the first time. It is used for registering your tool to the agent and any other custom initialisation that may be required.
+  The unnamed static block is executed when your tool is called for the first time. It is used for registering your tool as `serializable` to the agent and any other custom initialisation that may be required.
 
   <!-- eslint-skip -->
 
