@@ -260,16 +260,6 @@ export class BeeAgentRunner {
             output: toolOutput.getTextContent(),
           };
         } catch (error) {
-          if (error instanceof ToolInputValidationError) {
-            this.failedAttemptsCounter.use(error);
-            return {
-              success: false,
-              output: BeeToolInputErrorPrompt.render({
-                reason: error.toString(),
-              }),
-            };
-          }
-
           await this.run.emitter.emit("toolError", {
             data: {
               tool,
@@ -279,6 +269,16 @@ export class BeeAgentRunner {
               iteration,
             },
           });
+
+          if (error instanceof ToolInputValidationError) {
+            this.failedAttemptsCounter.use(error);
+            return {
+              success: false,
+              output: BeeToolInputErrorPrompt.render({
+                reason: error.toString(),
+              }),
+            };
+          }
 
           if (FrameworkError.isRetryable(error)) {
             this.failedAttemptsCounter.use(error);
