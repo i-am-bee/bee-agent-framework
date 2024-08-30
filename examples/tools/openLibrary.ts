@@ -123,7 +123,7 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
     });
     if (!response.ok) {
       throw new ToolError("Request to Open Library API has failed!", [
-        new Error(response.statusText),
+        new Error(await response.text()),
       ]);
     }
     try {
