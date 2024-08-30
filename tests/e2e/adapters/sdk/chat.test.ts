@@ -19,7 +19,7 @@ import { BaseMessage } from "@/llms/primitives/message.js";
 import { expect } from "vitest";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 
-describe("Adapter SDK Chat LLM", () => {
+describe.runIf(Boolean(process.env.GENAI_API_KEY))("Adapter SDK Chat LLM", () => {
   const createChatLLM = () => {
     return BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
   };

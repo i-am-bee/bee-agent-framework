@@ -14,52 +14,23 @@
  * limitations under the License.
  */
 
-import { PromptTemplate } from "@/template.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { expect } from "vitest";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { WatsonXChatLLM } from "@/adapters/watsonx/chat.js";
-import { WatsonXLLM } from "@/adapters/watsonx/llm.js";
 
 const apiKey = process.env.WATSONX_API_KEY!;
 const projectId = process.env.WATSONX_PROJECT_ID!;
 
 describe.runIf(Boolean(apiKey && projectId))("WatsonX Chat LLM", () => {
   const createChatLLM = () => {
-    const template = new PromptTemplate({
-      variables: ["messages"],
-      template: `{{#messages}}{{#system}}<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-
-{{system}}<|eot_id|>{{/system}}{{#user}}<|start_header_id|>user<|end_header_id|>
-
-{{user}}<|eot_id|>{{/user}}{{#assistant}}<|start_header_id|>assistant<|end_header_id|>
-
-{{assistant}}<|eot_id|>{{/assistant}}{{/messages}}<|start_header_id|>assistant<|end_header_id|>
-
-`,
-    });
-
-    return new WatsonXChatLLM({
-      llm: new WatsonXLLM({
-        modelId: "meta-llama/llama-3-70b-instruct",
-        projectId,
-        apiKey,
-        parameters: {
-          decoding_method: "greedy",
-          min_new_tokens: 5,
-          max_new_tokens: 50,
-        },
-      }),
-      config: {
-        messagesToPrompt(messages: BaseMessage[]) {
-          return template.render({
-            messages: messages.map((message) => ({
-              system: message.role === "system" ? [message.text] : [],
-              user: message.role === "user" ? [message.text] : [],
-              assistant: message.role === "assistant" ? [message.text] : [],
-            })),
-          });
-        },
+    return WatsonXChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct", {
+      apiKey,
+      projectId,
+      parameters: {
+        decoding_method: "greedy",
+        min_new_tokens: 5,
+        max_new_tokens: 50,
       },
     });
   };

@@ -19,17 +19,14 @@ import { FrameworkError } from "@/errors.js";
 import { beforeEach, expect, vi } from "vitest";
 import { Logger } from "@/logger/logger.js";
 import { BeeAgent } from "@/agents/bee/agent.js";
-import { BAMChatLLM } from "@/adapters/bam/chat.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { createCallbackRegister } from "@tests/e2e/utils.js";
 import { omitEmptyValues } from "@/internals/helpers/object.js";
+import * as process from "node:process";
+import { createChatLLM } from "@tests/utils/llmFactory.js";
 
 describe("Bee Agent", () => {
-  const createChatLLM = () => {
-    return BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
-  };
-
   const createAgent = () => {
     return new BeeAgent({
       llm: createChatLLM(),
