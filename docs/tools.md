@@ -10,7 +10,7 @@ These tools extend the agent's abilities, allowing it to interact with external 
 
 ### Writing a new tool
 
-To create a tool, the `Tool` or `DynamicTool` class must be implemented from [tools base](../src/tools/base.ts). When starting to write tools, it is recommended to implement the `Tool` class. The `DynamicTool` class is an extension of the `Tool` class that allows for dynamic forms of input. Refer to the list of [examples](#examples) for some simple examples or any of the built-in tools in order to guide the creation of new tools.
+To create a tool, the `Tool` class must be extended/ implemented or `DynamicTool` created from [tools base](../src/tools/base.ts). When starting to write tools, it is recommended to implement the `Tool` class. The `DynamicTool` class is an extension of the `Tool` class that allows for dynamic forms of input. Refer to the list of [examples](#examples) for some simple examples or any of the built-in tools in order to guide the creation of new tools.
 
 Tools MUST do the following:
 
@@ -51,7 +51,7 @@ Tools MUST do the following:
 
   The unnamed static block is executed when your tool is called for the first time. It is used for registering your tool to the agent and any other custom initialisation that may be required.
 
-<!-- eslint-skip -->
+  <!-- eslint-skip -->
 
   ```typescript
   static {
@@ -61,7 +61,7 @@ Tools MUST do the following:
 
 - Implement the `_run()` method:
 
-<!-- eslint-skip -->
+  <!-- eslint-skip -->
 
   ```typescript
   protected async _run(input: ToolInput<this>, options?: BaseToolRunOptions) {
