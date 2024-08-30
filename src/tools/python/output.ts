@@ -37,7 +37,7 @@ export class PythonToolOutput extends ToolOutput {
 
   getTextContent() {
     const fileList = this.outputFiles
-      .map((file) => `- [${file.filename}](urn:${file.hash})`)
+      .map((file) => `- [${file.filename}](urn:${file.id})`)
       .join("\n");
     return `The code exited with code ${this.exitCode}.
 stdout:

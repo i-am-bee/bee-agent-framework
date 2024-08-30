@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { BaseToolOptions, BaseToolRunOptions, Tool, ToolInput } from "@/tools/base.js";
+import {
+  BaseToolOptions,
+  BaseToolRunOptions,
+  Tool,
+  ToolInput,
+  ToolInputValidationError,
+} from "@/tools/base.js";
 import { createGrpcTransport } from "@connectrpc/connect-node";
 import { PromiseClient, createPromiseClient } from "@connectrpc/connect";
 import { CodeInterpreterService } from "bee-proto/code_interpreter/v1/code_interpreter_service_connect";
@@ -22,11 +28,12 @@ import { z } from "zod";
 import { BaseLLMOutput } from "@/llms/base.js";
 import { LLM } from "@/llms/index.js";
 import { PromptTemplate } from "@/template.js";
-import { mapToObj } from "remeda";
-import { PythonFile, PythonStorage } from "@/tools/python/storage.js";
+import { differenceWith, isShallowEqual, isTruthy, mapToObj, unique } from "remeda";
+import { PythonStorage } from "@/tools/python/storage.js";
 import { PythonToolOutput } from "@/tools/python/output.js";
 import { ValidationError } from "ajv";
 import { ConnectionOptions } from "node:tls";
+import { AnySchemaLike } from "@/internals/helpers/schema.js";
 
 export interface PythonToolOptions extends BaseToolOptions {
   codeInterpreter: {
@@ -58,7 +65,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
       inputFiles: z
         .object(
           mapToObj(files, (value) => [
-            value.hash,
+            value.id,
             z.literal(value.filename).describe("filename of a file"),
           ]),
         )
@@ -69,11 +76,29 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
             "To access an existing file, you must specify it; otherwise, the file will not be accessible. IMPORTANT: If the file is not provided in the input, it will not be accessible.",
             "The key is the final segment of a file URN, and the value is the filename. ",
             files.length > 0
-              ? `Example: {"${files[0].hash}":"${files[0].filename}"} -- the files will be available to the Python code in the working directory.`
+              ? `Example: {"${files[0].id}":"${files[0].filename}"} -- the files will be available to the Python code in the working directory.`
               : `Example: {"e6979b7bec732b89a736fd19436ec295f6f64092c0c6c0c86a2a7f27c73519d6":"file.txt"} -- the files will be available to the Python code in the working directory.`,
           ].join(""),
         ),
     });
+  }
+
+  protected validateInput(
+    schema: AnySchemaLike,
+    rawInput: unknown,
+  ): asserts rawInput is ToolInput<this> {
+    super.validateInput(schema, rawInput);
+
+    const fileNames = Object.values(rawInput.inputFiles ?? {}).filter(Boolean) as string[];
+    const diff = differenceWith(fileNames, unique(fileNames), isShallowEqual);
+    if (diff.length > 0) {
+      throw new ToolInputValidationError(
+        [
+          `All 'inputFiles' must have a unique filenames.`,
+          `Duplicated filenames: ${diff.join(",")}`,
+        ].join("\n"),
+      );
+    }
   }
 
   protected readonly client: PromiseClient<typeof CodeInterpreterService>;
@@ -111,22 +136,16 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
   }
 
   protected async _run(input: ToolInput<this>, options?: BaseToolRunOptions) {
-    const inputFiles: PythonFile[] = Object.entries(input.inputFiles ?? {})
-      .filter(([k, v]) => k && v)
-      .map(([hash, filename]) => ({
-        hash,
-        filename: filename!,
-      }));
-
-    await this.storage.upload(inputFiles);
-
-    // replace relative paths in "files" with absolute paths by prepending "/workspace"
-    const filesInput = Object.fromEntries(
-      inputFiles
-        .filter((file) => file.filename)
-        .map((file) => [`/workspace/${file.filename}`, file.hash]),
+    const inputFiles = await this.storage.upload(
+      Object.entries(input.inputFiles ?? {})
+        .filter(([k, v]) => Boolean(k && v))
+        .map(([id, filename]) => ({
+          id,
+          filename: filename!,
+        })),
     );
 
+    // replace relative paths in "files" with absolute paths by prepending "/workspace"
     const getSourceCode = async () => {
       if (this.preprocess) {
         const { llm, promptTemplate } = this.preprocess;
@@ -139,11 +158,15 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
       return input.code;
     };
 
+    const prefix = "/workspace/";
+
     const result = await this.client.execute(
       {
         sourceCode: await getSourceCode(),
         executorId: this.options.executorId ?? "default",
-        files: filesInput,
+        files: Object.fromEntries(
+          inputFiles.map((file) => [`${prefix}${file.filename}`, file.hash]),
+        ),
       },
       { signal: options?.signal },
     );
@@ -151,23 +174,26 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
     // replace absolute paths in "files" with relative paths by removing "/workspace/"
     // skip files that are not in "/workspace"
     // skip entries that are also entries in filesInput
-    const prefix = "/workspace/";
-    const filesOutput: PythonFile[] = Object.entries(result.files)
-      .map(([k, v]): PythonFile => ({ filename: k, hash: v }))
-      .filter(
-        (file) =>
-          file.filename.startsWith(prefix) &&
-          !(
-            file.filename.slice(prefix.length) in filesInput &&
-            filesInput[file.filename.slice(prefix.length)] === file.hash
-          ),
-      )
-      .map((file) => ({
-        hash: file.hash,
-        filename: file.filename.slice(prefix.length),
-      }));
+    const filesOutput = await this.storage.download(
+      Object.entries(result.files)
+        .map(([k, v]) => {
+          const file = { path: k, hash: v };
+          if (!file.path.startsWith(prefix)) {
+            return;
+          }
 
-    await this.storage.download(filesOutput);
+          const filename = file.path.slice(prefix.length);
+          if (inputFiles.some((input) => input.filename === filename && input.hash === file.hash)) {
+            return;
+          }
+
+          return {
+            hash: file.hash,
+            filename,
+          };
+        })
+        .filter(isTruthy),
+    );
     return new PythonToolOutput(result.stdout, result.stderr, result.exitCode, filesOutput);
   }
 
