@@ -7,6 +7,7 @@ export default defineConfig({
     globals: true,
     passWithNoTests: true,
     testTimeout: 120 * 1000,
+    printConsoleTrace: true,
     setupFiles: ["./tests/setup.ts"],
     deps: {
       interopDefault: false,
