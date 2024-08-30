@@ -49,10 +49,11 @@ import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
-const llm = new OllamaChatLLM(); // default is llama3.1 (7b), it is recommended to use 70b model
+const llm = new OllamaChatLLM();        // default is llama3.1 (8B), it is recommended to use 70B model
+
 const agent = new BeeAgent({
-  llm, // for more explore 'bee-agent-framework/adapters'
-  memory: new TokenMemory({ llm }), // for more explore 'bee-agent-framework/memory'
+  llm,                                  // for more explore 'bee-agent-framework/adapters'
+  memory: new TokenMemory({ llm }),     // for more explore 'bee-agent-framework/memory'
   tools: [new DuckDuckGoSearchTool(), new OpenMeteoTool()], // for more explore 'bee-agent-framework/tools'
 });
 
@@ -66,6 +67,8 @@ const response = await agent
 
 console.log(`Agent 🤖 : `, response.result.text);
 ```
+
+To run this example, be sure that you have installed [ollama](https://ollama.com) with the [llama3.1](https://ollama.com/library/llama3.1) model downloaded.
 
 ➡️ See a more [advanced example](./examples/agents/bee.ts).
 
