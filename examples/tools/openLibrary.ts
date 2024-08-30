@@ -111,7 +111,7 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
     this.register();
   }
 
-  protected async _run(input: ToolInput<this>, options?: BaseToolRunOptions) {
+  protected async _run(input: ToolInput<this>, options?: ToolRunOptions) {
     const params = createURLParams(input);
     const url = `https://openlibrary.org/search.json?${decodeURIComponent(params.toString())}`;
     const response = await fetch(url, {
