@@ -25,8 +25,20 @@ import { Serializable } from "@/internals/serializable.js";
 import { shallowCopy } from "@/serializer/utils.js";
 
 export interface PythonFile {
+  id: string;
   hash: string;
   filename: string;
+}
+
+export interface PythonUploadFile {
+  id: string;
+  filename: string;
+}
+
+export interface PythonDownloadFile {
+  id?: string;
+  filename: string;
+  hash: string;
 }
 
 export abstract class PythonStorage extends Serializable {
@@ -38,12 +50,12 @@ export abstract class PythonStorage extends Serializable {
   /**
    * Prepare subset of available files to code interpreter.
    */
-  abstract upload(files: PythonFile[]): Promise<void>;
+  abstract upload(files: PythonUploadFile[]): Promise<PythonFile[]>;
 
   /**
    * Process updated/modified/deleted files from code interpreter response.
    */
-  abstract download(files: PythonFile[]): Promise<void>;
+  abstract download(files: PythonDownloadFile[]): Promise<PythonFile[]>;
 }
 
 export class TemporaryStorage extends PythonStorage {
@@ -53,13 +65,20 @@ export class TemporaryStorage extends PythonStorage {
     return this.files.slice();
   }
 
-  async upload() {}
+  async upload(files: PythonUploadFile[]): Promise<PythonFile[]> {
+    return files.map((file) => ({
+      id: file.id,
+      hash: file.id,
+      filename: file.filename,
+    }));
+  }
 
-  async download(files: PythonFile[]) {
+  async download(files: PythonDownloadFile[]) {
     this.files = [
       ...this.files.filter((file) => files.every((f) => f.filename !== file.filename)),
-      ...files,
+      ...files.map((file) => ({ id: file.hash, ...file })),
     ];
+    return this.files.slice();
   }
 
   createSnapshot() {
@@ -104,27 +123,35 @@ export class LocalPythonStorage extends PythonStorage {
     return Promise.all(
       files
         .filter((file) => file.isFile() && !this.input.ignoredFiles.has(file.name))
-        .map(async (file) => ({
-          filename: file.name,
-          hash: await this.computeHash(path.join(this.input.localWorkingDir.toString(), file.name)),
-        })),
+        .map(async (file) => {
+          const hash = await this.computeHash(
+            path.join(this.input.localWorkingDir.toString(), file.name),
+          );
+
+          return {
+            id: hash,
+            filename: file.name,
+            hash,
+          };
+        }),
     );
   }
 
-  async upload(files: PythonFile[]): Promise<void> {
+  async upload(files: PythonUploadFile[]): Promise<PythonFile[]> {
     await this.init();
 
     await Promise.all(
       files.map((file) =>
         copyFile(
           path.join(this.input.localWorkingDir.toString(), file.filename),
-          path.join(this.input.interpreterWorkingDir.toString(), file.hash),
+          path.join(this.input.interpreterWorkingDir.toString(), file.id),
         ),
       ),
     );
+    return files.map((file) => ({ ...file, hash: file.id }));
   }
 
-  async download(files: PythonFile[]) {
+  async download(files: PythonDownloadFile[]) {
     await this.init();
 
     await Promise.all(
@@ -135,6 +162,7 @@ export class LocalPythonStorage extends PythonStorage {
         ),
       ),
     );
+    return files.map((file) => ({ ...file, id: file.hash }));
   }
 
   protected async computeHash(file: PathLike) {
