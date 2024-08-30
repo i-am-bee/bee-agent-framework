@@ -97,15 +97,19 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
   description =
     "Provides access to a library of books with information about book titles, authors, contributors, publication dates, publisher and isbn.";
 
-  inputSchema = z.object({
-    title: z.string().optional(),
-    author: z.string().optional(),
-    isbn: z.string().optional(),
-    subject: z.string().optional(),
-    place: z.string().optional(),
-    person: z.string().optional(),
-    publisher: z.string().optional(),
-  });
+  inputSchema() {
+    return z
+      .object({
+        title: z.string(),
+        author: z.string(),
+        isbn: z.string(),
+        subject: z.string(),
+        place: z.string(),
+        person: z.string(),
+        publisher: z.string(),
+      })
+      .partial();
+  }
 
   static {
     this.register();
