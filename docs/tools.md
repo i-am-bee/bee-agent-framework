@@ -48,6 +48,8 @@ Tools MUST do the following:
 
   This is used to define the format of the input to your tool. The agent will formalise the natural language input(s) it has received and structure them into the fields described in the tool's input. The input schema can be specified using [Zod](https://github.com/colinhacks/zod) (recommended) or JSONSchema. It must be a function (either sync or async). Zod effects (e.g. `z.object().transform(...)`) are not supported. The return value of `inputSchema` must always be an object and pass validation by the `validateSchema()` function defined in [schema.ts](../src/internals/helpers/schema.ts).
 
+  <!-- eslint-skip -->
+
   ```typescript
   inputSchema() {
       // any Zod definition is good here, this is typical simple example
