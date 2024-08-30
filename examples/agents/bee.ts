@@ -38,8 +38,8 @@ const agent = new BeeAgent({
           new PythonTool({
             codeInterpreter: { url: codeInterpreterUrl },
             storage: new LocalPythonStorage({
-              interpreterWorkingDir: `${__dirname}/tmp/code_interpreter`,
-              localWorkingDir: `${__dirname}/tmp/local`,
+              interpreterWorkingDir: `${__dirname}/../tmp/code_interpreter`,
+              localWorkingDir: `${__dirname}/../tmp/local`,
             }),
           }),
         ]
