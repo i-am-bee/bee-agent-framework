@@ -2,7 +2,9 @@
 
 ## Introduction
 
-Tools in the context of an agent refer to additional functionalities or capabilities integrated with the agent to perform specific tasks beyond text processing. These tools extend the agent's abilities, allowing it to interact with external systems, access information, and execute actions.
+Tools in the context of an agent refer to additional functionalities or capabilities integrated with the agent to perform specific tasks beyond text processing.
+
+These tools extend the agent's abilities, allowing it to interact with external systems, access information, and execute actions.
 
 ## Development
 
