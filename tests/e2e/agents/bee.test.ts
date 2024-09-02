@@ -25,6 +25,7 @@ import { createCallbackRegister } from "@tests/e2e/utils.js";
 import { omitEmptyValues } from "@/internals/helpers/object.js";
 import * as process from "node:process";
 import { createChatLLM } from "@tests/utils/llmFactory.js";
+import { BeeMeta } from "@/agents/bee/types.js";
 
 describe("Bee Agent", () => {
   const createAgent = () => {
@@ -97,6 +98,11 @@ describe("Bee Agent", () => {
           },
         )
         .observe((emitter) => {
+          let lastIteration = 0;
+          emitter.match("*", (data: { meta: BeeMeta }) => {
+            expect(data.meta.iteration >= lastIteration);
+            lastIteration = data.meta.iteration;
+          });
           emitter.registerCallbacks({
             success: callbacks.create("success", {
               check: ({ data }) => {

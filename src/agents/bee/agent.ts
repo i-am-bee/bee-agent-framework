@@ -26,6 +26,7 @@ import { Emitter } from "@/emitter/emitter.js";
 import {
   BeeAgentRunIteration,
   BeeCallbacks,
+  BeeMeta,
   BeeRunInput,
   BeeRunOptions,
   BeeRunOutput,
@@ -94,11 +95,12 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
     const iterations: BeeAgentRunIteration[] = [];
     const maxIterations = options?.execution?.maxIterations ?? Infinity;
 
-    const runner = await BeeAgentRunner.create(run, this.input, options, input.prompt);
+    const runner = await BeeAgentRunner.create(this.input, options, input.prompt);
 
     let finalMessage: BaseMessage | undefined;
     while (!finalMessage) {
-      if (iterations.length >= maxIterations) {
+      const meta: BeeMeta = { iteration: iterations.length + 1 };
+      if (meta.iteration > maxIterations) {
         throw new BeeAgentError(
           `Agent was not able to resolve the task in ${maxIterations} iterations.`,
           [],
@@ -106,18 +108,24 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
         );
       }
 
-      const iteration = await runner.llm();
+      const emitter = run.emitter.child({ groupId: `iteration-${meta.iteration}` });
+      const iteration = await runner.llm({ emitter, signal: run.signal, meta });
 
       if (iteration.state.tool_name || iteration.state.tool_caption || iteration.state.tool_input) {
-        const { output, success } = await runner.tool(iteration.state as BeeIterationToolResult);
+        const { output, success } = await runner.tool({
+          iteration: iteration.state as BeeIterationToolResult,
+          signal: run.signal,
+          emitter,
+          meta,
+        });
 
         for (const key of ["partialUpdate", "update"] as const) {
-          await run.emitter.emit(key, {
+          await emitter.emit(key, {
             data: {
               tool_output: output,
             },
             update: { key: "tool_output", value: output },
-            meta: { success },
+            meta: { success, ...meta },
           });
         }
 
@@ -149,6 +157,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
           data: finalMessage,
           iterations,
           memory: runner.memory,
+          meta,
         });
         await runner.memory.add(finalMessage);
       }
