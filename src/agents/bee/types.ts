@@ -54,18 +54,23 @@ export interface BeeRunOptions {
   };
 }
 
-export interface BeeUpdateMeta {
+export interface BeeMeta {
+  iteration: number;
+}
+
+export interface BeeUpdateMeta extends BeeMeta {
   success: boolean;
 }
 
 export interface BeeCallbacks {
-  start?: Callback<void>;
-  error?: Callback<{ error: Error }>;
-  retry?: Callback<void>;
+  start?: Callback<{ meta: BeeMeta }>;
+  error?: Callback<{ error: Error; meta: BeeMeta }>;
+  retry?: Callback<{ meta: BeeMeta }>;
   success?: Callback<{
     data: BaseMessage;
     iterations: BeeAgentRunIteration[];
     memory: BaseMemory;
+    meta: BeeMeta;
   }>;
   update?: Callback<{
     data: BeeIterationResult;
@@ -84,6 +89,7 @@ export interface BeeCallbacks {
       options: BaseToolRunOptions;
       iteration: BeeIterationToolResult;
     };
+    meta: BeeMeta;
   }>;
   toolSuccess?: Callback<{
     data: {
@@ -93,6 +99,7 @@ export interface BeeCallbacks {
       result: ToolOutput;
       iteration: BeeIterationToolResult;
     };
+    meta: BeeMeta;
   }>;
   toolError?: Callback<{
     data: {
@@ -102,5 +109,6 @@ export interface BeeCallbacks {
       error: ToolError;
       iteration: BeeIterationToolResult;
     };
+    meta: BeeMeta;
   }>;
 }

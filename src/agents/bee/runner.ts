@@ -19,13 +19,11 @@ import { BeeAgentError } from "@/agents/bee/errors.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { PromptTemplate } from "@/template.js";
-import { BeeAgentRunIteration, BeeCallbacks, BeeRunOptions } from "@/agents/bee/types.js";
-import { RequiredAll } from "@/internals/types.js";
+import { BeeAgentRunIteration, BeeCallbacks, BeeMeta, BeeRunOptions } from "@/agents/bee/types.js";
 import { BaseToolRunOptions, ToolInputValidationError, ToolOutput } from "@/tools/base.js";
 import { getProp } from "@/internals/helpers/object.js";
 import { Retryable } from "@/internals/helpers/retryable.js";
 import { FrameworkError } from "@/errors.js";
-import { RunContext } from "@/context.js";
 import { BeeInput } from "@/agents/bee/agent.js";
 import { RetryCounter } from "@/internals/helpers/counter.js";
 import {
@@ -37,6 +35,7 @@ import {
 } from "@/agents/bee/prompts.js";
 import { BeeIterationToolResult, BeeOutputParser } from "@/agents/bee/parser.js";
 import { AgentError } from "@/agents/base.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 export class BeeAgentRunnerFatalError extends BeeAgentError {
   isFatal = true;
@@ -46,7 +45,6 @@ export class BeeAgentRunner {
   protected readonly failedAttemptsCounter;
 
   constructor(
-    protected readonly run: RunContext<RequiredAll<BeeCallbacks>>,
     protected readonly input: BeeInput,
     protected readonly options: BeeRunOptions,
     public readonly memory: TokenMemory,
@@ -54,12 +52,7 @@ export class BeeAgentRunner {
     this.failedAttemptsCounter = new RetryCounter(options?.execution?.totalMaxRetries, AgentError);
   }
 
-  static async create(
-    run: RunContext<RequiredAll<BeeCallbacks>>,
-    input: BeeInput,
-    options: BeeRunOptions,
-    prompt: string,
-  ) {
+  static async create(input: BeeInput, options: BeeRunOptions, prompt: string) {
     const memory = new TokenMemory({
       llm: input.llm,
       capacityThreshold: 0.85,
@@ -118,25 +111,29 @@ export class BeeAgentRunner {
       }),
     ]);
 
-    return new BeeAgentRunner(run, input, options, memory);
+    return new BeeAgentRunner(input, options, memory);
   }
 
-  async llm(): Promise<BeeAgentRunIteration> {
-    const emitter = this.run.emitter;
+  async llm(input: {
+    emitter: Emitter<BeeCallbacks>;
+    signal: AbortSignal;
+    meta: BeeMeta;
+  }): Promise<BeeAgentRunIteration> {
+    const { emitter, signal, meta } = input;
 
     return new Retryable({
-      onRetry: () => emitter.emit("retry", undefined),
+      onRetry: () => emitter.emit("retry", { meta }),
       onError: async (error) => {
-        await emitter.emit("error", { error });
+        await emitter.emit("error", { error, meta });
         this.failedAttemptsCounter.use(error);
       },
       executor: async () => {
-        await emitter.emit("start", undefined);
+        await emitter.emit("start", { meta });
 
         const outputParser = new BeeOutputParser();
         const llmOutput = await this.input.llm
           .generate(this.memory.messages.slice(), {
-            signal: this.run.signal,
+            signal,
             stream: true,
             guided: {
               regex:
@@ -149,7 +146,7 @@ export class BeeAgentRunner {
               await emitter.emit(type === "full" ? "update" : "partialUpdate", {
                 data: state,
                 update,
-                meta: { success: true },
+                meta: { success: true, ...meta },
               });
             });
 
@@ -177,12 +174,19 @@ export class BeeAgentRunner {
       },
       config: {
         maxRetries: this.options.execution?.maxRetriesPerStep,
-        signal: this.run.signal,
+        signal,
       },
     }).get();
   }
 
-  async tool(iteration: BeeIterationToolResult): Promise<{ output: string; success: boolean }> {
+  async tool(input: {
+    iteration: BeeIterationToolResult;
+    signal: AbortSignal;
+    emitter: Emitter<BeeCallbacks>;
+    meta: BeeMeta;
+  }): Promise<{ output: string; success: boolean }> {
+    const { iteration, signal, emitter, meta } = input;
+
     const tool = this.input.tools.find(
       (tool) => tool.name.trim().toUpperCase() == iteration.tool_name?.toUpperCase(),
     );
@@ -202,7 +206,7 @@ export class BeeAgentRunner {
     }
     const options = await (async () => {
       const baseOptions: BaseToolRunOptions = {
-        signal: this.run.signal,
+        signal,
       };
       const customOptions = await this.options.modifiers?.getToolRunOptions?.({
         tool,
@@ -214,11 +218,11 @@ export class BeeAgentRunner {
 
     return new Retryable({
       config: {
-        signal: this.run.signal,
+        signal,
         maxRetries: this.options.execution?.maxRetriesPerStep,
       },
       onError: async (error) => {
-        await this.run.emitter.emit("toolError", {
+        await emitter.emit("toolError", {
           data: {
             iteration,
             tool,
@@ -226,22 +230,24 @@ export class BeeAgentRunner {
             options,
             error: FrameworkError.ensure(error),
           },
+          meta,
         });
         this.failedAttemptsCounter.use(error);
       },
       executor: async () => {
-        await this.run.emitter.emit("toolStart", {
+        await emitter.emit("toolStart", {
           data: {
             tool,
             input: iteration.tool_input,
             options,
             iteration,
           },
+          meta,
         });
 
         try {
           const toolOutput: ToolOutput = await tool.run(iteration.tool_input, options);
-          await this.run.emitter.emit("toolSuccess", {
+          await emitter.emit("toolSuccess", {
             data: {
               tool,
               input: iteration.tool_input,
@@ -249,6 +255,7 @@ export class BeeAgentRunner {
               result: toolOutput,
               iteration,
             },
+            meta,
           });
 
           if (toolOutput.isEmpty()) {
@@ -260,7 +267,7 @@ export class BeeAgentRunner {
             output: toolOutput.getTextContent(),
           };
         } catch (error) {
-          await this.run.emitter.emit("toolError", {
+          await emitter.emit("toolError", {
             data: {
               tool,
               input: iteration.tool_input,
@@ -268,6 +275,7 @@ export class BeeAgentRunner {
               error,
               iteration,
             },
+            meta,
           });
 
           if (error instanceof ToolInputValidationError) {
