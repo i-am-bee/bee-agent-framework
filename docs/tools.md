@@ -23,9 +23,11 @@ Tools MUST do the following:
   `ToolRunOptions` is optional (default BaseToolRunOptions), optional parameters that are passed to the run method
 
   ```typescript
-  import { BaseToolOptions, BaseToolRunOptions } from "bee-agent-framework/tools/base.js";
+  import { BaseToolOptions, BaseToolRunOptions } from "bee-agent-framework/tools/base";
+
   type ToolOptions = BaseToolOptions;
   type ToolRunOptions = BaseToolRunOptions;
+
   export class MyNewTool extends Tool<MyNewToolOutput, ToolOptions, ToolRunOptions> {
     // tool implementation
   }
