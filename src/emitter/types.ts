@@ -44,13 +44,3 @@ export interface EventMeta<C = unknown> {
   context: C;
   trace?: EventTrace;
 }
-
-// CREATED
-// Agent onStart({..., duration: 0, id: 1, parentId: null })
-// LLM onStart({..., duration: 0, id: 2, parentId: 1, groupId: xxx })
-// LLM onNewToken({..., duration: 10, id: 3, parentId: 1, groupId: xxx })
-// LLM onNewToken({..., duration:5, id: 4, parentId: 1, groupId: xxx})
-// LLM onNewToken({..., duration: 7, id: 5, parentId: 1, groupId: xxx})
-// LLM onNewToken({..., duration:20, id: 6, parentId: 1, groupId: xxx})
-// LLM onEnd({..., duration:10+5+7+20, groupId: xxx})
-// DESTROYED
