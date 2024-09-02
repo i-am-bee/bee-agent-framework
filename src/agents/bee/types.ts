@@ -62,7 +62,11 @@ export interface BeeCallbacks {
   start?: Callback<void>;
   error?: Callback<{ error: Error }>;
   retry?: Callback<void>;
-  success?: Callback<{ data: BaseMessage }>;
+  success?: Callback<{
+    data: BaseMessage;
+    iterations: BeeAgentRunIteration[];
+    memory: BaseMemory;
+  }>;
   update?: Callback<{
     data: BeeIterationResult;
     update: { key: keyof BeeIterationResult; value: string };

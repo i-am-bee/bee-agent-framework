@@ -147,6 +147,8 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
         });
         await run.emitter.emit("success", {
           data: finalMessage,
+          iterations,
+          memory: runner.memory,
         });
         await runner.memory.add(finalMessage);
       }
