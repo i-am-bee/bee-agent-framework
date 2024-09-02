@@ -26,7 +26,7 @@ import { PromiseClient, createPromiseClient } from "@connectrpc/connect";
 import { CodeInterpreterService } from "bee-proto/code_interpreter/v1/code_interpreter_service_connect";
 import { z } from "zod";
 import { BaseLLMOutput } from "@/llms/base.js";
-import { LLM } from "@/llms/index.js";
+import { LLM } from "@/llms/llm.js";
 import { PromptTemplate } from "@/template.js";
 import { differenceWith, isShallowEqual, isTruthy, mapToObj, unique } from "remeda";
 import { PythonStorage } from "@/tools/python/storage.js";

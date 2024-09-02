@@ -17,7 +17,7 @@
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { BaseMemory } from "@/memory/base.js";
 import { PromptTemplate } from "@/template.js";
-import { LLM } from "@/llms/index.js";
+import { LLM } from "@/llms/llm.js";
 import { BaseLLMOutput } from "@/llms/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
 
