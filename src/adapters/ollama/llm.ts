@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LLM, LLMInput } from "@/llms/index.js";
+import { LLM, LLMInput } from "@/llms/llm.js";
 import { Emitter } from "@/emitter/emitter.js";
 import {
   AsyncStream,
