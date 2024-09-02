@@ -105,7 +105,7 @@ The framework provides out-of-the-box tools.
 | `OpenMeteoTool`                                                           | Retrieves current, previous, or upcoming weather for a given destination. |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                           |
 
-To create your own tool, you need to either implement the `BaseTool` class ([example](../examples/tools/customHttpRequest.ts)) or use `DynamicTool.`
+To create your own tool, you need to either implement the `Tool` class or use `DynamicTool.` More information is available in the [tool documentation](tools.md).
 
 ### Cache
 
