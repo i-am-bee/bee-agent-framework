@@ -18,6 +18,8 @@ import { ToolOutput } from "@/tools/base.js";
 import { PythonFile } from "@/tools/python/storage.js";
 
 export class PythonToolOutput extends ToolOutput {
+  static FILE_PREFIX = "urn:bee:file";
+
   constructor(
     public readonly stdout: string,
     public readonly stderr: string,
@@ -37,7 +39,7 @@ export class PythonToolOutput extends ToolOutput {
 
   getTextContent() {
     const fileList = this.outputFiles
-      .map((file) => `- [${file.filename}](urn:${file.id})`)
+      .map((file) => `- [${file.filename}](${PythonToolOutput.FILE_PREFIX}:${file.id})`)
       .join("\n");
     return `The code exited with code ${this.exitCode}.
 stdout:
