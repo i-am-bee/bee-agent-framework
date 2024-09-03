@@ -217,6 +217,7 @@ export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions
       removeNSPrefix: true,
       textNodeName: "#text",
       trimValues: true,
+      ignoreDeclaration: true,
     });
 
     const text = await response.text();
@@ -224,7 +225,7 @@ export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions
 
     if (!response.ok) {
       throw new ToolError("Request to ArXiv API has failed!", [
-        new Error(JSON.stringify(getProp(parsedData, ["entry"], parsedData), null, 2)),
+        new Error(JSON.stringify(getProp(parsedData, ["feed", "entry"], parsedData), null, 2)),
       ]);
     }
 
