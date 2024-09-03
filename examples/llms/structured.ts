@@ -1,7 +1,7 @@
 import "dotenv/config.js";
 import { z } from "zod";
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
-import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
+import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 
 const llm = new OllamaChatLLM();
 const response = await llm.generateStructured(

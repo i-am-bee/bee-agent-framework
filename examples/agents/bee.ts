@@ -1,17 +1,17 @@
 import "dotenv/config.js";
-import { BeeAgent } from "@/agents/bee/agent.js";
+import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { createConsoleReader } from "../helpers/io.js";
-import { FrameworkError } from "@/errors.js";
-import { TokenMemory } from "@/memory/tokenMemory.js";
-import { Logger } from "@/logger/logger.js";
-import { PythonTool } from "@/tools/python/python.js";
-import { LocalPythonStorage } from "@/tools/python/storage.js";
-import { DuckDuckGoSearchTool } from "@/tools/search/duckDuckGoSearch.js";
-import { WikipediaTool } from "@/tools/search/wikipedia.js";
-import { OpenMeteoTool } from "@/tools/weather/openMeteo.js";
+import { FrameworkError } from "bee-agent-framework/errors";
+import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
+import { Logger } from "bee-agent-framework/logger/logger";
+import { PythonTool } from "bee-agent-framework/tools/python/python";
+import { LocalPythonStorage } from "bee-agent-framework/tools/python/storage";
+import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
+import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 
 Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });

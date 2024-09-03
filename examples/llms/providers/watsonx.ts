@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { BaseMessage } from "@/llms/primitives/message.js";
-import { WatsonXChatLLM } from "@/adapters/watsonx/chat.js";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { WatsonXChatLLM } from "bee-agent-framework/adapters/watsonx/chat";
 
 const chatLLM = WatsonXChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct", {
   apiKey: process.env.WATSONX_API_KEY,

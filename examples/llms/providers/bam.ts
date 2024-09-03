@@ -1,6 +1,6 @@
-import { BaseMessage } from "@/llms/primitives/message.js";
-import { BAMLLM } from "@/adapters/bam/llm.js";
-import { BAMChatLLM } from "@/adapters/bam/chat.js";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { BAMLLM } from "bee-agent-framework/adapters/bam/llm";
+import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
 
 {
   console.info("===RAW===");

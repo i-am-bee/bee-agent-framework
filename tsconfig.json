@@ -29,5 +29,6 @@
       "@tests/*": ["./tests/*"]
     },
     "useUnknownInCatchVariables": false
-  }
+  },
+  "exclude": ["examples"]
 }
