@@ -63,6 +63,12 @@ export class PromptTemplate<K extends string> extends Serializable {
   protected config: Required<PromptTemplateInput<K>>;
   protected parsed: ParsedTemplateSpans<K>;
 
+  public static functions = {
+    trim: () => (text: string, render: (value: string) => string) => {
+      return render(text).replace(/(,\s*$)/g, "");
+    },
+  };
+
   constructor(config: PromptTemplateInput<K>) {
     super();
     this.config = {
@@ -88,8 +94,11 @@ export class PromptTemplate<K extends string> extends Serializable {
       variables: new Map(),
     };
 
-    const definedVariables = new Set<string>(this.config.variables);
-    const seenVariables = new Set<string>();
+    const definedVariables = new Set<string>([
+      ...this.config.variables,
+      ...Object.keys(PromptTemplate.functions),
+    ]);
+    const seenVariables = new Set<string>(Object.keys(PromptTemplate.functions));
 
     // eslint-disable-next-line prefer-const
     for (let [type, name] of _raw) {
@@ -128,7 +137,8 @@ export class PromptTemplate<K extends string> extends Serializable {
       R.pick(inputs, allowedKeys),
     );
 
-    const view: Record<string, any> = {};
+    const view: Record<string, any> = { ...PromptTemplate.functions };
+
     for (const [key, { type }] of this.parsed.variables) {
       const isOptional = this.config.optionals.includes(key);
 
