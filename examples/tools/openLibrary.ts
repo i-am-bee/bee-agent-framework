@@ -5,9 +5,9 @@ import {
   ToolInput,
   JSONToolOutput,
   ToolError,
-} from "@/tools/base.js";
+} from "bee-agent-framework/tools/base";
 import { z } from "zod";
-import { createURLParams } from "@/internals/fetcher.js";
+import { createURLParams } from "bee-agent-framework/internals/fetcher";
 
 type ToolOptions = BaseToolOptions;
 type ToolRunOptions = BaseToolRunOptions;
@@ -117,7 +117,7 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
 
   protected async _run(input: ToolInput<this>, options?: ToolRunOptions) {
     const params = createURLParams(input);
-    const url = `https://openlibrary.org/search.json?${decodeURIComponent(params.toString())}`;
+    const url = `https://openlibrary.org/searchon?${decodeURIComponent(params.toString())}`;
     const response = await fetch(url, {
       signal: options?.signal,
     });

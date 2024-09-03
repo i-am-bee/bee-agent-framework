@@ -1,6 +1,6 @@
-import "examples/helpers/setup.js";
-import { PromptTemplate } from "@/template.js";
-import { Logger } from "@/logger/logger.js";
+import "./helpers/setup.js";
+import { PromptTemplate } from "bee-agent-framework/template";
+import { Logger } from "bee-agent-framework/logger/logger";
 
 const logger = new Logger({ name: "template" });
 

@@ -1,6 +1,6 @@
-import { OllamaLLM } from "@/adapters/ollama/llm.js";
-import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
-import { BaseMessage } from "@/llms/primitives/message.js";
+import { OllamaLLM } from "bee-agent-framework/adapters/ollama/llm";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 
 {
   console.info("===RAW===");

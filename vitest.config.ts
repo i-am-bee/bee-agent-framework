@@ -16,5 +16,9 @@ export default defineConfig({
   define: {
     __LIBRARY_VERSION: JSON.stringify(packageJson.version),
   },
-  plugins: [tsConfigPaths()],
+  plugins: [
+    tsConfigPaths({
+      projects: ["tsconfig.json"],
+    }),
+  ],
 });

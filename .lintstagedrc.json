@@ -1,5 +1,4 @@
 {
   "*.{ts,js}": "eslint --fix",
-  "*.ts": "tsc-files --noEmit",
   "*": "prettier --ignore-unknown --write"
 }

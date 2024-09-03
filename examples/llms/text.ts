@@ -1,6 +1,6 @@
 import "dotenv/config.js";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { WatsonXLLM } from "@/adapters/watsonx/llm.js";
+import { WatsonXLLM } from "bee-agent-framework/adapters/watsonx/llm";
 
 const llm = new WatsonXLLM({
   modelId: "google/flan-ul2",

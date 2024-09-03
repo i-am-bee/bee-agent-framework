@@ -3,8 +3,8 @@
 // - @langchain/cohere (or any other provider related package that you would like to use)
 // List of available providers: https://js.langchain.com/v0.2/docs/integrations/chat/
 
-import { BaseMessage } from "@/llms/primitives/message.js";
-import { LangChainChatLLM } from "@/adapters/langchain/llms/chat.js";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { LangChainChatLLM } from "bee-agent-framework/adapters/langchain/llms/chat";
 // @ts-expect-error package not installed
 import { ChatCohere } from "@langchain/cohere";
 

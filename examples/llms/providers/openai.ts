@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { BaseMessage } from "@/llms/primitives/message.js";
-import { OpenAIChatLLM } from "@/adapters/openai/chat.js";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { OpenAIChatLLM } from "bee-agent-framework/adapters/openai/chat";
 
 const llm = new OpenAIChatLLM({
   modelId: "gpt-4o",

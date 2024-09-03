@@ -1,8 +1,8 @@
 import "dotenv/config";
-import { BaseMessage } from "@/llms/primitives/message.js";
-import { WatsonXChatLLM } from "@/adapters/watsonx/chat.js";
-import { WatsonXLLM } from "@/adapters/watsonx/llm.js";
-import { PromptTemplate } from "@/template.js";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { WatsonXChatLLM } from "bee-agent-framework/adapters/watsonx/chat";
+import { WatsonXLLM } from "bee-agent-framework/adapters/watsonx/llm";
+import { PromptTemplate } from "bee-agent-framework/template";
 
 const template = new PromptTemplate({
   variables: ["messages"],

@@ -1,4 +1,4 @@
 import "dotenv/config";
 
-import { Logger } from "@/logger/logger.js";
+import { Logger } from "bee-agent-framework/logger/logger";
 Logger.defaults.pretty = true;

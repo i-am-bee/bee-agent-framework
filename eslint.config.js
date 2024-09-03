@@ -1,6 +1,5 @@
 // @ts-check
 
-// @ts-expect-error missing types
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
@@ -70,11 +69,26 @@ export default tseslint.config(
     },
   },
   {
-    files: ["examples/**"],
+    files: ["examples/**/*.ts"],
+    languageOptions: {
+      parserOptions: {
+        project: "./tsconfig.examples.json",
+      },
+    },
     rules: {
-      "no-restricted-imports": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-vars": "off",
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/"],
+              message: "Use 'bee-agent-framework' instead.",
+            },
+          ],
+        },
+      ],
     },
   },
   // @ts-expect-error wrong types

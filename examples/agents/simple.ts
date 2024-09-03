@@ -1,9 +1,9 @@
 import "dotenv/config.js";
-import { BeeAgent } from "@/agents/bee/agent.js";
-import { TokenMemory } from "@/memory/tokenMemory.js";
-import { DuckDuckGoSearchTool } from "@/tools/search/duckDuckGoSearch.js";
-import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
-import { OpenMeteoTool } from "@/tools/weather/openMeteo.js";
+import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
+import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
+import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
 const llm = new OllamaChatLLM();
 const agent = new BeeAgent({

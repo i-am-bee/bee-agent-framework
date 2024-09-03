@@ -4,7 +4,7 @@ import {
   StringToolOutput,
   Tool,
   ToolInput,
-} from "@/tools/base.js";
+} from "bee-agent-framework/tools/base";
 import { z } from "zod";
 
 type ToolOptions = BaseToolOptions;
