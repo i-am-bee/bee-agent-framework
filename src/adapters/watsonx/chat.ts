@@ -164,7 +164,7 @@ export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput, WatsonXLLMPara
 
   static fromPreset(
     modelId: WatsonXChatLLMPresetModel,
-    overrides?: Omit<WatsonXLLMInput, "parameters" | "modelId"> & {
+    overrides: Omit<WatsonXLLMInput, "parameters" | "modelId"> & {
       parameters?: WatsonXLLMParameters | ((value: WatsonXLLMParameters) => WatsonXLLMParameters);
     },
   ) {
