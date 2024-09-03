@@ -42,7 +42,7 @@ export interface BeeInput {
   tools: AnyTool[];
   memory: BaseMemory;
   meta?: AgentMeta;
-  templates?: BeeAgentTemplates;
+  templates?: Partial<BeeAgentTemplates>;
 }
 
 export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions> {
