@@ -27,6 +27,7 @@ import {
   AnyToolSchemaLike,
   createSchemaValidator,
   FromSchemaLike,
+  FromSchemaLikeRaw,
   toJsonSchema,
   validateSchema,
 } from "@/internals/helpers/schema.js";
@@ -149,6 +150,9 @@ export interface ToolSnapshot<TOutput extends ToolOutput, TOptions extends BaseT
 }
 
 export type ToolInput<T extends AnyTool> = FromSchemaLike<Awaited<ReturnType<T["inputSchema"]>>>;
+export type ToolInputRaw<T extends AnyTool> = FromSchemaLikeRaw<
+  Awaited<ReturnType<T["inputSchema"]>>
+>;
 
 type ToolConstructorParameters<TOptions extends BaseToolOptions> =
   Partial<TOptions> extends TOptions ? [options?: TOptions] : [options: TOptions];
@@ -198,7 +202,7 @@ export abstract class Tool<
     }
   }
 
-  run(input: ToolInput<this>, options?: TRunOptions): Promise<TOutput> {
+  run(input: ToolInputRaw<this>, options?: TRunOptions): Promise<TOutput> {
     return RunContext.enter(this, async (run) => {
       const meta = { input, options };
       let errorPropagated = false;
