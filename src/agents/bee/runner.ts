@@ -31,6 +31,7 @@ import {
   BeeToolErrorPrompt,
   BeeToolInputErrorPrompt,
   BeeToolNoResultsPrompt,
+  BeeToolNotFoundPrompt,
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
 import { BeeIterationToolResult, BeeOutputParser } from "@/agents/bee/parser.js";
@@ -190,17 +191,18 @@ export class BeeAgentRunner {
       (tool) => tool.name.trim().toUpperCase() == iteration.tool_name?.toUpperCase(),
     );
     if (!tool) {
-      this.failedAttemptsCounter.use();
-      const availableTools = this.input.tools.map((tool) => tool.name);
+      this.failedAttemptsCounter.use(
+        new AgentError(`Agent was trying to use non-existing tool "${iteration.tool_name}"`, [], {
+          context: { iteration, meta },
+        }),
+      );
+
+      const template = this.input.templates?.toolNotFoundError ?? BeeToolNotFoundPrompt;
       return {
         success: false,
-        output: [
-          `Tool does not exist!`,
-          availableTools.length > 0 &&
-            `Use one of the following tools: ${availableTools.join(",")}`,
-        ]
-          .filter(Boolean)
-          .join("\n"),
+        output: template.render({
+          tools: this.input.tools,
+        }),
       };
     }
     const options = await (async () => {
