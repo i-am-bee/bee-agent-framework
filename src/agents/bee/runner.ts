@@ -27,7 +27,7 @@ import { FrameworkError } from "@/errors.js";
 import { BeeInput } from "@/agents/bee/agent.js";
 import { RetryCounter } from "@/internals/helpers/counter.js";
 import {
-  BeeAgentSystemPrompt,
+  BeeSystemPrompt,
   BeeToolErrorPrompt,
   BeeToolInputErrorPrompt,
   BeeToolNoResultsPrompt,
@@ -86,11 +86,10 @@ export class BeeAgentRunner {
         },
       },
     });
-    const template = input.promptTemplate ?? BeeAgentSystemPrompt;
     await memory.addMany([
       BaseMessage.of({
         role: Role.SYSTEM,
-        text: template.render({
+        text: (input.templates?.system ?? BeeSystemPrompt).render({
           tools: await Promise.all(
             input.tools.map(async (tool) => ({
               name: tool.name,
@@ -105,7 +104,7 @@ export class BeeAgentRunner {
       ...input.memory.messages,
       BaseMessage.of({
         role: Role.USER,
-        text: BeeUserPrompt.clone().render({
+        text: (input.templates?.user ?? BeeUserPrompt).render({
           input: prompt.trim() ? prompt : "Empty message.",
         }),
       }),
@@ -259,7 +258,8 @@ export class BeeAgentRunner {
           });
 
           if (toolOutput.isEmpty()) {
-            return { output: BeeToolNoResultsPrompt.render({}), success: true };
+            const template = this.input.templates?.toolNoResultError ?? BeeToolNoResultsPrompt;
+            return { output: template.render({}), success: true };
           }
 
           return {
@@ -280,9 +280,11 @@ export class BeeAgentRunner {
 
           if (error instanceof ToolInputValidationError) {
             this.failedAttemptsCounter.use(error);
+
+            const template = this.input.templates?.toolInputError ?? BeeToolInputErrorPrompt;
             return {
               success: false,
-              output: BeeToolInputErrorPrompt.render({
+              output: template.render({
                 reason: error.toString(),
               }),
             };
@@ -290,9 +292,11 @@ export class BeeAgentRunner {
 
           if (FrameworkError.isRetryable(error)) {
             this.failedAttemptsCounter.use(error);
+
+            const template = this.input.templates?.toolError ?? BeeToolErrorPrompt;
             return {
               success: false,
-              output: BeeToolErrorPrompt.render({
+              output: template.render({
                 reason: FrameworkError.ensure(error).explain(),
               }),
             };

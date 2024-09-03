@@ -20,11 +20,12 @@ import { BaseMemory } from "@/memory/base.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { AgentMeta } from "@/agents/types.js";
-import { BeeAgentTemplate, BeeAssistantPrompt } from "@/agents/bee/prompts.js";
+import { BeeAssistantPrompt } from "@/agents/bee/prompts.js";
 import * as R from "remeda";
 import { Emitter } from "@/emitter/emitter.js";
 import {
   BeeAgentRunIteration,
+  BeeAgentTemplates,
   BeeCallbacks,
   BeeMeta,
   BeeRunInput,
@@ -40,8 +41,8 @@ export interface BeeInput {
   llm: ChatLLM<ChatLLMOutput>;
   tools: AnyTool[];
   memory: BaseMemory;
-  promptTemplate?: BeeAgentTemplate;
   meta?: AgentMeta;
+  templates?: BeeAgentTemplates;
 }
 
 export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions> {
