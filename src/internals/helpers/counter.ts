@@ -21,6 +21,7 @@ export class RetryCounter extends Serializable {
   public remaining: number;
   protected readonly maxRetries: number;
   protected lastError?: Error;
+  protected finalError?: Error;
 
   constructor(
     maxRetries = 0,
@@ -32,16 +33,20 @@ export class RetryCounter extends Serializable {
   }
 
   use(error?: Error) {
-    this.lastError = error ?? this.lastError;
+    if (this.finalError) {
+      throw this.finalError;
+    }
 
-    if (this.remaining <= 0) {
-      throw new this.ErrorClass(
+    this.lastError = error ?? this.lastError;
+    this.remaining--;
+    if (this.remaining < 0) {
+      this.finalError = new this.ErrorClass(
         `Maximal amount of global retries (${this.maxRetries}) has been reached.`,
         this.lastError ? [this.lastError] : undefined,
-        { isFatal: true },
+        { isFatal: true, isRetryable: false },
       );
+      throw this.finalError;
     }
-    this.remaining--;
   }
 
   createSnapshot() {
@@ -49,6 +54,7 @@ export class RetryCounter extends Serializable {
       remaining: this.remaining,
       maxRetries: this.maxRetries,
       lastError: this.lastError,
+      finalError: this.finalError,
       ErrorClass: this.ErrorClass,
     };
   }
