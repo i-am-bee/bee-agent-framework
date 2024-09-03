@@ -20,6 +20,13 @@ import { BaseMemory } from "@/memory/base.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { Callback } from "@/emitter/types.js";
 import { AnyTool, BaseToolRunOptions, Tool, ToolError, ToolOutput } from "@/tools/base.js";
+import {
+  BeeSystemPrompt,
+  BeeToolErrorPrompt,
+  BeeToolInputErrorPrompt,
+  BeeToolNoResultsPrompt,
+  BeeUserPrompt,
+} from "@/agents/bee/prompts.js";
 
 export interface BeeRunInput {
   prompt: string;
@@ -111,4 +118,12 @@ export interface BeeCallbacks {
     };
     meta: BeeMeta;
   }>;
+}
+
+export interface BeeAgentTemplates {
+  system: typeof BeeSystemPrompt;
+  user: typeof BeeUserPrompt;
+  toolError: typeof BeeToolErrorPrompt;
+  toolInputError: typeof BeeToolInputErrorPrompt;
+  toolNoResultError: typeof BeeToolNoResultsPrompt;
 }

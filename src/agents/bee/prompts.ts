@@ -16,7 +16,7 @@
 
 import { PromptTemplate } from "@/template.js";
 
-export const BeeAgentSystemPrompt = new PromptTemplate({
+export const BeeSystemPrompt = new PromptTemplate({
   variables: ["instructions", "tools", "tool_names"] as const,
   defaults: {
     instructions: "You are a helpful assistant that uses tools to answer questions.",
@@ -84,7 +84,6 @@ Responses must always have the following structure:
 - IMPORTANT: Lines 'Thought', 'Tool Name', 'Tool Caption', 'Tool Input', 'Tool Output' and 'Final Answer' must be sent within a single message.
 `,
 });
-export type BeeAgentTemplate = typeof BeeAgentSystemPrompt;
 
 export const BeeAssistantPrompt = new PromptTemplate({
   variables: ["thought", "toolName", "toolCaption", "toolInput", "toolOutput", "finalAnswer"],
