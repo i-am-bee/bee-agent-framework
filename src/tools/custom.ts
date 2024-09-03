@@ -46,12 +46,9 @@ function createCodeInterpreterClient(url: string) {
 }
 
 export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
-  public get name() {
-    return this.options.name;
-  }
-  public get description() {
-    return this.options.description;
-  }
+  name: string;
+  description: string;
+
   public inputSchema() {
     return this.options.inputSchema;
   }
@@ -69,6 +66,8 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     validate(options, toolOptionsSchema);
     super(options);
     this.client = client || createCodeInterpreterClient(options.codeInterpreterUrl);
+    this.name = options.name;
+    this.description = options.description;
   }
 
   protected async _run(input: any, options: BaseToolRunOptions) {
