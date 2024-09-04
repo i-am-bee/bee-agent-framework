@@ -30,7 +30,7 @@ const toolOptionsSchema = z
   .object({
     codeInterpreter: z.object({
       url: z.string().url(),
-      connectionOptions: z.any(),
+      connectionOptions: z.any().optional(),
     }),
     sourceCode: z.string().min(1),
     name: z.string().min(1),
