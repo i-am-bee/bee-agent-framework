@@ -35,11 +35,13 @@ import { ValidationError } from "ajv";
 import { ConnectionOptions } from "node:tls";
 import { AnySchemaLike } from "@/internals/helpers/schema.js";
 
+export interface CodeInterpreterOptions {
+  url: string;
+  connectionOptions?: ConnectionOptions;
+}
+
 export interface PythonToolOptions extends BaseToolOptions {
-  codeInterpreter: {
-    url: string;
-    connectionOptions?: ConnectionOptions;
-  };
+  codeInterpreter: CodeInterpreterOptions;
   executorId?: string;
   preprocess?: { llm: LLM<BaseLLMOutput>; promptTemplate: PromptTemplate<"input"> };
   storage: PythonStorage;
