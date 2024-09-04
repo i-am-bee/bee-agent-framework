@@ -78,7 +78,7 @@ export class OpenMeteoTool extends Tool<JSONToolOutput<Response>, ToolOptions, T
               .strip(),
           ),
         elevation: z.number().nullish(),
-        timezone: z.string(),
+        timezone: z.string().default(Intl.DateTimeFormat().resolvedOptions().timeZone),
         start_date: z
           .string()
           .date()
@@ -89,7 +89,7 @@ export class OpenMeteoTool extends Tool<JSONToolOutput<Response>, ToolOptions, T
           .date()
           .describe("Date Format: YYYY-MM-DD (omit the field for the current date)")
           .nullish(),
-        forecast_days: z.number().int().min(0).max(16).default(7),
+        forecast_days: z.number().int().min(0).max(16).default(1),
         past_days: z.number().int().min(0).max(92).default(0),
         temperature_unit: z.enum(["celsius", "fahrenheit"]).default("celsius"),
       })
