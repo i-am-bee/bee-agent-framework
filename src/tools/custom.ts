@@ -21,13 +21,17 @@ import { FrameworkError } from "@/errors.js";
 import { z } from "zod";
 import { validate } from "@/internals/helpers/general.js";
 import { CodeInterpreterService } from "bee-proto/code_interpreter/v1/code_interpreter_service_connect";
+import { CodeInterpreterOptions } from "./python/python.js";
 
 export class CustomToolCreateError extends FrameworkError {}
 export class CustomToolExecuteError extends FrameworkError {}
 
 const toolOptionsSchema = z
   .object({
-    codeInterpreterUrl: z.string().url(),
+    codeInterpreter: z.object({
+      url: z.string().url(),
+      connectionOptions: z.any(),
+    }),
     sourceCode: z.string().min(1),
     name: z.string().min(1),
     description: z.string().min(1),
@@ -38,10 +42,14 @@ const toolOptionsSchema = z
 
 export type CustomToolOptions = z.output<typeof toolOptionsSchema> & BaseToolOptions;
 
-function createCodeInterpreterClient(url: string) {
+function createCodeInterpreterClient(codeInterpreter: CodeInterpreterOptions) {
   return createPromiseClient(
     CodeInterpreterService,
-    createGrpcTransport({ baseUrl: url, httpVersion: "2" }),
+    createGrpcTransport({
+      baseUrl: codeInterpreter.url,
+      httpVersion: "2",
+      nodeOptions: codeInterpreter.connectionOptions,
+    }),
   );
 }
 
@@ -65,7 +73,7 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
   ) {
     validate(options, toolOptionsSchema);
     super(options);
-    this.client = client || createCodeInterpreterClient(options.codeInterpreterUrl);
+    this.client = client || createCodeInterpreterClient(options.codeInterpreter);
     this.name = options.name;
     this.description = options.description;
   }
@@ -89,11 +97,15 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {
     super.loadSnapshot(snapshot);
-    this.client = createCodeInterpreterClient(this.options.codeInterpreterUrl);
+    this.client = createCodeInterpreterClient(this.options.codeInterpreter);
   }
 
-  static async fromSourceCode(codeInterpreterUrl: string, sourceCode: string, executorId?: string) {
-    const client = createCodeInterpreterClient(codeInterpreterUrl);
+  static async fromSourceCode(
+    codeInterpreter: CodeInterpreterOptions,
+    sourceCode: string,
+    executorId?: string,
+  ) {
+    const client = createCodeInterpreterClient(codeInterpreter);
     const response = await client.parseCustomTool({ toolSourceCode: sourceCode });
 
     if (response.response.case === "error") {
@@ -104,7 +116,7 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
 
     return new CustomTool(
       {
-        codeInterpreterUrl,
+        codeInterpreter,
         sourceCode,
         name: toolName,
         description: toolDescription,
