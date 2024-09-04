@@ -25,6 +25,7 @@ import {
   BeeToolErrorPrompt,
   BeeToolInputErrorPrompt,
   BeeToolNoResultsPrompt,
+  BeeToolNotFoundPrompt,
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
 
@@ -126,4 +127,5 @@ export interface BeeAgentTemplates {
   toolError: typeof BeeToolErrorPrompt;
   toolInputError: typeof BeeToolInputErrorPrompt;
   toolNoResultError: typeof BeeToolNoResultsPrompt;
+  toolNotFoundError: typeof BeeToolNotFoundPrompt;
 }

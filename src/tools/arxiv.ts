@@ -102,7 +102,10 @@ export class ArXivToolOutput extends JSONToolOutput<ArXivResponse> {
 }
 
 const extractId = (value: string) =>
-  value.replace("https://arxiv.org/abs/", "").replace("https://arxiv.org/pdf/", "");
+  value
+    .replace("https://arxiv.org/abs/", "")
+    .replace("https://arxiv.org/pdf/", "")
+    .replace(/v\d$/, "");
 
 export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions> {
   name = "ArXiv";
@@ -115,40 +118,19 @@ export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions
       value: z.string().min(1),
     });
 
-    return z.object({
-      id_list: z.array(z.string().min(1)).nullish(),
-      filters: z
-        .array(
-          z.object({
-            include: z
-              .array(entrySchema)
-              .nonempty()
-              .describe(`Entries are combined as a logical 'AND'`),
-            exclude: z
-              .array(entrySchema)
-              .optional()
-              .describe(
-                `Entries are combined with those mentioned in 'include' as a logical 'ANDNOT`,
-              ),
-          }),
-        )
-        .describe(
-          `Entries are combined as a logical 'OR'. Note: filtering by date is not supported.`,
-        )
-        .nullish()
-        .default([]),
-      start: z.number().int().min(0).default(0),
-      maxResults: z.number().int().min(1).max(100).default(5),
-      sort: z
-        .object({
-          type: z.nativeEnum(SortType).default(SortType.RELEVANCE),
-          order: z.nativeEnum(SortOrder).default(SortOrder.DESCENDING),
-        })
-        .default({
-          type: SortType.RELEVANCE,
-          order: SortOrder.DESCENDING,
-        }),
-    });
+    return z
+      .object({
+        ids: z.array(z.string().min(1)).optional(),
+        search_query: z
+          .object({
+            include: z.array(entrySchema).nonempty().describe("Filters to include results."),
+            exclude: z.array(entrySchema).optional().describe("Filters to exclude results."),
+          })
+          .optional(),
+        start: z.number().int().min(0).default(0),
+        maxResults: z.number().int().min(1).max(100).default(5),
+      })
+      .describe("Sorting by date is not supported.");
   }
 
   static {
@@ -160,9 +142,9 @@ export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions
     rawInput: unknown,
   ): asserts rawInput is ToolInput<this> {
     super.validateInput(schema, rawInput);
-    if (isEmpty(rawInput.id_list ?? []) && isEmpty(rawInput.filters ?? [])) {
+    if (isEmpty(rawInput.ids ?? []) && !rawInput.search_query) {
       throw new ToolInputValidationError(
-        `Property 'filters' must be provided and non empty if the 'id_list' property is not provided!`,
+        `The 'search_query' property must be non-empty if the 'ids' property is not provided!`,
       );
     }
   }
@@ -171,24 +153,21 @@ export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions
     return createURLParams({
       start: input.start,
       max_results: input.maxResults,
-      sortBy: input.sort.type,
-      sortOrder: input.sort.order,
-      id_list: isEmpty(input.id_list ?? []) ? undefined : input.id_list?.map(extractId),
-      search_query: input.filters
-        ?.map(({ include, exclude = [] }) =>
-          [
-            include
-              .map((tag) => `${FilterTypeMapping[tag.field]}:${tag.value}`)
-              .join(Separators.AND),
-            exclude
-              .map((tag) => `${FilterTypeMapping[tag.field]}:${tag.value}`)
-              .join(Separators.ANDNOT),
-          ]
-            .filter(Boolean)
+      id_list: isEmpty(input.ids ?? []) ? undefined : input.ids?.map(extractId),
+      search_query:
+        input.search_query &&
+        [
+          input.search_query.include
+            .map((tag) => `${FilterTypeMapping[tag.field]}:${tag.value}`)
+            .join(Separators.AND),
+          (input.search_query.exclude ?? [])
+            .map((tag) => `${FilterTypeMapping[tag.field]}:${tag.value}`)
             .join(Separators.ANDNOT),
-        )
-        .filter(Boolean)
-        .join(Separators.OR),
+        ]
+          .filter(Boolean)
+          .join(Separators.ANDNOT),
+      sortBy: SortType.RELEVANCE,
+      sortOrder: SortOrder.DESCENDING,
     });
   }
 

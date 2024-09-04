@@ -29,6 +29,8 @@ import type { NeedleOptions } from "needle";
 import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
 
+export { SafeSearchType as DuckDuckGoSearchToolSearchType };
+
 export interface DuckDuckGoSearchToolOptions extends SearchToolOptions {
   search?: SearchOptions;
   throttle?: ThrottleOptions | false;

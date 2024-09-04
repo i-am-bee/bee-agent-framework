@@ -57,7 +57,7 @@ export function createSchemaValidator<T extends AnySchemaLike>(
 
   const ajv = new Ajv(
     options ?? {
-      coerceTypes: true,
+      coerceTypes: "array",
       useDefaults: true,
       strict: false,
       strictSchema: false,

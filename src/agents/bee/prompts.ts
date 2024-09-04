@@ -114,3 +114,11 @@ export const BeeToolNoResultsPrompt = new PromptTemplate({
   variables: [],
   template: `No results were found!`,
 });
+
+export const BeeToolNotFoundPrompt = new PromptTemplate({
+  variables: ["tools"],
+  template: `Tool does not exist!
+{{#tools.length}}
+Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
+{{/tools.length}}`,
+});

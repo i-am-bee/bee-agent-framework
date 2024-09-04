@@ -27,21 +27,15 @@ describe("Arxiv", () => {
   it("Runs", async () => {
     const response = await instance.run(
       {
-        filters: [
-          {
-            include: [
-              {
-                value: "LLM",
-                field: "title",
-              },
-            ],
-          },
-        ],
-        maxResults: 2,
-        sort: {
-          type: "submittedDate",
-          order: "ascending",
+        search_query: {
+          include: [
+            {
+              value: "LLM",
+              field: "title",
+            },
+          ],
         },
+        maxResults: 2,
       },
       {
         signal: AbortSignal.timeout(60 * 1000),
@@ -65,7 +59,7 @@ describe("Arxiv", () => {
   it("Throws", async () => {
     await expect(
       instance.run({
-        id_list: ["xx"],
+        ids: ["xx"],
       }),
     ).rejects.toThrowErrorMatchingInlineSnapshot(`[ToolError: Request to ArXiv API has failed!]`);
   });

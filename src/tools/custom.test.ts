@@ -52,7 +52,7 @@ describe("CustomTool", () => {
       },
     });
 
-    const customTool = await CustomTool.fromSourceCode("http://localhost", "source code");
+    const customTool = await CustomTool.fromSourceCode({ url: "http://localhost" }, "source code");
 
     expect(customTool.name).toBe("test");
     expect(customTool.description).toBe("A test tool");
@@ -76,9 +76,9 @@ describe("CustomTool", () => {
       },
     });
 
-    await expect(CustomTool.fromSourceCode("http://localhost", "source code")).rejects.toThrow(
-      "Error parsing tool",
-    );
+    await expect(
+      CustomTool.fromSourceCode({ url: "http://localhost" }, "source code"),
+    ).rejects.toThrow("Error parsing tool");
   });
 
   it("should run the custom tool", async () => {
@@ -101,7 +101,7 @@ describe("CustomTool", () => {
     });
 
     const customTool = await CustomTool.fromSourceCode(
-      "http://localhost",
+      { url: "http://localhost" },
       "source code",
       "executor-id",
     );
@@ -148,7 +148,7 @@ describe("CustomTool", () => {
     });
 
     const customTool = await CustomTool.fromSourceCode(
-      "http://localhost",
+      { url: "http://localhost" },
       "source code",
       "executor-id",
     );

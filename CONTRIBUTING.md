@@ -50,8 +50,8 @@ yarn install
 GENAI_API_KEY=""
 OPENAI_API_KEY=""
 WATSONX_API_KEY=""
+WATSONX_PROJECT_ID=""
 
-WATSONX_PROJECT_ID="" # optional
 WATSONX_SPACE_ID="" # optional
 WATSONX_DEPLOYMENT_ID=""  # optional
 ```
