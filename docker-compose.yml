@@ -1,9 +1,9 @@
 services:
   bee-code-interpreter:
-    image: "iambeeagent/bee-code-interpreter:0.0.4"
+    image: "iambeeagent/bee-code-interpreter:0.0.5"
     environment:
       KUBECONFIG: /root/kubeconfig.yaml
-      APP_EXECUTOR_IMAGE: "iambeeagent/bee-code-executor:0.0.4"
+      APP_EXECUTOR_IMAGE: "iambeeagent/bee-code-executor:0.0.5"
       APP_EXECUTOR_CONTAINER_RESOURCES: "{}"
       APP_FILE_STORAGE_PATH: "/storage"
     volumes:
