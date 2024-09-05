@@ -32,6 +32,7 @@ import {
   BeeToolInputErrorPrompt,
   BeeToolNoResultsPrompt,
   BeeToolNotFoundPrompt,
+  BeeUserEmptyPrompt,
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
 import { BeeIterationToolResult, BeeOutputParser } from "@/agents/bee/parser.js";
@@ -53,7 +54,7 @@ export class BeeAgentRunner {
     this.failedAttemptsCounter = new RetryCounter(options?.execution?.totalMaxRetries, AgentError);
   }
 
-  static async create(input: BeeInput, options: BeeRunOptions, prompt: string) {
+  static async create(input: BeeInput, options: BeeRunOptions, prompt: string | null) {
     const memory = new TokenMemory({
       llm: input.llm,
       capacityThreshold: 0.85,
@@ -103,13 +104,21 @@ export class BeeAgentRunner {
         }),
       }),
       ...input.memory.messages,
-      BaseMessage.of({
-        role: Role.USER,
-        text: (input.templates?.user ?? BeeUserPrompt).render({
-          input: prompt.trim() ? prompt : "Empty message.",
-        }),
-      }),
     ]);
+
+    if (prompt !== null || input.memory.isEmpty()) {
+      const isEmpty = !prompt?.trim?.();
+      const text = isEmpty
+        ? (input.templates?.userEmpty ?? BeeUserEmptyPrompt).render({})
+        : (input.templates?.user ?? BeeUserPrompt).render({ input: prompt });
+
+      await memory.add(
+        BaseMessage.of({
+          role: Role.USER,
+          text,
+        }),
+      );
+    }
 
     return new BeeAgentRunner(input, options, memory);
   }

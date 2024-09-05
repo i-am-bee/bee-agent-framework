@@ -96,6 +96,11 @@ export const BeeUserPrompt = new PromptTemplate({
   template: `Question: {{input}}`,
 });
 
+export const BeeUserEmptyPrompt = new PromptTemplate({
+  variables: [],
+  template: `Question: Empty message.`,
+});
+
 export const BeeToolErrorPrompt = new PromptTemplate({
   variables: ["reason"],
   template: `The tool has failed; the error log is shown below. If the tool cannot accomplish what you want, use a different tool or explain why you can't use it.

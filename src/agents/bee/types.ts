@@ -26,11 +26,12 @@ import {
   BeeToolInputErrorPrompt,
   BeeToolNoResultsPrompt,
   BeeToolNotFoundPrompt,
+  BeeUserEmptyPrompt,
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
 
 export interface BeeRunInput {
-  prompt: string;
+  prompt: string | null;
 }
 
 export interface BeeRunOutput {
@@ -124,6 +125,7 @@ export interface BeeCallbacks {
 export interface BeeAgentTemplates {
   system: typeof BeeSystemPrompt;
   user: typeof BeeUserPrompt;
+  userEmpty: typeof BeeUserEmptyPrompt;
   toolError: typeof BeeToolErrorPrompt;
   toolInputError: typeof BeeToolInputErrorPrompt;
   toolNoResultError: typeof BeeToolNoResultsPrompt;

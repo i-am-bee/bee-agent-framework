@@ -21,7 +21,6 @@ The Bee framework makes it easy to build agentic worfklows with leading open-sou
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
 - 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our MLflow integration (coming soon) to debug performance.
 - 🎛️ **Production-level** control with [caching](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#cache) and [error handling](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#errors).
-- 🚧 (Coming soon) **Evaluation**: Run evaluation jobs with your own data source (custom csv or Airtable).
 - 🚧 (Coming soon) **Model-agnostic support**: Change model providers in 1 line of code without breaking your agent’s functionality.
 - 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
 - ... more on our [Roadmap](#roadmap)
@@ -74,6 +73,8 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 ➡️ All examples can be found in the [examples](./examples) directory.
 
+➡️ To run an arbitrary example, use the following command `yarn start -- examples/agents/bee.ts` (just pass the appropriate path to the desired example).
+
 ### Local Installation (Python Interpreter + Interactive CLI)
 
 > _Note: `yarn` should be installed via Corepack ([tutorial](https://yarnpkg.com/corepack))_
@@ -112,9 +113,10 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 | Name                                                                      | Description                                                                             |
 | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | `Ollama`                                                                  | LLM + ChatLLM support ([example](./examples/llms/providers/ollama.ts))                  |
+| `OpenAI`                                                                  | LLM + ChatLLM support ([example](./examples/llms/providers/openai.ts))                  |
 | `LangChain`                                                               | Use any LLM that LangChain supports ([example](./examples/llms/providers/langchain.ts)) |
 | `WatsonX`                                                                 | LLM + ChatLLM support ([example](./examples/llms/providers/watsonx.ts))                 |
-| `BAM (IBM Internal)`                                                      | LLM + ChatLLM support ([example](./examples/llms/providers/bam.ts))                     |
+| `BAM (Internal)`                                                          | LLM + ChatLLM support ([example](./examples/llms/providers/bam.ts))                     |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                         |
 
 ### 📦 Modules
@@ -144,12 +146,13 @@ To see more in-depth explanation see [docs](./docs/overview.md).
 
 ## Roadmap
 
-- Evaluation with MLFlow integration
+- MLFlow integration for trace observability
 - JSON encoder/decoder for model-agnostic support
-- Chat Client (GUI)
 - Structured outputs
+- Chat Client (GUI)
 - Improvements to base Bee agent
 - Guardrails
+- Evaluation
 - 🚧 TBD 🚧
 
 ## Contribution guidelines
@@ -169,3 +172,11 @@ This project and everyone participating in it are governed by the [Code of Condu
 ## Legal notice
 
 All content in these repositories including code has been provided by IBM under the associated open source software license and IBM is under no obligation to provide enhancements, updates, or support. IBM developers produced this code as an open source project (not as an IBM product), and IBM makes no assertions as to the level of quality nor security, and will not be maintaining this code going forward.
+
+## Contributors
+
+Special thanks to our contributors for helping us improve Bee Agent Framework.
+
+<a href="https://github.com/i-am-bee/bee-agent-framework/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=i-am-bee/bee-agent-framework" />
+</a>
