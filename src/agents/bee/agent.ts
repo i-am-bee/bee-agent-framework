@@ -165,13 +165,16 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       iterations.push(iteration);
     }
 
-    await this.input.memory.addMany([
-      BaseMessage.of({
-        role: Role.USER,
-        text: input.prompt,
-      }),
-      finalMessage,
-    ]);
+    if (input.prompt !== null) {
+      await this.input.memory.add(
+        BaseMessage.of({
+          role: Role.USER,
+          text: input.prompt,
+        }),
+      );
+    }
+    await this.input.memory.add(finalMessage);
+
     return { result: finalMessage, iterations, memory: runner.memory };
   }
 
