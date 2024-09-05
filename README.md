@@ -74,6 +74,8 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 ➡️ All examples can be found in the [examples](./examples) directory.
 
+➡️ To run an arbitrary example, use the following command `yarn start -- examples/agents/bee.ts` (just pass the appropriate path to the desired example).
+
 ### Local Installation (Python Interpreter + Interactive CLI)
 
 > _Note: `yarn` should be installed via Corepack ([tutorial](https://yarnpkg.com/corepack))_
