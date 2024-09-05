@@ -21,7 +21,6 @@ The Bee framework makes it easy to build agentic worfklows with leading open-sou
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
 - 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our MLflow integration (coming soon) to debug performance.
 - 🎛️ **Production-level** control with [caching](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#cache) and [error handling](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#errors).
-- 🚧 (Coming soon) **Evaluation**: Run evaluation jobs with your own data source (custom csv or Airtable).
 - 🚧 (Coming soon) **Model-agnostic support**: Change model providers in 1 line of code without breaking your agent’s functionality.
 - 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
 - ... more on our [Roadmap](#roadmap)
@@ -114,9 +113,10 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 | Name                                                                      | Description                                                                             |
 | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | `Ollama`                                                                  | LLM + ChatLLM support ([example](./examples/llms/providers/ollama.ts))                  |
+| `OpenAI`                                                                  | LLM + ChatLLM support ([example](./examples/llms/providers/openai.ts))                  |
 | `LangChain`                                                               | Use any LLM that LangChain supports ([example](./examples/llms/providers/langchain.ts)) |
 | `WatsonX`                                                                 | LLM + ChatLLM support ([example](./examples/llms/providers/watsonx.ts))                 |
-| `BAM (IBM Internal)`                                                      | LLM + ChatLLM support ([example](./examples/llms/providers/bam.ts))                     |
+| `BAM (Internal)`                                                          | LLM + ChatLLM support ([example](./examples/llms/providers/bam.ts))                     |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                         |
 
 ### 📦 Modules
@@ -146,12 +146,13 @@ To see more in-depth explanation see [docs](./docs/overview.md).
 
 ## Roadmap
 
-- Evaluation with MLFlow integration
+- MLFlow integration for trace observability
 - JSON encoder/decoder for model-agnostic support
-- Chat Client (GUI)
 - Structured outputs
+- Chat Client (GUI)
 - Improvements to base Bee agent
 - Guardrails
+- Evaluation
 - 🚧 TBD 🚧
 
 ## Contribution guidelines
