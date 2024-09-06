@@ -23,6 +23,7 @@ import { GetRunContext, RunContext } from "@/context.js";
 import { Callback } from "@/emitter/types.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { pRetry } from "@/internals/helpers/retry.js";
+import { emitterToGenerator } from "@/internals/helpers/promise.js";
 
 export interface GenerateCallbacks {
   newToken?: Callback<{ value: BaseLLMOutput; callbacks: { abort: () => void } }>;
@@ -187,13 +188,17 @@ export abstract class BaseLLM<
   }
 
   async *stream(input: TInput, options?: StreamGenerateOptions): AsyncStream<TOutput> {
-    return yield* await RunContext.enter(
-      { self: this, params: [input, options] as const, signal: options?.signal },
-      async (run) => {
-        // @ts-expect-error wrong types
-        return this._stream(input, options, run);
-      },
-    );
+    return yield* emitterToGenerator(async ({ emit }) => {
+      return RunContext.enter(
+        { self: this, params: [input, options] as const, signal: options?.signal },
+        async (run) => {
+          // @ts-expect-error wrong types
+          for await (const token of this._stream(input, options ?? {}, run)) {
+            emit(token);
+          }
+        },
+      );
+    });
   }
 
   protected abstract _generate(
