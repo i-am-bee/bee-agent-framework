@@ -39,10 +39,10 @@ export interface RunContextCallbacks {
 export type GetRunContext<T> = T extends RunInstance<infer P> ? RunContext<P> : never;
 export type GetRunInstance<T> = T extends RunInstance<infer P> ? P : never;
 
-export class Run<T, C> extends LazyPromise<T> {
+export class Run<T, C, P = any> extends LazyPromise<T> {
   constructor(
     handler: () => Promise<T>,
-    protected readonly runContext: RunContext<C>,
+    protected readonly runContext: RunContext<C, P>,
   ) {
     super(handler);
   }
@@ -60,13 +60,19 @@ export class Run<T, C> extends LazyPromise<T> {
     return this;
   }
 
-  middleware(fn: (context: RunContext<C>) => void) {
+  middleware(fn: (context: RunContext<C, P>) => void) {
     fn(this.runContext);
     return this;
   }
 }
 
-export class RunContext<I> extends Serializable {
+export interface RunContextInput<A, P> {
+  self: RunInstance<A>;
+  params: P;
+  signal?: AbortSignal;
+}
+
+export class RunContext<I, P = any> extends Serializable {
   static #storage = new AsyncLocalStorage<RunContext<any>>();
 
   protected readonly controller: AbortController;
@@ -75,6 +81,7 @@ export class RunContext<I> extends Serializable {
   public readonly parentId?: string;
   public readonly emitter;
   public readonly context: object;
+  public readonly runParams: P;
 
   get signal() {
     return this.controller.signal;
@@ -85,11 +92,11 @@ export class RunContext<I> extends Serializable {
   }
 
   constructor(
-    protected readonly instance: RunInstance<I>,
+    protected readonly input: RunContextInput<I, P>,
     parent?: RunContext<any>,
-    signal?: AbortSignal,
   ) {
     super();
+    this.runParams = input.params;
     this.runId = createRandomHash(5);
     this.parentId = parent?.runId;
     this.groupId = parent?.groupId ?? createRandomHash();
@@ -98,9 +105,9 @@ export class RunContext<I> extends Serializable {
     );
 
     this.controller = new AbortController();
-    registerSignals(this.controller, [signal, parent?.signal]);
+    registerSignals(this.controller, [input.signal, parent?.signal]);
 
-    this.emitter = instance.emitter.child<I>({
+    this.emitter = input.self.emitter.child<I>({
       context: this.context,
       trace: {
         id: this.groupId,
@@ -118,15 +125,14 @@ export class RunContext<I> extends Serializable {
     this.controller.abort(new FrameworkError("Context destroyed."));
   }
 
-  static enter<A, R>(
-    self: RunInstance<A>,
-    fn: (context: RunContext<A>) => Promise<R>,
-    signal?: AbortSignal,
+  static enter<I2, R2, P2>(
+    input: RunContextInput<I2, P2>,
+    fn: (context: RunContext<I2, P2>) => Promise<R2>,
   ) {
     const parent = RunContext.#storage.getStore();
-    const runContext = new RunContext(self, parent, signal);
+    const runContext = new RunContext(input, parent);
 
-    return new Run<R, A>(async () => {
+    return new Run<R2, I2, P2>(async () => {
       const emitter = runContext.emitter.child<RunContextCallbacks>({
         namespace: ["run"],
         creator: runContext,
@@ -138,7 +144,9 @@ export class RunContext<I> extends Serializable {
         const result = await Promise.race([
           RunContext.#storage.run(runContext, fn, runContext),
           new Promise<never>((_, reject) =>
-            runContext.signal.addEventListener("abort", () => reject(runContext.signal.reason)),
+            runContext.signal.addEventListener("abort", () =>
+              setTimeout(() => reject(runContext.signal.reason), 0),
+            ),
           ),
         ]);
         await emitter.emit("success", result);

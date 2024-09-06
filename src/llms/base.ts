@@ -130,7 +130,7 @@ export abstract class BaseLLM<
 
   generate(input: TInput, options?: TGenerateOptions) {
     return RunContext.enter(
-      this,
+      { self: this, params: [input, options] as const, signal: options?.signal },
       async (run) => {
         try {
           await run.emitter.emit("start", { input, options });
@@ -183,18 +183,16 @@ export abstract class BaseLLM<
           await run.emitter.emit("finish", null);
         }
       },
-      options?.signal,
     );
   }
 
   async *stream(input: TInput, options?: StreamGenerateOptions): AsyncStream<TOutput> {
     return yield* await RunContext.enter(
-      this,
+      { self: this, params: [input, options] as const, signal: options?.signal },
       async (run) => {
         // @ts-expect-error wrong types
         return this._stream(input, options, run);
       },
-      options?.signal,
     );
   }
 

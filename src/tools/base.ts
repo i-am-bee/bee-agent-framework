@@ -203,58 +203,61 @@ export abstract class Tool<
   }
 
   run(input: ToolInputRaw<this>, options?: TRunOptions): Promise<TOutput> {
-    return RunContext.enter(this, async (run) => {
-      const meta = { input, options };
-      let errorPropagated = false;
+    return RunContext.enter(
+      { self: this, signal: options?.signal, params: [input, options] as const },
+      async (run) => {
+        const meta = { input, options };
+        let errorPropagated = false;
 
-      try {
-        await this.assertInput(input);
+        try {
+          await this.assertInput(input);
 
-        const output = await new Retryable({
-          executor: async () => {
-            errorPropagated = false;
-            await run.emitter.emit("start", { ...meta });
-            return this.cache.enabled
-              ? // @ts-expect-error wrong types
-                await this._runCached(input, options, run)
-              : // @ts-expect-error wrong types
-                await this._run(input, options, run);
-          },
-          onError: async (error) => {
-            errorPropagated = true;
+          const output = await new Retryable({
+            executor: async () => {
+              errorPropagated = false;
+              await run.emitter.emit("start", { ...meta });
+              return this.cache.enabled
+                ? // @ts-expect-error wrong types
+                  await this._runCached(input, options, run)
+                : // @ts-expect-error wrong types
+                  await this._run(input, options, run);
+            },
+            onError: async (error) => {
+              errorPropagated = true;
+              await run.emitter.emit("error", {
+                error: this.toError(error, meta),
+                ...meta,
+              });
+              if (this.options.fatalErrors?.some((cls) => error instanceof cls)) {
+                throw error;
+              }
+            },
+            onRetry: async (_, error) => {
+              await run.emitter.emit("retry", { ...meta, error: this.toError(error, meta) });
+            },
+            config: {
+              ...this._createRetryOptions(options?.retryOptions),
+              signal: options?.signal,
+            },
+          }).get();
+
+          await run.emitter.emit("success", { output, ...meta });
+          return output;
+        } catch (e) {
+          const error = this.toError(e, meta);
+          if (!errorPropagated) {
             await run.emitter.emit("error", {
-              error: this.toError(error, meta),
-              ...meta,
+              error,
+              options,
+              input,
             });
-            if (this.options.fatalErrors?.some((cls) => error instanceof cls)) {
-              throw error;
-            }
-          },
-          onRetry: async (_, error) => {
-            await run.emitter.emit("retry", { ...meta, error: this.toError(error, meta) });
-          },
-          config: {
-            ...this._createRetryOptions(options?.retryOptions),
-            signal: options?.signal,
-          },
-        }).get();
-
-        await run.emitter.emit("success", { output, ...meta });
-        return output;
-      } catch (e) {
-        const error = this.toError(e, meta);
-        if (!errorPropagated) {
-          await run.emitter.emit("error", {
-            error,
-            options,
-            input,
-          });
+          }
+          throw error;
+        } finally {
+          await this.emitter.emit("finish", null);
         }
-        throw error;
-      } finally {
-        await this.emitter.emit("finish", null);
-      }
-    });
+      },
+    );
   }
 
   protected async _runCached(

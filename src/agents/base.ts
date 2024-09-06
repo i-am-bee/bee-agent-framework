@@ -39,13 +39,13 @@ export abstract class BaseAgent<
     ...[input, options]: Partial<TOptions> extends TOptions
       ? [input: TInput, options?: TOptions]
       : [input: TInput, options: TOptions]
-  ): Run<TOutput, GetRunInstance<typeof this>> {
+  ): Run<TOutput, GetRunInstance<typeof this>, [input: TInput, options?: TOptions]> {
     if (this.isRunning) {
       throw new AgentError("Agent is already running!");
     }
 
     return RunContext.enter(
-      this,
+      { self: this, signal: options?.signal, params: [input, options] as const },
       async (context) => {
         try {
           // @ts-expect-error
@@ -60,7 +60,6 @@ export abstract class BaseAgent<
           this.isRunning = false;
         }
       },
-      options?.signal,
     );
   }
 
