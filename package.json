@@ -89,6 +89,7 @@
     "fast-xml-parser": "^4.4.1",
     "header-generator": "^2.1.54",
     "joplin-turndown-plugin-gfm": "^1.0.12",
+    "mathjs": "^13.1.1",
     "mustache": "^4.2.0",
     "object-hash": "^3.0.0",
     "p-queue": "^8.0.1",
