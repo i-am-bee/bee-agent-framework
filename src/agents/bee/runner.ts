@@ -74,6 +74,7 @@ export class BeeAgentRunner {
     const memory = new TokenMemory({
       llm: input.llm,
       capacityThreshold: 0.85,
+      syncThreshold: 0.5,
       handlers: {
         removalSelector(curMessages) {
           // First we remove messages from the past conversations
