@@ -13,5 +13,5 @@ jobs:
     steps:
       - name: Notify Slack on Releases
         uses: amendx/slackbot-release@1.0.1
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
