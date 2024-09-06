@@ -21,6 +21,7 @@ import { halveString } from "@/internals/helpers/string.js";
 import { parseBrokenJson } from "@/internals/helpers/schema.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { NonUndefined } from "@/internals/types.js";
+import { sumBy } from "remeda";
 
 export interface BeeOutputParserOptions {
   allowMultiLines: boolean;
@@ -58,6 +59,29 @@ interface Callbacks {
   }) => Promise<void>;
 }
 
+class RepetitionChecker {
+  protected stash: string[] = [];
+
+  constructor(
+    protected readonly size: number,
+    protected threshold: number,
+  ) {}
+
+  add(chunk: string) {
+    if (this.stash.length > this.size) {
+      this.stash.shift();
+    }
+    this.stash.push(chunk);
+
+    const occurrences = sumBy(this.stash, (token) => Number(token === chunk));
+    return occurrences >= this.threshold;
+  }
+
+  reset() {
+    this.stash.length = 0;
+  }
+}
+
 export class BeeOutputParser {
   public isDone = false;
   protected readonly lines: string[];
@@ -68,6 +92,7 @@ export class BeeOutputParser {
     namespace: ["agent", "bee", "parser"],
   });
 
+  public repetitionChecker = new RepetitionChecker(10, 5);
   protected readonly options: BeeOutputParserOptions;
 
   protected readonly result: BeeIterationSerializedResult = {
@@ -89,18 +114,33 @@ export class BeeOutputParser {
   }
 
   async add(chunk: string) {
+    if (this.isDone) {
+      return;
+    }
+
     chunk = chunk ?? "";
+
+    const isRepeating = this.repetitionChecker.add(chunk);
+    if (isRepeating) {
+      chunk = NEW_LINE_CHARACTER;
+    }
+
     this.stash += chunk;
     if (!chunk.includes(NEW_LINE_CHARACTER)) {
       return;
     }
 
     while (this.stash.includes(NEW_LINE_CHARACTER)) {
+      this.repetitionChecker.reset();
       this.filterStash();
       const [line, stash = ""] = halveString(this.stash, NEW_LINE_CHARACTER);
       this.stash = stash;
 
       await this._processChunk(line);
+    }
+
+    if (isRepeating) {
+      this.isDone = true;
     }
   }
 
