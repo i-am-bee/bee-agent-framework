@@ -52,7 +52,6 @@ export async function* emitterToGenerator<T, R>(fn: EmitterToGeneratorFn<T, R>) 
   })
     .catch((err) => {
       task.reject(err);
-      throw err;
     })
     .finally(() => {
       task.resolve(EmptyTag);
