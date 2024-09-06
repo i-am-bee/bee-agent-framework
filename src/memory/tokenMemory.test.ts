@@ -23,7 +23,12 @@ import * as R from "remeda";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 
 describe("Token Memory", () => {
-  const getInstance = () => {
+  const getInstance = (config: {
+    llmFactor: number;
+    localFactor: number;
+    syncThreshold: number;
+    maxTokens: number;
+  }) => {
     const llm = new BAMChatLLM({
       llm: new BAMLLM({
         client: new Client(),
@@ -35,22 +40,87 @@ describe("Token Memory", () => {
       },
     });
 
+    const estimateLLM = (msg: BaseMessage) => Math.ceil(msg.text.length * config.llmFactor);
+    const estimateLocal = (msg: BaseMessage) => Math.ceil(msg.text.length * config.localFactor);
+
     vi.spyOn(llm, "tokenize").mockImplementation(async (messages: BaseMessage[]) => ({
-      tokensCount: R.sum(messages.map((msg) => [msg.role, msg.text].join("").length)),
+      tokensCount: R.sum(messages.map(estimateLLM)),
     }));
 
     return new TokenMemory({
       llm,
-      maxTokens: 1000,
+      maxTokens: config.maxTokens,
+      syncThreshold: config.syncThreshold,
+      handlers: {
+        estimate: estimateLocal,
+      },
     });
   };
 
+  it("Auto sync", async () => {
+    const instance = getInstance({
+      llmFactor: 2,
+      localFactor: 1,
+      maxTokens: 4,
+      syncThreshold: 0.5,
+    });
+    await instance.addMany([
+      BaseMessage.of({ role: Role.USER, text: "A" }),
+      BaseMessage.of({ role: Role.USER, text: "B" }),
+      BaseMessage.of({ role: Role.USER, text: "C" }),
+      BaseMessage.of({ role: Role.USER, text: "D" }),
+    ]);
+    expect(instance.stats()).toMatchObject({
+      isDirty: false,
+      tokensUsed: 4,
+      messagesCount: 2,
+    });
+  });
+
+  it("Synchronizes", async () => {
+    const instance = getInstance({
+      llmFactor: 2,
+      localFactor: 1,
+      maxTokens: 10,
+      syncThreshold: 1,
+    });
+    expect(instance.stats()).toMatchObject({
+      isDirty: false,
+      tokensUsed: 0,
+      messagesCount: 0,
+    });
+    await instance.addMany([
+      BaseMessage.of({ role: Role.USER, text: "A" }),
+      BaseMessage.of({ role: Role.USER, text: "B" }),
+      BaseMessage.of({ role: Role.USER, text: "C" }),
+      BaseMessage.of({ role: Role.USER, text: "D" }),
+      BaseMessage.of({ role: Role.USER, text: "E" }),
+      BaseMessage.of({ role: Role.USER, text: "F" }),
+    ]);
+    expect(instance.stats()).toMatchObject({
+      isDirty: true,
+      tokensUsed: 6,
+      messagesCount: 6,
+    });
+    await instance.sync();
+    expect(instance.stats()).toMatchObject({
+      isDirty: false,
+      tokensUsed: 10,
+      messagesCount: 5,
+    });
+  });
+
   it("Serializes", async () => {
     vi.stubEnv("GENAI_API_KEY", "123");
-    const instance = getInstance();
+    const instance = getInstance({
+      llmFactor: 2,
+      localFactor: 1,
+      maxTokens: 10,
+      syncThreshold: 1,
+    });
     await instance.add(
       BaseMessage.of({
-        text: "I am a Batman!",
+        text: "Hello!",
         role: Role.USER,
       }),
     );

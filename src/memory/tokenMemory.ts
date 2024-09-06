@@ -20,26 +20,34 @@ import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import * as R from "remeda";
 import { shallowCopy } from "@/serializer/utils.js";
 import { removeFromArray } from "@/internals/helpers/array.js";
+import { sum } from "remeda";
 
 export interface Handlers {
+  estimate: (messages: BaseMessage) => number;
   removalSelector: (messages: BaseMessage[]) => BaseMessage;
 }
 
 export interface TokenMemoryInput {
   llm: ChatLLM<ChatLLMOutput>;
   maxTokens?: number;
+  syncThreshold?: number;
   capacityThreshold?: number;
-  handlers?: Handlers;
+  handlers?: Partial<Handlers>;
+}
+
+interface TokenByMessage {
+  tokensCount: number;
+  dirty: boolean;
 }
 
 export class TokenMemory extends BaseMemory {
   public readonly messages: BaseMessage[] = [];
 
   protected llm: ChatLLM<ChatLLMOutput>;
-  protected threshold = 1;
+  protected threshold;
+  protected syncThreshold;
   protected maxTokens: number | null = null;
-  protected tokensUsed = 0;
-  protected tokensByMessage = new WeakMap<BaseMessage, number>();
+  protected tokensByMessage = new WeakMap<BaseMessage, TokenByMessage>();
   public readonly handlers: Handlers;
 
   constructor(config: TokenMemoryInput) {
@@ -47,8 +55,11 @@ export class TokenMemory extends BaseMemory {
     this.llm = config.llm;
     this.maxTokens = config.maxTokens ?? null;
     this.threshold = config.capacityThreshold ?? 0.75;
+    this.syncThreshold = config.syncThreshold ?? 0.25;
     this.handlers = {
       ...config?.handlers,
+      estimate:
+        config?.handlers?.estimate || ((msg) => Math.ceil((msg.role.length + msg.text.length) / 4)),
       removalSelector: config.handlers?.removalSelector || ((messages) => messages[0]),
     };
     if (!R.clamp({ min: 0, max: 1 })(this.threshold)) {
@@ -60,13 +71,24 @@ export class TokenMemory extends BaseMemory {
     this.register();
   }
 
+  get tokensUsed(): number {
+    return sum(this.messages.map((msg) => this.tokensByMessage.get(msg)!.tokensCount!));
+  }
+
+  get isDirty(): boolean {
+    return this.messages.some((msg) => this.tokensByMessage.get(msg)?.dirty !== false);
+  }
+
   async add(message: BaseMessage) {
     if (this.maxTokens === null) {
       const meta = await this.llm.meta();
       this.maxTokens = Math.ceil((meta.tokenLimit ?? Infinity) * this.threshold);
     }
 
-    const meta = await this.llm.tokenize([message]);
+    const meta = this.tokensByMessage.has(message)
+      ? this.tokensByMessage.get(message)!
+      : { tokensCount: this.handlers.estimate(message), dirty: true };
+
     if (meta.tokensCount > this.maxTokens) {
       throw new MemoryFatalError(
         `Retrieved message (${meta.tokensCount} tokens) cannot fit inside current memory (${this.maxTokens} tokens)`,
@@ -80,14 +102,30 @@ export class TokenMemory extends BaseMemory {
       if (!messageToDelete || !exists) {
         throw new MemoryFatalError('The "removalSelector" handler must return a valid message!');
       }
-
-      const tokensCount = this.tokensByMessage.get(messageToDelete) ?? 0;
-      this.tokensUsed -= tokensCount;
     }
 
-    this.tokensUsed += meta.tokensCount;
-    this.tokensByMessage.set(message, meta.tokensCount);
+    this.tokensByMessage.set(message, meta);
     this.messages.push(message);
+
+    if (this.isDirty && this.tokensUsed / this.maxTokens >= this.syncThreshold) {
+      await this.sync();
+    }
+  }
+
+  async sync() {
+    const messages = await Promise.all(
+      this.messages.map(async (msg) => {
+        const cache = this.tokensByMessage.get(msg);
+        if (cache?.dirty !== false) {
+          const result = await this.llm.tokenize([msg]);
+          this.tokensByMessage.set(msg, { tokensCount: result.tokensCount, dirty: false });
+        }
+        return msg;
+      }),
+    );
+
+    this.messages.length = 0;
+    await this.addMany(messages);
   }
 
   reset() {
@@ -95,7 +133,6 @@ export class TokenMemory extends BaseMemory {
       this.tokensByMessage.delete(msg);
     }
     this.messages.length = 0;
-    this.tokensUsed = 0;
   }
 
   stats() {
@@ -103,15 +140,16 @@ export class TokenMemory extends BaseMemory {
       tokensUsed: this.tokensUsed,
       maxTokens: this.maxTokens,
       messagesCount: this.messages.length,
+      isDirty: this.isDirty,
     };
   }
 
   createSnapshot() {
     return {
-      tokensUsed: this.tokensUsed,
       llm: this.llm,
       maxTokens: this.maxTokens,
       threshold: this.threshold,
+      syncThreshold: this.syncThreshold,
       messages: shallowCopy(this.messages),
       handlers: this.handlers,
       tokensByMessage: this.messages
