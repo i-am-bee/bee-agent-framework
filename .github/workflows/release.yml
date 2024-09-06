@@ -1,6 +1,7 @@
 name: Slackbot on release
 
 on:
+  workflow_dispatch:
   release:
     types:
       - created
@@ -11,6 +12,6 @@ jobs:
     name: Notify Slack on Release
     steps:
       - name: Notify Slack on Releases
-        uses: amendx/slackbot-release@1.0.0
-        with:
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        uses: slackapi/slack-github-action@v1.27.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
