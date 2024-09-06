@@ -30,11 +30,9 @@ describe("Calculator", () => {
     const x2 = 4;
     const y2 = 5;
 
-    const response = await instance.run(
-      {
-        expression: `sqrt( (${x2}-${x1})^2 + (${y2}-${y1})^2 )`
-      }
-    );
+    const response = await instance.run({
+      expression: `sqrt( (${x2}-${x1})^2 + (${y2}-${y1})^2 )`,
+    });
     expect(response.result).toBe(5);
   });
 
