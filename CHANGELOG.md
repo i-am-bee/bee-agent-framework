@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.10](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.9...v0.0.10) (2024-09-06)
+
+### Features
+
+- **agent:** allow to run with an empty prompt ([8622e2d](https://github.com/i-am-bee/bee-agent-framework/commit/8622e2d23c4bbfbc2a6621eb07a9816cfe5af3d8))
+- **execution:** propagate runParams to RunContext ([925f7d8](https://github.com/i-am-bee/bee-agent-framework/commit/925f7d85b9b4af85a18817b1b9eea7658446a771))
+- **tool:** add calculator tool ([#10](https://github.com/i-am-bee/bee-agent-framework/issues/10)) ([2af8af7](https://github.com/i-am-bee/bee-agent-framework/commit/2af8af751ca8df20ca7cd408d7ad6a528a2e2694))
+- **tool:** update openMeteo default settings ([ad4bb21](https://github.com/i-am-bee/bee-agent-framework/commit/ad4bb2196b7d4cd0d1cc5931b84221a6bd1606c8))
+
 ## [0.0.9](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.8...v0.0.9) (2024-09-04)
 
 ### Features
