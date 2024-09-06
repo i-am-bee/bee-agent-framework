@@ -22,14 +22,14 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "# Release notes - [${{ github.event.release.tag_name }}](${{ github.event.release.html_url }})"
+                    "text": "# Release notes - ${{ github.event.release.tag_name }}"
                   }
                 },
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "${{ toJSON(github.event.release.body) }}"
+                    "text": ${{ toJSON(github.event.release.body) }}
                   }
                 }
               ]
