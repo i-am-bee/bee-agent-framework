@@ -23,6 +23,10 @@ import * as R from "remeda";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 
 describe("Token Memory", () => {
+  beforeEach(() => {
+    vi.stubEnv("GENAI_API_KEY", "123");
+  });
+
   const getInstance = (config: {
     llmFactor: number;
     localFactor: number;
@@ -111,7 +115,6 @@ describe("Token Memory", () => {
   });
 
   it("Serializes", async () => {
-    vi.stubEnv("GENAI_API_KEY", "123");
     const instance = getInstance({
       llmFactor: 2,
       localFactor: 1,
