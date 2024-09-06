@@ -12,27 +12,6 @@ jobs:
     name: Notify Slack on Release
     steps:
       - name: Notify Slack on Releases
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "text": "Release notes",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "# Release notes - ${{ github.event.release.tag_name }}"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ${{ toJSON(github.event.release.body) }}
-                  }
-                }
-              ]
-            }
+        uses: amendx/slackbot-release@1.0.1
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
