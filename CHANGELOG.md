@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.11](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.10...v0.0.11) (2024-09-06)
+
+### Features
+
+- **agent:** unify user's input formatting ([b6e4b02](https://github.com/i-am-bee/bee-agent-framework/commit/b6e4b02564be0cf0d1813e34e5209277abb6a3d6))
+- **agent:** update runner memory setting ([adb6a7e](https://github.com/i-am-bee/bee-agent-framework/commit/adb6a7efbb0fcd42a5696976fd2602c25ad58452))
+- **memory:** add sync mechanism to the TokenMemory ([63975c9](https://github.com/i-am-bee/bee-agent-framework/commit/63975c939639a94bd82ee49c31ef247bb8bbcbba))
+
 ## [0.0.10](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.9...v0.0.10) (2024-09-06)
 
 ### Features
