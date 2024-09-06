@@ -22,7 +22,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "# Release notes - ${{ github.event.release.tag_name }}"
+                    "text": "# Release notes - [${{ github.event.release.tag_name }}](${{ github.event.release.html_url }})"
                   }
                 },
                 {
@@ -31,7 +31,7 @@ jobs:
                     "type": "mrkdwn",
                     "text": "${{ github.event.release.body }}"
                   }
-                },
+                }
               ]
             }
         env:
