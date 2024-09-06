@@ -55,6 +55,22 @@ export class BeeAgentRunner {
   }
 
   static async create(input: BeeInput, options: BeeRunOptions, prompt: string | null) {
+    const transformMessage = (message: BaseMessage) => {
+      if (message.role === Role.USER) {
+        const isEmpty = !message.text.trim();
+        const text = isEmpty
+          ? (input.templates?.userEmpty ?? BeeUserEmptyPrompt).render({})
+          : (input.templates?.user ?? BeeUserPrompt).render({ input: message.text });
+
+        return BaseMessage.of({
+          role: Role.USER,
+          text,
+          meta: message.meta,
+        });
+      }
+      return message;
+    };
+
     const memory = new TokenMemory({
       llm: input.llm,
       capacityThreshold: 0.85,
@@ -103,21 +119,11 @@ export class BeeAgentRunner {
           instructions: PromptTemplate.defaultPlaceholder,
         }),
       }),
-      ...input.memory.messages,
+      ...input.memory.messages.map(transformMessage),
     ]);
 
     if (prompt !== null || input.memory.isEmpty()) {
-      const isEmpty = !prompt?.trim?.();
-      const text = isEmpty
-        ? (input.templates?.userEmpty ?? BeeUserEmptyPrompt).render({})
-        : (input.templates?.user ?? BeeUserPrompt).render({ input: prompt });
-
-      await memory.add(
-        BaseMessage.of({
-          role: Role.USER,
-          text,
-        }),
-      );
+      await memory.add(transformMessage(BaseMessage.of({ role: Role.USER, text: prompt ?? "" })));
     }
 
     return new BeeAgentRunner(input, options, memory);
