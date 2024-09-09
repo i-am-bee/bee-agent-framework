@@ -92,7 +92,14 @@ export class BeeOutputParser {
     namespace: ["agent", "bee", "parser"],
   });
 
-  public repetitionChecker = new RepetitionChecker(10, 5);
+  static Config = {
+    repetition: {
+      size: 20,
+      threshold: 10,
+    },
+  };
+
+  public repetitionChecker: RepetitionChecker;
   protected readonly options: BeeOutputParserOptions;
 
   protected readonly result: BeeIterationSerializedResult = {
@@ -111,6 +118,10 @@ export class BeeOutputParser {
     };
     this.lines = [];
     this.stash = "";
+    this.repetitionChecker = new RepetitionChecker(
+      BeeOutputParser.Config.repetition.size,
+      BeeOutputParser.Config.repetition.threshold,
+    );
   }
 
   async add(chunk: string) {
