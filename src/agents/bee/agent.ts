@@ -68,6 +68,10 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
     this.register();
   }
 
+  get memory() {
+    return this.input.memory;
+  }
+
   get meta(): AgentMeta {
     if (this.input.meta) {
       return this.input.meta;

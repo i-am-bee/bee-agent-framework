@@ -19,6 +19,7 @@ import { AgentMeta } from "@/agents/types.js";
 import { Serializable } from "@/internals/serializable.js";
 import { GetRunContext, GetRunInstance, Run, RunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
+import { BaseMemory } from "@/memory/base.js";
 
 export class AgentError extends FrameworkError {}
 
@@ -73,5 +74,6 @@ export abstract class BaseAgent<
     this.emitter.destroy();
   }
 
+  public abstract get memory(): BaseMemory;
   public abstract get meta(): AgentMeta;
 }
