@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.12](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.11...v0.0.12) (2024-09-09)
+
+### Features
+
+- **agent:** add memory getter to the base class ([bf985d1](https://github.com/i-am-bee/bee-agent-framework/commit/bf985d13327702708e3ffeffa70d783359ee578c))
+- **agent:** add runner config ([36eff24](https://github.com/i-am-bee/bee-agent-framework/commit/36eff246a66db3448199ce72d919c6853f3dde7f))
+- **agent:** premature stop on sequence repetition ([d54eb2a](https://github.com/i-am-bee/bee-agent-framework/commit/d54eb2a3dc05d8aac8814596d836fbd17e0d3cee))
+- **observability:** propagate current instance to async scope ([085d69a](https://github.com/i-am-bee/bee-agent-framework/commit/085d69ad0d9292bc853844202722cc7e889d4b26))
+
+### Bug Fixes
+
+- **bee-agent:** rendering of empty lines in prompt ([#18](https://github.com/i-am-bee/bee-agent-framework/issues/18)) ([8aad96e](https://github.com/i-am-bee/bee-agent-framework/commit/8aad96eca98445905c7f871aca88e4c8e8bfc712))
+- **llm:** stream method ([9e47f1a](https://github.com/i-am-bee/bee-agent-framework/commit/9e47f1a148ef24dd8d5d04cee4f6226ef268d967))
+- **utils:** prevent unhandledRejection ([f74a4f5](https://github.com/i-am-bee/bee-agent-framework/commit/f74a4f5715dc5fa75b9850d31aa0fee594acb2a0))
+
 ## [0.0.11](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.10...v0.0.11) (2024-09-06)
 
 ### Features
