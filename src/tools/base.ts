@@ -204,7 +204,8 @@ export abstract class Tool<
 
   run(input: ToolInputRaw<this>, options?: TRunOptions): Promise<TOutput> {
     return RunContext.enter(
-      { self: this, signal: options?.signal, params: [input, options] as const },
+      this,
+      { signal: options?.signal, params: [input, options] as const },
       async (run) => {
         const meta = { input, options };
         let errorPropagated = false;
@@ -217,10 +218,8 @@ export abstract class Tool<
               errorPropagated = false;
               await run.emitter.emit("start", { ...meta });
               return this.cache.enabled
-                ? // @ts-expect-error wrong types
-                  await this._runCached(input, options, run)
-                : // @ts-expect-error wrong types
-                  await this._run(input, options, run);
+                ? await this._runCached(input, options, run)
+                : await this._run(input, options, run);
             },
             onError: async (error) => {
               errorPropagated = true;

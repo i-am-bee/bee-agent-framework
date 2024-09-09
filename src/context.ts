@@ -36,21 +36,21 @@ export interface RunContextCallbacks {
   finish: Callback<null>;
 }
 
-export type GetRunContext<T> = T extends RunInstance<infer P> ? RunContext<P> : never;
+export type GetRunContext<T, P = any> = T extends RunInstance ? RunContext<T, P> : never;
 export type GetRunInstance<T> = T extends RunInstance<infer P> ? P : never;
 
-export class Run<T, C, P = any> extends LazyPromise<T> {
+export class Run<R, I extends RunInstance, P = any> extends LazyPromise<R> {
   constructor(
-    handler: () => Promise<T>,
-    protected readonly runContext: RunContext<C, P>,
+    handler: () => Promise<R>,
+    protected readonly runContext: GetRunContext<I, P>,
   ) {
     super(handler);
   }
 
   readonly [Symbol.toStringTag] = "Promise";
 
-  observe(fn: (emitter: Emitter<C>) => void) {
-    fn(this.runContext.emitter as any);
+  observe(fn: (emitter: Emitter<GetRunInstance<I>>) => void) {
+    fn(this.runContext.emitter);
     return this;
   }
 
@@ -60,19 +60,18 @@ export class Run<T, C, P = any> extends LazyPromise<T> {
     return this;
   }
 
-  middleware(fn: (context: RunContext<C, P>) => void) {
+  middleware(fn: (context: GetRunContext<I, P>) => void) {
     fn(this.runContext);
     return this;
   }
 }
 
-export interface RunContextInput<A, P> {
-  self: RunInstance<A>;
+export interface RunContextInput<P> {
   params: P;
   signal?: AbortSignal;
 }
 
-export class RunContext<I, P = any> extends Serializable {
+export class RunContext<T extends RunInstance, P = any> extends Serializable {
   static #storage = new AsyncLocalStorage<RunContext<any>>();
 
   protected readonly controller: AbortController;
@@ -92,7 +91,8 @@ export class RunContext<I, P = any> extends Serializable {
   }
 
   constructor(
-    protected readonly input: RunContextInput<I, P>,
+    public readonly instance: T,
+    protected readonly input: RunContextInput<P>,
     parent?: RunContext<any>,
   ) {
     super();
@@ -107,7 +107,7 @@ export class RunContext<I, P = any> extends Serializable {
     this.controller = new AbortController();
     registerSignals(this.controller, [input.signal, parent?.signal]);
 
-    this.emitter = input.self.emitter.child<I>({
+    this.emitter = instance.emitter.child<GetRunInstance<T>>({
       context: this.context,
       trace: {
         id: this.groupId,
@@ -125,14 +125,15 @@ export class RunContext<I, P = any> extends Serializable {
     this.controller.abort(new FrameworkError("Context destroyed."));
   }
 
-  static enter<I2, R2, P2>(
-    input: RunContextInput<I2, P2>,
-    fn: (context: RunContext<I2, P2>) => Promise<R2>,
+  static enter<C2 extends RunInstance, R2, P2>(
+    instance: C2,
+    input: RunContextInput<P2>,
+    fn: (context: GetRunContext<C2, P2>) => Promise<R2>,
   ) {
     const parent = RunContext.#storage.getStore();
-    const runContext = new RunContext(input, parent);
+    const runContext = new RunContext(instance, input, parent) as GetRunContext<C2, P2>;
 
-    return new Run<R2, I2, P2>(async () => {
+    return new Run(async () => {
       const emitter = runContext.emitter.child<RunContextCallbacks>({
         namespace: ["run"],
         creator: runContext,

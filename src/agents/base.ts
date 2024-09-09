@@ -17,7 +17,7 @@
 import { FrameworkError } from "@/errors.js";
 import { AgentMeta } from "@/agents/types.js";
 import { Serializable } from "@/internals/serializable.js";
-import { GetRunContext, GetRunInstance, Run, RunContext } from "@/context.js";
+import { GetRunContext, RunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { BaseMemory } from "@/memory/base.js";
 
@@ -40,13 +40,14 @@ export abstract class BaseAgent<
     ...[input, options]: Partial<TOptions> extends TOptions
       ? [input: TInput, options?: TOptions]
       : [input: TInput, options: TOptions]
-  ): Run<TOutput, GetRunInstance<typeof this>, [input: TInput, options?: TOptions]> {
+  ) {
     if (this.isRunning) {
       throw new AgentError("Agent is already running!");
     }
 
     return RunContext.enter(
-      { self: this, signal: options?.signal, params: [input, options] as const },
+      this,
+      { signal: options?.signal, params: [input, options] as const },
       async (context) => {
         try {
           // @ts-expect-error

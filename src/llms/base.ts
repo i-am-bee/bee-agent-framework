@@ -131,7 +131,8 @@ export abstract class BaseLLM<
 
   generate(input: TInput, options?: TGenerateOptions) {
     return RunContext.enter(
-      { self: this, params: [input, options] as const, signal: options?.signal },
+      this,
+      { params: [input, options] as const, signal: options?.signal },
       async (run) => {
         try {
           await run.emitter.emit("start", { input, options });
@@ -147,7 +148,6 @@ export abstract class BaseLLM<
                 ...options,
                 signal: controller.signal,
               },
-              // @ts-expect-error wrong types
               run,
             )) {
               chunks.push(chunk);
@@ -190,9 +190,9 @@ export abstract class BaseLLM<
   async *stream(input: TInput, options?: StreamGenerateOptions): AsyncStream<TOutput> {
     return yield* emitterToGenerator(async ({ emit }) => {
       return RunContext.enter(
-        { self: this, params: [input, options] as const, signal: options?.signal },
+        this,
+        { params: [input, options] as const, signal: options?.signal },
         async (run) => {
-          // @ts-expect-error wrong types
           for await (const token of this._stream(input, options ?? {}, run)) {
             emit(token);
           }
