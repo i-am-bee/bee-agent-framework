@@ -2,9 +2,11 @@ import "dotenv/config.js";
 import { z } from "zod";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { JsonDriver } from "bee-agent-framework/drivers/json";
 
 const llm = new OllamaChatLLM();
-const response = await llm.generateStructured(
+const driver = new JsonDriver(llm);
+const response = await driver.generate(
   z.union([
     z.object({
       firstName: z.string().min(1),
