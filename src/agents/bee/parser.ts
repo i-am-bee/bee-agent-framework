@@ -61,6 +61,7 @@ interface Callbacks {
 
 class RepetitionChecker {
   protected stash: string[] = [];
+  public enabled = true;
 
   constructor(
     protected readonly size: number,
@@ -68,6 +69,10 @@ class RepetitionChecker {
   ) {}
 
   add(chunk: string) {
+    if (!this.enabled) {
+      return false;
+    }
+
     if (this.stash.length > this.size) {
       this.stash.shift();
     }
@@ -96,6 +101,7 @@ export class BeeOutputParser {
     repetition: {
       size: 20,
       threshold: 10,
+      enabled: true,
     },
   };
 
@@ -122,6 +128,7 @@ export class BeeOutputParser {
       BeeOutputParser.Config.repetition.size,
       BeeOutputParser.Config.repetition.threshold,
     );
+    this.repetitionChecker.enabled = BeeOutputParser.Config.repetition.enabled;
   }
 
   async add(chunk: string) {
