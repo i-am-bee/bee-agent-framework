@@ -63,16 +63,13 @@ const logger = new Logger({ name: "template" });
   const modified = original.fork((oldConfig) => ({
     ...oldConfig,
     template: `${oldConfig.template} Your answers must be concise.`,
-    schema: z.object({
-      name: z.string().default("123"),
-      age: z.number(),
-      objective: z.string(),
-    }),
+    defaults: {
+      name: "Alex",
+    },
   }));
 
   const output = modified.render({
     name: undefined,
-    age: 12,
     objective: "fulfill the user needs",
   });
   logger.info(output);

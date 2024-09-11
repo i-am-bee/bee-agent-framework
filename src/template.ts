@@ -23,13 +23,14 @@ import { z, ZodType } from "zod";
 import { createSchemaValidator, toJsonSchema } from "@/internals/helpers/schema.js";
 import type { SchemaObject, ValidateFunction } from "ajv";
 import { shallowCopy } from "@/serializer/utils.js";
+import { pickBy } from "remeda";
+import { getProp } from "@/internals/helpers/object.js";
 
-export type PromptTemplateRenderFn<K extends ZodType> = (
-  this: K extends ZodType<infer A> ? A : never,
-) => any;
+export type InferValue<T> = T extends ZodType<infer A> ? A : never;
+export type PromptTemplateRenderFn<K extends ZodType> = (this: InferValue<K>) => any;
 
 export type PromptTemplateRenderInput<T extends ZodType, T2 extends z.input<T> = z.input<T>> = {
-  [K in keyof T2]: T2[K] | PromptTemplateRenderFn<T>;
+  [K in keyof T2]: T2[K] | PromptTemplateRenderFn<T> | undefined;
 };
 
 export interface PromptTemplateInput<T extends ZodType> {
@@ -37,13 +38,15 @@ export interface PromptTemplateInput<T extends ZodType> {
   customTags?: [string, string];
   escape?: boolean;
   schema: SchemaObject;
+  defaults?: Partial<InferValue<T>>;
   functions?: Record<string, PromptTemplateRenderFn<T>>;
 }
 
 type PromptTemplateConstructor<T extends ZodType, N> = N extends ZodType
-  ? Omit<PromptTemplateInput<N>, "schema" | "functions"> & {
+  ? Omit<PromptTemplateInput<N>, "schema" | "functions" | "defaults"> & {
       schema: N;
       functions?: Record<string, PromptTemplateRenderFn<N | T>>;
+      defaults?: Partial<InferValue<N | T>>;
     }
   : Omit<PromptTemplateInput<T>, "schema"> & { schema: T | SchemaObject };
 
@@ -77,6 +80,7 @@ export class PromptTemplate<T extends ZodType> extends Serializable {
     super();
     this.config = {
       ...config,
+      defaults: (config.defaults ?? {}) as Partial<InferValue<T>>,
       schema: toJsonSchema(config.schema),
       escape: Boolean(config.escape),
       customTags: config.customTags ?? ["{{", "}}"],
@@ -92,8 +96,7 @@ export class PromptTemplate<T extends ZodType> extends Serializable {
   }
 
   protected validateInput(input: unknown): asserts input is T {
-    const schema = toJsonSchema(this.config.schema);
-    const validator = createSchemaValidator(schema, {
+    const validator = createSchemaValidator(this.config.schema, {
       coerceTypes: false,
     }) as ValidateFunction<T>;
 
@@ -119,11 +122,17 @@ export class PromptTemplate<T extends ZodType> extends Serializable {
     return new PromptTemplate(newConfig);
   }
 
-  render(inputs: PromptTemplateRenderInput<T>): string {
-    this.validateInput(inputs);
+  render(input: PromptTemplateRenderInput<T>): string {
+    const updatedInput: typeof input = { ...input };
+    Object.assign(
+      updatedInput,
+      pickBy(this.config.defaults, (_, k) => getProp(updatedInput, [k]) === undefined),
+    );
+
+    this.validateInput(updatedInput);
     const view: Record<string, any> = {
       ...this.config.functions,
-      ...inputs,
+      ...updatedInput,
     };
 
     const output = Mustache.render(
