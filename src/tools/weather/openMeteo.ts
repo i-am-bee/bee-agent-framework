@@ -40,7 +40,7 @@ interface LocationSearch {
   language?: string;
 }
 
-interface Response {
+export interface OpenMeteoToolResponse {
   latitude: number;
   longitude: number;
   generationtime_ms: number;
@@ -56,9 +56,13 @@ interface Response {
   daily: Record<string, any[]>;
 }
 
-export class OpenMeteoTool extends Tool<JSONToolOutput<Response>, ToolOptions, ToolRunOptions> {
+export class OpenMeteoTool extends Tool<
+  JSONToolOutput<OpenMeteoToolResponse>,
+  ToolOptions,
+  ToolRunOptions
+> {
   name = "OpenMeteo";
-  description = `Retrieves current, previous, or upcoming weather for a given destination.`;
+  description = `Retrieves current, past, or future weather forecasts for a specified location.`;
 
   inputSchema() {
     return z
@@ -77,20 +81,16 @@ export class OpenMeteoTool extends Tool<JSONToolOutput<Response>, ToolOptions, T
               })
               .strip(),
           ),
-        elevation: z.number().nullish(),
-        timezone: z.string().default(Intl.DateTimeFormat().resolvedOptions().timeZone),
         start_date: z
           .string()
           .date()
-          .describe("Date Format: YYYY-MM-DD (omit the field for the current date)")
-          .nullish(),
+          .describe("Start date for the weather forecast in the format YYYY-MM-DD (UTC)"),
         end_date: z
           .string()
           .date()
-          .describe("Date Format: YYYY-MM-DD (omit the field for the current date)")
-          .nullish(),
-        forecast_days: z.number().int().min(0).max(16).default(1),
-        past_days: z.number().int().min(0).max(92).default(0),
+          .describe("End date for the weather forecast in the format YYYY-MM-DD (UTC)")
+          .optional(),
+        elevation: z.number().nullish(),
         temperature_unit: z.enum(["celsius", "fahrenheit"]).default("celsius"),
       })
       .strip();
@@ -100,30 +100,50 @@ export class OpenMeteoTool extends Tool<JSONToolOutput<Response>, ToolOptions, T
     this.register();
   }
 
-  protected async _run({ location, ...input }: ToolInput<this>, options?: BaseToolRunOptions) {
+  protected async _run(
+    { location, start_date: startDate, end_date: endDate, ...input }: ToolInput<this>,
+    options?: BaseToolRunOptions,
+  ) {
     const { apiKey } = this.options;
 
-    const extractLocation = async (): Promise<Location> => {
-      if ("name" in location) {
-        const response = await this._geocode(
-          {
-            name: location.name,
-            language: location.language,
-          },
-          options?.signal,
-        );
-        return pick(response, ["latitude", "longitude"]);
-      }
-      return location;
+    const prepareParams = async () => {
+      const extractLocation = async (): Promise<Location> => {
+        if ("name" in location) {
+          const response = await this._geocode(
+            {
+              name: location.name,
+              language: location.language,
+            },
+            options?.signal,
+          );
+          return pick(response, ["latitude", "longitude"]);
+        }
+        return location;
+      };
+
+      const start = startDate ? new Date(startDate) : new Date();
+      start.setHours(0, 0, 0, 0);
+      start.setTime(start.getTime() - start.getTimezoneOffset() * 60_000);
+
+      const end = endDate ? new Date(endDate) : new Date();
+      end.setHours(0, 0, 0, 0);
+      end.setTime(end.getTime() - end.getTimezoneOffset() * 60_000);
+
+      const toDateString = (date: Date) => date.toISOString().split("T")[0];
+
+      return createURLParams({
+        ...pickBy(input, (v) => !isNullish(v) && v !== ""),
+        ...(await extractLocation()),
+        start_date: toDateString(start),
+        end_date: toDateString(end),
+        current: ["temperature_2m", "rain", "apparent_temperature"],
+        daily: ["apparent_temperature_max", "apparent_temperature_min", "sunrise", "sunset"],
+        hourly: ["temperature_2m", "relative_humidity_2m", "apparent_temperature"],
+        timezone: "UTC",
+      });
     };
 
-    const params = createURLParams({
-      ...pickBy(input, (v) => !isNullish(v) && v !== ""),
-      ...(await extractLocation()),
-      current: ["temperature_2m", "rain", "apparent_temperature"],
-      daily: ["apparent_temperature_max", "apparent_temperature_min", "sunrise", "sunset"],
-      hourly: ["temperature_2m", "relative_humidity_2m", "apparent_temperature"],
-    });
+    const params = await prepareParams();
     const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
       headers: {
         ...(apiKey && {
@@ -139,7 +159,7 @@ export class OpenMeteoTool extends Tool<JSONToolOutput<Response>, ToolOptions, T
       ]);
     }
 
-    const data: Response = await response.json();
+    const data: OpenMeteoToolResponse = await response.json();
     return new JSONToolOutput(data);
   }
 
