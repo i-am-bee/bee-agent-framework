@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.0.14](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.13...v0.0.14) (2024-09-11)
+
+### Features
+
+- **agent:** update user prompt ([b9303ca](https://github.com/i-am-bee/bee-agent-framework/commit/b9303ca0f4a10b873f8b6ef430c872c50810fd21))
+- **observability:** add createdAt to run context ([667a30a](https://github.com/i-am-bee/bee-agent-framework/commit/667a30a8c2101693a408f7a414f97e081e34d851))
+
+### Bug Fixes
+
+- **agent:** add createdAt to newly created messages ([9313f52](https://github.com/i-am-bee/bee-agent-framework/commit/9313f5268636a5c892435d240466fe0247c30e77))
+
 ## [0.0.13](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.12...v0.0.13) (2024-09-11)
 
 ### Features
