@@ -15,6 +15,7 @@
  */
 
 import { PromptTemplate } from "@/template.js";
+import { BaseMessageMeta } from "@/llms/primitives/message.js";
 import { z } from "zod";
 
 export const BeeSystemPrompt = new PromptTemplate({
@@ -114,8 +115,24 @@ export const BeeAssistantPrompt = new PromptTemplate({
 export const BeeUserPrompt = new PromptTemplate({
   schema: z.object({
     input: z.string(),
+    meta: z
+      .object({
+        createdAt: z.string().datetime().optional(),
+      })
+      .optional(),
   }),
-  template: `Question: {{input}}`,
+  functions: {
+    formatMeta: function () {
+      const meta = this.meta as BaseMessageMeta;
+      if (!meta) {
+        return "";
+      }
+
+      const parts = [meta.createdAt && `Created At: ${meta.createdAt}`].filter(Boolean).join("\n");
+      return parts ? `\n\n${parts}` : parts;
+    },
+  },
+  template: `Question: {{input}}{{formatMeta}}`,
 });
 
 export const BeeUserEmptyPrompt = new PromptTemplate({

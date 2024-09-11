@@ -28,7 +28,14 @@ vi.mock("@/memory/tokenMemory.js", async () => {
 });
 
 describe("Bee Agent Runner", () => {
+  beforeEach(() => {
+    vi.useRealTimers();
+  });
+
   it("Handles different prompt input source", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-09-10T19:51:46.954Z"));
+
     const createMemory = async () => {
       const memory = new UnconstrainedMemory();
       await memory.addMany([
@@ -62,13 +69,18 @@ describe("Bee Agent Runner", () => {
     const instance = await createInstance(memory, prompt);
 
     const memory2 = await createMemory();
-    await memory2.add(BaseMessage.of({ role: Role.USER, text: prompt }));
+    await memory2.add(
+      BaseMessage.of({ role: Role.USER, text: prompt, meta: { createdAt: new Date() } }),
+    );
     const instance2 = await createInstance(memory2, null);
     expect(instance.memory.messages).toEqual(instance2.memory.messages);
   });
 
   it.each([
-    BeeUserPrompt,
+    BeeUserPrompt.fork((old) => ({
+      ...old,
+      functions: { ...old.functions, formatMeta: () => "" },
+    })),
     BeeUserPrompt.fork((old) => ({ ...old, template: `{{input}}` })),
     BeeUserPrompt.fork((old) => ({ ...old, template: `User: {{input}}` })),
     BeeUserPrompt.fork((old) => ({ ...old, template: `` })),
@@ -114,7 +126,7 @@ describe("Bee Agent Runner", () => {
       ],
       instance.memory.messages.filter((msg) => msg.role === Role.USER),
     )) {
-      expect(template.render({ input: a.text })).toStrictEqual(b.text);
+      expect(template.render({ input: a.text, meta: undefined })).toStrictEqual(b.text);
     }
   });
 });

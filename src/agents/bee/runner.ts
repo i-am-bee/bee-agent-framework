@@ -59,7 +59,13 @@ export class BeeAgentRunner {
         const isEmpty = !message.text.trim();
         const text = isEmpty
           ? (input.templates?.userEmpty ?? BeeUserEmptyPrompt).render({})
-          : (input.templates?.user ?? BeeUserPrompt).render({ input: message.text });
+          : (input.templates?.user ?? BeeUserPrompt).render({
+              input: message.text,
+              meta: {
+                ...message?.meta,
+                createdAt: message?.meta?.createdAt?.toISOString?.(),
+              },
+            });
 
         return BaseMessage.of({
           role: Role.USER,
@@ -118,12 +124,26 @@ export class BeeAgentRunner {
           tool_names: input.tools.map((tool) => tool.name).join(","),
           instructions: undefined,
         }),
+        meta: {
+          createdAt: new Date(),
+        },
       }),
       ...input.memory.messages.map(transformMessage),
     ]);
 
     if (prompt !== null || input.memory.isEmpty()) {
-      await memory.add(transformMessage(BaseMessage.of({ role: Role.USER, text: prompt ?? "" })));
+      await memory.add(
+        transformMessage(
+          BaseMessage.of({
+            role: Role.USER,
+            text: prompt ?? "",
+            meta: {
+              // TODO: createdAt
+              createdAt: new Date(),
+            },
+          }),
+        ),
+      );
     }
 
     return new BeeAgentRunner(input, options, memory);

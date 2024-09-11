@@ -26,17 +26,22 @@ export const Role = {
 
 export type RoleType = EnumLowerCaseValue<typeof Role> | string;
 
+export interface BaseMessageMeta {
+  [key: string]: any;
+  createdAt?: Date;
+}
+
 export interface BaseMessageInput {
   role: RoleType;
   text: string;
-  meta?: Record<string, any>;
+  meta?: BaseMessageMeta;
 }
 
 export class BaseMessage extends Serializable {
   constructor(
     public readonly role: RoleType,
     public readonly text: string,
-    public readonly meta?: Record<string, any>,
+    public readonly meta?: BaseMessageMeta,
   ) {
     super();
   }
