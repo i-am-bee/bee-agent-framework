@@ -24,6 +24,7 @@ import { registerSignals } from "@/internals/helpers/cancellation.js";
 import { Serializable } from "@/internals/serializable.js";
 import { LazyPromise } from "@/internals/helpers/promise.js";
 import { FrameworkError } from "@/errors.js";
+import { shallowCopy } from "@/serializer/utils.js";
 
 export interface RunInstance<T = any> {
   emitter: Emitter<T>;
@@ -81,6 +82,7 @@ export class RunContext<T extends RunInstance, P = any> extends Serializable {
   public readonly emitter;
   public readonly context: object;
   public readonly runParams: P;
+  public readonly createdAt: Date;
 
   get signal() {
     return this.controller.signal;
@@ -96,6 +98,7 @@ export class RunContext<T extends RunInstance, P = any> extends Serializable {
     parent?: RunContext<any>,
   ) {
     super();
+    this.createdAt = new Date();
     this.runParams = input.params;
     this.runId = createRandomHash(5);
     this.parentId = parent?.runId;
@@ -174,7 +177,9 @@ export class RunContext<T extends RunInstance, P = any> extends Serializable {
       groupId: this.groupId,
       parentId: this.parentId,
       emitter: this.emitter,
-      context: this.context,
+      context: shallowCopy(this.context),
+      runParams: shallowCopy(this.runParams),
+      createdAt: new Date(this.createdAt),
     };
   }
 
