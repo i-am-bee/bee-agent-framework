@@ -43,7 +43,10 @@ export interface CodeInterpreterOptions {
 export interface PythonToolOptions extends BaseToolOptions {
   codeInterpreter: CodeInterpreterOptions;
   executorId?: string;
-  preprocess?: { llm: LLM<BaseLLMOutput>; promptTemplate: PromptTemplate<"input"> };
+  preprocess?: {
+    llm: LLM<BaseLLMOutput>;
+    promptTemplate: PromptTemplate.infer<{ input: string }>;
+  };
   storage: PythonStorage;
 }
 

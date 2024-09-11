@@ -20,6 +20,7 @@ import { PromptTemplate } from "@/template.js";
 import { LLM } from "@/llms/llm.js";
 import { BaseLLMOutput } from "@/llms/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
+import { z } from "zod";
 
 export interface SummarizeMemoryInput {
   llm: LLM<BaseLLMOutput>;
@@ -27,7 +28,10 @@ export interface SummarizeMemoryInput {
 }
 
 export const SummarizeMemoryTemplate = new PromptTemplate({
-  variables: ["summary", "new_lines"],
+  schema: z.object({
+    summary: z.string(),
+    new_lines: z.string(),
+  }),
   template: `Progressively summarize the lines of conversation provided, adding onto the previous summary returning a new summary.
 
 EXAMPLE

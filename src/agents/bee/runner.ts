@@ -18,7 +18,6 @@ import { BeeAgentError } from "@/agents/bee/errors.js";
 
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
-import { PromptTemplate } from "@/template.js";
 import { BeeAgentRunIteration, BeeCallbacks, BeeMeta, BeeRunOptions } from "@/agents/bee/types.js";
 import { BaseToolRunOptions, ToolInputValidationError, ToolOutput } from "@/tools/base.js";
 import { getProp } from "@/internals/helpers/object.js";
@@ -117,7 +116,7 @@ export class BeeAgentRunner {
             })),
           ),
           tool_names: input.tools.map((tool) => tool.name).join(","),
-          instructions: PromptTemplate.defaultPlaceholder,
+          instructions: undefined,
         }),
       }),
       ...input.memory.messages.map(transformMessage),

@@ -15,12 +15,22 @@
  */
 
 import { PromptTemplate } from "@/template.js";
+import { z } from "zod";
 
 export const BeeSystemPrompt = new PromptTemplate({
-  variables: ["instructions", "tools", "tool_names"] as const,
-  defaults: {
-    instructions: "You are a helpful assistant that uses tools to answer questions.",
-  },
+  schema: z.object({
+    instructions: z
+      .string()
+      .default("You are a helpful assistant that uses tools to answer questions."),
+    tools: z.array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        schema: z.string(),
+      }),
+    ),
+    tool_names: z.string(),
+  }),
   template: `{{instructions}}
 
 # Tools
@@ -88,42 +98,58 @@ Responses must always have the following structure:
 });
 
 export const BeeAssistantPrompt = new PromptTemplate({
-  variables: ["thought", "toolName", "toolCaption", "toolInput", "toolOutput", "finalAnswer"],
-  optionals: ["thought", "toolName", "toolCaption", "toolInput", "toolOutput", "finalAnswer"],
+  schema: z
+    .object({
+      thought: z.array(z.string()),
+      toolName: z.array(z.string()),
+      toolCaption: z.array(z.string()),
+      toolInput: z.array(z.string()),
+      toolOutput: z.array(z.string()),
+      finalAnswer: z.array(z.string()),
+    })
+    .partial(),
   template: `{{#thought}}Thought: {{.}}\n{{/thought}}{{#toolName}}Tool Name: {{.}}\n{{/toolName}}{{#toolCaption}}Tool Caption: {{.}}\n{{/toolCaption}}{{#toolInput}}Tool Input: {{.}}\n{{/toolInput}}{{#toolOutput}}Tool Output: {{.}}\n{{/toolOutput}}{{#finalAnswer}}Final Answer: {{.}}{{/finalAnswer}}`,
 });
 
 export const BeeUserPrompt = new PromptTemplate({
-  variables: ["input"],
+  schema: z.object({
+    input: z.string(),
+  }),
   template: `Question: {{input}}`,
 });
 
 export const BeeUserEmptyPrompt = new PromptTemplate({
-  variables: [],
+  schema: z.object({}),
   template: `Question: Empty message.`,
 });
 
 export const BeeToolErrorPrompt = new PromptTemplate({
-  variables: ["reason"],
+  schema: z.object({
+    reason: z.string(),
+  }),
   template: `The tool has failed; the error log is shown below. If the tool cannot accomplish what you want, use a different tool or explain why you can't use it.
 
 {{reason}}`,
 });
 
 export const BeeToolInputErrorPrompt = new PromptTemplate({
-  variables: ["reason"],
+  schema: z.object({
+    reason: z.string(),
+  }),
   template: `{{reason}}
 
 HINT: If you're convinced that the input was correct but the tool cannot process it then use a different tool or say I don't know.`,
 });
 
 export const BeeToolNoResultsPrompt = new PromptTemplate({
-  variables: [],
+  schema: z.record(z.any()),
   template: `No results were found!`,
 });
 
 export const BeeToolNotFoundPrompt = new PromptTemplate({
-  variables: ["tools"],
+  schema: z.object({
+    tools: z.array(z.object({ name: z.string() })),
+  }),
   template: `Tool does not exist!
 {{#tools.length}}
 Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}

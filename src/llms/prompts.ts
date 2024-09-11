@@ -15,9 +15,12 @@
  */
 
 import { PromptTemplate } from "@/template.js";
+import { z } from "zod";
 
 export const GeneratedStructuredTemplate = new PromptTemplate({
-  variables: ["schema"],
+  schema: z.object({
+    schema: z.string(),
+  }),
   template: `You are a helpful assistant that generates only valid JSON adhering to the following JSON Schema.
 
 \`\`\`
@@ -29,7 +32,11 @@ IMPORTANT: Every message must be a parsable JSON string without additional outpu
 });
 
 export const GeneratedStructuredErrorTemplate = new PromptTemplate({
-  variables: ["errors", "expected", "received"],
+  schema: z.object({
+    errors: z.string(),
+    expected: z.string(),
+    received: z.string(),
+  }),
   template: `Generated response does not match the expected schema!
 Validation Errors: "{{errors}}"`,
 });

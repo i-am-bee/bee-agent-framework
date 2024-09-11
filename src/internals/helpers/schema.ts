@@ -55,18 +55,20 @@ export function createSchemaValidator<T extends AnySchemaLike>(
 ): ValidateFunction<FromSchemaLike<T>> {
   const jsonSchema = toJsonSchema(schema);
 
-  const ajv = new Ajv(
-    options ?? {
-      coerceTypes: "array",
-      useDefaults: true,
-      strict: false,
-      strictSchema: false,
-      strictTuples: true,
-      strictNumbers: true,
-      strictTypes: true,
-      strictRequired: true,
-    },
-  );
+  const ajv = new Ajv({
+    coerceTypes: "array",
+    useDefaults: true,
+    strict: false,
+    strictSchema: false,
+    strictTuples: true,
+    strictNumbers: true,
+    strictTypes: true,
+    strictRequired: true,
+    parseDate: true,
+    allowDate: true,
+    allowUnionTypes: true,
+    ...options,
+  });
   addFormats.default(ajv);
   return ajv.compile<FromSchemaLike<T>>(jsonSchema);
 }

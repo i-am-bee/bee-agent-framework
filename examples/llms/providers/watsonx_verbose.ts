@@ -3,9 +3,12 @@ import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 import { WatsonXChatLLM } from "bee-agent-framework/adapters/watsonx/chat";
 import { WatsonXLLM } from "bee-agent-framework/adapters/watsonx/llm";
 import { PromptTemplate } from "bee-agent-framework/template";
+import { z } from "zod";
 
 const template = new PromptTemplate({
-  variables: ["messages"],
+  schema: z.object({
+    messages: z.array(z.record(z.array(z.string()))),
+  }),
   template: `{{#messages}}{{#system}}<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
 {{system}}<|eot_id|>{{/system}}{{#user}}<|start_header_id|>user<|end_header_id|>

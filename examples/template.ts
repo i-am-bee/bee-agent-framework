@@ -1,6 +1,7 @@
 import "./helpers/setup.js";
 import { PromptTemplate } from "bee-agent-framework/template";
 import { Logger } from "bee-agent-framework/logger/logger";
+import { z } from "zod";
 
 const logger = new Logger({ name: "template" });
 
@@ -8,7 +9,9 @@ const logger = new Logger({ name: "template" });
 {
   const greetTemplate = new PromptTemplate({
     template: `Hello {{name}}`,
-    variables: ["name"],
+    schema: z.object({
+      name: z.string(),
+    }),
   });
 
   const output = greetTemplate.render({
@@ -20,7 +23,9 @@ const logger = new Logger({ name: "template" });
 // Arrays
 {
   const template = new PromptTemplate({
-    variables: ["colors"],
+    schema: z.object({
+      colors: z.any(z.string()),
+    }),
     template: `My Favorite Colors: {{#colors}}{{.}} {{/colors}}`,
   });
   const output = template.render({
@@ -33,13 +38,13 @@ const logger = new Logger({ name: "template" });
 {
   const template = new PromptTemplate({
     template: `Expected Duration: {{expected}}ms; Retrieved: {{#responses}}{{duration}}ms {{/responses}}`,
-    variables: ["expected", "responses"],
-    defaults: {
-      expected: 5,
-    },
+    schema: z.object({
+      expected: z.number().default(5),
+      responses: z.array(z.object({ duration: z.number() })),
+    }),
   });
   const output = template.render({
-    expected: PromptTemplate.defaultPlaceholder,
+    expected: undefined,
     responses: [{ duration: 3 }, { duration: 5 }, { duration: 6 }],
   });
   logger.info(output);
@@ -49,19 +54,25 @@ const logger = new Logger({ name: "template" });
 {
   const original = new PromptTemplate({
     template: `You are a helpful assistant called {{name}}. You objective is to {{objective}}.`,
-    variables: ["name", "objective"],
+    schema: z.object({
+      name: z.string(),
+      objective: z.string(),
+    }),
   });
 
   const modified = original.fork((oldConfig) => ({
     ...oldConfig,
     template: `${oldConfig.template} Your answers must be concise.`,
-    defaults: {
-      name: "Allan",
-    },
+    schema: z.object({
+      name: z.string().default("123"),
+      age: z.number(),
+      objective: z.string(),
+    }),
   }));
 
   const output = modified.render({
-    name: PromptTemplate.defaultPlaceholder,
+    name: undefined,
+    age: 12,
     objective: "fulfill the user needs",
   });
   logger.info(output);

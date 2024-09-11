@@ -17,6 +17,7 @@ import {
 import { PromptTemplate } from "bee-agent-framework/template";
 import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
+import { z } from "zod";
 
 Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
@@ -29,7 +30,9 @@ const agent = new BeeAgent({
   // You can override internal templates
   templates: {
     user: new PromptTemplate({
-      variables: ["input"],
+      schema: z.object({
+        input: z.string(),
+      }),
       template: `User: {{input}}`,
     }),
     system: BeeSystemPrompt.fork((old) => ({
@@ -45,7 +48,9 @@ const agent = new BeeAgent({
       template: `${old.template}\nPlease reformat your input.`,
     })),
     toolNotFoundError: new PromptTemplate({
-      variables: ["tools"],
+      schema: z.object({
+        tools: z.array(z.object({ name: z.string() })),
+      }),
       template: `Tool does not exist!
 {{#tools.length}}
 Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}

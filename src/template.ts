@@ -17,25 +17,41 @@
 import { FrameworkError } from "@/errors.js";
 import { ObjectLike } from "@/internals/types.js";
 import * as R from "remeda";
-import Mustache, { TemplateSpans } from "mustache";
+import Mustache from "mustache";
 import { Serializable } from "@/internals/serializable.js";
-import { hasProp } from "@/internals/helpers/object.js";
+import { z, ZodType } from "zod";
+import { createSchemaValidator, toJsonSchema } from "@/internals/helpers/schema.js";
+import type { SchemaObject, ValidateFunction } from "ajv";
 import { shallowCopy } from "@/serializer/utils.js";
 
-export type PromptTemplateRenderFn = () => any;
-export type PromptTemplateValue = any | PromptTemplateRenderFn;
-export type PromptTemplateRenderInput<K extends string> = Record<K, PromptTemplateValue>;
+export type PromptTemplateRenderFn<K extends ZodType> = (
+  this: K extends ZodType<infer A> ? A : never,
+) => any;
 
-export interface PromptTemplateInput<K extends string> {
+export type PromptTemplateRenderInput<T extends ZodType, T2 extends z.input<T> = z.input<T>> = {
+  [K in keyof T2]: T2[K] | PromptTemplateRenderFn<T>;
+};
+
+export interface PromptTemplateInput<T extends ZodType> {
   template: string;
   customTags?: [string, string];
   escape?: boolean;
-  variables: readonly K[];
-  optionals?: readonly Partial<K>[];
-  defaults?: Partial<PromptTemplateRenderInput<K>>;
+  schema: SchemaObject;
+  functions?: Record<string, PromptTemplateRenderFn<T>>;
 }
 
-export class PromptTemplateError<T extends string> extends FrameworkError {
+type PromptTemplateConstructor<T extends ZodType, N> = N extends ZodType
+  ? Omit<PromptTemplateInput<N>, "schema" | "functions"> & {
+      schema: N;
+      functions?: Record<string, PromptTemplateRenderFn<N | T>>;
+    }
+  : Omit<PromptTemplateInput<T>, "schema"> & { schema: T | SchemaObject };
+
+type Customizer<T extends ZodType, N> = (
+  config: Required<PromptTemplateInput<T>>,
+) => PromptTemplateConstructor<T, N>;
+
+export class PromptTemplateError<T extends ZodType> extends FrameworkError {
   template: PromptTemplate<T>;
 
   constructor(message: string, template: PromptTemplate<T>, context?: ObjectLike) {
@@ -46,22 +62,10 @@ export class PromptTemplateError<T extends string> extends FrameworkError {
   }
 }
 
-export class ValidationPromptTemplateError<T extends string> extends PromptTemplateError<T> {}
+export class ValidationPromptTemplateError<T extends ZodType> extends PromptTemplateError<T> {}
 
-type VariableType = "primitive" | "array" | "inverse";
-const typeToVariableType: Record<string, VariableType> = {
-  "#": "array",
-  "^": "inverse",
-};
-
-interface ParsedTemplateSpans<K> {
-  variables: Map<K, { type: VariableType }>;
-  raw: TemplateSpans;
-}
-
-export class PromptTemplate<K extends string> extends Serializable {
-  protected config: Required<PromptTemplateInput<K>>;
-  protected parsed: ParsedTemplateSpans<K>;
+export class PromptTemplate<T extends ZodType> extends Serializable {
+  protected config: Required<PromptTemplateInput<T>>;
 
   public static functions = {
     trim: () => (text: string, render: (value: string) => string) => {
@@ -69,110 +73,58 @@ export class PromptTemplate<K extends string> extends Serializable {
     },
   };
 
-  constructor(config: PromptTemplateInput<K>) {
+  constructor(config: Omit<PromptTemplateInput<T>, "schema"> & { schema: T | SchemaObject }) {
     super();
     this.config = {
       ...config,
+      schema: toJsonSchema(config.schema),
       escape: Boolean(config.escape),
       customTags: config.customTags ?? ["{{", "}}"],
-      optionals: config.optionals ?? [],
-      defaults: config.defaults ?? {},
+      functions: {
+        ...PromptTemplate.functions,
+        ...config.functions,
+      },
     };
-    this.parsed = this._parse();
   }
 
   static {
     this.register();
   }
 
-  static readonly defaultPlaceholder = Symbol("default");
+  protected validateInput(input: unknown): asserts input is T {
+    const schema = toJsonSchema(this.config.schema);
+    const validator = createSchemaValidator(schema, {
+      coerceTypes: false,
+    }) as ValidateFunction<T>;
 
-  protected _parse(): ParsedTemplateSpans<K> {
-    const _raw = Mustache.parse(this.config.template, this.config.customTags);
-    const result: ParsedTemplateSpans<K> = {
-      raw: _raw,
-      variables: new Map(),
+    const success = validator(input);
+    if (!success) {
+      throw new ValidationPromptTemplateError(
+        `Template cannot be rendered because input does not adhere to the template schema.`,
+        this,
+        {
+          errors: validator.errors,
+        },
+      );
+    }
+  }
+
+  fork(customizer: Customizer<T, SchemaObject>): PromptTemplate<T>;
+  fork<R extends ZodType>(customizer: Customizer<T, R>): PromptTemplate<R>;
+  fork<R extends ZodType>(
+    customizer: Customizer<T, SchemaObject> | Customizer<T, R>,
+  ): PromptTemplate<T | R> {
+    const config = shallowCopy(this.config);
+    const newConfig = customizer?.(config) ?? config;
+    return new PromptTemplate(newConfig);
+  }
+
+  render(inputs: PromptTemplateRenderInput<T>): string {
+    this.validateInput(inputs);
+    const view: Record<string, any> = {
+      ...this.config.functions,
+      ...inputs,
     };
-
-    const definedVariables = new Set<string>([
-      ...this.config.variables,
-      ...Object.keys(PromptTemplate.functions),
-    ]);
-    const seenVariables = new Set<string>(Object.keys(PromptTemplate.functions));
-
-    // eslint-disable-next-line prefer-const
-    for (let [type, name] of _raw) {
-      if (type === "text") {
-        continue;
-      }
-      if (name.includes(".")) {
-        name = name.substring(0, name.indexOf("."));
-      }
-      if (!definedVariables.has(name) && !seenVariables.has(name)) {
-        throw new PromptTemplateError(
-          `Variable "${name}" was found in template but not in initial definition!`,
-          this,
-        );
-      }
-      seenVariables.add(name);
-      definedVariables.delete(name);
-
-      result.variables.set(name as K, {
-        type: typeToVariableType[type] ?? "primitive",
-      });
-    }
-
-    return result;
-  }
-
-  fork(customizer?: (config: Required<PromptTemplateInput<K>>) => PromptTemplateInput<K>) {
-    const config = R.clone(this.config);
-    return new PromptTemplate<K>(customizer?.(config) ?? config);
-  }
-
-  render(inputs: PromptTemplateRenderInput<K>): string {
-    const allowedKeys = Array.from(this.parsed.variables.keys());
-    const rawView: Record<string, PromptTemplateValue> = R.merge(
-      R.pick(this.config.defaults ?? {}, allowedKeys),
-      R.pick(inputs, allowedKeys),
-    );
-
-    const view: Record<string, any> = { ...PromptTemplate.functions };
-
-    for (const [key, { type }] of this.parsed.variables) {
-      const isOptional = this.config.optionals.includes(key);
-
-      let value = rawView[key];
-      if (value === PromptTemplate.defaultPlaceholder) {
-        if (!hasProp(this.config.defaults, key)) {
-          throw new PromptTemplateError(`No default value exists for variable "${key}"`, this);
-        }
-        value = this.config.defaults?.[key];
-      }
-
-      if (!isOptional && R.isNullish(value)) {
-        throw new PromptTemplateError(`Empty value has been passed for variable "${key}".`, this, {
-          value,
-          inputs,
-        });
-      }
-
-      if (!R.isFunction(value)) {
-        if (type === "array" && !R.isArray(value)) {
-          throw new ValidationPromptTemplateError(
-            `Invalid value provided for variable "${key}" (expected array)`,
-            this,
-          );
-        } else if (type === "primitive" && R.isObjectType(value)) {
-          throw new ValidationPromptTemplateError(
-            `Invalid value provided for variable "${key}" (expected literal)`,
-            this,
-          );
-        }
-      }
-
-      view[key] = value;
-    }
 
     const output = Mustache.render(
       this.config.template,
@@ -201,13 +153,16 @@ export class PromptTemplate<K extends string> extends Serializable {
 
   loadSnapshot(data: ReturnType<typeof this.createSnapshot>) {
     this.config = data.config;
-    this.parsed = this._parse();
   }
 
   createSnapshot() {
     return {
-      config: shallowCopy(this.config),
-      parsed: this.parsed,
+      config: this.config,
     };
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace PromptTemplate {
+  export type infer<T> = PromptTemplate<ZodType<T>>;
 }

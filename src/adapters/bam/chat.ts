@@ -24,7 +24,6 @@ import {
 } from "@/adapters/bam/llm.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
-import { PromptTemplate } from "@/template.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { BAMChatLLMPreset, BAMChatLLMPresetModel } from "@/adapters/bam/chatPreset.js";
 import { Client } from "@ibm-generative-ai/node-sdk";
@@ -83,7 +82,7 @@ export class BAMChatLLMOutput extends ChatLLMOutput {
 }
 
 export interface BAMChatLLMInputConfig {
-  messagesToPrompt: PromptTemplate<"messages"> | ((messages: BaseMessage[]) => string);
+  messagesToPrompt: (messages: BaseMessage[]) => string;
 }
 
 export interface BAMChatLLMInput {
@@ -152,11 +151,7 @@ export class BAMChatLLM extends ChatLLM<BAMChatLLMOutput> {
   }
 
   messagesToPrompt(messages: BaseMessage[]) {
-    const convertor = this.config.messagesToPrompt;
-    if (convertor instanceof PromptTemplate) {
-      return convertor.render({ messages });
-    }
-    return convertor(messages);
+    return this.config.messagesToPrompt(messages);
   }
 
   static fromPreset(

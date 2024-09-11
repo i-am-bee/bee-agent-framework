@@ -18,9 +18,3 @@ exports[`Bee Parser > Chunking > Text 2`] = `
   "final_answer": "ABC",
 }
 `;
-
-exports[`ReAct Parser > Chunking > Text 2`] = `
-{
-  "final_answer": "ABC",
-}
-`;

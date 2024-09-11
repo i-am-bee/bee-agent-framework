@@ -24,7 +24,6 @@ import {
 } from "@/adapters/watsonx/llm.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
-import { PromptTemplate } from "@/template.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { transformAsyncIterable } from "@/internals/helpers/stream.js";
 import { shallowCopy } from "@/serializer/utils.js";
@@ -79,7 +78,7 @@ export class WatsonXChatLLMOutput extends ChatLLMOutput {
 }
 
 export interface WatsonXChatLLMInputConfig {
-  messagesToPrompt: PromptTemplate<"messages"> | ((messages: BaseMessage[]) => string);
+  messagesToPrompt: (messages: BaseMessage[]) => string;
 }
 
 export interface WatsonXChatLLMInput {
@@ -155,11 +154,7 @@ export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput, WatsonXLLMPara
   }
 
   messagesToPrompt(messages: BaseMessage[]) {
-    const convertor = this.config.messagesToPrompt;
-    if (convertor instanceof PromptTemplate) {
-      return convertor.render({ messages });
-    }
-    return convertor(messages);
+    return this.config.messagesToPrompt(messages);
   }
 
   static fromPreset(

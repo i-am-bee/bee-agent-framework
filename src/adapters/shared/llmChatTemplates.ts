@@ -17,11 +17,14 @@
 import { PromptTemplate } from "@/template.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { ValueError } from "@/errors.js";
-import { isDefined, mapValues, pickBy } from "remeda";
+import { isDefined, mapToObj, mapValues, pickBy } from "remeda";
+import { z } from "zod";
 
-export interface Template {
-  template: PromptTemplate<"messages">;
-  messagesToPrompt: (template: PromptTemplate<"messages">) => (messages: BaseMessage[]) => string;
+export type LLMChatPromptTemplate = PromptTemplate.infer<{ messages: Record<string, string[]>[] }>;
+
+export interface LLMChatTemplate {
+  template: LLMChatPromptTemplate;
+  messagesToPrompt: (template: LLMChatPromptTemplate) => (messages: BaseMessage[]) => string;
   parameters: {
     stop_sequence: string[];
   };
@@ -38,7 +41,7 @@ function messagesToPromptFactory(rolesOverride: Record<string, string | undefine
     isDefined,
   );
 
-  return (template: PromptTemplate<"messages">) => {
+  return (template: LLMChatPromptTemplate) => {
     return (messages: BaseMessage[]) => {
       return template.render({
         messages: messages.map((message) =>
@@ -49,9 +52,15 @@ function messagesToPromptFactory(rolesOverride: Record<string, string | undefine
   };
 }
 
-const llama31: Template = {
+function templateSchemaFactory(roles: readonly string[]) {
+  return z.object({
+    messages: z.array(z.object(mapToObj(roles, (role) => [role, z.array(z.string())] as const))),
+  });
+}
+
+const llama31: LLMChatTemplate = {
   template: new PromptTemplate({
-    variables: ["messages"],
+    schema: templateSchemaFactory(["system", "user", "assistant", "ipython"] as const),
     template: `{{#messages}}{{#system}}<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
 {{system}}<|eot_id|>{{/system}}{{#user}}<|start_header_id|>user<|end_header_id|>
@@ -69,9 +78,9 @@ const llama31: Template = {
   },
 };
 
-const llama3: Template = {
+const llama3: LLMChatTemplate = {
   template: new PromptTemplate({
-    variables: ["messages"],
+    schema: templateSchemaFactory(["system", "user", "assistant"] as const),
     template: `{{#messages}}{{#system}}<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
 {{system}}<|eot_id|>{{/system}}{{#user}}<|start_header_id|>user<|end_header_id|>
@@ -87,9 +96,9 @@ const llama3: Template = {
   },
 };
 
-const qwen2: Template = {
+const qwen2: LLMChatTemplate = {
   template: new PromptTemplate({
-    variables: ["messages"],
+    schema: templateSchemaFactory(["system", "user", "assistant"] as const),
     template: `{{#messages}}{{#system}}<|im_start|>system
 {{system}}<|im_end|>
 {{ end }}{{/system}}{{#user}}<|im_start|>user
@@ -112,7 +121,7 @@ export class LLMChatTemplates {
     "qwen2": qwen2,
   };
 
-  static register(model: string, template: Template, override = false) {
+  static register(model: string, template: LLMChatTemplate, override = false) {
     if (model in this.registry && !override) {
       throw new ValueError(`Template for model '${model}' already exists!`);
     }
@@ -123,10 +132,10 @@ export class LLMChatTemplates {
     return Boolean(model && model in this.registry);
   }
 
-  static get(model: keyof typeof LLMChatTemplates.registry): Template;
+  static get(model: keyof typeof LLMChatTemplates.registry): LLMChatTemplate;
   // eslint-disable-next-line @typescript-eslint/unified-signatures
-  static get(model: string): Template;
-  static get(model: string): Template {
+  static get(model: string): LLMChatTemplate;
+  static get(model: string): LLMChatTemplate {
     if (!this.has(model)) {
       throw new ValueError(`Template for model '${model}' not found!`, [], {
         context: {

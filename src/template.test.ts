@@ -15,12 +15,15 @@
  */
 
 import { PromptTemplateError, PromptTemplate, ValidationPromptTemplateError } from "@/template.js";
+import { z } from "zod";
 
 describe("Prompt Template", () => {
   describe("Rendering", () => {
     it.each([1, "1", true, false, "Hey!"])("Handles primitives (%s)", (value) => {
       const template = new PromptTemplate({
-        variables: ["value"],
+        schema: z.object({
+          value: z.union([z.number(), z.string(), z.boolean()]),
+        }),
         template: `Input: {{value}}!`,
       });
 
@@ -29,7 +32,9 @@ describe("Prompt Template", () => {
 
     it.each([[[]], [[1, 2, 3]], [["a", "b", "c"]]])("Handles arrays (%s)", (values) => {
       const template = new PromptTemplate({
-        variables: ["values"],
+        schema: z.object({
+          values: z.array(z.any()),
+        }),
         template: `Input: {{#values}}{{.}}{{/values}}`,
       });
 
@@ -40,7 +45,9 @@ describe("Prompt Template", () => {
       "Handles plain objects (%s)",
       (values) => {
         const template = new PromptTemplate({
-          variables: ["values"],
+          schema: z.object({
+            values: z.array(z.record(z.string())),
+          }),
           template: `{{#values}}Name: {{name}}\n{{/values}}`,
         });
 
@@ -52,7 +59,10 @@ describe("Prompt Template", () => {
 
     it("Handles multiple occurrences of same variable", () => {
       const template = new PromptTemplate({
-        variables: ["firstName", "lastName"],
+        schema: z.object({
+          firstName: z.string(),
+          lastName: z.string(),
+        }),
         template: `First Name: {{firstName}}. Last Name {{lastName}}. Full Name: {{firstName}} {{lastName}}.`,
       });
       expect(template.render({ firstName: "A", lastName: "B" })).toMatchInlineSnapshot(
@@ -62,63 +72,36 @@ describe("Prompt Template", () => {
 
     it("Uses the value from defaults", () => {
       const template = new PromptTemplate({
-        variables: ["name"],
-        template: `{{name}}`,
-        defaults: {
-          name: "Alex",
-        },
-      });
-      expect(
-        template.render({
-          name: PromptTemplate.defaultPlaceholder,
+        schema: z.object({
+          name: z.string().default("Alex"),
         }),
-      ).toStrictEqual("Alex");
+        template: `{{name}}`,
+      });
+      expect(template.render({ name: undefined })).toStrictEqual("Alex");
     });
   });
 
   describe("Validation", () => {
     it.each([null, undefined])("Validates required variables (%s)", (value) => {
       const template = new PromptTemplate({
-        variables: ["value"],
+        schema: z.object({
+          value: z.string(),
+        }),
         template: `Input: {{value}}!`,
       });
 
-      expect(() => template.render({ value })).toThrowError(PromptTemplateError);
+      expect(() => template.render({ value: value as any })).toThrowError(PromptTemplateError);
     });
 
     it.each([null, undefined])("Validates only required variables (%s)", (value) => {
       const template = new PromptTemplate({
-        variables: ["value"],
-        optionals: ["value"],
+        schema: z.object({
+          value: z.string().nullish(),
+        }),
         template: `Input: {{value}}!`,
       });
 
       expect(template.render({ value })).toBeTruthy();
-    });
-
-    it.each([
-      {
-        variables: ["name"],
-        template: `Name: {{name}}; Age: {{age}}`,
-      },
-      {
-        variables: ["name"],
-        optionals: ["age"],
-        template: `Name: {{name}}; Age: {{age}}`,
-      },
-      {
-        variables: [],
-        template: `{{#values}}{{.}}{{/values}}`,
-      },
-    ])("Throws when variable is not explicitly mentioned", ({ variables, optionals, template }) => {
-      expect(
-        () =>
-          new PromptTemplate({
-            variables,
-            optionals,
-            template,
-          }),
-      ).toThrowError(PromptTemplateError);
     });
 
     it.each([
@@ -142,12 +125,14 @@ describe("Prompt Template", () => {
       ],
     ])("Throws wrong data-type is passed (%s)", ({ template: templateRaw, values }) => {
       const template = new PromptTemplate({
-        variables: ["value"],
+        schema: z.object({ value: z.string().min(1) }),
         template: templateRaw,
       });
 
       for (const value of values) {
-        expect(() => template.render({ value })).toThrowError(ValidationPromptTemplateError);
+        expect(() => template.render({ value: value as any })).toThrowError(
+          ValidationPromptTemplateError,
+        );
       }
     });
   });
@@ -156,11 +141,11 @@ describe("Prompt Template", () => {
     const createTemplate = () => {
       return new PromptTemplate({
         template: `Hello <<name>>!`,
-        variables: ["name"],
-        optionals: [],
+        schema: z.object({
+          name: z.string(),
+        }),
         customTags: ["<<", ">>"],
         escape: false,
-        defaults: {},
       });
     };
 
@@ -173,11 +158,11 @@ describe("Prompt Template", () => {
     it("Forks", () => {
       const template = new PromptTemplate({
         template: `Hello <<name>>!`,
-        variables: ["name"],
-        optionals: [],
+        schema: z.object({
+          name: z.string(),
+        }),
         customTags: ["<<", ">>"],
         escape: false,
-        defaults: {},
       });
       const forked = template.fork((config) => ({
         ...config,
@@ -187,5 +172,36 @@ describe("Prompt Template", () => {
 
       expect(template.render({ name: "Tomas" })).toEqual(forked.render({ name: "Tomas" }));
     });
+  });
+  test("Custom function", () => {
+    const template = new PromptTemplate({
+      schema: z.object({
+        input: z.string(),
+        meta: z
+          .object({
+            createdAt: z.string().datetime(),
+          })
+          .optional(),
+      }),
+      functions: {
+        formatMeta: function () {
+          return [`Created At: ${this.meta?.createdAt ?? "unknown"}`].filter(Boolean).join("\n");
+        },
+      },
+      template: `Question: {{input}}\n\n{{formatMeta}}`,
+    });
+
+    expect(
+      template.render({
+        input: "Who are you?",
+        meta: {
+          createdAt: new Date("2024-09-10T17:55:44.947Z").toISOString(),
+        },
+      }),
+    ).toMatchInlineSnapshot(`
+      "Question: Who are you?
+
+      Created At: 2024-09-10T17:55:44.947Z"
+    `);
   });
 });
