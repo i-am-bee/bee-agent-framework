@@ -172,7 +172,7 @@ export class BeeAgentRunner {
             stream: true,
             guided: {
               regex:
-                /Thought:.+\n(?:Final Answer:[\S\s]+|Tool Name:.+\nTool Caption:.+\nTool Input:\{.+\}\nTool Output:)/
+                /Thought:.{1,512}\n(?:Final Answer:[\S\s]+|Tool Name:.+\nTool Caption:.+\nTool Input:\{.+\}\nTool Output:)?/
                   .source,
             },
           })
