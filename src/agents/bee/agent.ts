@@ -157,6 +157,9 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
         finalMessage = BaseMessage.of({
           role: Role.ASSISTANT,
           text: iteration.state.final_answer,
+          meta: {
+            createdAt: new Date(),
+          },
         });
         await run.emitter.emit("success", {
           data: finalMessage,
@@ -174,6 +177,9 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
         BaseMessage.of({
           role: Role.USER,
           text: input.prompt,
+          meta: {
+            createdAt: run.createdAt,
+          },
         }),
       );
     }
