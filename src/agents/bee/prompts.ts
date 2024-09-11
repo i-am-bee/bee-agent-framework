@@ -128,7 +128,10 @@ export const BeeUserPrompt = new PromptTemplate({
         return "";
       }
 
-      const parts = [meta.createdAt && `Created At: ${meta.createdAt}`].filter(Boolean).join("\n");
+      const parts = [meta.createdAt && `This message was created at ${meta.createdAt}`]
+        .filter(Boolean)
+        .join("\n");
+
       return parts ? `\n\n${parts}` : parts;
     },
   },
