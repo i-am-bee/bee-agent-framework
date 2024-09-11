@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.0.13](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.12...v0.0.13) (2024-09-11)
+
+### Features
+
+- **agent:** inject metadata to messages ([a10d432](https://github.com/i-am-bee/bee-agent-framework/commit/a10d43268317479d05f16907d394e002900052fc))
+- **agent:** make repetition checker disabled by default ([4bc3a60](https://github.com/i-am-bee/bee-agent-framework/commit/4bc3a6094f86c9ec952331dd7afb86820a40cc81))
+- **templates:** add schema validation ([5a5114d](https://github.com/i-am-bee/bee-agent-framework/commit/5a5114df52a7fbce56de1e61eb025f5688097cb3))
+- **templates:** add support for defaults ([8be1adb](https://github.com/i-am-bee/bee-agent-framework/commit/8be1adb863d4a17a5451e5f78d2064ba87c43176))
+- **tool:** update openMeteo tool ([5726691](https://github.com/i-am-bee/bee-agent-framework/commit/572669150648a12f66bd40a6b23d543910bb5385))
+
 ## [0.0.12](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.11...v0.0.12) (2024-09-09)
 
 ### Features
