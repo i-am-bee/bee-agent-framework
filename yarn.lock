@@ -2543,6 +2543,7 @@ __metadata:
     eslint-plugin-unused-imports: "npm:^4.1.3"
     fast-xml-parser: "npm:^4.4.1"
     glob: "npm:^11.0.0"
+    groq-sdk: "npm:^0.7.0"
     header-generator: "npm:^2.1.54"
     husky: "npm:^9.1.5"
     joplin-turndown-plugin-gfm: "npm:^1.0.12"
@@ -4744,6 +4745,21 @@ __metadata:
   version: 1.4.0
   resolution: "graphemer@npm:1.4.0"
   checksum: 10c0/e951259d8cd2e0d196c72ec711add7115d42eb9a8146c8eeda5b8d3ac91e5dd816b9cd68920726d9fd4490368e7ed86e9c423f40db87e2d8dfafa00fa17c3a31
+  languageName: node
+  linkType: hard
+
+"groq-sdk@npm:^0.7.0":
+  version: 0.7.0
+  resolution: "groq-sdk@npm:0.7.0"
+  dependencies:
+    "@types/node": "npm:^18.11.18"
+    "@types/node-fetch": "npm:^2.6.4"
+    abort-controller: "npm:^3.0.0"
+    agentkeepalive: "npm:^4.2.1"
+    form-data-encoder: "npm:1.7.2"
+    formdata-node: "npm:^4.3.2"
+    node-fetch: "npm:^2.6.7"
+  checksum: 10c0/53fad6f5492b4682cdcc75d994e7bc6c29be910f727da35639a729519003f433813ac47a0ca6a9acb27dd7d938a0a6b6677c22bd68067f2aba7a5cdbb5bb20c2
   languageName: node
   linkType: hard
 

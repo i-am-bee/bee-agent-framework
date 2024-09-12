@@ -116,6 +116,7 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 | `OpenAI`                                                                  | LLM + ChatLLM support ([example](./examples/llms/providers/openai.ts))                  |
 | `LangChain`                                                               | Use any LLM that LangChain supports ([example](./examples/llms/providers/langchain.ts)) |
 | `WatsonX`                                                                 | LLM + ChatLLM support ([example](./examples/llms/providers/watsonx.ts))                 |
+| `Groq`                                                                    | ChatLLM support ([example](./examples/llms/providers/groq.ts))                          |
 | `BAM (Internal)`                                                          | LLM + ChatLLM support ([example](./examples/llms/providers/bam.ts))                     |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                         |
 
