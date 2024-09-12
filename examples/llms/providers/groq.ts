@@ -12,10 +12,10 @@ const llm = new GroqChatLLM({
 });
 
 console.info("Meta", await llm.meta());
-const response = await llm.stream([
+const response = await llm.generate([
   BaseMessage.of({
     role: "user",
     text: "Hello world!",
   }),
 ]);
-console.info(response);
+console.info(response.getTextContent());

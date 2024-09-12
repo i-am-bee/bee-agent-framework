@@ -129,7 +129,7 @@ export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
     } else if (this.modelId.includes("llava-v1.5")) {
       return { tokenLimit: 4 * 1024 };
     } else if (this.modelId.includes("llama-3.1-70b") || this.modelId.includes("llama-3.1-8b")) {
-      return { tokenLimit: 131 * 1024 };
+      return { tokenLimit: 128 * 1024 };
     } else if (this.modelId.includes("mixtral-8x7b")) {
       return { tokenLimit: 32 * 1024 };
     }
