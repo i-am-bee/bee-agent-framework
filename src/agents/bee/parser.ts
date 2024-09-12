@@ -132,7 +132,7 @@ export class BeeOutputParser {
   }
 
   async add(chunk: string) {
-    if (this.isDone) {
+    if (this.isDone || !chunk) {
       return;
     }
 
