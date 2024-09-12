@@ -101,7 +101,7 @@ export class BeeOutputParser {
     repetition: {
       size: 20,
       threshold: 10,
-      enabled: true,
+      enabled: false,
     },
   };
 
