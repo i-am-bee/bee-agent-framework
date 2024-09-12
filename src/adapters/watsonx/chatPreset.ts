@@ -42,6 +42,9 @@ export const WatsonXChatLLMPreset = {
       },
     };
   },
+  "meta-llama/llama-3-1-405b-instruct"() {
+    return this["meta-llama/llama-3-1-70b-instruct"]();
+  },
   "meta-llama/llama-3-1-8b-instruct"() {
     return this["meta-llama/llama-3-1-70b-instruct"]();
   },
