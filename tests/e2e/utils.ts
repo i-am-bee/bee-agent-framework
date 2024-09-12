@@ -28,6 +28,7 @@ import { RunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { toJsonSchema } from "@/internals/helpers/schema.js";
 import { OpenAI } from "openai";
+import { Groq } from "groq-sdk";
 
 interface CallbackOptions<T> {
   required?: boolean;
@@ -121,7 +122,7 @@ verifyDeserialization.isIgnored = (value: unknown, parent?: any) => {
     return true;
   }
 
-  if (parent && parent instanceof OpenAI) {
+  if (parent && (parent instanceof OpenAI || parent instanceof Groq)) {
     try {
       Serializer.findFactory(value);
       return false;
