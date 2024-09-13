@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.15](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.14...v0.0.15) (2024-09-13)
+
+### Features
+
+- **agent:** disable repetition checker by default ([0a5f8ac](https://github.com/i-am-bee/bee-agent-framework/commit/0a5f8ac9ad610c6beb13587b84ae179af72a020a))
+- **agent:** parser ignores empty chunks ([cbceb87](https://github.com/i-am-bee/bee-agent-framework/commit/cbceb8749e87b5c14f495818516900f001408faa))
+- **agent:** propagate python file identifier to the system prompt ([334e90f](https://github.com/i-am-bee/bee-agent-framework/commit/334e90f82c407e7023633d6738266f2420b2e82a))
+- **groq:** add llm adapter ([#20](https://github.com/i-am-bee/bee-agent-framework/issues/20)) ([5abb614](https://github.com/i-am-bee/bee-agent-framework/commit/5abb61483727f9f98cd2a84059b293ce089e91f5))
+- **llm:** add drivers ([f38cee4](https://github.com/i-am-bee/bee-agent-framework/commit/f38cee4fbaa7386c8f9860bc3a150be43ad49929))
+- **watsonx:** add llama3.1-405b to the preset ([8a93496](https://github.com/i-am-bee/bee-agent-framework/commit/8a93496652ae018464bb12b1a9b94091e5eb5b40))
+
+### Bug Fixes
+
+- **agent:** update guided setting ([19f11cf](https://github.com/i-am-bee/bee-agent-framework/commit/19f11cf72669ab59404089af7c3b23ff75ae1633))
+
 ## [0.0.14](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.13...v0.0.14) (2024-09-11)
 
 ### Features
