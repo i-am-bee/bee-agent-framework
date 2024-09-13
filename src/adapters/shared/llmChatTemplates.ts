@@ -70,6 +70,7 @@ const llama31: LLMChatTemplate = {
 {{assistant}}<|eot_id|>{{/assistant}}{{#ipython}}<|start_header_id|>ipython<|end_header_id|>
 
 {{ipython}}<|eot_id|>{{/ipython}}{{/messages}}<|start_header_id|>assistant<|end_header_id|>
+
 `,
   }),
   messagesToPrompt: messagesToPromptFactory({ ipython: "ipython" }),
