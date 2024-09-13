@@ -17,6 +17,7 @@
 import { PromptTemplate } from "@/template.js";
 import { BaseMessageMeta } from "@/llms/primitives/message.js";
 import { z } from "zod";
+import { PythonToolOutput } from "@/tools/python/output.js";
 
 export const BeeSystemPrompt = new PromptTemplate({
   schema: z.object({
@@ -76,7 +77,7 @@ Responses must always have the following structure:
   - If enough information is available to provide the Final Answer, the following line will be:
     - Line starting 'Final Answer: ' followed by a response to the original question and context, for example: 'Final Answer: Zblorg #178 is green.'
       - Use markdown syntax for formatting code snippets, links, JSON, tables, images, files.
-      - To reference an internal file, use the markdown syntax [file_name.ext](urn:file_identifier).
+      - To reference an internal file, use the markdown syntax [file_name.ext](${PythonToolOutput.FILE_PREFIX}:file_identifier).
         - The bracketed part must contain the file name, verbatim.
         - The parenthesis part must contain the file URN, which can be obtained from the user or from tools.
         - The agent does not, under any circumstances, reference a URN that was not provided by the user or a tool in the current conversation.
