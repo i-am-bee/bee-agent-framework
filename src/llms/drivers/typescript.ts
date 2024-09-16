@@ -14,35 +14,40 @@
  * limitations under the License.
  */
 
+import { parseBrokenJson } from "@/internals/helpers/schema.js";
 import { GenerateOptions } from "@/llms/base.js";
 import { PromptTemplate } from "@/template.js";
-import { BaseDriver } from "./base.js";
-import yaml from "js-yaml";
+import { BaseDriver } from "@/llms/drivers/base.js";
+import * as jsonSchemaToTypescript from "json-schema-to-typescript";
 import { SchemaObject } from "ajv";
 import { z } from "zod";
 
-export class YamlDriver<
+export class TypescriptDriver<
   TGenerateOptions extends GenerateOptions = GenerateOptions,
 > extends BaseDriver<TGenerateOptions> {
   protected template = new PromptTemplate({
     schema: z.object({
       schema: z.string(),
     }),
-    template: `You are a helpful assistant that generates only valid YAML adhering to the following schema.
+    template: `You are a helpful assistant that generates only valid JSON adhering to the following TypeScript type.
 
 \`\`\`
 {{schema}}
 \`\`\`
 
-IMPORTANT: Every message must be a parsable YAML string without additional output.
+IMPORTANT: Every message must be a parsable JSON string without additional output.
 `,
   });
 
   protected parseResponse(textResponse: string): unknown {
-    return yaml.load(textResponse);
+    return parseBrokenJson(textResponse);
   }
 
-  protected schemaToString(schema: SchemaObject): string {
-    return yaml.dump(schema);
+  protected async schemaToString(schema: SchemaObject): Promise<string> {
+    return await jsonSchemaToTypescript.compile(schema, "Output");
+  }
+
+  protected guided(schema: SchemaObject) {
+    return { json: schema } as const;
   }
 }

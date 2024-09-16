@@ -2,7 +2,7 @@ import "dotenv/config.js";
 import { z } from "zod";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
-import { JsonDriver } from "bee-agent-framework/drivers/json";
+import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
 
 const llm = new OllamaChatLLM();
 const driver = new JsonDriver(llm);
