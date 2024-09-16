@@ -49,6 +49,8 @@ Validation Errors: "{{errors}}"`,
 
   protected abstract parseResponse(textResponse: string): unknown;
   protected abstract schemaToString(schema: SchemaObject): Promise<string> | string;
+
+  // eslint-disable-next-line unused-imports/no-unused-vars
   protected guided(schema: SchemaObject): GenerateOptions["guided"] | undefined {
     return undefined;
   }
