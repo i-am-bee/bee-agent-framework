@@ -67,27 +67,25 @@ export class OpenMeteoTool extends Tool<
   inputSchema() {
     return z
       .object({
-        location: z
-          .object({
-            latitude: z.number(),
-            longitude: z.number(),
-          })
-          .strip()
-          .or(
-            z
-              .object({
-                name: z.string().min(1),
-                language: z.string().default("English"),
-              })
-              .strip(),
-          ),
+        location: z.union([
+          z
+            .object({
+              name: z.string().min(1),
+              language: z.string().default("English"),
+            })
+            .strip(),
+          z
+            .object({
+              latitude: z.number(),
+              longitude: z.number(),
+            })
+            .strip(),
+        ]),
         start_date: z
-          .string()
-          .date()
+          .union([z.string().date(), z.string().datetime()])
           .describe("Start date for the weather forecast in the format YYYY-MM-DD (UTC)"),
         end_date: z
-          .string()
-          .date()
+          .union([z.string().date(), z.string().datetime()])
           .describe("End date for the weather forecast in the format YYYY-MM-DD (UTC)")
           .optional(),
         elevation: z.number().nullish(),
