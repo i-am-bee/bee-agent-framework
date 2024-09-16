@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.16](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.15...v0.0.16) (2024-09-16)
+
+### Features
+
+- **llm:** export messagesToPromptFactory function ([d534012](https://github.com/i-am-bee/bee-agent-framework/commit/d5340128b27ad11b99b01174ec8b4c38b64f5f93))
+- move llm drivers under the llm module ([8ea5136](https://github.com/i-am-bee/bee-agent-framework/commit/8ea5136a4f97323ffc9b3613b26c4886cc1f2eca))
+- **tool:** update open meteo schema ([8736e21](https://github.com/i-am-bee/bee-agent-framework/commit/8736e217a366dd89680213d05c5729b9ae09377f))
+
+### Bug Fixes
+
+- **llm:** llama3.1 add trailing new line ([#22](https://github.com/i-am-bee/bee-agent-framework/issues/22)) ([99ace8f](https://github.com/i-am-bee/bee-agent-framework/commit/99ace8fc7b96de7811c80f22158910d5f5d2b295))
+
 ## [0.0.15](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.14...v0.0.15) (2024-09-13)
 
 ### Features
