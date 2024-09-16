@@ -26,6 +26,7 @@ import { omitEmptyValues } from "@/internals/helpers/object.js";
 import * as process from "node:process";
 import { createChatLLM } from "@tests/utils/llmFactory.js";
 import { BeeMeta } from "@/agents/bee/types.js";
+import { UnconstrainedCache } from "@/cache/unconstrainedCache.js";
 
 describe("Bee Agent", () => {
   const createAgent = () => {
@@ -34,6 +35,7 @@ describe("Bee Agent", () => {
       memory: new UnconstrainedMemory(),
       tools: [
         new DuckDuckGoSearchTool({
+          cache: new UnconstrainedCache(),
           maxResultsPerPage: 10,
           throttle: {
             interval: 5000,

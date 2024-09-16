@@ -30,7 +30,7 @@ export type InferValue<T> = T extends ZodType<infer A> ? A : never;
 export type PromptTemplateRenderFn<K extends ZodType> = (this: InferValue<K>) => any;
 
 export type PromptTemplateRenderInput<T extends ZodType, T2 extends z.input<T> = z.input<T>> = {
-  [K in keyof T2]: T2[K] | PromptTemplateRenderFn<T> | undefined;
+  [K in Extract<keyof T2, string>]: T2[K] | PromptTemplateRenderFn<T> | undefined;
 };
 
 export interface PromptTemplateInput<T extends ZodType> {

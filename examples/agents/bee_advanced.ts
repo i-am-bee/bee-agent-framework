@@ -30,9 +30,11 @@ const agent = new BeeAgent({
   // You can override internal templates
   templates: {
     user: new PromptTemplate({
-      schema: z.object({
-        input: z.string(),
-      }),
+      schema: z
+        .object({
+          input: z.string(),
+        })
+        .passthrough(),
       template: `User: {{input}}`,
     }),
     system: BeeSystemPrompt.fork((old) => ({
@@ -48,9 +50,11 @@ const agent = new BeeAgent({
       template: `${old.template}\nPlease reformat your input.`,
     })),
     toolNotFoundError: new PromptTemplate({
-      schema: z.object({
-        tools: z.array(z.object({ name: z.string() })),
-      }),
+      schema: z
+        .object({
+          tools: z.array(z.object({ name: z.string() }).passthrough()),
+        })
+        .passthrough(),
       template: `Tool does not exist!
 {{#tools.length}}
 Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}

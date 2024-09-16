@@ -25,11 +25,13 @@ export const BeeSystemPrompt = new PromptTemplate({
       .string()
       .default("You are a helpful assistant that uses tools to answer questions."),
     tools: z.array(
-      z.object({
-        name: z.string(),
-        description: z.string(),
-        schema: z.string(),
-      }),
+      z
+        .object({
+          name: z.string().min(1),
+          description: z.string().min(1),
+          schema: z.string().min(1),
+        })
+        .passthrough(),
     ),
     tool_names: z.string(),
   }),
@@ -114,14 +116,17 @@ export const BeeAssistantPrompt = new PromptTemplate({
 });
 
 export const BeeUserPrompt = new PromptTemplate({
-  schema: z.object({
-    input: z.string(),
-    meta: z
-      .object({
-        createdAt: z.string().datetime().optional(),
-      })
-      .optional(),
-  }),
+  schema: z
+    .object({
+      input: z.string(),
+      meta: z
+        .object({
+          createdAt: z.string().datetime().optional(),
+        })
+        .passthrough()
+        .optional(),
+    })
+    .passthrough(),
   functions: {
     formatMeta: function () {
       const meta = this.meta as BaseMessageMeta;
@@ -140,23 +145,27 @@ export const BeeUserPrompt = new PromptTemplate({
 });
 
 export const BeeUserEmptyPrompt = new PromptTemplate({
-  schema: z.object({}),
+  schema: z.object({}).passthrough(),
   template: `Question: Empty message.`,
 });
 
 export const BeeToolErrorPrompt = new PromptTemplate({
-  schema: z.object({
-    reason: z.string(),
-  }),
+  schema: z
+    .object({
+      reason: z.string(),
+    })
+    .passthrough(),
   template: `The tool has failed; the error log is shown below. If the tool cannot accomplish what you want, use a different tool or explain why you can't use it.
 
 {{reason}}`,
 });
 
 export const BeeToolInputErrorPrompt = new PromptTemplate({
-  schema: z.object({
-    reason: z.string(),
-  }),
+  schema: z
+    .object({
+      reason: z.string(),
+    })
+    .passthrough(),
   template: `{{reason}}
 
 HINT: If you're convinced that the input was correct but the tool cannot process it then use a different tool or say I don't know.`,
@@ -168,9 +177,11 @@ export const BeeToolNoResultsPrompt = new PromptTemplate({
 });
 
 export const BeeToolNotFoundPrompt = new PromptTemplate({
-  schema: z.object({
-    tools: z.array(z.object({ name: z.string() })),
-  }),
+  schema: z
+    .object({
+      tools: z.array(z.object({ name: z.string() }).passthrough()),
+    })
+    .passthrough(),
   template: `Tool does not exist!
 {{#tools.length}}
 Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
