@@ -30,7 +30,7 @@ export interface LLMChatTemplate {
   };
 }
 
-function messagesToPromptFactory(rolesOverride: Record<string, string | undefined> = {}) {
+export function messagesToPromptFactory(rolesOverride: Record<string, string | undefined> = {}) {
   const roles: Record<string, string> = pickBy(
     {
       system: "system",
