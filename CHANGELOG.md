@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.17](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.16...v0.0.17) (2024-09-16)
+
+### Bug Fixes
+
+- **agent:** update prompt template schemas ([5373835](https://github.com/i-am-bee/bee-agent-framework/commit/5373835d96d9495ee11f5046c1944b7d5004c4a4))
+
 ## [0.0.16](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.15...v0.0.16) (2024-09-16)
 
 ### Features
