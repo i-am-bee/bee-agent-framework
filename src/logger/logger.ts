@@ -128,7 +128,7 @@ export class Logger extends Serializable implements pinoLogger.BaseLogger {
   static get defaults(): Omit<LoggerInput, "raw"> & { pretty: boolean } {
     return {
       name: undefined,
-      pretty: Boolean(parseEnv("BEE_FRAMEWORK_LOG_PRETTY", z.coerce.boolean().default(false))),
+      pretty: parseEnv.asBoolean("BEE_FRAMEWORK_LOG_PRETTY", false),
       bindings: {},
       level: parseEnv(
         "BEE_FRAMEWORK_LOG_LEVEL",
@@ -184,10 +184,7 @@ export class Logger extends Serializable implements pinoLogger.BaseLogger {
               errorKey: "error",
               colorize: true,
               sync: true,
-              singleLine: parseEnv(
-                "BEE_FRAMEWORK_LOG_SINGLE_LINE",
-                z.coerce.boolean().default(true),
-              ),
+              singleLine: parseEnv.asBoolean("BEE_FRAMEWORK_LOG_SINGLE_LINE", false),
             } as PrettyOptions,
           },
         }),

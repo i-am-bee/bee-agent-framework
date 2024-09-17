@@ -34,6 +34,9 @@ export function parseEnv<T>(key: string, schema: z.ZodType<T>, defaultValue?: T)
   }
   return result.data;
 }
+parseEnv.asBoolean = (key: string, fallback = false) => {
+  return parseEnv(key, z.string(), String(fallback)).trim().toLowerCase() === "true";
+};
 
 export function hasEnv(key: string) {
   return getProp(process.env, [key]) !== undefined;
