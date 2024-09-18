@@ -123,7 +123,12 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
   public readonly parameters: Partial<Parameters>;
 
   constructor(
-    { client, modelId, parameters, executionOptions = {} }: Input = {
+    {
+      client,
+      modelId = "llama3.1",
+      parameters = { temperature: 0 },
+      executionOptions = {},
+    }: Input = {
       modelId: "llama3.1",
       parameters: {
         temperature: 0,
