@@ -43,7 +43,8 @@ Tools MUST do the following:
 
 - Provide a natural language description of what the tool does:
 
-  ❗Important: this description is used by the agent to determine when the tool should be used. It's probably the most important aspect of your tool and you should experiment with different natural language descriptions to ensure the tool is used in the correct circumstances.
+  ❗Important: this description is used by the agent to determine when the tool should be used. It's probably the most important aspect of your tool and you should experiment with different natural language descriptions to ensure the tool is used in the correct circumstances. You can also include usage tips and guidance for the agent in the description, but
+  its advisable to keep the description succinct in order to reduce the probability of conflicting with other tools, or adversely affecting agent behavior.
 
   ```typescript
   description = "Takes X action when given Y input resulting in Z output";
@@ -51,7 +52,7 @@ Tools MUST do the following:
 
 - Declare an input schema:
 
-  This is used to define the format of the input to your tool. The agent will formalise the natural language input(s) it has received and structure them into the fields described in the tool's input. The input schema can be specified using [Zod](https://github.com/colinhacks/zod) (recommended) or JSONSchema. It must be a function (either sync or async). Zod effects (e.g. `z.object().transform(...)`) are not supported. The return value of `inputSchema` must always be an object and pass validation by the `validateSchema()` function defined in [schema.ts](../src/internals/helpers/schema.ts).
+  This is used to define the format of the input to your tool. The agent will formalise the natural language input(s) it has received and structure them into the fields described in the tool's input. The input schema can be specified using [Zod](https://github.com/colinhacks/zod) (recommended) or JSONSchema. It must be a function (either sync or async). Zod effects (e.g. `z.object().transform(...)`) are not supported. The return value of `inputSchema` must always be an object and pass validation by the `validateSchema()` function defined in [schema.ts](../src/internals/helpers/schema.ts). Keep your tool input schema simple and provide schema descriptions to help the agent to interpret fields.
 
   <!-- eslint-skip -->
 
@@ -60,6 +61,12 @@ Tools MUST do the following:
       // any Zod definition is good here, this is typical simple example
       return z.object({
         // list of key-value pairs
+        expression: z
+                .string()
+                .min(1)
+                .describe(
+                  `The mathematical expression to evaluate (e.g., "2 + 3 * 4").`,
+                ),
       });
   }
   ```
@@ -105,6 +112,22 @@ const agent = new BeeAgent({
   tools: [new ArXivTool()],
 });
 ```
+
+## General Tips
+
+### Data Minimization
+
+If your tool is providing data to the agent, try to ensure that the data is relevant and free of extraneous metatdata. Preprocessing data to improve relevance and minimizing unnecessary data conserves agent memory, and tends to improve overall performance.
+
+### Provide Hints
+
+If your tool encounters an error that is fixable you can return a hint to the agent, the agent will try to reuse the tool in the context of the hint. This can improve the agents ability
+to recover from errors.
+
+### Security & Stability
+
+When building tools consider that the tool is being invoked by a somewhat unpredictable third party (the agent). You should ensure that sufficient guardrails are in place to prevent
+adverse outcomes.
 
 ## Examples
 
