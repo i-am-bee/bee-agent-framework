@@ -61,6 +61,18 @@ describe("Arxiv", () => {
       instance.run({
         ids: ["xx"],
       }),
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`[ToolError: Request to ArXiv API has failed!]`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      ToolError: Request to ArXiv API has failed!
+          Error: {
+        "id": "http://arxiv.org/api/errors#incorrect_id_format_for_xx",
+        "title": "Error",
+        "summary": "incorrect id format for xx",
+        "updated": "2024-09-20T00:00:00-04:00",
+        "link": "",
+        "author": {
+          "name": "arXiv api core"
+        }
+      }
+    `);
   });
 });

@@ -322,9 +322,9 @@ describe("Base Tool", () => {
       const tool = new ComplexTool();
 
       await expect(tool.run("fail" as any)).rejects.toThrowErrorMatchingInlineSnapshot(`
-        [ToolInputValidationError: The received tool input does not match the expected schema.
+        ToolInputValidationError: The received tool input does not match the expected schema.
         Input Schema: "{"type":"object","properties":{"foo":{"type":"string"},"bar":{"type":"string"}},"required":["foo","bar"],"additionalProperties":false,"$schema":"http://json-schema.org/draft-07/schema#"}"
-        Validation Errors: [{"instancePath":"","schemaPath":"#/type","keyword":"type","params":{"type":"object"},"message":"must be object"}]]
+        Validation Errors: [{"instancePath":"","schemaPath":"#/type","keyword":"type","params":{"type":"object"},"message":"must be object"}]
       `);
     });
   });
