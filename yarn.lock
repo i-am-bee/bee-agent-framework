@@ -2699,7 +2699,6 @@ __metadata:
     openai: ^4.56.0
     openai-chat-tokens: ^0.2.8
     sequelize: ^6.37.3
-    sqlite3: ^5.1.7
   languageName: unknown
   linkType: soft
 
@@ -7303,11 +7302,11 @@ __metadata:
   linkType: hard
 
 "node-abi@npm:^3.3.0":
-  version: 3.67.0
-  resolution: "node-abi@npm:3.67.0"
+  version: 3.68.0
+  resolution: "node-abi@npm:3.68.0"
   dependencies:
     semver: "npm:^7.3.5"
-  checksum: 10c0/72ce2edbdfb84745bc201a4e48aa7146fd88a0d2c80046b6b17f28439c9a7683eab846f40f1e819349c31f7d9331ed5c50d1e741208d938dd5f38b29cab2275e
+  checksum: 10c0/0f20cdb1216485ef399f581fe8fad300f1321cc66e08a7e2e7c6c6a1d89006799c464943e45dae19ec39ba581f6417dff4af21324a09c1e74a4e2fc1bceb0f83
   languageName: node
   linkType: hard
 

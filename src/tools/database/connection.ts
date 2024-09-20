@@ -15,6 +15,7 @@
  */
 
 import { Sequelize, Dialect } from "sequelize";
+import { ToolError } from "@/tools/base.js";
 
 let dbSchema: string | undefined = undefined;
 
@@ -42,15 +43,12 @@ export async function connectSql(): Promise<Sequelize> {
     await sequelize.authenticate();
     return sequelize;
   } catch (error) {
-    throw Error(`Unable to connect to the SQL database: ${error.message}`);
+    throw new ToolError("Unable to connect to the SQL database:", [new Error(error)], {
+      isRetryable: false,
+    });
   }
 }
 
 export function getSchema(): string | undefined {
   return dbSchema || undefined;
-}
-
-export function isSupported(provider: string): boolean {
-  const supportedProviders = ["mysql", "mariadb", "postgres", "mssql", "db2", "sqlite", "oracle"];
-  return supportedProviders.includes(provider);
 }

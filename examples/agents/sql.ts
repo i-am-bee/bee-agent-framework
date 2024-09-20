@@ -28,7 +28,7 @@ const question = "which country's customers spent the most?";
 try {
   const response = await agent
     .run(
-      { prompt: "From the database: " + question },
+      { prompt: `From the database: ${question}` },
       {
         execution: {
           maxRetriesPerStep: 5,
@@ -53,5 +53,6 @@ try {
 } catch (error) {
   console.error(FrameworkError.ensure(error).dump());
 } finally {
+  await sqlTool.destroy();
   process.exit(0);
 }

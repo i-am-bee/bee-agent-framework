@@ -17,15 +17,20 @@
 import {
   Tool,
   ToolInput,
+  ToolError,
   BaseToolOptions,
   BaseToolRunOptions,
   JSONToolOutput,
 } from "@/tools/base.js";
 import { z } from "zod";
+import { Sequelize } from "sequelize";
 import { getMetadata } from "@/tools/database/metadata.js";
-import { isSupported, connectSql } from "@/tools/database/connection.js";
+import { connectSql } from "@/tools/database/connection.js";
+import { Cache } from "@/cache/decoratorCache.js";
 
-type ToolOptions = { provider: string } & BaseToolOptions;
+type Provider = "mysql" | "mariadb" | "postgres" | "mssql" | "db2" | "sqlite" | "oracle";
+
+type ToolOptions = { provider: Provider } & BaseToolOptions;
 type ToolRunOptions = BaseToolRunOptions;
 
 export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptions> {
@@ -44,15 +49,19 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
     this.register();
   }
 
+  private _sequelize: Sequelize | null = null;
+
+  @Cache()
+  protected async connection(): Promise<Sequelize> {
+    this._sequelize = await connectSql();
+    return this._sequelize;
+  }
+
   protected async _run(
     { query }: ToolInput<this>,
     _options?: ToolRunOptions,
   ): Promise<JSONToolOutput<any>> {
     const provider = this.options.provider;
-
-    if (!isSupported(provider)) {
-      throw new Error(`Unsupported database provider: ${provider}`);
-    }
 
     if (!this.isReadOnlyQuery(query)) {
       return new JSONToolOutput({
@@ -61,11 +70,11 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
       });
     }
 
-    let sequelize = null;
     let metadata = "";
 
     try {
-      sequelize = await connectSql();
+      const sequelize = await this.connection();
+
       metadata = await getMetadata(provider, sequelize);
 
       const [results] = await sequelize.query(query);
@@ -83,9 +92,7 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
       generate a correct query that retrieves data using the appropriate ${provider} dialect. 
       The original request was: ${query}, and the error was: ${error.message}.`;
 
-      return new JSONToolOutput({ error: errorMessage });
-    } finally {
-      await sequelize?.close();
+      throw new ToolError(errorMessage);
     }
   }
 
@@ -96,5 +103,16 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
       normalizedQuery.startsWith("SHOW") ||
       normalizedQuery.startsWith("DESC")
     );
+  }
+
+  public async destroy(): Promise<void> {
+    if (this._sequelize) {
+      try {
+        await this._sequelize.close();
+        this._sequelize = null;
+      } catch (error: any) {
+        throw new ToolError(`Failed to close the database connection: ${error.message}`);
+      }
+    }
   }
 }
