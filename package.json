@@ -12,7 +12,7 @@
     "Bee Agent Framework",
     "NodeJS Agent Framework"
   ],
-  "packageManager": "yarn@4.1.1",
+  "packageManager": "yarn@4.5.0",
   "prettier": {
     "printWidth": 100,
     "quoteProps": "consistent"
@@ -83,6 +83,7 @@
   },
   "dependencies": {
     "@ai-zen/node-fetch-event-source": "^2.1.4",
+    "@bufbuild/protobuf": "^2.1.0",
     "@connectrpc/connect": "^1.4.0",
     "@connectrpc/connect-node": "^1.4.0",
     "ajv": "^8.17.1",

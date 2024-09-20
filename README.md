@@ -10,7 +10,7 @@
   <h4 align="center">Open-source framework for building, deploying, and serving powerful agentic workflows at scale.</h4>
 </p>
 
-The Bee framework makes it easy to build agentic worfklows with leading open-source and proprietary models. We’re working on bringing model-agnostic support to any LLM to help developers avoid model provider lock-in.
+The Bee Agent Framework makes it easy to build scalable agent-based workflows with your model of choice. Our default agent, [Bee](https://github.com/i-am-bee/bee-agent-framework/tree/main?tab=readme-ov-file#get-started-with-bee), is designed to perform robustly with [Llama 3.1](https://ai.meta.com/blog/meta-llama-3-1/), and we're actively working on optimizing its performance with other popular LLMs.<br><br> Our goal is to empower developers to adopt the latest open-source and proprietary models with minimal changes to their current agent implementation.
 
 ## Key Features
 
@@ -21,7 +21,7 @@ The Bee framework makes it easy to build agentic worfklows with leading open-sou
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
 - 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our MLflow integration (coming soon) to debug performance.
 - 🎛️ **Production-level** control with [caching](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#cache) and [error handling](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#errors).
-- 🚧 (Coming soon) **Model-agnostic support**: Change model providers in 1 line of code without breaking your agent’s functionality.
+- 🚧 (Coming soon) **API**: Configure and deploy your agents with a production-hardened API.
 - 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
 - ... more on our [Roadmap](#roadmap)
 
@@ -148,12 +148,11 @@ To see more in-depth explanation see [docs](./docs/overview.md).
 ## Roadmap
 
 - MLFlow integration for trace observability
-- JSON encoder/decoder for model-agnostic support
-- Structured outputs
+- Improvements to base Bee agent and performance optimization with Llama3.1 and Granite model suites
+- API
+- Python SDK
 - Chat Client (GUI)
-- Improvements to base Bee agent
-- Guardrails
-- Evaluation
+- Structured outputs
 - 🚧 TBD 🚧
 
 ## Contribution guidelines
