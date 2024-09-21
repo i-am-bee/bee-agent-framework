@@ -32,9 +32,14 @@ export interface CacheDecoratorOptions {
   enumerable?: boolean;
 }
 
+interface CacheEntry {
+  expiresAt: number;
+  data: any;
+}
+
 interface FnContext {
   options: CacheDecoratorOptions;
-  cache: Map<string, { expiresAt: number; data: any }>;
+  cache: Map<string, CacheEntry>;
 }
 
 interface GroupContext {
@@ -43,6 +48,8 @@ interface GroupContext {
 }
 
 export interface CacheDecoratorInstance {
+  get(key?: string): CacheEntry | undefined;
+
   clear(keys?: string[]): void;
 
   isEnabled(): boolean;
@@ -117,6 +124,10 @@ export function Cache(_options?: Partial<CacheDecoratorOptions>) {
     }
 
     const target = state.extractDescriptor(descriptor);
+    if (descriptor.get && !_options?.cacheKey) {
+      baseOptions.cacheKey = SingletonCacheKeyFn;
+    }
+
     const groupContext: GroupContext = { instances: new WeakMap(), options: baseOptions };
 
     const fn = function wrapper(this: any, ...args: any[]) {
@@ -175,6 +186,9 @@ Cache.getInstance = function getInstance<T extends NonNullable<unknown>>(
 
   const ctx = state.getInstanceContext(target, ctxByInstance);
   return {
+    get(key = "") {
+      return ctx.cache.get(key);
+    },
     clear(keys?: string[]) {
       if (keys) {
         keys.forEach((key) => ctx.cache.delete(key));

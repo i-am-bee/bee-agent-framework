@@ -249,6 +249,23 @@ describe("@Cache decorator", () => {
     expect(B.counter).toBe(2);
   });
 
+  it("Retrieves cache entry directly", async () => {
+    class A {
+      @Cache()
+      get instance() {
+        return Promise.resolve(1);
+      }
+    }
+    const a = new A();
+    const cache = Cache.getInstance(a, "instance");
+    expect(cache.get()).toBeUndefined();
+    await a.instance;
+    expect(cache.get()).toMatchObject({
+      expiresAt: Infinity,
+      data: expect.any(Promise),
+    });
+  });
+
   describe("CacheFn", () => {
     it("Caches", () => {
       const fn = vi.fn((input) => input);
