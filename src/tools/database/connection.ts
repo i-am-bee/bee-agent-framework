@@ -43,7 +43,7 @@ export async function connectSql(): Promise<Sequelize> {
     await sequelize.authenticate();
     return sequelize;
   } catch (error) {
-    throw new ToolError("Unable to connect to the SQL database:", [new Error(error)], {
+    throw new ToolError(`Unable to connect to database: ${error}`, [], {
       isRetryable: false,
     });
   }

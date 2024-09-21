@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { ToolError } from "@/tools/base.js";
 import { Sequelize } from "sequelize";
 import { getSchema } from "@/tools/database/connection.js";
 
@@ -43,7 +44,7 @@ export async function getMetadata(provider: string, sequelize: Sequelize): Promi
       .map((columns) => columns.join(", "))
       .join("; ");
   } catch (error) {
-    throw new Error(`Error initializing metadata: ${error.message}`);
+    throw new ToolError(`Error initializing metadata: ${error}`, [], { isRetryable: false });
   }
 }
 
@@ -88,7 +89,9 @@ function getMetadataQuery(provider: string): string {
 
     case "db2":
       if (schemaName === undefined) {
-        throw new Error(`Schema name is required for ${provider}`);
+        throw new ToolError(`Schema name is required for ${provider}`, [], {
+          isRetryable: false,
+        });
       }
 
       return `
@@ -112,7 +115,9 @@ function getMetadataQuery(provider: string): string {
 
     case "oracle":
       if (schemaName === undefined) {
-        throw new Error(`Schema name is required for ${provider}`);
+        throw new ToolError(`Schema name is required for ${provider}`, [], {
+          isRetryable: false,
+        });
       }
       return `
           SELECT t.table_name AS "tableName", c.column_name AS "columnName", 
@@ -123,6 +128,8 @@ function getMetadataQuery(provider: string): string {
         `;
 
     default:
-      throw new Error(`Unsupported database provider: ${provider}`);
+      throw new ToolError(`Provider ${provider} is not supported`, [], {
+        isRetryable: false,
+      });
   }
 }
