@@ -16,6 +16,7 @@
 
 import { ArXivResponse, ArXivTool } from "@/tools/arxiv.js";
 import { beforeEach, expect } from "vitest";
+import { ToolError } from "@/tools/base.js";
 
 describe("Arxiv", () => {
   let instance: ArXivTool;
@@ -61,18 +62,6 @@ describe("Arxiv", () => {
       instance.run({
         ids: ["xx"],
       }),
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      ToolError: Request to ArXiv API has failed!
-          Error: {
-        "id": "http://arxiv.org/api/errors#incorrect_id_format_for_xx",
-        "title": "Error",
-        "summary": "incorrect id format for xx",
-        "updated": "2024-09-20T00:00:00-04:00",
-        "link": "",
-        "author": {
-          "name": "arXiv api core"
-        }
-      }
-    `);
+    ).rejects.toThrowError(new ToolError(`Request to ArXiv API has failed!`));
   });
 });
