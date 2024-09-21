@@ -61,7 +61,6 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
     { query }: ToolInput<this>,
     _options?: ToolRunOptions,
   ): Promise<JSONToolOutput<any>> {
-
     if (!this.isReadOnlyQuery(query)) {
       return new JSONToolOutput({
         success: false,
@@ -74,7 +73,6 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
     const sequelize = await this.connection();
 
     try {
-
       metadata = await getMetadata(provider, sequelize);
 
       const [results] = await sequelize.query(query);
