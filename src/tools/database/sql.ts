@@ -49,12 +49,9 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
     this.register();
   }
 
-  private _sequelize: Sequelize | null = null;
-
   @Cache()
   protected async connection(): Promise<Sequelize> {
-    this._sequelize = await connectSql();
-    return this._sequelize;
+    return await connectSql();
   }
 
   protected async _run(
@@ -104,12 +101,17 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
   }
 
   public async destroy(): Promise<void> {
-    if (this._sequelize) {
+    // @ts-expect-error protected property
+    const cache = Cache.getInstance(this, "connection");
+    const entry = cache.get();
+
+    if (entry) {
+      cache.clear();
+
       try {
-        await this._sequelize.close();
-        this._sequelize = null;
-      } catch (error: any) {
-        throw new ToolError(`Failed to close the database connection: ${error.message}`);
+        await entry.data.close();
+      } catch (error) {
+        throw new ToolError(`Failed to close the database connection`, [error]);
       }
     }
   }

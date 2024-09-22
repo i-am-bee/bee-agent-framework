@@ -44,7 +44,9 @@ export async function getMetadata(provider: string, sequelize: Sequelize): Promi
       .map((columns) => columns.join(", "))
       .join("; ");
   } catch (error) {
-    throw new ToolError(`Error initializing metadata: ${error}`, [], { isRetryable: false });
+    throw new ToolError(`Error initializing metadata: ${error}`, [], {
+      isRetryable: false,
+    });
   }
 }
 
@@ -129,6 +131,7 @@ function getMetadataQuery(provider: string): string {
 
     default:
       throw new ToolError(`Provider ${provider} is not supported`, [], {
+        isFatal: true,
         isRetryable: false,
       });
   }
