@@ -42,6 +42,15 @@ IMPORTANT: Every message must be a parsable JSON string without additional outpu
     this.register();
   }
 
+  static fromTemplate<T extends JsonDriver["template"]>(
+    template: T,
+    ...parameters: ConstructorParameters<typeof this>
+  ) {
+    const driver = new JsonDriver(...parameters);
+    driver.template = template;
+    return driver;
+  }
+
   protected parseResponse(textResponse: string): unknown {
     return parseBrokenJson(textResponse);
   }
