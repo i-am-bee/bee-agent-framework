@@ -137,6 +137,38 @@ describe("Prompt Template", () => {
     });
   });
 
+  describe("Functions", () => {
+    it("Trims", () => {
+      const template = new PromptTemplate({
+        template: `{{#trim}}{{names}},{{/trim}}`,
+        schema: z.object({
+          names: z.array(z.string()),
+        }),
+      });
+      expect(template.render({ names: ["Tomas", "Alex"] })).toMatchInlineSnapshot(`"Tomas,Alex"`);
+    });
+
+    it("Custom function", () => {
+      const template = new PromptTemplate({
+        template: [`Name: {{name}}`, `User Name: {{userName}}`].join("\n"),
+        schema: z.object({ name: z.string() }),
+        functions: {
+          userName: function () {
+            return this.name.replaceAll(" ", "-").toLowerCase().trim();
+          },
+        },
+      });
+      expect(
+        template.render({
+          name: "John Doe",
+        }),
+      ).toMatchInlineSnapshot(`
+        "Name: John Doe
+        User Name: john-doe"
+      `);
+    });
+  });
+
   describe("Customization", () => {
     const createTemplate = () => {
       return new PromptTemplate({
