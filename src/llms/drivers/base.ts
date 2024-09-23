@@ -27,13 +27,16 @@ import { Retryable } from "@/internals/helpers/retryable.js";
 import { PromptTemplate } from "@/template.js";
 import { SchemaObject } from "ajv";
 import { z } from "zod";
+import { Serializable } from "@/internals/serializable.js";
 
 export interface GenerateSchemaInput<T> {
   maxRetries?: number;
   options?: T;
 }
 
-export abstract class BaseDriver<TGenerateOptions extends GenerateOptions = GenerateOptions> {
+export abstract class BaseDriver<
+  TGenerateOptions extends GenerateOptions = GenerateOptions,
+> extends Serializable<any> {
   protected abstract template: PromptTemplate.infer<{ schema: string }>;
   protected errorTemplate = new PromptTemplate({
     schema: z.object({
@@ -45,7 +48,9 @@ export abstract class BaseDriver<TGenerateOptions extends GenerateOptions = Gene
 Validation Errors: "{{errors}}"`,
   });
 
-  constructor(protected llm: ChatLLM<ChatLLMOutput, TGenerateOptions>) {}
+  constructor(protected readonly llm: ChatLLM<ChatLLMOutput, TGenerateOptions>) {
+    super();
+  }
 
   protected abstract parseResponse(textResponse: string): unknown;
   protected abstract schemaToString(schema: SchemaObject): Promise<string> | string;
@@ -122,5 +127,16 @@ Validation Errors: "{{errors}}"`,
         maxRetries,
       },
     }).get();
+  }
+
+  createSnapshot() {
+    return {
+      template: this.template,
+      errorTemplate: this.errorTemplate,
+    };
+  }
+
+  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
+    Object.assign(this, snapshot);
   }
 }

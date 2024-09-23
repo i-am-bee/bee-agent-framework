@@ -38,6 +38,10 @@ IMPORTANT: Every message must be a parsable JSON string without additional outpu
 `,
   });
 
+  static {
+    this.register();
+  }
+
   protected parseResponse(textResponse: string): unknown {
     return parseBrokenJson(textResponse);
   }
