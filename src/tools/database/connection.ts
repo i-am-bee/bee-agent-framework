@@ -17,8 +17,6 @@
 import { Sequelize, Dialect } from "sequelize";
 import { ToolError } from "@/tools/base.js";
 
-let dbSchema: string | undefined = undefined;
-
 export async function connectSql(): Promise<Sequelize> {
   try {
     const dbName = process.env.DB_NAME as string;
@@ -28,8 +26,7 @@ export async function connectSql(): Promise<Sequelize> {
     const dbPort = process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined;
     const dbDialect = process.env.DB_DIALECT as Dialect;
     const dbStorage = process.env.DB_STORAGE;
-
-    dbSchema = process.env.DB_SCHEMA;
+    const dbSchema = process.env.DB_SCHEMA;
 
     const sequelize = new Sequelize(dbName, dbUser, dbPassword, {
       host: dbHost,
@@ -47,8 +44,4 @@ export async function connectSql(): Promise<Sequelize> {
       isRetryable: false,
     });
   }
-}
-
-export function getSchema(): string | undefined {
-  return dbSchema || undefined;
 }

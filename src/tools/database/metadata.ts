@@ -16,7 +16,6 @@
 
 import { ToolError } from "@/tools/base.js";
 import { Sequelize } from "sequelize";
-import { getSchema } from "@/tools/database/connection.js";
 
 export interface Metadata {
   tableName: string;
@@ -135,4 +134,8 @@ function getMetadataQuery(provider: string): string {
         isRetryable: false,
       });
   }
+}
+
+function getSchema(): string | undefined {
+  return process.env.DB_SCHEMA || undefined;
 }
