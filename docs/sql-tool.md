@@ -2,7 +2,7 @@
 
 ## Description
 
-This tool executes SQL queries and guides the agent in constructing correct queries based on the structures of all available tables. It simplifies data retrieval, allowing users without advanced SQL knowledge to effectively query databases using natural language. The tool is designed for safety, allowing only `SELECT` queries to prevent any accidental changes to the database.
+This tool executes SQL queries and guides the agent in constructing correct queries based on the structures of all available tables in the database. It simplifies data retrieval, allowing users without advanced SQL knowledge to effectively query databases using natural language. The tool allows only `SELECT` queries to prevent any accidental changes to the database.
 
 ## Requirements
 
@@ -39,37 +39,46 @@ yarn add node-gyp ibm_db
 
 Replace `node-gyp` `ibm_db` with the appropriate package(s) for your database from the table above.
 
-## Database Connection Configuration
+## Usage
 
-Configure the connection to your database using environment variables. Sample configuration is provided in `.env.template` file to guide you in setting up your `.env` file with appropriate values for your database.
+To use the `SQLTool` class, the following parameters must be supplied:
 
-```bash
-# SQL Tool Connection Properties
+- `provider`: The database provider. Supported values are: `mysql`, `mariadb`, `postgres`, `mssql`, `db2`, `sqlite`, `oracle`.
 
-# For SQLite
-DB_DIALECT=sqlite
-DB_STORAGE=sqlite_file.db
+- `connection`: This parameter is based on the [Sequelize](https://sequelize.org/api/v6/class/src/sequelize.js~sequelize#instance-constructor-constructor) `Options` type, which specifies the required configuration for establishing a database connection in Sequelize. You can use this object to pass various connection parameters required by the database [dialect](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/).
 
-# For other databases
-DB_NAME=database_name
-DB_USERNAME=username
-DB_PASSWORD=password
-DB_HOST=host
-DB_PORT=1521
-DB_DIALECT=oracle  # Or mariadb, mysql, mssql, postgres, db2
-DB_SCHEMA=schema_name  # Optional for mariadb, mysql, mssql, postgres
-```
-
-### Usage
-
-In order to use the SQLTool, you need to pass the database provider name to the tool.
-Supported values are: `mysql`, `mariadb`, `postgres`, `mssql`, `db2`, `sqlite`, `oracle`.
+**For SQLite**
 
 ```js
-import { SQLTool } from "bee-agent-framework/tools/database/sql";
+import { SQLTool } from "bee-agent-framework/tools/database/sql.js";
 
 const sqlTool = new SQLTool({
   provider: "sqlite",
+  connection: {
+    dialect: "sqlite",
+    storage: "sqlite_file.db",
+    logging: false,
+  },
+});
+```
+
+**Other databases**
+
+```js
+import { SQLTool } from "bee-agent-framework/tools/database/sql.js";
+
+const sqlTool = new SQLTool({
+  provider: "oracle", // one of "mariadb" | "mysql" | "mssql" | "postgres" | "db2"
+  connection: {
+    dialect: "oracle", // one of "mariadb" | "mysql" | "mssql" | "postgres" | "db2"
+    host: "localhost",
+    port: 1521,
+    database: "database_name",
+    username: "username",
+    password: "password",
+    schema: "schema_name", // Schema is optional for mariadb, mysql, mssql, postgres
+    logging: false,
+  },
 });
 ```
 

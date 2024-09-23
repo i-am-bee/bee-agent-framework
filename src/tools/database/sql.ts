@@ -23,14 +23,16 @@ import {
   JSONToolOutput,
 } from "@/tools/base.js";
 import { z } from "zod";
-import { Sequelize } from "sequelize";
+import { Sequelize, Options } from "sequelize";
 import { getMetadata } from "@/tools/database/metadata.js";
-import { connectSql } from "@/tools/database/connection.js";
 import { Cache } from "@/cache/decoratorCache.js";
 
 type Provider = "mysql" | "mariadb" | "postgres" | "mssql" | "db2" | "sqlite" | "oracle";
 
-type ToolOptions = { provider: Provider } & BaseToolOptions;
+interface ToolOptions extends BaseToolOptions {
+  provider: Provider;
+  connection: Options;
+}
 type ToolRunOptions = BaseToolRunOptions;
 
 export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptions> {
@@ -51,7 +53,7 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
 
   @Cache()
   protected async connection(): Promise<Sequelize> {
-    return await connectSql();
+    return await this.connectSql(this.options.connection);
   }
 
   protected async _run(
@@ -68,9 +70,10 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
     let metadata = "";
     const provider = this.options.provider;
     const sequelize = await this.connection();
+    const schema = this.options.connection.schema;
 
     try {
-      metadata = await getMetadata(provider, sequelize);
+      metadata = await getMetadata(sequelize, provider, schema);
 
       const [results] = await sequelize.query(query);
 
@@ -98,6 +101,19 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
       normalizedQuery.startsWith("SHOW") ||
       normalizedQuery.startsWith("DESC")
     );
+  }
+
+  private async connectSql(connection: Options): Promise<Sequelize> {
+    try {
+      const sequelize = new Sequelize(connection);
+
+      await sequelize.authenticate();
+      return sequelize;
+    } catch (error) {
+      throw new ToolError(`Unable to connect to database: ${error}`, [], {
+        isRetryable: false,
+      });
+    }
   }
 
   public async destroy(): Promise<void> {

@@ -5,7 +5,13 @@ describe("SQLTool", () => {
   let instance: SQLTool;
 
   beforeEach(() => {
-    instance = new SQLTool({ provider: "sqlite" });
+    instance = new SQLTool({
+      provider: "sqlite",
+      connection: {
+        dialect: "sqlite",
+        logging: false,
+      },
+    });
   });
 
   it("Returns an error for invalid query", async () => {

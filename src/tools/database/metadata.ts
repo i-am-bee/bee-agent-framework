@@ -23,9 +23,13 @@ export interface Metadata {
   dataType: string;
 }
 
-export async function getMetadata(provider: string, sequelize: Sequelize): Promise<string> {
+export async function getMetadata(
+  sequelize: Sequelize,
+  provider: string,
+  schema?: string,
+): Promise<string> {
   try {
-    const query = getMetadataQuery(provider);
+    const query = getMetadataQuery(provider, schema);
 
     const [metadata] = (await sequelize.query(query)) as [Metadata[], any];
 
@@ -49,8 +53,8 @@ export async function getMetadata(provider: string, sequelize: Sequelize): Promi
   }
 }
 
-function getMetadataQuery(provider: string): string {
-  let schemaName = getSchema();
+function getMetadataQuery(provider: string, schema?: string): string {
+  const schemaName = schema ?? getDefaultSchema(provider);
 
   switch (provider) {
     case "mysql":
@@ -64,8 +68,6 @@ function getMetadataQuery(provider: string): string {
         `;
 
     case "postgres":
-      schemaName = schemaName ?? "public";
-
       return `
           SELECT t.table_name AS "tableName", c.column_name AS "columnName", 
                  c.data_type AS "dataType"
@@ -75,8 +77,6 @@ function getMetadataQuery(provider: string): string {
         `;
 
     case "mssql":
-      schemaName = schemaName ?? "dbo";
-
       return `
           SELECT t.name AS tableName, c.name AS columnName,
                  ty.name AS dataType
@@ -89,12 +89,6 @@ function getMetadataQuery(provider: string): string {
         `;
 
     case "db2":
-      if (schemaName === undefined) {
-        throw new ToolError(`Schema name is required for ${provider}`, [], {
-          isRetryable: false,
-        });
-      }
-
       return `
           SELECT t.tabname AS "tableName", c.colname AS "columnName", 
                  c.typename AS "dataType"
@@ -115,11 +109,6 @@ function getMetadataQuery(provider: string): string {
         `;
 
     case "oracle":
-      if (schemaName === undefined) {
-        throw new ToolError(`Schema name is required for ${provider}`, [], {
-          isRetryable: false,
-        });
-      }
       return `
           SELECT t.table_name AS "tableName", c.column_name AS "columnName", 
                  c.data_type AS "dataType"
@@ -136,6 +125,18 @@ function getMetadataQuery(provider: string): string {
   }
 }
 
-function getSchema(): string | undefined {
-  return process.env.DB_SCHEMA || undefined;
+function getDefaultSchema(provider: string): string {
+  switch (provider) {
+    case "postgres":
+      return "public";
+    case "mssql":
+      return "dbo";
+    case "db2":
+    case "oracle":
+      throw new ToolError(`Schema name is required for ${provider}`, [], {
+        isRetryable: false,
+      });
+    default:
+      return "";
+  }
 }

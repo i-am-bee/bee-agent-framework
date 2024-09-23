@@ -15,6 +15,11 @@ const llm = new GroqChatLLM({
 
 const sqlTool = new SQLTool({
   provider: "sqlite",
+  connection: {
+    dialect: "sqlite",
+    storage: "chinook.sqlite",
+    logging: false,
+  },
 });
 
 const agent = new BeeAgent({
