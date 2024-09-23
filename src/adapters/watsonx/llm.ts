@@ -129,7 +129,35 @@ export class WatsonXLLMOutput extends BaseLLMOutput {
   }
 }
 
-export type WatsonXLLMParameters = Record<string, any>;
+export interface WatsonXLLMParameters extends GenerateOptions {
+  [key: string]: any;
+  decoding_method?: "sample" | "greedy";
+  length_penalty?: {
+    decay_factor?: number;
+    start_index?: number;
+  };
+  max_new_tokens?: number;
+  min_new_tokens?: number;
+  random_seed?: number;
+  stop_sequences?: string[];
+  temperature?: number;
+  time_limit?: number;
+  top_k?: number;
+  top_p?: number;
+  repetition_penalty?: number;
+  truncate_input_tokens?: number;
+  return_options?: {
+    input_text?: boolean;
+    generated_tokens?: boolean;
+    input_tokens?: boolean;
+    token_logprobs?: boolean;
+    token_ranks?: boolean;
+    top_n_tokens?: boolean;
+  };
+  include_stop_sequence?: boolean;
+  typical_p?: number;
+  prompt_variables?: Record<string, any>;
+}
 export type WatsonXLLMModerations = Record<string, any>;
 
 export interface WatsonXLLMGenerateOptions extends GenerateOptions {

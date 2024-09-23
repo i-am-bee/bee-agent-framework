@@ -86,7 +86,7 @@ export interface WatsonXChatLLMInput {
   config: WatsonXChatLLMInputConfig;
 }
 
-export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput, WatsonXLLMParameters> {
+export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput> {
   public readonly emitter = Emitter.root.child<GenerateCallbacks>({
     namespace: ["watsonx", "chat_llm"],
     creator: this,
