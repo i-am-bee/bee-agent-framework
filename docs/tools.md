@@ -16,11 +16,11 @@ Tools MUST do the following:
 
 - Implement the `Tool` class:
 
-  `MyNewToolOutput` is required, must be an implementation of `ToolOutput` such as `StringToolOutput` or `JSONToolOutput`
+  - `MyNewToolOutput` is required, must be an implementation of `ToolOutput` such as `StringToolOutput` or `JSONToolOutput`
 
-  `ToolOptions` is optional (default BaseToolOptions), constructor parameters that are passed during tool creation
+  - `ToolOptions` is optional (default BaseToolOptions), constructor parameters that are passed during tool creation
 
-  `ToolRunOptions` is optional (default BaseToolRunOptions), optional parameters that are passed to the run method
+  - `ToolRunOptions` is optional (default BaseToolRunOptions), optional parameters that are passed to the run method
 
   ```typescript
   import { BaseToolOptions, BaseToolRunOptions } from "bee-agent-framework/tools/base";
@@ -73,7 +73,7 @@ Tools MUST do the following:
 
 - Implement initialisation:
 
-  The unnamed static block is executed when your tool is called for the first time. It is used for registering your tool as `serializable` to the agent and any other custom initialisation that may be required.
+  The unnamed static block is executed when your tool is called for the first time. It is used for registering your tool as `serializable` (you can then use the `serialize()` method).
 
   <!-- eslint-skip -->
 
