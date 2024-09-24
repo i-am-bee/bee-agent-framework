@@ -15,7 +15,7 @@ export function createConsoleReader({
   input = "User 👤 : ",
   allowEmpty = false,
 }: ReadFromConsoleInput = {}) {
-  const rl = readline.createInterface({ input: stdin, output: stdout, terminal: true });
+  const rl = readline.createInterface({ input: stdin, output: stdout, terminal: true, prompt: "" });
   let isActive = true;
 
   return {
