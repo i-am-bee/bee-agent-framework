@@ -95,18 +95,20 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 ### 🛠️ Tools
 
-| Name                                                                      | Description                                                               |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `PythonTool`                                                              | Run arbitrary Python code in the remote environment.                      |
-| `WikipediaTool`                                                           | Search for data on Wikipedia.                                             |
-| `DuckDuckGoTool`                                                          | Search for data on DuckDuckGo.                                            |
-| `LLMTool`                                                                 | Uses an LLM to process input data.                                        |
-| `DynamicTool`                                                             | Construct to create dynamic tools.                                        |
-| `ArXivTool`                                                               | Retrieves research articles published on arXiv.                           |
-| `WebCrawlerTool`                                                          | Retrieves content of an arbitrary website.                                |
-| `CustomTool`                                                              | Runs your own Python function in the remote environment.                  |
-| `OpenMeteoTool`                                                           | Retrieves current, previous, or upcoming weather for a given destination. |
-| ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                           |
+| Name                                                                      | Description                                                                          |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `PythonTool`                                                              | Run arbitrary Python code in the remote environment.                                 |
+| `WikipediaTool`                                                           | Search for data on Wikipedia.                                                        |
+| `DuckDuckGoTool`                                                          | Search for data on DuckDuckGo.                                                       |
+| `SQLTool`                                                                 | Executing SQL queries against various databases. [Instructions](./docs/sql-tool.md). |
+| `CustomTool`                                                              | Runs your own Python function in the remote environment.                             |
+| `LLMTool`                                                                 | Uses an LLM to process input data.                                                   |
+| `DynamicTool`                                                             | Construct to create dynamic tools.                                                   |
+| `ArXivTool`                                                               | Retrieves research articles published on arXiv.                                      |
+| `WebCrawlerTool`                                                          | Retrieves content of an arbitrary website.                                           |
+| `CustomTool`                                                              | Runs your own Python function in the remote environment.                             |
+| `OpenMeteoTool`                                                           | Retrieves current, previous, or upcoming weather for a given destination.            |
+| ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                      |
 
 ### 🔌️ Adapters (LLM - Inference providers)
 
