@@ -19,7 +19,12 @@ import { BeeAgentError } from "@/agents/bee/errors.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { BeeAgentRunIteration, BeeCallbacks, BeeMeta, BeeRunOptions } from "@/agents/bee/types.js";
-import { BaseToolRunOptions, ToolInputValidationError, ToolOutput } from "@/tools/base.js";
+import {
+  BaseToolRunOptions,
+  ToolError,
+  ToolInputValidationError,
+  ToolOutput,
+} from "@/tools/base.js";
 import { getProp } from "@/internals/helpers/object.js";
 import { Retryable } from "@/internals/helpers/retryable.js";
 import { FrameworkError } from "@/errors.js";
@@ -271,17 +276,16 @@ export class BeeAgentRunner {
         this.failedAttemptsCounter.use(error);
       },
       executor: async () => {
-        await emitter.emit("toolStart", {
-          data: {
-            tool,
-            input: iteration.tool_input,
-            options,
-            iteration,
-          },
-          meta,
-        });
-
         try {
+          await emitter.emit("toolStart", {
+            data: {
+              tool,
+              input: iteration.tool_input,
+              options,
+              iteration,
+            },
+            meta,
+          });
           const toolOutput: ToolOutput = await tool.run(iteration.tool_input, options);
           await emitter.emit("toolSuccess", {
             data: {
@@ -327,14 +331,14 @@ export class BeeAgentRunner {
             };
           }
 
-          if (FrameworkError.isRetryable(error)) {
+          if (error instanceof ToolError) {
             this.failedAttemptsCounter.use(error);
 
             const template = this.input.templates?.toolError ?? BeeToolErrorPrompt;
             return {
               success: false,
               output: template.render({
-                reason: FrameworkError.ensure(error).explain(),
+                reason: error.explain(),
               }),
             };
           }
