@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.0.18](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.17...v0.0.18) (2024-09-24)
+
+### Features
+
+- **agent:** update tool error handling ([d403665](https://github.com/i-am-bee/bee-agent-framework/commit/d4036652a819a2712670d5a25e94fbb271aad9ae))
+- **cache:** extend instance abilities ([cb7ccc9](https://github.com/i-am-bee/bee-agent-framework/commit/cb7ccc9c0e18a3cffc832e3e0871450f6bd83147))
+- **llm:** add bam adapter verbose example ([7db2835](https://github.com/i-am-bee/bee-agent-framework/commit/7db28353ee8d289a5fa77c051b6949e87b03c9a9))
+- **llm:** add fromTemplate factory to the JSON driver ([6d3b356](https://github.com/i-am-bee/bee-agent-framework/commit/6d3b35637f9497a25e789a18e77e438b541db46f))
+- **llm:** add types for watsonx llm inference parameters ([312626d](https://github.com/i-am-bee/bee-agent-framework/commit/312626d87d2166d3e9dddc9c963884c87ab4b119))
+- **llm:** make drivers serializable ([05d6dbb](https://github.com/i-am-bee/bee-agent-framework/commit/05d6dbb37582f4a258c693c33bab993ca95466a9))
+- **llm:** set default parameters for groq ([82daecd](https://github.com/i-am-bee/bee-agent-framework/commit/82daecd497c57cfe6e39b02b0a7f7e6f9f56c5c3))
+- **llm:** set default parameters for ollama ([0eecb65](https://github.com/i-am-bee/bee-agent-framework/commit/0eecb6534a0998f4326cd41e3c2b55c29e2a37d8))
+
+### Bug Fixes
+
+- casting boolean envs ([5994152](https://github.com/i-am-bee/bee-agent-framework/commit/59941523159cfa677b5d48d60b6f6e6d243a9780))
+
 ## [0.0.17](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.16...v0.0.17) (2024-09-16)
 
 ### Bug Fixes
