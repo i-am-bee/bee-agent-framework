@@ -24,10 +24,9 @@ import {
 } from "@/tools/base.js";
 import { z } from "zod";
 import { Sequelize, Options } from "sequelize";
-import { getMetadata } from "@/tools/database/metadata.js";
+import { Provider, getMetadata } from "@/tools/database/metadata.js";
 import { Cache } from "@/cache/decoratorCache.js";
-
-type Provider = "mysql" | "mariadb" | "postgres" | "mssql" | "db2" | "sqlite" | "oracle";
+import { ValidationError } from "ajv";
 
 interface ToolOptions extends BaseToolOptions {
   provider: Provider;
@@ -47,13 +46,54 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
     });
   }
 
+  public constructor(options: ToolOptions) {
+    super(options);
+    if (!options.connection.dialect) {
+      throw new ValidationError([
+        {
+          message: "Property is required",
+          propertyName: "connection.dialect",
+        },
+      ]);
+    }
+    if (
+      !options.connection.schema &&
+      (options.provider === "oracle" || options.provider === "db2")
+    ) {
+      throw new ValidationError([
+        {
+          message: `Property is required for ${options.provider}`,
+          propertyName: "connection.schema",
+        },
+      ]);
+    }
+    if (!options.connection.storage && options.provider === "sqlite") {
+      throw new ValidationError([
+        {
+          message: `Property is required for ${options.provider}`,
+          propertyName: "connection.storage",
+        },
+      ]);
+    }
+  }
+
   static {
     this.register();
   }
 
   @Cache()
   protected async connection(): Promise<Sequelize> {
-    return await this.connectSql(this.options.connection);
+    try {
+      const sequelize = new Sequelize(this.options.connection);
+
+      await sequelize.authenticate();
+      return sequelize;
+    } catch (error) {
+      throw new ToolError(`Unable to connect to database: ${error}`, [], {
+        isRetryable: false,
+        isFatal: true,
+      });
+    }
   }
 
   protected async _run(
@@ -101,19 +141,6 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
       normalizedQuery.startsWith("SHOW") ||
       normalizedQuery.startsWith("DESC")
     );
-  }
-
-  private async connectSql(connection: Options): Promise<Sequelize> {
-    try {
-      const sequelize = new Sequelize(connection);
-
-      await sequelize.authenticate();
-      return sequelize;
-    } catch (error) {
-      throw new ToolError(`Unable to connect to database: ${error}`, [], {
-        isRetryable: false,
-      });
-    }
   }
 
   public async destroy(): Promise<void> {

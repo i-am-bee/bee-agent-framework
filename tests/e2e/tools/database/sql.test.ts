@@ -9,6 +9,7 @@ describe("SQLTool", () => {
       provider: "sqlite",
       connection: {
         dialect: "sqlite",
+        storage: "chinook.sqlite",
         logging: false,
       },
     });

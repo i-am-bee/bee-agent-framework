@@ -17,6 +17,8 @@
 import { ToolError } from "@/tools/base.js";
 import { Sequelize } from "sequelize";
 
+export type Provider = "mysql" | "mariadb" | "postgres" | "mssql" | "db2" | "sqlite" | "oracle";
+
 export interface Metadata {
   tableName: string;
   columnName: string;
@@ -25,7 +27,7 @@ export interface Metadata {
 
 export async function getMetadata(
   sequelize: Sequelize,
-  provider: string,
+  provider: Provider,
   schema?: string,
 ): Promise<string> {
   try {
@@ -53,7 +55,7 @@ export async function getMetadata(
   }
 }
 
-function getMetadataQuery(provider: string, schema?: string): string {
+function getMetadataQuery(provider: Provider, schema?: string): string {
   const schemaName = schema ?? getDefaultSchema(provider);
 
   switch (provider) {
@@ -125,7 +127,7 @@ function getMetadataQuery(provider: string, schema?: string): string {
   }
 }
 
-function getDefaultSchema(provider: string): string {
+function getDefaultSchema(provider: Provider): string {
   switch (provider) {
     case "postgres":
       return "public";
@@ -135,6 +137,7 @@ function getDefaultSchema(provider: string): string {
     case "oracle":
       throw new ToolError(`Schema name is required for ${provider}`, [], {
         isRetryable: false,
+        isFatal: true,
       });
     default:
       return "";
