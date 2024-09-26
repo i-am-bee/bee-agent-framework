@@ -16,11 +16,13 @@
 
 import { BaseAgent } from "@/agents/base.js";
 import { OmitEmpty } from "@/internals/types.js";
+import { AnyTool } from "@/tools/base.js";
 
 export interface AgentMeta {
   name: string;
   description: string;
   extraDescription?: string;
+  tools: AnyTool[];
 }
 
 export type AgentCallbackValue =

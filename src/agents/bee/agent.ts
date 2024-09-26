@@ -41,7 +41,7 @@ export interface BeeInput {
   llm: ChatLLM<ChatLLMOutput>;
   tools: AnyTool[];
   memory: BaseMemory;
-  meta?: AgentMeta;
+  meta?: Omit<AgentMeta, "tools">;
   templates?: Partial<BeeAgentTemplates>;
 }
 
@@ -73,14 +73,15 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
   }
 
   get meta(): AgentMeta {
-    if (this.input.meta) {
-      return this.input.meta;
-    }
+    const tools = this.input.tools.slice();
 
-    const tools = this.input.tools;
+    if (this.input.meta) {
+      return { ...this.input.meta, tools };
+    }
 
     return {
       name: "Bee",
+      tools,
       description:
         "The Bee framework demonstrates its ability to auto-correct and adapt in real-time, improving the overall reliability and resilience of the system.",
       ...(tools.length > 0 && {
