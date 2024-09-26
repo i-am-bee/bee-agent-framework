@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { z, ZodSchema } from "zod";
+import { ZodSchema } from "zod";
 import { setProp } from "@/internals/helpers/object.js";
 import { ValueError } from "@/errors.js";
 import { Serializable } from "@/internals/serializable.js";
@@ -44,20 +44,20 @@ export abstract class ParserField<T, TPartial> extends Serializable {
   }
 }
 
-export class ZodParserField<T extends ZodSchema> extends ParserField<z.output<T>, string> {
+export class ZodParserField<T> extends ParserField<T, string> {
   static {
     this.register();
   }
 
-  constructor(protected readonly schema: T) {
+  constructor(protected readonly schema: ZodSchema<T>) {
     super();
   }
 
-  get() {
+  get(): T {
     return this.schema.parse(this.raw);
   }
 
-  getPartial() {
+  getPartial(): string {
     return this.raw;
   }
 
@@ -66,15 +66,12 @@ export class ZodParserField<T extends ZodSchema> extends ParserField<z.output<T>
   }
 }
 
-export class JSONParserField<T extends ZodSchema> extends ParserField<
-  z.output<T>,
-  Partial<z.output<T>>
-> {
+export class JSONParserField<T> extends ParserField<T, Partial<T>> {
   protected stream!: ReturnType<typeof jsonrepairTransform>;
   protected jsonParser!: JSONParser;
-  protected ref!: { value: z.output<T> };
+  protected ref!: { value: Partial<T> };
 
-  constructor(protected readonly input: { schema: T; base: Partial<z.output<T>> }) {
+  constructor(protected readonly input: { schema: ZodSchema<T>; base: Partial<T> }) {
     super();
     if (input.base === undefined) {
       throw new ValueError(`Base must be defined!`);
@@ -145,6 +142,6 @@ export class JSONParserField<T extends ZodSchema> extends ParserField<
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ParserField {
-  export type inferValue<T> = T extends ParserField<infer L, any> ? L : never;
+  export type inferValue<T> = T extends ParserField<infer L, unknown> ? L : never;
   export type inferPartialValue<T> = T extends ParserField<any, infer L> ? L : never;
 }

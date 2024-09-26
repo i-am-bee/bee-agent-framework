@@ -156,7 +156,6 @@ export class LinePrefixParser<
         if (this.lastNodeKey) {
           const lastNode = this.nodes[this.lastNodeKey];
           if (!lastNode.next.includes(parsedLine.key)) {
-            console.info({ parsedLine, line, x: this.partialState });
             throw new LinePrefixParserError(
               `Transition from '${this.lastNodeKey}' to '${parsedLine.key}' does not exist!`,
             );
@@ -313,9 +312,20 @@ export namespace LinePrefixParser {
   export type infer<
     T extends Record<string, ParserNode<Extract<keyof T, string>, ParserField<any, any>>>,
   > = {
-    [K in StringKey<T>]: T[K]["field"] extends ParserField<infer L, any> ? L : never;
+    [K in keyof T]: ParserField.inferValue<T[K]["field"]>;
   };
+  export type inferPartial<
+    T extends Record<string, ParserNode<Extract<keyof T, string>, ParserField<any, any>>>,
+  > = {
+    [K in StringKey<T>]: ParserField.inferPartialValue<T[K]["field"]>;
+  };
+
+  export type inferCallback<T> =
+    T extends LinePrefixParser<any> ? (T["emitter"] extends Emitter<infer L> ? L : never) : never;
 
   export type inferOutput<T> =
     T extends LinePrefixParser<infer P> ? LinePrefixParser.infer<P> : never;
+
+  export type inferPartialOutput<T> =
+    T extends LinePrefixParser<infer P> ? LinePrefixParser.inferPartial<P> : never;
 }
