@@ -1717,6 +1717,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@streamparser/json@npm:^0.0.21":
+  version: 0.0.21
+  resolution: "@streamparser/json@npm:0.0.21"
+  checksum: 10c0/1dc27367e97f8e165f1268c29c4c463d5b644d8776bc5dcc07820dcdf62bae14c5eb3128c34d142b4e92a064a2c3563a127ec0dd3129c6425d06411838bb476a
+  languageName: node
+  linkType: hard
+
 "@swc/core-darwin-arm64@npm:1.7.14":
   version: 1.7.14
   resolution: "@swc/core-darwin-arm64@npm:1.7.14"
@@ -2622,6 +2629,7 @@ __metadata:
     "@langchain/langgraph": "npm:~0.0.34"
     "@release-it/conventional-changelog": "npm:^8.0.1"
     "@rollup/plugin-commonjs": "npm:^26.0.1"
+    "@streamparser/json": "npm:^0.0.21"
     "@swc/core": "npm:^1.7.14"
     "@types/eslint": "npm:^9.6.1"
     "@types/eslint-config-prettier": "npm:^6.11.3"
@@ -2649,6 +2657,7 @@ __metadata:
     joplin-turndown-plugin-gfm: "npm:^1.0.12"
     js-yaml: "npm:^4.1.0"
     json-schema-to-typescript: "npm:^15.0.2"
+    jsonrepair: "npm:^3.8.1"
     langchain: "npm:~0.2.16"
     lint-staged: "npm:^15.2.9"
     mathjs: "npm:^13.1.1"
@@ -2668,7 +2677,7 @@ __metadata:
     prettier: "npm:^3.3.3"
     promise-based-task: "npm:^3.0.2"
     release-it: "npm:^17.6.0"
-    remeda: "npm:^2.11.0"
+    remeda: "npm:^2.14.0"
     rimraf: "npm:^6.0.1"
     sequelize: "npm:^6.37.3"
     serialize-error: "npm:^11.0.3"
@@ -5819,6 +5828,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsonrepair@npm:^3.8.1":
+  version: 3.8.1
+  resolution: "jsonrepair@npm:3.8.1"
+  bin:
+    jsonrepair: bin/cli.js
+  checksum: 10c0/2e6a750928d8a8ac8d6cc37dc399188098267e44827e00089da6245e75f6e8aaf95e145d2a346569a518fbfb761da78e61d37d833591bd0ef0230a7d8dbd5af5
+  languageName: node
+  linkType: hard
+
 "keyv@npm:^4.5.3, keyv@npm:^4.5.4":
   version: 4.5.4
   resolution: "keyv@npm:4.5.4"
@@ -8554,12 +8572,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"remeda@npm:^2.11.0":
-  version: 2.11.0
-  resolution: "remeda@npm:2.11.0"
+"remeda@npm:^2.14.0":
+  version: 2.14.0
+  resolution: "remeda@npm:2.14.0"
   dependencies:
-    type-fest: "npm:^4.23.0"
-  checksum: 10c0/cb2ff3e48fca2a5d341c7243546d432d14b465ddba9fa04898d200836cf12f75caa8bcdcc48774e790f152ff07ae35b2594a152ec849fa428490acf153fa15e7
+    type-fest: "npm:^4.26.1"
+  checksum: 10c0/1f6ca80f9b896f7323c21de131129c2bae6251f2d723a5497a678461486fcf7111be94b9c30bed8fd7b9fced622cb6ab496960478f36e86fe479f3e54ae2cabf
   languageName: node
   linkType: hard
 
@@ -9790,10 +9808,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^4.2.0, type-fest@npm:^4.23.0, type-fest@npm:^4.7.1":
+"type-fest@npm:^4.2.0, type-fest@npm:^4.7.1":
   version: 4.25.0
   resolution: "type-fest@npm:4.25.0"
   checksum: 10c0/1187b30d74e72f4b0b44a3493d2c1c2a9dc46423961c8250bd1535e976c4b8afc3916f6b4b90d7f56ed5b2f36d1645b05c318b4915fe4909a8a66890bda1d68d
+  languageName: node
+  linkType: hard
+
+"type-fest@npm:^4.26.1":
+  version: 4.26.1
+  resolution: "type-fest@npm:4.26.1"
+  checksum: 10c0/d2719ff8d380befe8a3c61068f37f28d6fa2849fd140c5d2f0f143099e371da6856aad7c97e56b83329d45bfe504afe9fd936a7cff600cc0d46aa9ffb008d6c6
   languageName: node
   linkType: hard
 
