@@ -21,6 +21,7 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { ParserField } from "@/agents/parsers/field.js";
 import { Callback, InferCallbackValue } from "@/emitter/types.js";
+import { ZodError } from "zod";
 
 export interface ParserNode<T extends string, P extends ParserField<any, any>> {
   prefix: string;
@@ -251,13 +252,24 @@ export class LinePrefixParser<
     if (key in this.finalState) {
       throw new LinePrefixParserError(`Duplicated key '${key}'`);
     }
-    const value = field.get();
-    this.finalState[key] = value;
-    await this.emitter.emit("update", {
-      key,
-      field,
-      value,
-    });
+
+    try {
+      const value = field.get();
+      this.finalState[key] = value;
+      await this.emitter.emit("update", {
+        key,
+        field,
+        value,
+      });
+    } catch (e) {
+      if (e instanceof ZodError) {
+        throw new LinePrefixParserError(
+          `Value for ${key} cannot be retrieved because it's value does not adhere to the appropriate schema.`,
+          [e],
+        );
+      }
+      throw e;
+    }
   }
 
   @Cache()

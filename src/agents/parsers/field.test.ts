@@ -61,6 +61,27 @@ describe("Parser Fields", () => {
     });
   });
 
+  describe("Invalid JSON", () => {
+    it("Object", async () => {
+      const field = new JSONParserField({
+        schema: z.object({}).passthrough(),
+        base: {},
+        matchPair: ["{", "}"],
+      });
+
+      const validPart = `{"a":{"b":{"c":{"d":1}}},"b":2}`;
+      const invalidPart = `{"a":{"b":{"c":{"d":1}}},"b":2,}`;
+
+      const content = `Here is the object that you were asking for: ${invalidPart} Thank you!`;
+      for (const chunk of splitString(content, { size: 4, overlap: 0 })) {
+        field.write(chunk);
+      }
+      await field.end();
+      expect(field.raw).toBe(invalidPart);
+      expect(JSON.stringify(field.get())).toBe(validPart);
+    });
+  });
+
   it("String", async () => {
     const field = new ZodParserField(z.string());
     const content = "Hello world!";

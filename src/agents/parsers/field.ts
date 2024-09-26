@@ -22,6 +22,8 @@ import { JSONParser } from "@streamparser/json";
 import { jsonrepairTransform } from "jsonrepair/stream";
 import { Cache, SingletonCacheKeyFn } from "@/cache/decoratorCache.js";
 import { shallowCopy } from "@/serializer/utils.js";
+import { parseBrokenJson } from "@/internals/helpers/schema.js";
+import { findFirstPair } from "@/internals/helpers/string.js";
 
 export abstract class ParserField<T, TPartial> extends Serializable {
   public raw = "";
@@ -69,9 +71,16 @@ export class ZodParserField<T> extends ParserField<T, string> {
 export class JSONParserField<T> extends ParserField<T, Partial<T>> {
   protected stream!: ReturnType<typeof jsonrepairTransform>;
   protected jsonParser!: JSONParser;
+  protected errored = false;
   protected ref!: { value: Partial<T> };
 
-  constructor(protected readonly input: { schema: ZodSchema<T>; base: Partial<T> }) {
+  constructor(
+    protected readonly input: {
+      schema: ZodSchema<T>;
+      base: Partial<T>;
+      matchPair?: [string, string];
+    },
+  ) {
     super();
     if (input.base === undefined) {
       throw new ValueError(`Base must be defined!`);
@@ -85,7 +94,15 @@ export class JSONParserField<T> extends ParserField<T, Partial<T>> {
     this.jsonParser = new JSONParser({ emitPartialTokens: false, emitPartialValues: true });
     this.stream = jsonrepairTransform();
     this.stream.on("data", (chunk) => {
-      this.jsonParser.write(chunk.toString());
+      if (this.errored) {
+        return;
+      }
+
+      try {
+        this.jsonParser.write(chunk.toString());
+      } catch {
+        this.errored = true;
+      }
     });
     this.jsonParser.onValue = ({ value, key, stack }) => {
       const keys = stack
@@ -103,12 +120,43 @@ export class JSONParserField<T> extends ParserField<T, Partial<T>> {
   }
 
   write(chunk: string) {
+    if (this.input.matchPair) {
+      if (!this.raw) {
+        const startChar = this.input.matchPair[0];
+        const index = chunk.indexOf(startChar);
+        if (index === -1) {
+          return;
+        }
+        chunk = chunk.substring(index);
+      } else {
+        const merged = this.raw.concat(chunk);
+        const match = findFirstPair(merged, this.input.matchPair);
+        if (match) {
+          const end = match[1];
+          if (end < this.raw.length) {
+            return;
+          }
+          chunk = merged.substring(this.raw.length, end + 1);
+        }
+      }
+    }
+
     super.write(chunk);
-    this.stream.push(chunk);
+    try {
+      this.stream.push(chunk);
+    } catch {
+      this.errored = true;
+    }
   }
 
   get() {
-    return this.input.schema.parse(this.ref.value);
+    const inputToParse = this.errored
+      ? parseBrokenJson(this.raw, {
+          pair: this.input.matchPair,
+        })
+      : this.ref.value;
+
+    return this.input.schema.parse(inputToParse);
   }
 
   getPartial() {
@@ -116,7 +164,7 @@ export class JSONParserField<T> extends ParserField<T, Partial<T>> {
   }
 
   async end() {
-    if (this.stream.closed || this.jsonParser.isEnded) {
+    if (this.stream.closed || this.jsonParser.isEnded || this.errored) {
       return;
     }
 
@@ -130,7 +178,7 @@ export class JSONParserField<T> extends ParserField<T, Partial<T>> {
   }
 
   createSnapshot() {
-    return { ...super.createSnapshot(), input: this.input };
+    return { ...super.createSnapshot(), input: this.input, errored: this.errored };
   }
 
   loadSnapshot({ raw, ...snapshot }: ReturnType<typeof this.createSnapshot>) {
