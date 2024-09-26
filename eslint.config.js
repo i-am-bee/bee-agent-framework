@@ -14,6 +14,10 @@ export default tseslint.config(
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
   {
+    files: ["src/adapters/ibm-vllm/types/**"],
+    rules: { "@typescript-eslint/unified-signatures": "off" },
+  },
+  {
     files: ["**/*.md/**"],
     languageOptions: {
       parserOptions: {
