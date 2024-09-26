@@ -42,10 +42,12 @@ export function hasProps<T>(keys: (keyof T)[]) {
   return (target: T | undefined) => keys.every((key) => hasProp(target, key));
 }
 
-export function setProp(target: unknown, paths: readonly string[], value: unknown) {
-  for (const [idx, key] of paths.entries()) {
-    if (!R.isPlainObject(target)) {
-      throw new TypeError("Only plain objects are supported!");
+export function setProp(target: unknown, paths: readonly (keyof any)[], value: unknown) {
+  for (const entry of paths.entries()) {
+    const [idx, key] = entry as [number, keyof object];
+    if (!R.isPlainObject(target) && !R.isArray(target)) {
+      console.info({ target });
+      throw new TypeError("Only plain objects and arrays are supported!");
     }
 
     const isLast = idx === paths.length - 1;
