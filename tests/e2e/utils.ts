@@ -29,6 +29,7 @@ import { Emitter } from "@/emitter/emitter.js";
 import { toJsonSchema } from "@/internals/helpers/schema.js";
 import { OpenAI } from "openai";
 import { Groq } from "groq-sdk";
+import util from "util";
 import { customsearch_v1 } from "@googleapis/customsearch";
 
 interface CallbackOptions<T> {
@@ -100,8 +101,9 @@ export function verifyDeserialization(ref: unknown, deserialized: unknown, paren
       if (target instanceof ZodType) {
         target = toJsonSchema(target);
       }
-
-      Serializer.findFactory(target);
+      if (!util.types.isProxy(target)) {
+        Serializer.findFactory(target);
+      }
       verifyDeserialization(value, target, parent);
     }
   } else {

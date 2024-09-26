@@ -44,7 +44,7 @@ fi
 if command -v nwa &> /dev/null; then
   nwa add -l apache -c "$AUTHOR" src dist tests scripts
 elif command -v docker &> /dev/null; then
-  docker run -it -v "${PWD}:/src" ghcr.io/b1nary-gr0up/nwa:main add -l apache -c "$AUTHOR" src dist tests scripts
+  docker run --rm -v "${PWD}:/src" ghcr.io/b1nary-gr0up/nwa:main add -l apache -c "$AUTHOR" src dist tests scripts
 else
   echo "Error: 'nwa' is not available. Either install it manually or install go/docker."
   exit 1

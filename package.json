@@ -57,7 +57,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "yarn clean && yarn ts:check && tsup",
+    "build": "yarn clean && yarn ts:check && NODE_OPTIONS='--max-old-space-size=8192' tsup",
     "ts:check": "tsc --noEmit && tsc -p tsconfig.examples.json --noEmit",
     "start": "tsx --tsconfig tsconfig.examples.json",
     "start:bee": "yarn start -- examples/agents/bee.ts",
@@ -79,12 +79,15 @@
     "copyright": "./scripts/copyright.sh",
     "release": "release-it",
     "_ensure_env": "cp -n .env.template .env || true",
-    "_docker": "yarn _ensure_env && bash -c 'source ./.env && docker_cmd=$(which docker >/dev/null 2>&1 && printf docker || printf podman) && $docker_cmd \"$@\"' sh"
+    "_docker": "yarn _ensure_env && bash -c 'source ./.env && docker_cmd=$(which docker >/dev/null 2>&1 && printf docker || printf podman) && $docker_cmd \"$@\"' sh",
+    "ibm-vllm:generate-types": "./scripts/ibm_vllm_generate_protos.sh"
   },
   "dependencies": {
     "@ai-zen/node-fetch-event-source": "^2.1.4",
     "@connectrpc/connect": "^1.4.0",
     "@connectrpc/connect-node": "^1.4.0",
+    "@grpc/grpc-js": "^1.11.3",
+    "@grpc/proto-loader": "^0.7.13",
     "@streamparser/json": "^0.0.21",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
@@ -97,6 +100,7 @@
     "js-yaml": "^4.1.0",
     "json-schema-to-typescript": "^15.0.2",
     "jsonrepair": "^3.8.1",
+    "lru-cache": "^11.0.1",
     "mathjs": "^13.1.1",
     "mustache": "^4.2.0",
     "object-hash": "^3.0.0",
@@ -172,7 +176,7 @@
     "strip-ansi": "^7.1.0",
     "temp-dir": "^3.0.0",
     "tsc-files": "^1.1.4",
-    "tsup": "^8.2.4",
+    "tsup": "^8.3.0",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.2.0",
