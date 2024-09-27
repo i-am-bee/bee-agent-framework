@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.20](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.19...v0.0.20) (2024-09-27)
+
+### Features
+
+- **code-interpreter:** update to 0.0.7 ([#37](https://github.com/i-am-bee/bee-agent-framework/issues/37)) ([0392ff0](https://github.com/i-am-bee/bee-agent-framework/commit/0392ff008a3ebcd043ec9aabbac5e52d34bb28db))
+- **tool:** add google custom search tool ([#34](https://github.com/i-am-bee/bee-agent-framework/issues/34)) ([ef839da](https://github.com/i-am-bee/bee-agent-framework/commit/ef839da933276c3deff21552e16627dfe9c3ef7d))
+- **tools:** update Wikipedia tool, remove links, extend interface ([ee651c3](https://github.com/i-am-bee/bee-agent-framework/commit/ee651c38ae21711161dfd755987be8640519c9fc))
+
+### Bug Fixes
+
+- **agent:** update constraint decoding regex ([8d47cae](https://github.com/i-am-bee/bee-agent-framework/commit/8d47cae3293c80a100d422a592b0dfaf30a4243c))
+
 ## [0.0.19](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.18...v0.0.19) (2024-09-27)
 
 ### Features
