@@ -52,13 +52,7 @@ export interface PythonToolOptions extends BaseToolOptions {
 
 export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
   name = "Python";
-  description = [
-    "Run Python code and return the console output. Use for tasks that involve calculations, computations, or data manipulation.",
-    "If files are created inside Python code, the user won't see them right away -- tool output will provide hashes of the created files, and the assistant must reference them using a Markdown link or image, by using the provided URN. ",
-    "To work with some files, you must specify them in the input schema; otherwise, the file will not be accessible.",
-    "It is necessary to always print() results. Available libraries include numpy, pandas, scipy, matplotlib (but you have to save the plot as a file, showing does not work), but you can import any library and it will be installed for you.",
-    "The execution state is not preserved -- each invocation is a new environment. Do not use this tool multiple times in a row, always write the full code you want to run in a single invocation.",
-  ].join("");
+  description = `Run Python code and return the console output. Use for isolated calculations, computations, or data manipulation. Before using it, make sure you have all information. If files are created inside Python code, the user won't see them right away -- tool output will provide hashes of the created files, and the assistant must reference them using a Markdown link or image, by using the provided URN. To work with some files, you must specify them in the input schema; otherwise, the file will not be accessible.It is necessary to always print() results. Available libraries include numpy, pandas, scipy, matplotlib (but you have to save the plot as a file, showing does not work), but you can import any library and it will be installed for you.The execution state is not preserved -- each invocation is a new environment. Do not use this tool multiple times in a row, always write the full code you want to run in a single invocation.`;
 
   public readonly storage: PythonStorage;
 
