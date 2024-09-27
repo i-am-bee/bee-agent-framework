@@ -38,7 +38,9 @@ describe("GoogleCustomSearch Tool", () => {
       maxResultsPerPage: 10,
     });
 
-    (googleSearchTool as any).client = mockCustomSearchClient;
+    Object.defineProperty(googleSearchTool, "client", {
+      get: () => mockCustomSearchClient,
+    });
   });
 
   const generateResults = (count: number) => {
@@ -71,14 +73,18 @@ describe("GoogleCustomSearch Tool", () => {
 
     expect(response).toBeInstanceOf(GoogleSearchToolOutput);
     expect(response.results.length).toBe(3);
-    expect(mockCustomSearchClient.cse.list).toHaveBeenCalledWith({
-      cx: "test-cse-id",
-      q: query,
-      auth: "test-api-key",
-      num: 10,
-      start: 1,
-      safe: "active",
-    });
+    expect(mockCustomSearchClient.cse.list).toHaveBeenCalledWith(
+      {
+        cx: "test-cse-id",
+        q: query,
+        num: 10,
+        start: 1,
+        safe: "active",
+      },
+      {
+        signal: undefined,
+      },
+    );
   });
 
   it("validates maxResultsPerPage range", () => {
@@ -117,22 +123,32 @@ describe("GoogleCustomSearch Tool", () => {
     expect(combinedResults.length).toBe(20);
 
     expect(mockCustomSearchClient.cse.list).toHaveBeenCalledTimes(2);
-    expect(mockCustomSearchClient.cse.list).toHaveBeenNthCalledWith(1, {
-      cx: "test-cse-id",
-      q: query,
-      auth: "test-api-key",
-      num: 10,
-      start: 1,
-      safe: "active",
-    });
-    expect(mockCustomSearchClient.cse.list).toHaveBeenNthCalledWith(2, {
-      cx: "test-cse-id",
-      q: query,
-      auth: "test-api-key",
-      num: 10,
-      start: 11,
-      safe: "active",
-    });
+    expect(mockCustomSearchClient.cse.list).toHaveBeenNthCalledWith(
+      1,
+      {
+        cx: "test-cse-id",
+        q: query,
+        num: 10,
+        start: 1,
+        safe: "active",
+      },
+      {
+        signal: undefined,
+      },
+    );
+    expect(mockCustomSearchClient.cse.list).toHaveBeenNthCalledWith(
+      2,
+      {
+        cx: "test-cse-id",
+        q: query,
+        num: 10,
+        start: 11,
+        safe: "active",
+      },
+      {
+        signal: undefined,
+      },
+    );
   });
 
   it("Serializes", async () => {
