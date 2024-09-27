@@ -1,39 +1,4 @@
 services:
-  bee-code-interpreter:
-    image: "docker.io/iambeeagent/bee-code-interpreter:0.0.6"
-    environment:
-      KUBECONFIG: /root/kubeconfig.yaml
-      APP_EXECUTOR_IMAGE: "docker.io/iambeeagent/bee-code-executor:0.0.6"
-      APP_EXECUTOR_CONTAINER_RESOURCES: "{}"
-      APP_FILE_STORAGE_PATH: "/storage"
-    volumes:
-      - ${CODE_INTEPRETER_TMPDIR:-./examples/tmp/code_interpreter}:/storage
-      - k3s-kubeconfig:/kube
-    ports:
-      - "50051:50051"
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - >
-        echo 'Updating kubeconfig' &&
-        while [ ! -f $${KUBECONFIG} ] || ! kubectl get namespace default 2>/dev/null 1>&2; do
-          sleep 1;
-          sed 's|127.0.0.1|bee-code-interpreter-k3s|g' /kube/kubeconfig.yaml >$${KUBECONFIG} 2>/dev/null;
-        done &&
-        echo 'Kubeconfig updated successfully' &&
-
-        echo "Pulling executor image $${APP_EXECUTOR_IMAGE}" &&
-        if kubectl get job/pull-image 2>/dev/null 1>&2; then
-          echo "pull-image job already exists";
-        else
-          kubectl create job pull-image --image "$${APP_EXECUTOR_IMAGE}" -- /bin/sh -c "echo done";
-        fi &&
-        kubectl wait --for=condition=complete job/pull-image --timeout 1800s &&
-        echo 'Image pulled successfully' &&
-
-        python -m code_interpreter
-    depends_on:
-      - bee-code-interpreter-k3s
-
   bee-code-interpreter-k3s:
     image: "rancher/k3s:v1.29.7-k3s1"
     command: ["server", "--tls-san", "bee-code-interpreter-k3s"]
@@ -47,14 +12,16 @@ services:
         hard: 65535
     privileged: true
     restart: always
-    environment:
-      - K3S_TOKEN=secret-token
-      - K3S_KUBECONFIG_OUTPUT=/output/kubeconfig.yaml
-      - K3S_KUBECONFIG_MODE=644
     volumes:
       - k3s-containerd:/var/lib/rancher/k3s/agent/containerd
-      - k3s-kubeconfig:/output
+      - ./infra/bee-code-interpreter/k8s:/var/lib/rancher/k3s/server/manifests
+    ports:
+      - "50051:30051"
+    healthcheck:
+      test: "kubectl get po code-interpreter | grep Running"
+      interval: 10s
+      retries: 5
+      start_period: 30s
 
 volumes:
-  k3s-kubeconfig:
   k3s-containerd:
