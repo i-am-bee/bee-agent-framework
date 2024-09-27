@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.0.19](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.18...v0.0.19) (2024-09-27)
+
+### Features
+
+- **agent:** add generic line prefix parser ([#35](https://github.com/i-am-bee/bee-agent-framework/issues/35)) ([2c39c6a](https://github.com/i-am-bee/bee-agent-framework/commit/2c39c6a8c400c8f9bb2d7deb4698e636549a61df))
+- **agent:** add tools property to agent's metadata ([59036b1](https://github.com/i-am-bee/bee-agent-framework/commit/59036b1a18ac98d454302f7776c65f454b6439b4))
+- **agent:** improve invalid json parsing ([da7c7e6](https://github.com/i-am-bee/bee-agent-framework/commit/da7c7e69f126495649a85b146ef41aa129a7f76a))
+- **agent:** improve parser typings ([a86d85d](https://github.com/i-am-bee/bee-agent-framework/commit/a86d85d6c195121ebe4a26b9a1781f85abe8c8e2))
+- **agent:** switch to a new system prompt ([#38](https://github.com/i-am-bee/bee-agent-framework/issues/38)) ([9f41663](https://github.com/i-am-bee/bee-agent-framework/commit/9f41663092869fce1dd7f622795db2e46797e0a3))
+- **tool:** add sql tool ([#24](https://github.com/i-am-bee/bee-agent-framework/issues/24)) ([719d80d](https://github.com/i-am-bee/bee-agent-framework/commit/719d80dedd7593dcccb17a05a19d7ff7e452b37d))
+- **tool:** OpenMeteo - add optional country parameter ([a3612a5](https://github.com/i-am-bee/bee-agent-framework/commit/a3612a50ccee544d13fe4fdbd3f0f818e884bf0e)), closes [#36](https://github.com/i-am-bee/bee-agent-framework/issues/36)
+- **tools:** update Python tool description ([b1f6104](https://github.com/i-am-bee/bee-agent-framework/commit/b1f61041e4a65ab25b845ce7452aaf10f32caac5))
+
+### Bug Fixes
+
+- **agent:** line prefix parser types ([699ccac](https://github.com/i-am-bee/bee-agent-framework/commit/699ccac93be08981a285523f895be3aaea9913bd))
+- **llm:** watsonx serialization ([b1caa9f](https://github.com/i-am-bee/bee-agent-framework/commit/b1caa9fa8c683082275c5b8c6efff786c6b2b767))
+- **tool:** OpenMeteo - handle empty geocode result ([424e620](https://github.com/i-am-bee/bee-agent-framework/commit/424e620669fc06d256b9312cfd29e603afd7b98a)), closes [#36](https://github.com/i-am-bee/bee-agent-framework/issues/36)
+
 ## [0.0.18](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.17...v0.0.18) (2024-09-24)
 
 ### Features
