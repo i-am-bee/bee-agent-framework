@@ -32,6 +32,7 @@ import { Tool, ToolInput } from "@/tools/base.js";
 import Turndown from "turndown";
 // @ts-expect-error missing types
 import turndownPlugin from "joplin-turndown-plugin-gfm";
+import { keys, mapValues } from "remeda";
 
 wiki.default.setLang("en");
 
@@ -42,10 +43,20 @@ export interface FilterOptions {
   minPageNameSimilarity?: number;
 }
 
-export type PageFunctions = pageFunctions | "markdown";
+export type PageFunctions = Record<
+  pageFunctions,
+  {
+    transform?: <T>(output: T) => T;
+  }
+> & {
+  markdown: {
+    transform?: <T>(output: T) => T;
+    filter?: (node: HTMLElement) => boolean;
+  };
+};
 
 export interface ExtractionOptions {
-  fields?: PageFunctions[];
+  fields?: Partial<PageFunctions>;
 }
 
 export interface OutputOptions {
@@ -68,7 +79,7 @@ export interface WikipediaToolRunOptions extends SearchToolRunOptions {
 }
 
 export interface WikipediaToolResult extends SearchToolResult {
-  fields: Record<string, unknown>;
+  fields: Partial<Record<keyof PageFunctions, unknown>>;
 }
 
 export class WikipediaToolOutput extends SearchToolOutput<WikipediaToolResult> {
@@ -133,14 +144,14 @@ export class WikipediaTool extends Tool<
 
   @Cache()
   protected get _mappers(): Record<
-    PageFunctions,
+    keyof PageFunctions,
     (page: Page, runOptions: WikipediaToolRunOptions) => Promise<any>
   > {
     return {
       categories: (page) => page.categories(),
       content: (page) => page.content(),
       html: (page) => page.html(),
-      markdown: async (page) => {
+      markdown: async (page, runOptions) => {
         const html = await page.html().then((result) => {
           const url = new URL(page.fullurl);
           const base = `${url.protocol}//${[url.hostname, url.port].filter(Boolean).join(":")}`;
@@ -159,30 +170,7 @@ export class WikipediaTool extends Tool<
         const service = new Turndown();
         service.use(turndownPlugin.gfm);
         return service
-          .remove((node): boolean => {
-            switch (node.tagName.toLowerCase()) {
-              case "link":
-              case "style":
-                return true;
-              default:
-                return (
-                  [
-                    "toc",
-                    "reflist",
-                    "mw-references-wrap",
-                    "navbox",
-                    "navbox-styles",
-                    "mw-editsection",
-                    "sistersitebox",
-                    "navbox-inner",
-                    "refbegin",
-                    "notpageimage",
-                    "mw-file-element",
-                  ].some((cls) => node.className.includes(cls)) ||
-                  ["navigation"].some((role) => node.role === role)
-                );
-            }
-          })
+          .remove((node) => runOptions.extraction?.fields?.markdown?.filter?.(node) === false)
           .turndown(html);
       },
       images: (page) => page.images(),
@@ -200,9 +188,64 @@ export class WikipediaTool extends Tool<
 
   @Cache()
   protected get _defaultRunOptions(): WikipediaToolRunOptions {
+    const ignoredTags = new Set([
+      "a",
+      "img",
+      "link",
+      "style",
+      "abbr",
+      "cite",
+      "input",
+      "sup",
+      "bdi",
+      "q",
+      "figure",
+      "audio",
+      "track",
+      "figcaption",
+      "small",
+    ]);
+    const ignoredTagsSelector = Array.from(ignoredTags.values()).join(",");
+
     return {
       extraction: {
-        fields: ["markdown"],
+        fields: {
+          markdown: {
+            filter: (node) => {
+              const tagName = node.tagName.toLowerCase();
+              if (ignoredTags.has(tagName)) {
+                return false;
+              }
+
+              if (ignoredTagsSelector) {
+                for (const childNode of node.querySelectorAll(ignoredTagsSelector)) {
+                  childNode.remove();
+                }
+              }
+
+              if (node.children.length === 0) {
+                return false;
+              }
+
+              return (
+                [
+                  "toc",
+                  "reflist",
+                  "mw-references-wrap",
+                  "navbox",
+                  "navbox-styles",
+                  "mw-editsection",
+                  "sistersitebox",
+                  "navbox-inner",
+                  "refbegin",
+                  "notpageimage",
+                  "mw-file-element",
+                ].every((cls) => !node.className.includes(cls)) &&
+                ["navigation"].every((role) => node.role !== role)
+              );
+            },
+          },
+        },
       },
       filters: {
         minPageNameSimilarity: 0.5,
@@ -275,9 +318,7 @@ export class WikipediaTool extends Tool<
         const page = await wiki.default.page(pageId, {
           redirect: true,
           preload: false,
-          fields: (runOptions?.extraction?.fields ?? []).filter(
-            (field): field is pageFunctions => field !== "markdown",
-          ),
+          fields: keys(runOptions.extraction?.fields ?? {}).filter((key) => key !== "markdown"),
         });
 
         return asyncProperties({
@@ -290,10 +331,11 @@ export class WikipediaTool extends Tool<
           })(),
           url: page.fullurl,
           fields: asyncProperties(
-            R.mapToObj(runOptions?.extraction?.fields || [], (key) => [
-              key,
-              this._mappers[key](page, runOptions).catch(() => null),
-            ]),
+            mapValues(runOptions?.extraction?.fields ?? {}, (value, key) =>
+              this._mappers[key](page, runOptions)
+                .then((response) => (value.transform ? value.transform(response) : response))
+                .catch(() => null),
+            ),
           ),
         });
       }),

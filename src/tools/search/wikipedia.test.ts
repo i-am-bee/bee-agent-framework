@@ -46,7 +46,7 @@ describe("Wikipedia", () => {
   it("Serializes", async () => {
     const instance = new WikipediaTool({
       extraction: {
-        fields: ["infobox"],
+        fields: { infobox: {} },
       },
     });
     await instance.run({ query: "Prague" });
