@@ -35,7 +35,6 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { safeSum } from "@/internals/helpers/number.js";
 import { omitUndefined } from "@/internals/helpers/object.js";
 import { createURLParams, RestfulClient, RestfulClientError } from "@/internals/fetcher.js";
-import { identity } from "remeda";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
 import { getEnv } from "@/internals/env.js";
@@ -289,7 +288,7 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
     this.spaceId = input.spaceId;
     this.deploymentId = input.deploymentId;
     this.moderations = input.moderations;
-    this.transform = input.transform ?? identity();
+    this.transform = input.transform ?? ((input) => input);
     this.client = createApiClient(input);
     this.parameters = input.parameters ?? {};
   }
