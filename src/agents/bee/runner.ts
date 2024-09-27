@@ -159,7 +159,7 @@ export class BeeAgentRunner {
 
   static createParser(tools: AnyTool[]) {
     const parserRegex =
-      /Thought:.\n(?:Final Answer:[\S\s]+|Function Name:.+\nFunction Input:\{.+\}\nFunction Caption:.+\nFunction Output:)?/;
+      /Thought:.+\n(?:Final Answer:[\S\s]+|Function Name:.+\nFunction Input:\{.+\}\nFunction Caption:.+\nFunction Output:)?/;
 
     const parser = new LinePrefixParser({
       thought: {
