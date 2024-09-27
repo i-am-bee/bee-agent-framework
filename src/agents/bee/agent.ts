@@ -36,6 +36,7 @@ import { GetRunContext } from "@/context.js";
 import { BeeAgentRunner } from "@/agents/bee/runner.js";
 import { BeeAgentError } from "@/agents/bee/errors.js";
 import { BeeIterationToolResult } from "@/agents/bee/parser.js";
+import { assign } from "@/internals/helpers/object.js";
 
 export interface BeeInput {
   llm: ChatLLM<ChatLLMOutput>;
@@ -128,9 +129,10 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
         for (const key of ["partialUpdate", "update"] as const) {
           await emitter.emit(key, {
             data: {
+              ...iteration.state,
               tool_output: output,
             },
-            update: { key: "tool_output", value: output },
+            update: { key: "tool_output", value: output, parsedValue: output },
             meta: { success, ...meta },
           });
         }
@@ -152,7 +154,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
           }),
         );
 
-        iteration.state.tool_output = output;
+        assign(iteration.state, { tool_output: output });
       }
       if (iteration.state.final_answer) {
         finalMessage = BaseMessage.of({

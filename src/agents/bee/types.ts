@@ -15,7 +15,11 @@
  */
 
 import { ChatLLMOutput } from "@/llms/chat.js";
-import { BeeIterationResult, BeeIterationToolResult } from "@/agents/bee/parser.js";
+import {
+  BeeIterationResult,
+  BeeIterationResultPartial,
+  BeeIterationToolResult,
+} from "@/agents/bee/parser.js";
 import { BaseMemory } from "@/memory/base.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { Callback } from "@/emitter/types.js";
@@ -83,12 +87,12 @@ export interface BeeCallbacks {
   }>;
   update?: Callback<{
     data: BeeIterationResult;
-    update: { key: keyof BeeIterationResult; value: string };
+    update: { key: keyof BeeIterationResult; value: string; parsedValue: unknown };
     meta: BeeUpdateMeta;
   }>;
   partialUpdate?: Callback<{
-    data: BeeIterationResult;
-    update: { key: keyof BeeIterationResult; value: string };
+    data: BeeIterationResultPartial;
+    update: { key: keyof BeeIterationResult; value: string; parsedValue: unknown };
     meta: BeeUpdateMeta;
   }>;
   toolStart?: Callback<{

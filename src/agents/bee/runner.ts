@@ -20,6 +20,7 @@ import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { BeeAgentRunIteration, BeeCallbacks, BeeMeta, BeeRunOptions } from "@/agents/bee/types.js";
 import {
+  AnyTool,
   BaseToolRunOptions,
   ToolError,
   ToolInputValidationError,
@@ -39,9 +40,12 @@ import {
   BeeUserEmptyPrompt,
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
-import { BeeIterationToolResult, BeeOutputParser } from "@/agents/bee/parser.js";
+import { BeeIterationToolResult } from "@/agents/bee/parser.js";
 import { AgentError } from "@/agents/base.js";
 import { Emitter } from "@/emitter/emitter.js";
+import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
+import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
+import { z } from "zod";
 
 export class BeeAgentRunnerFatalError extends BeeAgentError {
   isFatal = true;
@@ -126,7 +130,6 @@ export class BeeAgentRunner {
               schema: JSON.stringify(await tool.getInputJsonSchema()),
             })),
           ),
-          tool_names: input.tools.map((tool) => tool.name).join(","),
           instructions: undefined,
         }),
         meta: {
@@ -154,6 +157,58 @@ export class BeeAgentRunner {
     return new BeeAgentRunner(input, options, memory);
   }
 
+  static createParser(tools: AnyTool[]) {
+    const parserRegex =
+      /Thought:.\n(?:Final Answer:[\S\s]+|Function Name:.+\nFunction Input:\{.+\}\nFunction Caption:.+\nFunction Output:)?/;
+
+    const parser = new LinePrefixParser({
+      thought: {
+        prefix: "Thought:",
+        next: ["tool_name", "final_answer"],
+        isStart: true,
+        field: new ZodParserField(z.string().min(1)),
+      },
+      tool_name: {
+        prefix: "Function Name:",
+        next: ["tool_input"],
+        field: new ZodParserField(z.enum(tools.map((tool) => tool.name) as [string, ...string[]])),
+      },
+      tool_input: {
+        prefix: "Function Input:",
+        next: ["tool_caption", "tool_output"],
+        isEnd: true,
+        field: new JSONParserField({
+          schema: z.object({}).passthrough(),
+          base: {},
+        }),
+      },
+      tool_caption: {
+        prefix: "Function Caption:",
+        next: ["tool_output"],
+        isEnd: true,
+        field: new ZodParserField(z.string()),
+      },
+      tool_output: {
+        prefix: "Function Output:",
+        next: ["final_answer"],
+        isEnd: true,
+        field: new ZodParserField(z.string()),
+      },
+      final_answer: {
+        prefix: "Final Answer:",
+        next: [],
+        isStart: true,
+        isEnd: true,
+        field: new ZodParserField(z.string().min(1)),
+      },
+    } as const);
+
+    return {
+      parser,
+      parserRegex,
+    } as const;
+  }
+
   async llm(input: {
     emitter: Emitter<BeeCallbacks>;
     signal: AbortSignal;
@@ -170,45 +225,48 @@ export class BeeAgentRunner {
       executor: async () => {
         await emitter.emit("start", { meta });
 
-        const outputParser = new BeeOutputParser();
+        const { parser, parserRegex } = BeeAgentRunner.createParser(this.input.tools);
         const llmOutput = await this.input.llm
           .generate(this.memory.messages.slice(), {
             signal,
             stream: true,
             guided: {
-              regex:
-                /Thought:.{1,512}\n(?:Final Answer:[\S\s]+|Tool Name:.+\nTool Caption:.+\nTool Input:\{.+\}\nTool Output:)?/
-                  .source,
+              regex: parserRegex.source,
             },
           })
           .observe((llmEmitter) => {
-            outputParser.emitter.on("update", async ({ type, update, state }) => {
-              await emitter.emit(type === "full" ? "update" : "partialUpdate", {
-                data: state,
-                update,
+            parser.emitter.on("update", async ({ value, key, field }) => {
+              await emitter.emit("update", {
+                data: parser.finalState,
+                update: { key, value: field.raw, parsedValue: value },
+                meta: { success: true, ...meta },
+              });
+            });
+            parser.emitter.on("partialUpdate", async ({ key, delta, value }) => {
+              await emitter.emit("partialUpdate", {
+                data: parser.finalState,
+                update: { key, value: delta, parsedValue: value },
                 meta: { success: true, ...meta },
               });
             });
 
             llmEmitter.on("newToken", async ({ value, callbacks }) => {
-              if (outputParser.isDone) {
+              if (parser.isDone) {
                 callbacks.abort();
                 return;
               }
 
-              await outputParser.add(value.getTextContent());
-              if (outputParser.stash.match(/^\s*Tool Output:/i)) {
-                outputParser.stash = "";
+              await parser.add(value.getTextContent());
+              if (parser.partialState.tool_output !== undefined) {
                 callbacks.abort();
               }
             });
           });
 
-        await outputParser.finalize();
-        outputParser.validate();
+        await parser.end();
 
         return {
-          state: outputParser.parse(),
+          state: parser.finalState,
           raw: llmOutput,
         };
       },
