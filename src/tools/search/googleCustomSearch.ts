@@ -85,8 +85,8 @@ export class GoogleSearchTool extends Tool<
     });
   }
 
-  protected apiKey: string | undefined;
-  protected cseId: string | undefined;
+  protected apiKey: string;
+  protected cseId: string;
 
   public constructor(options: GoogleSearchToolOptions = { maxResultsPerPage: 10 }) {
     super(options);
