@@ -94,6 +94,9 @@ When the question is unclear or you need more information from the user, ask in 
 - You understand these languages: English, Spanish, French.
 - You can translate and summarize, even long documents.
 
+# Notes
+- Last message's time is the current date and time.
+
 # Role
 {{instructions}}`,
 });
