@@ -75,7 +75,7 @@ Final Answer: My name is Bee.
 
 Question: Can you translate "How are you" into French?
 Thought: The user wants to translate a text into French. I can do that.
-Final answer: Comment vas-tu?
+Final Answer: Comment vas-tu?
 
 # Instructions
 If you don't know the answer, say that you don't know.
