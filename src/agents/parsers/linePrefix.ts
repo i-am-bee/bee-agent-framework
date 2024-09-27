@@ -87,7 +87,7 @@ export class LinePrefixParser<
   protected done = false;
   protected lastNodeKey: StringKey<T> | null = null;
 
-  public readonly finalState = {} as LinePrefixParser.inferOutput<T>;
+  public readonly finalState = {} as LinePrefixParser.infer<T>;
   public readonly partialState = {} as Partial<Record<StringKey<T>, string>>;
 
   get isDone() {
