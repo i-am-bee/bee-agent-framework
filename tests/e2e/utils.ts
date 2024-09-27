@@ -29,6 +29,7 @@ import { Emitter } from "@/emitter/emitter.js";
 import { toJsonSchema } from "@/internals/helpers/schema.js";
 import { OpenAI } from "openai";
 import { Groq } from "groq-sdk";
+import { customsearch_v1 } from "@googleapis/customsearch";
 
 interface CallbackOptions<T> {
   required?: boolean;
@@ -110,6 +111,7 @@ export function verifyDeserialization(ref: unknown, deserialized: unknown, paren
 verifyDeserialization.ignoredClasses = [
   Logger,
   Client,
+  customsearch_v1.Customsearch,
   LCBaseLLM,
   RunContext,
   Emitter,
