@@ -186,6 +186,9 @@ export class OpenMeteoTool extends Tool<
     }
 
     const { results } = await response.json();
+    if (!results || results.length === 0) {
+      throw new ToolError(`Location '${location.name}' was not found.`);
+    }
     return results[0];
   }
 }

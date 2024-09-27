@@ -59,4 +59,13 @@ describe("OpenMeteo", () => {
       }),
     ).rejects.toThrowError(ToolInputValidationError);
   });
+
+  it("Throws for unknown location", async () => {
+    await expect(
+      instance.run({
+        location: { name: "ABCDEFGH" },
+        start_date: "2024-01-01",
+      }),
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`ToolError: Location 'ABCDEFGH' was not found.`);
+  });
 });
