@@ -37,6 +37,7 @@ interface Location {
 
 interface LocationSearch {
   name: string;
+  country?: string;
   language?: string;
 }
 
@@ -71,6 +72,7 @@ export class OpenMeteoTool extends Tool<
           z
             .object({
               name: z.string().min(1),
+              country: z.string().optional(),
               language: z.string().default("English"),
             })
             .strip(),
@@ -107,13 +109,7 @@ export class OpenMeteoTool extends Tool<
     const prepareParams = async () => {
       const extractLocation = async (): Promise<Location> => {
         if ("name" in location) {
-          const response = await this._geocode(
-            {
-              name: location.name,
-              language: location.language,
-            },
-            options?.signal,
-          );
+          const response = await this._geocode(location, options?.signal);
           return pick(response, ["latitude", "longitude"]);
         }
         return location;
@@ -168,6 +164,7 @@ export class OpenMeteoTool extends Tool<
     const params = createURLParams({
       name: location.name,
       language: location.language,
+      country: location.country,
       format: "json",
       count: 1,
     });
