@@ -46,7 +46,6 @@ export function setProp(target: unknown, paths: readonly (keyof any)[], value: u
   for (const entry of paths.entries()) {
     const [idx, key] = entry as [number, keyof object];
     if (!R.isPlainObject(target) && !R.isArray(target)) {
-      console.info({ target });
       throw new TypeError("Only plain objects and arrays are supported!");
     }
 
@@ -121,6 +120,7 @@ export function createNonOverridableObject<T extends object>(target: T) {
         return true;
       }
 
+      // eslint-disable-next-line
       console.error(`Property '${String(k)}' already exists. Cannot set value.`);
       return false;
     },

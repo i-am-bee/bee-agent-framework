@@ -35,6 +35,7 @@ export default tseslint.config(
       "unused-imports": unusedImports,
     },
     rules: {
+      "no-console": ["error"],
       "no-restricted-imports": [
         "error",
         {
@@ -76,6 +77,7 @@ export default tseslint.config(
       },
     },
     rules: {
+      "no-console": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-vars": "off",
       "no-restricted-imports": [

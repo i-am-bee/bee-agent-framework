@@ -61,6 +61,7 @@ export abstract class Serializable<T = unknown> {
   protected deserialize(value: string): T {
     const { __root } = Serializer.deserializeWithMeta<SerializableStructure<T>>(value);
     if (!__root.target) {
+      // eslint-disable-next-line
       console.warn(
         `Serializable class must be serialized via "serialize" method and not via Serializer class. This may lead to incorrect deserialization.`,
       );
