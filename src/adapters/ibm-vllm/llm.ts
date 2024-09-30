@@ -27,21 +27,14 @@ import {
 import { isEmpty, isString } from "remeda";
 import { BatchedGenerationRequest } from "@/adapters/ibm-vllm/types/fmaas/BatchedGenerationRequest.js";
 import { SingleGenerationRequest } from "@/adapters/ibm-vllm/types/fmaas/SingleGenerationRequest.js";
-import { ModelInfoRequest } from "@/adapters/ibm-vllm/types/fmaas/ModelInfoRequest.js";
-import { ModelInfoResponse__Output } from "@/adapters/ibm-vllm/types/fmaas/ModelInfoResponse.js";
 import { LLM, LLMInput } from "@/llms/llm.js";
-import { BatchedTokenizeRequest } from "@/adapters/ibm-vllm/types/fmaas/BatchedTokenizeRequest.js";
-import { BatchedTokenizeResponse__Output } from "@/adapters/ibm-vllm/types/fmaas/BatchedTokenizeResponse.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { BatchedGenerationResponse__Output } from "@/adapters/ibm-vllm/types/fmaas/BatchedGenerationResponse.js";
 import { GenerationResponse__Output } from "@/adapters/ibm-vllm/types/fmaas/GenerationResponse.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { FrameworkError, NotImplementedError } from "@/errors.js";
 import { assign } from "@/internals/helpers/object.js";
-import { wrapGrpcCall, wrapGrpcStream } from "@/adapters/ibm-vllm/utils/wrappers.js";
 import { ServiceError } from "@grpc/grpc-js";
-import { buildClient } from "@/adapters/ibm-vllm/utils/build-client.js";
-import { GenerationServiceClient } from "@/adapters/ibm-vllm/types/fmaas/GenerationService.js";
+import { Client } from "@/adapters/ibm-vllm/client.js";
 
 function isGrpcServiceError(err: unknown): err is ServiceError {
   return (
@@ -90,7 +83,7 @@ export class IBMvLLMOutput extends BaseLLMOutput {
 }
 
 export interface IBMvLLMInput {
-  client?: GenerationServiceClient;
+  client?: Client;
   modelId: string;
   parameters?: IBMvLLMParameters;
   executionOptions?: ExecutionOptions;
@@ -108,12 +101,12 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
     creator: this,
   });
 
-  public readonly client: GenerationServiceClient;
+  public readonly client: Client;
   public readonly parameters: Partial<IBMvLLMParameters>;
 
   constructor({ client, modelId, parameters = {}, executionOptions }: IBMvLLMInput) {
     super(modelId, executionOptions);
-    this.client = client ?? buildClient({});
+    this.client = client ?? new Client();
     this.parameters = parameters ?? {};
   }
 
@@ -122,9 +115,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
   }
 
   async meta(): Promise<LLMMeta> {
-    const response = await wrapGrpcCall<ModelInfoRequest, ModelInfoResponse__Output>(
-      this.client.modelInfo,
-    )({ model_id: this.modelId });
+    const response = await this.client.modelInfo({ model_id: this.modelId });
     return {
       tokenLimit: response.max_sequence_length,
     };
@@ -132,9 +123,10 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {
     try {
-      const response = await wrapGrpcCall<BatchedTokenizeRequest, BatchedTokenizeResponse__Output>(
-        this.client.tokenize,
-      )({ model_id: this.modelId, requests: [{ text: input }] });
+      const response = await this.client.tokenize({
+        model_id: this.modelId,
+        requests: [{ text: input }],
+      });
       const output = response.responses.at(0);
       if (!output) {
         throw new LLMError("Missing output");
@@ -153,10 +145,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
     options?: IBMvLLMGenerateOptions,
   ): Promise<IBMvLLMOutput> {
     try {
-      const response = await wrapGrpcCall<
-        BatchedGenerationRequest,
-        BatchedGenerationResponse__Output
-      >(this.client.generate)(
+      const response = await this.client.generate(
         {
           model_id: this.modelId,
           requests: [{ text: input }],
@@ -183,7 +172,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
     options?: IBMvLLMGenerateOptions,
   ): AsyncStream<IBMvLLMOutput> {
     try {
-      const stream = await wrapGrpcStream(this.client.generateStream)(
+      const stream = await this.client.generateStream(
         {
           model_id: this.modelId,
           request: { text: input },
@@ -196,10 +185,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
       for await (const chunk of stream) {
         const typedChunk = chunk as GenerationResponse__Output;
         const { text, ...rest } = typedChunk;
-        if (text.length > 0) {
-          // TODO remove condition once repetition checker is fixed in FW
-          yield new IBMvLLMOutput(text, rest);
-        }
+        yield new IBMvLLMOutput(text, rest);
       }
     } catch (err) {
       throw this._transformError(err);
@@ -219,7 +205,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
     super.loadSnapshot(snapshot);
     Object.assign(this, snapshot, {
-      client: snapshot?.client ?? buildClient({}), // TODO: serialize?
+      client: snapshot?.client ?? new Client(), // TODO: serialize?
     });
   }
 

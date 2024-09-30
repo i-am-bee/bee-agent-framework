@@ -36,7 +36,7 @@ import {
   IBMVllmChatLLMPreset,
   IBMVllmChatLLMPresetModel,
 } from "@/adapters/ibm-vllm/chat-preset.js";
-import { GenerationServiceClient } from "@/adapters/ibm-vllm/types/fmaas/GenerationService.js";
+import { Client } from "./client.js";
 
 export class GrpcChatLLMOutput extends ChatLLMOutput {
   public readonly raw: IBMvLLMOutput;
@@ -161,7 +161,7 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
   static fromPreset(
     modelId: IBMVllmChatLLMPresetModel,
     overrides?: {
-      client?: GenerationServiceClient;
+      client?: Client;
       parameters?: IBMvLLMParameters | ((value: IBMvLLMParameters) => IBMvLLMParameters);
     },
   ) {

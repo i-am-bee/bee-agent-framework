@@ -2,10 +2,13 @@ import "dotenv/config.js";
 import { IBMvLLM } from "bee-agent-framework/adapters/ibm-vllm/llm";
 import { IBMVllmChatLLM } from "bee-agent-framework/adapters/ibm-vllm/chat";
 import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Client } from "bee-agent-framework/adapters/ibm-vllm/client";
 
+const client = new Client();
 {
   console.info("===RAW===");
   const llm = new IBMvLLM({
+    client,
     modelId: "meta-llama/llama-3-1-70b-instruct",
   });
 
@@ -19,7 +22,7 @@ import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 
 {
   console.info("===CHAT===");
-  const llm = IBMVllmChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
+  const llm = IBMVllmChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct", { client });
 
   console.info("Meta", await llm.meta());
 
