@@ -26,6 +26,7 @@ import { z } from "zod";
 import { createURLParams } from "@/internals/fetcher.js";
 import { isNullish, pick, pickBy } from "remeda";
 import { Cache } from "@/cache/decoratorCache.js";
+import { RunContext } from "@/context.js";
 
 type ToolOptions = { apiKey?: string } & BaseToolOptions;
 type ToolRunOptions = BaseToolRunOptions;
@@ -102,14 +103,15 @@ export class OpenMeteoTool extends Tool<
 
   protected async _run(
     { location, start_date: startDate, end_date: endDate, ...input }: ToolInput<this>,
-    options?: BaseToolRunOptions,
+    _options: BaseToolRunOptions | undefined,
+    run: RunContext<this>,
   ) {
     const { apiKey } = this.options;
 
     const prepareParams = async () => {
       const extractLocation = async (): Promise<Location> => {
         if ("name" in location) {
-          const response = await this._geocode(location, options?.signal);
+          const response = await this._geocode(location, run.signal);
           return pick(response, ["latitude", "longitude"]);
         }
         return location;
@@ -144,7 +146,7 @@ export class OpenMeteoTool extends Tool<
           Authorization: `Bearer ${apiKey}`,
         }),
       },
-      signal: options?.signal,
+      signal: run.signal,
     });
 
     if (!response.ok) {
@@ -158,7 +160,7 @@ export class OpenMeteoTool extends Tool<
   }
 
   @Cache()
-  protected async _geocode(location: LocationSearch, signal?: AbortSignal) {
+  protected async _geocode(location: LocationSearch, signal: AbortSignal) {
     const { apiKey } = this.options;
 
     const params = createURLParams({

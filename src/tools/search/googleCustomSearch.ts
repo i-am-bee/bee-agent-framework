@@ -27,6 +27,7 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { ValueError } from "@/errors.js";
 import { ValidationError } from "ajv";
 import { parseEnv } from "@/internals/env.js";
+import { RunContext } from "@/context.js";
 
 export interface GoogleSearchToolOptions extends SearchToolOptions {
   apiKey?: string;
@@ -126,7 +127,8 @@ export class GoogleSearchTool extends Tool<
 
   protected async _run(
     { query: input, page = 1 }: ToolInput<this>,
-    options?: GoogleSearchToolRunOptions,
+    _options: GoogleSearchToolRunOptions | undefined,
+    run: RunContext<this>,
   ) {
     const startIndex = (page - 1) * this.options.maxResultsPerPage + 1;
     const response = await this.client.cse.list(
@@ -138,7 +140,7 @@ export class GoogleSearchTool extends Tool<
         safe: "active",
       },
       {
-        signal: options?.signal,
+        signal: run.signal,
       },
     );
 

@@ -24,6 +24,7 @@ import {
 import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
 import { stripHtml } from "string-strip-html";
+import { RunContext } from "@/context.js";
 
 interface CrawlerOutput {
   url: string;
@@ -89,11 +90,15 @@ export class WebCrawlerTool extends Tool<WebCrawlerToolOutput, WebsiteCrawlerToo
     this.parser = parser ?? defaultParser;
   }
 
-  protected async _run({ url }: ToolInput<this>, options?: BaseToolRunOptions) {
+  protected async _run(
+    { url }: ToolInput<this>,
+    _options: BaseToolRunOptions | undefined,
+    run: RunContext<this>,
+  ) {
     const response = await this.client(url, {
       redirect: "follow",
       ...this.options.request,
-      signal: options?.signal,
+      signal: run.signal,
     });
 
     const content = await this.parser(response);

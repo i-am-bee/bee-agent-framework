@@ -32,6 +32,7 @@ import { isDefined, isEmpty, pickBy } from "remeda";
 import { castArray } from "@/internals/helpers/array.js";
 import { ValueOf } from "@/internals/types.js";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
+import { RunContext } from "@/context.js";
 
 type ToolOptions = BaseToolOptions;
 type ToolRunOptions = BaseToolRunOptions;
@@ -171,11 +172,15 @@ export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions
     });
   }
 
-  protected async _run(input: ToolInput<this>, options?: BaseToolRunOptions) {
+  protected async _run(
+    input: ToolInput<this>,
+    _options: BaseToolRunOptions | undefined,
+    run: RunContext<this>,
+  ) {
     const params = this._prepareParams(input);
     const url = `https://export.arxiv.org/api/query?${decodeURIComponent(params.toString())}`;
     const response = await fetch(url, {
-      signal: options?.signal,
+      signal: run.signal,
     });
     const data = await this._parseResponse(response);
     return new ArXivToolOutput(data);

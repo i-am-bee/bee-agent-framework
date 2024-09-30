@@ -8,6 +8,7 @@ import {
 } from "bee-agent-framework/tools/base";
 import { z } from "zod";
 import { createURLParams } from "bee-agent-framework/internals/fetcher";
+import { RunContext } from "bee-agent-framework/context";
 
 type ToolOptions = BaseToolOptions;
 type ToolRunOptions = BaseToolRunOptions;
@@ -115,11 +116,15 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
     this.register();
   }
 
-  protected async _run(input: ToolInput<this>, options?: ToolRunOptions) {
+  protected async _run(
+    input: ToolInput<this>,
+    _options: ToolRunOptions | undefined,
+    run: RunContext<this>,
+  ) {
     const params = createURLParams(input);
     const url = `https://openlibrary.org/searchon?${decodeURIComponent(params.toString())}`;
     const response = await fetch(url, {
-      signal: options?.signal,
+      signal: run.signal,
     });
     if (!response.ok) {
       throw new ToolError("Request to Open Library API has failed!", [

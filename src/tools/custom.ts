@@ -22,6 +22,7 @@ import { z } from "zod";
 import { validate } from "@/internals/helpers/general.js";
 import { CodeInterpreterService } from "bee-proto/code_interpreter/v1/code_interpreter_service_connect";
 import { CodeInterpreterOptions } from "./python/python.js";
+import { RunContext } from "@/context.js";
 
 export class CustomToolCreateError extends FrameworkError {}
 export class CustomToolExecuteError extends FrameworkError {}
@@ -78,14 +79,18 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     this.description = options.description;
   }
 
-  protected async _run(input: any, options: BaseToolRunOptions) {
+  protected async _run(
+    input: any,
+    _options: BaseToolRunOptions | undefined,
+    run: RunContext<typeof this>,
+  ) {
     const { response } = await this.client.executeCustomTool(
       {
         executorId: this.options.executorId || "default",
         toolSourceCode: this.options.sourceCode,
         toolInputJson: JSON.stringify(input),
       },
-      { signal: options.signal },
+      { signal: run.signal },
     );
 
     if (response.case === "error") {

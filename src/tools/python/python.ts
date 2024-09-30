@@ -34,6 +34,7 @@ import { PythonToolOutput } from "@/tools/python/output.js";
 import { ValidationError } from "ajv";
 import { ConnectionOptions } from "node:tls";
 import { AnySchemaLike } from "@/internals/helpers/schema.js";
+import { RunContext } from "@/context.js";
 
 export interface CodeInterpreterOptions {
   url: string;
@@ -134,7 +135,11 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
     );
   }
 
-  protected async _run(input: ToolInput<this>, options?: BaseToolRunOptions) {
+  protected async _run(
+    input: ToolInput<this>,
+    _options: BaseToolRunOptions | undefined,
+    run: RunContext<this>,
+  ) {
     const inputFiles = await this.storage.upload(
       Object.entries(input.inputFiles ?? {})
         .filter(([k, v]) => Boolean(k && v))
@@ -149,7 +154,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
       if (this.preprocess) {
         const { llm, promptTemplate } = this.preprocess;
         const response = await llm.generate(promptTemplate.render({ input: input.code }), {
-          signal: options?.signal,
+          signal: run.signal,
           stream: false,
         });
         return response.getTextContent().trim();
@@ -167,7 +172,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
           inputFiles.map((file) => [`${prefix}${file.filename}`, file.hash]),
         ),
       },
-      { signal: options?.signal },
+      { signal: run.signal },
     );
 
     // replace absolute paths in "files" with relative paths by removing "/workspace/"

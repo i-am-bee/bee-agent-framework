@@ -82,7 +82,7 @@ describe("GoogleCustomSearch Tool", () => {
         safe: "active",
       },
       {
-        signal: undefined,
+        signal: expect.any(AbortSignal),
       },
     );
   });
@@ -133,7 +133,7 @@ describe("GoogleCustomSearch Tool", () => {
         safe: "active",
       },
       {
-        signal: undefined,
+        signal: expect.any(AbortSignal),
       },
     );
     expect(mockCustomSearchClient.cse.list).toHaveBeenNthCalledWith(
@@ -146,7 +146,7 @@ describe("GoogleCustomSearch Tool", () => {
         safe: "active",
       },
       {
-        signal: undefined,
+        signal: expect.any(AbortSignal),
       },
     );
   });
