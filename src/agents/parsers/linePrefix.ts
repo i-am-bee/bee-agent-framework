@@ -74,6 +74,11 @@ interface ExtractedLine<T extends NonNullable<unknown>> {
 }
 
 const trimLeftSpaces = (value: string) => value.replace(/^\s*/g, "");
+const linesToString = (lines: Line[]) =>
+  lines.reduce(
+    (acc, { newLine, value }) => `${acc}${newLine ? NEW_LINE_CHARACTER.concat(value) : value}`,
+    "",
+  );
 
 export class LinePrefixParser<
   T extends Record<string, ParserNode<Extract<keyof T, string>, ParserField<any, any>>>,
@@ -84,6 +89,7 @@ export class LinePrefixParser<
   });
 
   protected readonly lines: Line[] = [];
+  protected readonly excludedLines: Line[] = [];
   protected done = false;
   protected lastNodeKey: StringKey<T> | null = null;
 
@@ -194,6 +200,8 @@ export class LinePrefixParser<
           delta: line.value,
           field: node.field,
         });
+      } else {
+        this.excludedLines.push(line);
       }
     }
   }
@@ -205,13 +213,15 @@ export class LinePrefixParser<
     this.done = true;
 
     if (!this.lastNodeKey) {
-      throw new LinePrefixParserError("Nothing valid has been parsed yet!");
+      throw new LinePrefixParserError("Nothing valid has been parsed yet!", [], {
+        context: {
+          lines: linesToString(this.lines),
+          excludedLines: linesToString(this.excludedLines),
+        },
+      });
     }
 
-    const stash = this.lines.reduce(
-      (acc, { newLine, value }) => `${acc}${newLine ? NEW_LINE_CHARACTER.concat(value) : value}`,
-      "",
-    );
+    const stash = linesToString(this.lines);
     this.lines.length = 0;
 
     const field = this.nodes[this.lastNodeKey].field!;
