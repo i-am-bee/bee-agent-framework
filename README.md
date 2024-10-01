@@ -77,11 +77,17 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 ### Local Installation (Python Interpreter + Interactive CLI)
 
-> _Note: `yarn` should be installed via Corepack ([tutorial](https://yarnpkg.com/corepack))_
+> [!NOTE]
+>
+> `yarn` should be installed via Corepack ([tutorial](https://yarnpkg.com/corepack))\_
 
-> _Note: To make any asset available to a local code interpreter place them the following directory: ./examples/tmp/local_
+> [!NOTE]
+>
+> To make any asset available to a local code interpreter place them the following directory: ./examples/tmp/local\_
 
-> _Note: Docker distribution with support for compose is required, the following are supported:_
+> [!NOTE]
+>
+> Docker distribution with support for compose is required, the following are supported:
 >
 > - [Docker](https://www.docker.com/)
 > - [Rancher](https://www.rancher.com/) - macOS users must use VZ instead of QEMU
@@ -107,7 +113,6 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 | `DynamicTool`                                                             | Construct to create dynamic tools.                                                    |
 | `ArXivTool`                                                               | Retrieve research articles published on arXiv.                                        |
 | `WebCrawlerTool`                                                          | Retrieve content of an arbitrary website.                                             |
-| `CustomTool`                                                              | Run your own Python function in the remote environment.                               |
 | `OpenMeteoTool`                                                           | Retrieve current, previous, or upcoming weather for a given destination.              |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                       |
 
