@@ -15,6 +15,7 @@ services:
     volumes:
       - k3s-containerd:/var/lib/rancher/k3s/agent/containerd
       - ./infra/bee-code-interpreter/k8s:/var/lib/rancher/k3s/server/manifests
+      - ${CODE_INTEPRETER_TMPDIR:-./examples/tmp/code_interpreter}:/storage
     ports:
       - "50051:30051"
     healthcheck:
