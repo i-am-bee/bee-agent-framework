@@ -35,6 +35,7 @@ import { FrameworkError, NotImplementedError } from "@/errors.js";
 import { assign } from "@/internals/helpers/object.js";
 import { ServiceError } from "@grpc/grpc-js";
 import { Client } from "@/adapters/ibm-vllm/client.js";
+import { GetRunContext } from "@/context.js";
 
 function isGrpcServiceError(err: unknown): err is ServiceError {
   return (
@@ -97,7 +98,7 @@ export interface IBMvLLMGenerateOptions extends GenerateOptions {}
 
 export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
   public readonly emitter = new Emitter<GenerateCallbacks>({
-    namespace: ["grpc", "llm"],
+    namespace: ["ibm_vllm", "llm"],
     creator: this,
   });
 
@@ -142,7 +143,8 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
 
   protected async _generate(
     input: LLMInput,
-    options?: IBMvLLMGenerateOptions,
+    options: IBMvLLMGenerateOptions | undefined,
+    run: GetRunContext<this>,
   ): Promise<IBMvLLMOutput> {
     try {
       const response = await this.client.generate(
@@ -151,13 +153,11 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
           requests: [{ text: input }],
           params: this._prepareParameters(options),
         },
-        {
-          signal: options?.signal,
-        },
+        { signal: run.signal },
       );
       const output = response.responses.at(0);
       if (!output) {
-        throw new Error("Missing output");
+        throw new LLMError("Missing output");
       }
 
       const { text, ...rest } = output;
@@ -169,7 +169,8 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
 
   protected async *_stream(
     input: string,
-    options?: IBMvLLMGenerateOptions,
+    options: IBMvLLMGenerateOptions | undefined,
+    run: GetRunContext<typeof this>,
   ): AsyncStream<IBMvLLMOutput> {
     try {
       const stream = await this.client.generateStream(
@@ -178,14 +179,14 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
           request: { text: input },
           params: this._prepareParameters(options),
         },
-        {
-          signal: options?.signal,
-        },
+        { signal: run.signal },
       );
       for await (const chunk of stream) {
         const typedChunk = chunk as GenerationResponse__Output;
         const { text, ...rest } = typedChunk;
-        yield new IBMvLLMOutput(text, rest);
+        if (text.length > 0) {
+          yield new IBMvLLMOutput(text, rest);
+        }
       }
     } catch (err) {
       throw this._transformError(err);
@@ -195,7 +196,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
   createSnapshot() {
     return {
       ...super.createSnapshot(),
-      client: null,
+      client: this.client,
       modelId: this.modelId,
       parameters: shallowCopy(this.parameters),
       executionOptions: shallowCopy(this.executionOptions),
@@ -204,9 +205,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
     super.loadSnapshot(snapshot);
-    Object.assign(this, snapshot, {
-      client: snapshot?.client ?? new Client(), // TODO: serialize?
-    });
+    Object.assign(this, snapshot);
   }
 
   protected _transformError(error: Error): Error {

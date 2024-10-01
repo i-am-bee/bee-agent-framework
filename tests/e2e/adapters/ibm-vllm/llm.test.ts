@@ -16,7 +16,7 @@
 
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { IBMvLLM, IBMvLLMOutput } from "@/adapters/ibm-vllm/llm.js";
-import { IBMVllmModel } from "@/adapters/ibm-vllm/chat-preset.js";
+import { IBMVllmModel } from "@/adapters/ibm-vllm/chatPreset.js";
 
 describe.runIf(
   [

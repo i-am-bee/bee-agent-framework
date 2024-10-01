@@ -19,7 +19,7 @@ import { isFunction, isObjectType } from "remeda";
 import { IBMvLLM, IBMvLLMGenerateOptions, IBMvLLMOutput, IBMvLLMParameters } from "./llm.js";
 
 import { Cache } from "@/cache/decoratorCache.js";
-import { BaseMessage } from "@/llms/primitives/message.js";
+import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import {
@@ -29,14 +29,11 @@ import {
   LLMError,
   LLMMeta,
 } from "@/llms/base.js";
-import { PromptTemplate } from "@/template.js";
 import { transformAsyncIterable } from "@/internals/helpers/stream.js";
 import { shallowCopy } from "@/serializer/utils.js";
-import {
-  IBMVllmChatLLMPreset,
-  IBMVllmChatLLMPresetModel,
-} from "@/adapters/ibm-vllm/chat-preset.js";
+import { IBMVllmChatLLMPreset, IBMVllmChatLLMPresetModel } from "@/adapters/ibm-vllm/chatPreset.js";
 import { Client } from "./client.js";
+import { GetRunContext } from "@/context.js";
 
 export class GrpcChatLLMOutput extends ChatLLMOutput {
   public readonly raw: IBMvLLMOutput;
@@ -51,7 +48,7 @@ export class GrpcChatLLMOutput extends ChatLLMOutput {
     const text = this.raw.getTextContent();
     return [
       BaseMessage.of({
-        role: "assistant",
+        role: Role.ASSISTANT,
         text,
         meta: this.raw.meta,
       }),
@@ -94,7 +91,7 @@ export interface GrpcChatLLMInput {
 
 export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
   public readonly emitter = new Emitter<GenerateCallbacks>({
-    namespace: ["grpc", "chat_llm"],
+    namespace: ["ibm_vllm", "chat_llm"],
     creator: this,
   });
 
@@ -115,7 +112,7 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
     return this.llm.meta();
   }
 
-  createSnapshot(): any {
+  createSnapshot() {
     return {
       ...super.createSnapshot(),
       modelId: this.modelId,
@@ -132,11 +129,12 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
 
   protected async _generate(
     messages: BaseMessage[],
-    options?: IBMvLLMGenerateOptions,
+    options: IBMvLLMGenerateOptions | undefined,
+    run: GetRunContext<typeof this>,
   ): Promise<GrpcChatLLMOutput> {
     const prompt = this.messagesToPrompt(messages);
     // @ts-expect-error protected property
-    const rawResponse = await this.llm._generate(prompt, options);
+    const rawResponse = await this.llm._generate(prompt, options, run);
     return new GrpcChatLLMOutput(rawResponse);
   }
 
@@ -151,11 +149,7 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
   }
 
   messagesToPrompt(messages: BaseMessage[]) {
-    const convertor = this.config.messagesToPrompt;
-    if (convertor instanceof PromptTemplate) {
-      return convertor.render({ messages });
-    }
-    return convertor(messages);
+    return this.config.messagesToPrompt(messages);
   }
 
   static fromPreset(

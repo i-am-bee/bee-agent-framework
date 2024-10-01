@@ -16,10 +16,12 @@
 
 import grpc, {
   CallOptions as GRPCCallOptions,
-  ClientOptions,
+  ClientOptions as GRPCClientOptions,
   ClientReadableStream,
   ClientUnaryCall,
 } from "@grpc/grpc-js";
+
+import * as R from "remeda";
 // eslint-disable-next-line no-restricted-imports
 import { UnaryCallback } from "@grpc/grpc-js/build/src/client.js";
 import { FrameworkError, ValueError } from "@/errors.js";
@@ -37,11 +39,12 @@ import { GenerationRequest__Output } from "@/adapters/ibm-vllm/types/fmaas/Gener
 import { BatchedTokenizeRequest } from "@/adapters/ibm-vllm/types/fmaas/BatchedTokenizeRequest.js";
 import { BatchedTokenizeResponse__Output } from "@/adapters/ibm-vllm/types/fmaas/BatchedTokenizeResponse.js";
 import { Cache } from "@/cache/decoratorCache.js";
+import { Serializable } from "@/internals/serializable.js";
 
 const generationProtoPath = "./proto/generation.proto"; // separate variable to avoid Vite transformation https://vitejs.dev/guide/assets#new-url-url-import-meta-url
 const GENERATION_PROTO_PATH = new URL(generationProtoPath, import.meta.url);
 
-interface BuildClientProps {
+interface ClientOptions {
   modelRouterSubdomain?: string;
   url: string;
   credentials: {
@@ -49,9 +52,18 @@ interface BuildClientProps {
     certChain: string;
     privateKey: string;
   };
-  grpcClientOptions: ClientOptions;
+  grpcClientOptions: GRPCClientOptions;
   clientShutdownDelay: number;
 }
+
+const defaultOptions = {
+  clientShutdownDelay: 5 * 60 * 1000,
+  grpcClientOptions: {
+    // This is needed, otherwise communication to DIPC cluster fails with "Dropped connection" error after +- 50 secs
+    "grpc.keepalive_time_ms": 25000,
+    "grpc.max_receive_message_length": 32 * 1024 * 1024, // 32MiB
+  },
+};
 
 const generationPackageObject = grpc.loadPackageDefinition(
   protoLoader.loadSync([GENERATION_PROTO_PATH.pathname], {
@@ -65,41 +77,26 @@ const generationPackageObject = grpc.loadPackageDefinition(
   }),
 ) as unknown as GenerationProtoGentypes;
 
-const defaultOptions: BuildClientProps = {
-  url: parseEnv("IBM_VLLM_URL", z.string()),
-  credentials: {
-    rootCert: parseEnv("IBM_VLLM_ROOT_CERT", z.string()),
-    privateKey: parseEnv("IBM_VLLM_PRIVATE_KEY", z.string()),
-    certChain: parseEnv("IBM_VLLM_CERT_CHAIN", z.string()),
-  },
-  clientShutdownDelay: 5 * 60 * 1000,
-  grpcClientOptions: {
-    // This is needed, otherwise communication to DIPC cluster fails with "Dropped connection" error after +- 50 secs
-    "grpc.keepalive_time_ms": 25000,
-    "grpc.max_receive_message_length": 32 * 1024 * 1024, // 32MiB
-  },
-};
-
 const GRPC_CLIENT_TTL = 15 * 60 * 1000;
 
 type CallOptions = GRPCCallOptions & { signal?: AbortSignal };
 type RequiredModel<T> = T & { model_id: string };
 
-export class Client {
-  options: BuildClientProps;
+export class Client extends Serializable {
+  public readonly options: ClientOptions;
+  private usedDefaultCredentials = false;
 
   @Cache({ ttl: GRPC_CLIENT_TTL })
   cachedClientFactory(modelId: string) {
-    const options = this.options;
-    const modelSpecificUrl = options.url.replace(/{model_id}/, modelId.replaceAll("/", "--"));
+    const modelSpecificUrl = this.options.url.replace(/{model_id}/, modelId.replaceAll("/", "--"));
     const client = new generationPackageObject.fmaas.GenerationService(
       modelSpecificUrl,
       grpc.credentials.createSsl(
-        Buffer.from(options.credentials.rootCert),
-        Buffer.from(options.credentials.privateKey),
-        Buffer.from(options.credentials.certChain),
+        Buffer.from(this.options.credentials.rootCert),
+        Buffer.from(this.options.credentials.privateKey),
+        Buffer.from(this.options.credentials.certChain),
       ),
-      options.grpcClientOptions,
+      this.options.grpcClientOptions,
     );
     setTimeout(() => {
       try {
@@ -107,7 +104,7 @@ export class Client {
       } catch {
         /* empty */
       }
-    }, GRPC_CLIENT_TTL + options.clientShutdownDelay).unref();
+    }, GRPC_CLIENT_TTL + this.options.clientShutdownDelay).unref();
     return client;
   }
 
@@ -115,25 +112,23 @@ export class Client {
     return this.cachedClientFactory(modelId);
   }
 
-  constructor(options?: Partial<BuildClientProps>) {
-    this.options = { ...defaultOptions, ...options };
-    if (
-      !this.options.credentials.rootCert ||
-      !this.options.credentials.privateKey ||
-      !this.options.credentials.certChain
-    ) {
-      throw new ValueError(
-        [
-          `IBM vllm GRPC credentials were not provided. Either set them directly or put them in ENV:`,
-          `"IBM_VLLM_ROOT_CERT", "IBM_VLLM_PRIVATE_KEY", "IBM_VLLM_CERT_CHAIN"`,
-        ].join("\n"),
-      );
-    }
-    if (!this.options.url) {
-      throw new ValueError(
-        `IBM vllm URL was not provided. Either set them directly or put them in ENV: "IBM_VLLM_URL"`,
-      );
-    }
+  getDefaultCredentials() {
+    this.usedDefaultCredentials = true;
+    return {
+      rootCert: parseEnv("IBM_VLLM_ROOT_CERT", z.string()),
+      privateKey: parseEnv("IBM_VLLM_PRIVATE_KEY", z.string()),
+      certChain: parseEnv("IBM_VLLM_CERT_CHAIN", z.string()),
+    };
+  }
+
+  constructor(options?: Partial<ClientOptions>) {
+    super();
+    this.options = {
+      ...defaultOptions,
+      ...options,
+      url: options?.url ?? parseEnv("IBM_VLLM_URL", z.string()),
+      credentials: options?.credentials ?? this.getDefaultCredentials(),
+    };
   }
 
   async modelInfo(request: RequiredModel<ModelInfoRequest>, options?: CallOptions) {
@@ -204,5 +199,20 @@ export class Client {
       stream.addListener("close", () => signal?.removeEventListener("abort", abortHandler));
       return stream;
     };
+  }
+
+  createSnapshot() {
+    if (!this.usedDefaultCredentials) {
+      throw new ValueError(
+        "Cannot serialize a client with credentials passed directly. Use environment variables.",
+      );
+    }
+    return {
+      options: R.omit(this.options, ["credentials"]),
+    };
+  }
+  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
+    Object.assign(this, snapshot);
+    this.options.credentials = this.getDefaultCredentials();
   }
 }

@@ -2785,7 +2785,6 @@ __metadata:
     jsonrepair: "npm:^3.8.1"
     langchain: "npm:~0.2.16"
     lint-staged: "npm:^15.2.9"
-    lru-cache: "npm:^11.0.1"
     mathjs: "npm:^13.1.1"
     mustache: "npm:^4.2.0"
     object-hash: "npm:^3.0.0"
@@ -2826,6 +2825,8 @@ __metadata:
     zod-to-json-schema: "npm:^3.23.3"
   peerDependencies:
     "@googleapis/customsearch": ^3.2.0
+    "@grpc/grpc-js": ^1.11.3
+    "@grpc/proto-loader": ^0.7.13
     "@ibm-generative-ai/node-sdk": ~3.2.3
     "@langchain/community": ~0.2.28
     "@langchain/core": ~0.2.27
@@ -6722,13 +6723,6 @@ __metadata:
   version: 11.0.0
   resolution: "lru-cache@npm:11.0.0"
   checksum: 10c0/827ff0e0739f9b0f30f92f5a5fc97c6a2bd3ae32c0452bc58cb7411d6c589d49536073027293f2d1f02d0c2e72b63b162f238df7e9ff6f4cc0345f92afec4d1d
-  languageName: node
-  linkType: hard
-
-"lru-cache@npm:^11.0.1":
-  version: 11.0.1
-  resolution: "lru-cache@npm:11.0.1"
-  checksum: 10c0/8bad6603dc67eb5b03520fba05bce5df6473dbba58ac4c6067ed088d29225a0a04416bb1462acd8c1f819d1fbf37920446a1c36bafd9c384bcc54cee0d3b697a
   languageName: node
   linkType: hard
 
