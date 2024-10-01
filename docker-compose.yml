@@ -1,6 +1,6 @@
 services:
   bee-code-interpreter-k3s:
-    image: "rancher/k3s:v1.29.7-k3s1"
+    image: "rancher/k3s:v1.30.5-k3s1"
     command: ["server", "--tls-san", "bee-code-interpreter-k3s"]
     tmpfs:
       - /run
@@ -21,7 +21,7 @@ services:
     healthcheck:
       test: "kubectl get po code-interpreter | grep Running"
       interval: 10s
-      retries: 5
+      retries: 10
       start_period: 30s
 
 volumes:
