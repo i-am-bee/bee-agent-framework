@@ -42,6 +42,9 @@ export const BAMChatLLMPreset = {
       },
     };
   },
+  "meta-llama/llama-3-8b-instruct"(): BAMChatLLMPreset {
+    return this["meta-llama/llama-3-1-70b-instruct"]();
+  },
   "meta-llama/llama-3-70b-instruct": (): BAMChatLLMPreset => {
     const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("llama3");
 
