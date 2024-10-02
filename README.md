@@ -48,7 +48,7 @@ import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
-const llm = new OllamaChatLLM(); // default is llama3.2 (3B), 
+const llm = new OllamaChatLLM(); // default is llama3.2 (3B),
 
 const agent = new BeeAgent({
   llm, // for more explore 'bee-agent-framework/adapters'
