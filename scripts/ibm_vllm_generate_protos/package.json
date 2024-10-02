@@ -1,5 +1,6 @@
 {
-  "name": "grpc-types",
+  "name": "ibm-vllm-proto-types",
+  "type": "module",
   "version": "1.0.0",
   "typings": "./types/generation.d.ts"
 }
