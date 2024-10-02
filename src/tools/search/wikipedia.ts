@@ -123,7 +123,7 @@ export class WikipediaTool extends Tool<
 > {
   name = "Wikipedia";
   description =
-    "Search a query on Wikipedia. Useful when you need to get information about famous people, places, companies, historical events, or other subjects.";
+    "Search factual and historical information, including biography, history, politics, geography, society, culture, science, technology, people, animal species, mathematics, and other subjects.";
 
   inputSchema() {
     return z.object({

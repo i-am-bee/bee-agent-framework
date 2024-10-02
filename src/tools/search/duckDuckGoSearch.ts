@@ -72,7 +72,7 @@ export class DuckDuckGoSearchTool extends Tool<
 > {
   name = "DuckDuckGo";
   description =
-    "Search a query on DuckDuckGo. Useful for when you need to answer questions about current events. Output is a list of relevant websites with a concrete page description.";
+    "Search for online trends, news, current events, real-time information, or research topics.";
 
   protected readonly client: typeof rawDDGSearch;
 
