@@ -101,7 +101,7 @@ describe("Bee Agent Runner", () => {
       }),
       BaseMessage.of({
         role: Role.ASSISTANT,
-        text: "I am a helpful assistant that uses tools to answer questions.",
+        text: "I am a helpful assistant.",
       }),
     ]);
 
