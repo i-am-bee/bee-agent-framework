@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.0.22](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.21...v0.0.22) (2024-10-02)
+
+### Features
+
+- **agent:** prevent emitting tool output update during streaming ([94ab4fe](https://github.com/i-am-bee/bee-agent-framework/commit/94ab4fe6aa7497ec7c4d26145c7c63a3fcb2163d))
+- **agent:** update bee system prompt, tools description ([#48](https://github.com/i-am-bee/bee-agent-framework/issues/48)) ([83fdb26](https://github.com/i-am-bee/bee-agent-framework/commit/83fdb26d6a83810bd20faf465654250f0aa88fee))
+- **ibm-vllm:** add llm adapter ([ec4e455](https://github.com/i-am-bee/bee-agent-framework/commit/ec4e455627a80ae0e2ec36a9c8369b7b107dbe21))
+- **ibm-vllm:** update build process ([4a73ac0](https://github.com/i-am-bee/bee-agent-framework/commit/4a73ac0c0746a62d2d322895ac251642954f675d))
+
+### Bug Fixes
+
+- **tools:** wikipedia - remove records that did not pass the filtering criteria ([46ce792](https://github.com/i-am-bee/bee-agent-framework/commit/46ce7929558fc8ee769b124a66de6a3ba90e868d))
+
 ## [0.0.21](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.20...v0.0.21) (2024-10-02)
 
 ### Features
