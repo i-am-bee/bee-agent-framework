@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.0.21](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.20...v0.0.21) (2024-10-02)
+
+### Features
+
+- **agent:** extend line prefix parser error messages ([20efff2](https://github.com/i-am-bee/bee-agent-framework/commit/20efff2ff57de1e331c6df327fae05ced5722fa4))
+- **code-interpreter:** update configuration and readme ([70280a9](https://github.com/i-am-bee/bee-agent-framework/commit/70280a97359d3850104cad88b83923b0ac34d09a))
+- **code-interpreter:** update to 0.0.11 ([#41](https://github.com/i-am-bee/bee-agent-framework/issues/41)) ([f136a09](https://github.com/i-am-bee/bee-agent-framework/commit/f136a093ac998fa80c470ae2c6aeb6759112d171))
+- **llm:** add llama3-8b to BAM chat preset ([8f6be11](https://github.com/i-am-bee/bee-agent-framework/commit/8f6be1110dfcb711cc62822123a7ed5f4d3da274))
+- **serializer:** supports serialization for class with the same name ([11cab93](https://github.com/i-am-bee/bee-agent-framework/commit/11cab93ae11e3a3408b06e4aece5d63f30cd4a0d))
+- **tools:** add langchain adapter ([332edce](https://github.com/i-am-bee/bee-agent-framework/commit/332edce8356121d7a6bbd521f6c05e5648ef74db)), closes [#42](https://github.com/i-am-bee/bee-agent-framework/issues/42)
+- **tools:** rename GoogleCustomSearch to GoogleSearch ([087351f](https://github.com/i-am-bee/bee-agent-framework/commit/087351f07e747ca2cb7b614422332e1e95c8aa0c))
+- **tools:** update abort signal propagation ([f718236](https://github.com/i-am-bee/bee-agent-framework/commit/f7182360ecc55d5abeb9fe15e53b75f6f1ea2ba5))
+
 ## [0.0.20](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.19...v0.0.20) (2024-09-27)
 
 ### Features

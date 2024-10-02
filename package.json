@@ -1,6 +1,6 @@
 {
   "name": "bee-agent-framework",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "license": "Apache-2.0",
   "description": "Bee - LLM Agent Framework",
   "author": "IBM Corp.",
@@ -57,7 +57,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "yarn clean && yarn ts:check && tsup",
+    "build": "yarn clean && yarn ts:check && NODE_OPTIONS='--max-old-space-size=8192' tsup",
     "ts:check": "tsc --noEmit && tsc -p tsconfig.examples.json --noEmit",
     "start": "tsx --tsconfig tsconfig.examples.json",
     "start:bee": "yarn start -- examples/agents/bee.ts",

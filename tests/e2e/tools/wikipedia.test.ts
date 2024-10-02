@@ -37,4 +37,15 @@ describe("Wikipedia", () => {
     expect(markdown).not.match(/<a\s+[^>]*href=["'][^"']*["'][^>]*>/gim);
     expect(markdown).not.match(/<img\s+[^>]*src=["'][^"']*["'][^>]*>/gim);
   });
+
+  it("Handles non-existing page", async () => {
+    const instance = new WikipediaTool();
+    const response = await instance.run({ query: "adsdassdsadas" });
+
+    expect(response.isEmpty()).toBeTruthy();
+    expect(response.results).toHaveLength(0);
+    expect(response.getTextContent()).toMatchInlineSnapshot(
+      `"No results were found. Try to reformat your query."`,
+    );
+  });
 });

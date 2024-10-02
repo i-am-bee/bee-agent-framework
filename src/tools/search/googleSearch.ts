@@ -64,7 +64,7 @@ export class GoogleSearchTool extends Tool<
   GoogleSearchToolOptions,
   GoogleSearchToolRunOptions
 > {
-  name = "GoogleCustomSearch";
+  name = "GoogleSearch";
   description = `Search a query using Google Custom Search Engine.
      Useful for when you need to answer questions or find relevant content on all or specific websites. 
      Output is a list of relevant websites with descriptions.`;
@@ -99,7 +99,7 @@ export class GoogleSearchTool extends Tool<
       throw new ValueError(
         [
           `"apiKey" or "cseId" must both be provided.`,
-          `Either set them directly or put them in ENV ("WATSONX_ACCESS_TOKEN" / "WATSONX_API_KEY")`,
+          `Either set them directly or put them in ENV ("GOOGLE_API_KEY" / "GOOGLE_CSE_ID")`,
         ].join("\n"),
       );
     }

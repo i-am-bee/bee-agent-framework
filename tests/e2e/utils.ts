@@ -30,6 +30,7 @@ import { toJsonSchema } from "@/internals/helpers/schema.js";
 import { OpenAI } from "openai";
 import { Groq } from "groq-sdk";
 import { customsearch_v1 } from "@googleapis/customsearch";
+import { LangChainTool } from "@/adapters/langchain/tools.js";
 
 interface CallbackOptions<T> {
   required?: boolean;
@@ -67,7 +68,13 @@ export function createCallbackRegister() {
   };
 }
 
-export function verifyDeserialization(ref: unknown, deserialized: unknown, parent?: any) {
+export function verifyDeserialization(
+  ref: unknown,
+  deserialized: unknown,
+  parent?: any,
+  path: string[] = [],
+  ignoredPaths: string[] = [],
+) {
   if (R.isPromise(ref) || R.isPromise(deserialized)) {
     throw new TypeError('Value passed to "verifyDeserialization" is promise (forgotten await)!');
   }
@@ -81,7 +88,7 @@ export function verifyDeserialization(ref: unknown, deserialized: unknown, paren
     const getNonIgnoredKeys = (instance: any) =>
       new Set(
         Object.entries(instance)
-          .filter(([_, value]) => !verifyDeserialization.isIgnored(value, instance))
+          .filter(([key, value]) => !verifyDeserialization.isIgnored(key, value, instance))
           .map(([key, _]) => key)
           .sort(),
       );
@@ -91,6 +98,11 @@ export function verifyDeserialization(ref: unknown, deserialized: unknown, paren
     expect(keysB).toStrictEqual(refKeys);
 
     for (const key of refKeys.values()) {
+      const fullPath = path.concat(key).join(".");
+      if (ignoredPaths.includes(fullPath)) {
+        continue;
+      }
+
       let value: any = ref[key as keyof typeof ref];
       let target: any = deserialized[key as keyof typeof deserialized];
 
@@ -102,12 +114,13 @@ export function verifyDeserialization(ref: unknown, deserialized: unknown, paren
       }
 
       Serializer.findFactory(target);
-      verifyDeserialization(value, target, parent);
+      verifyDeserialization(value, target, parent, path.concat(key), ignoredPaths);
     }
   } else {
     expect(deserialized).toStrictEqual(ref);
   }
 }
+verifyDeserialization.ignoredKeys = new Set<string>([LangChainTool.serializedSchemaKey]);
 verifyDeserialization.ignoredClasses = [
   Logger,
   Client,
@@ -116,7 +129,11 @@ verifyDeserialization.ignoredClasses = [
   RunContext,
   Emitter,
 ] as ClassConstructor[];
-verifyDeserialization.isIgnored = (value: unknown, parent?: any) => {
+verifyDeserialization.isIgnored = (key: string, value: unknown, parent?: any) => {
+  if (verifyDeserialization.ignoredKeys.has(key)) {
+    return true;
+  }
+
   const ignored = verifyDeserialization.ignoredClasses;
 
   // Pino check
