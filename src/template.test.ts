@@ -220,7 +220,7 @@ describe("Prompt Template", () => {
           return [`Created At: ${this.meta?.createdAt ?? "unknown"}`].filter(Boolean).join("\n");
         },
       },
-      template: `Question: {{input}}\n\n{{formatMeta}}`,
+      template: `Message: {{input}}\n\n{{formatMeta}}`,
     });
 
     expect(
@@ -231,7 +231,7 @@ describe("Prompt Template", () => {
         },
       }),
     ).toMatchInlineSnapshot(`
-      "Question: Who are you?
+      "Message: Who are you?
 
       Created At: 2024-09-10T17:55:44.947Z"
     `);
