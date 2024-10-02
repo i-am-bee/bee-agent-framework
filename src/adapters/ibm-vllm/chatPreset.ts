@@ -49,7 +49,7 @@ export const IBMVllmChatLLMPreset = {
             max_new_tokens: 2048,
           },
           decoding: {
-            repetition_penalty: 1.03,
+            repetition_penalty: 1,
           },
         },
       },
@@ -71,7 +71,7 @@ export const IBMVllmChatLLMPreset = {
             max_new_tokens: 2048,
           },
           decoding: {
-            repetition_penalty: 1.03,
+            repetition_penalty: 1,
           },
         },
       },
