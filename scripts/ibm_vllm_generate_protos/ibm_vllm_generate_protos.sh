@@ -16,9 +16,15 @@
 set -e
 
 GRPC_PROTO_PATH="./src/adapters/ibm-vllm/proto"
-GRPC_TYPES_PATH="./src/adapters/ibm-vllm/types"
+GRPC_TYPES_PATH="./src/adapters/ibm-vllm/types.ts"
 
-rm -r "$GRPC_TYPES_PATH"
+SCRIPT_DIR="$(dirname "$0")"
+GRPC_TYPES_TMP_PATH=types
+
+rm -f "$GRPC_TYPES_PATH"
+
+rm -rf "${SCRIPT_DIR}"/{dist,dts,types}
+
 
 yarn run proto-loader-gen-types \
   --defaults \
@@ -27,13 +33,25 @@ yarn run proto-loader-gen-types \
   --longs=Number \
   --enums=String \
   --grpcLib=@grpc/grpc-js \
-  --"outDir=${GRPC_TYPES_PATH}" \
+  --"outDir=${SCRIPT_DIR}/${GRPC_TYPES_TMP_PATH}" \
   "${GRPC_PROTO_PATH}"/*.proto
 
-# Fix imports: relative -> absolute, add .js extension
-sed -i.bak -E "s| from '\.\.?([^']*)'| from '@/${GRPC_TYPES_PATH//.\/src\//}\1.js'|g" \
-  "${GRPC_TYPES_PATH}"/*.ts \
-  "${GRPC_TYPES_PATH}"/**/*.ts
-rm "${GRPC_TYPES_PATH}"/**/*.bak "${GRPC_TYPES_PATH}"/*.bak
+
+cd "$SCRIPT_DIR"
+  # Fix imports: add .js extension
+  sed -i.bak -E "s| from '(\.[^']*)'| from '\1.js'|g" types/*.ts types/**/*.ts
+  rm types/**/*.bak types/*.bak
+
+  npx tsc --project tsconfig.proto.json
+  npx api-extractor run
+
+  # declare -> export
+  # export const -> let (due to 'const' declarations must be initialized error)
+  sed -i.bak -E "s/^declare/export/" dist/grpc-types.d.ts
+  sed -i.bak -E "s/^export const/let/" dist/grpc-types.d.ts
+  rm dist/grpc-types.d.ts.bak
+cd -
+
+mv "${SCRIPT_DIR}/dist/grpc-types.d.ts" "$GRPC_TYPES_PATH"
 yarn run lint:fix "${GRPC_TYPES_PATH}"
 yarn prettier --write "${GRPC_TYPES_PATH}"

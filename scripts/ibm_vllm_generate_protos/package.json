@@ -1,0 +1,5 @@
+{
+  "name": "grpc-types",
+  "version": "1.0.0",
+  "typings": "./types/generation.d.ts"
+}

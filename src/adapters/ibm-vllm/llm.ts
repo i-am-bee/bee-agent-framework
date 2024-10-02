@@ -25,17 +25,17 @@ import {
   LLMMeta,
 } from "@/llms/base.js";
 import { isEmpty, isString } from "remeda";
-import { BatchedGenerationRequest } from "@/adapters/ibm-vllm/types/fmaas/BatchedGenerationRequest.js";
-import { SingleGenerationRequest } from "@/adapters/ibm-vllm/types/fmaas/SingleGenerationRequest.js";
+import { SingleGenerationRequest } from "@/adapters/ibm-vllm/types.js";
 import { LLM, LLMInput } from "@/llms/llm.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { GenerationResponse__Output } from "@/adapters/ibm-vllm/types/fmaas/GenerationResponse.js";
+import { GenerationResponse__Output } from "@/adapters/ibm-vllm/types.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { FrameworkError, NotImplementedError } from "@/errors.js";
 import { assign } from "@/internals/helpers/object.js";
 import { ServiceError } from "@grpc/grpc-js";
 import { Client } from "@/adapters/ibm-vllm/client.js";
 import { GetRunContext } from "@/context.js";
+import { BatchedGenerationRequest } from "./types.js";
 
 function isGrpcServiceError(err: unknown): err is ServiceError {
   return (
@@ -130,7 +130,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
       });
       const output = response.responses.at(0);
       if (!output) {
-        throw new LLMError("Missing output");
+        throw new LLMError("Missing output", [], { context: { response } });
       }
       return {
         tokens: output.tokens,
@@ -157,7 +157,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
       );
       const output = response.responses.at(0);
       if (!output) {
-        throw new LLMError("Missing output");
+        throw new LLMError("Missing output", [], { context: { response } });
       }
 
       const { text, ...rest } = output;

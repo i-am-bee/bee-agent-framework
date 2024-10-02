@@ -78,7 +78,7 @@
     "prepare": "husky",
     "copyright": "./scripts/copyright.sh",
     "release": "release-it",
-    "ibm-vllm:generate-types": "./scripts/ibm_vllm_generate_protos.sh",
+    "ibm-vllm:generate-types": "./scripts/ibm_vllm_generate_protos/ibm_vllm_generate_protos.sh",
     "_ensure_env": "cp -n .env.template .env || true",
     "_docker": "yarn _ensure_env && bash -c 'source ./.env && docker_cmd=$(which docker >/dev/null 2>&1 && printf docker || printf podman) && $docker_cmd \"$@\"' sh"
   },
@@ -140,6 +140,7 @@
     "@langchain/community": "~0.2.28",
     "@langchain/core": "~0.2.27",
     "@langchain/langgraph": "~0.0.34",
+    "@microsoft/api-extractor": "^7.47.9",
     "@release-it/conventional-changelog": "^8.0.1",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@swc/core": "^1.7.14",
