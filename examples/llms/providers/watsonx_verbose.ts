@@ -22,7 +22,7 @@ const template = new PromptTemplate({
 });
 
 const llm = new WatsonXLLM({
-  modelId: "meta-llama/llama-3-1-70b-instruct",
+  modelId: "meta-llama/Llama-3.2-3B-Instruct",
   projectId: process.env.WATSONX_PROJECT_ID,
   apiKey: process.env.WATSONX_API_KEY,
   parameters: {
