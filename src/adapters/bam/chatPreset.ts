@@ -33,7 +33,7 @@ export const BAMChatLLMPreset = {
           decoding_method: "greedy",
           include_stop_sequence: false,
           max_new_tokens: 2048,
-          repetition_penalty: 1.03,
+          repetition_penalty: 1,
           stop_sequences: [...parameters.stop_sequence],
         },
       },
