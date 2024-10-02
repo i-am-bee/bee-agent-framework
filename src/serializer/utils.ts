@@ -82,15 +82,32 @@ export function isRootNode<T>(data: unknown): data is RootNode<T> {
   );
 }
 
-export function extractClassName(value: unknown): string {
-  if (R.isObjectType(value) && "constructor" in value) {
-    return value.constructor.name;
-  }
-  if (R.isFunction(value)) {
-    return value.name || value.constructor?.name || Function.name;
-  }
-  return extractClassName(primitiveToSerializableClass(value));
-}
+export const extractClassName = (() => {
+  const registry = new Map<string, unknown[]>();
+  const register = (name: string, factory: any) => {
+    if (!registry.has(name)) {
+      registry.set(name, []);
+    }
+    const target = registry.get(name)!;
+    let index = target.indexOf(factory);
+    if (index === -1) {
+      index = target.push(factory) - 1;
+    }
+    return [name, index].filter(Boolean).join("");
+  };
+
+  return (value: unknown): string => {
+    if (R.isObjectType(value) && "constructor" in value) {
+      const name = value.constructor.name;
+      return register(name, value.constructor);
+    }
+    if (R.isFunction(value)) {
+      const name = value.name || value.constructor?.name || Function.name;
+      return register(name, value);
+    }
+    return extractClassName(primitiveToSerializableClass(value));
+  };
+})();
 
 const ClassByValueType = {
   string: String,
