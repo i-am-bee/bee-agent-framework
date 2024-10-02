@@ -236,6 +236,9 @@ export class BeeAgentRunner {
           })
           .observe((llmEmitter) => {
             parser.emitter.on("update", async ({ value, key, field }) => {
+              if (key === "tool_output" && parser.isDone) {
+                return;
+              }
               await emitter.emit("update", {
                 data: parser.finalState,
                 update: { key, value: field.raw, parsedValue: value },
