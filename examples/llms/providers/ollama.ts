@@ -5,7 +5,7 @@ import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 {
   console.info("===RAW===");
   const llm = new OllamaLLM({
-    modelId: "llama3.1",
+    modelId: "llama3.2",
     parameters: {
       num_predict: 10,
       stop: ["post"],
@@ -23,7 +23,7 @@ import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 {
   console.info("===CHAT===");
   const llm = new OllamaChatLLM({
-    modelId: "llama3.1",
+    modelId: "llama3.2",
     parameters: {
       num_predict: 10,
       temperature: 0,
