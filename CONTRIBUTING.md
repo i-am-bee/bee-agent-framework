@@ -104,9 +104,47 @@ We use GitHub pull requests to accept contributions.
 While not required, opening a new issue about the bug you're fixing or the feature you're working on before you open a pull request is important in starting a discussion with the community about your work. The issue gives us a place to talk about the idea and how we can work together to implement it in the code. It also lets the community know what you're working on, and if you need help, you can reference the issue when discussing it with other community and team members.
 If you've written some code but need help finishing it, want to get initial feedback on it before finishing it, or want to share it and discuss it prior to completing the implementation, you can open a Draft pull request and prepend the title with the [WIP] tag (for Work In Progress). This will indicate to reviewers that the code in the PR isn't in its final state and will change. It also means we will only merge the commit once it is finished. You or a reviewer can remove the [WIP] tag when the code is ready to be thoroughly reviewed for merging.
 
-## Contributor Licensing Agreement
+## Legal
 
-Before you can submit any code, all contributors must sign a
-contributor license agreement (CLA). By signing a CLA, you're attesting
-that you are the author of the contribution, and that you're freely
-contributing it under the terms of the Apache-2.0 license.
+The following sections detail important legal information that should be viewed prior to contribution.
+
+### License and Copyright
+
+Distributed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+SPDX-License-Identifier: [Apache-2.0](https://spdx.org/licenses/Apache-2.0)
+
+If you would like to see the detailed LICENSE click [here](LICENSE).
+
+### Developer Certificate of Origin (DCO)
+
+We have tried to make it as easy as possible to make contributions. This applies to how we handle the legal aspects of
+contribution. We use the same approach - the
+[Developer's Certificate of Origin 1.1 (DCO)](https://developercertificate.org/) - that the Linux® Kernel
+[community](https://docs.kernel.org/process/submitting-patches.html#sign-your-work-the-developer-s-certificate-of-origin)
+uses to manage code contributions.
+
+We ask that when submitting a patch for review, the developer must include a sign-off statement in the commit message.
+If you set your `user.name` and `user.email` in your `git config` file, you can sign your commit automatically by using
+the following command:
+
+```shell
+git commit -s
+```
+
+The following example includes a `Signed-off-by:` line, which indicates that the submitter has accepted the DCO:
+
+```text
+Signed-off-by: John Doe <john.doe@example.com>
+```
+
+We automatically verify that all commit messages contain a `Signed-off-by:` line with your email address.
+
+#### Useful tools for doing DCO signoffs
+
+There are a number of tools that make it easier for developers to manage DCO signoffs.
+
+- DCO command line tool, which let's you do a single signoff for an entire repo ( <https://github.com/coderanger/dco> )
+- GitHub UI integrations for adding the signoff automatically ( <https://github.com/scottrigby/dco-gh-ui> )
+- Chrome - <https://chrome.google.com/webstore/detail/dco-github-ui/onhgmjhnaeipfgacbglaphlmllkpoijo>
+- Firefox - <https://addons.mozilla.org/en-US/firefox/addon/scott-rigby/?src=search>
