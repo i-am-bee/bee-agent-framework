@@ -19,6 +19,7 @@ GRPC_PROTO_PATH="./src/adapters/ibm-vllm/proto"
 GRPC_TYPES_PATH="./src/adapters/ibm-vllm/types.ts"
 
 SCRIPT_DIR="$(dirname "$0")"
+OUTPUT_RELATIVE_PATH="dist/generation.d.ts"
 GRPC_TYPES_TMP_PATH=types
 
 rm -f "$GRPC_TYPES_PATH"
@@ -38,20 +39,15 @@ yarn run proto-loader-gen-types \
 
 
 cd "$SCRIPT_DIR"
-  # Fix imports: add .js extension
-  sed -i.bak -E "s| from '(\.[^']*)'| from '\1.js'|g" types/*.ts types/**/*.ts
-  rm types/**/*.bak types/*.bak
-
-  npx tsc --project tsconfig.proto.json
-  npx api-extractor run
-
-  # declare -> export
-  # export const -> let (due to 'const' declarations must be initialized error)
-  sed -i.bak -E "s/^declare/export/" dist/grpc-types.d.ts
-  sed -i.bak -E "s/^export const/let/" dist/grpc-types.d.ts
-  rm dist/grpc-types.d.ts.bak
+  tsup --dts-only
+  sed -i.bak '$ d' "$OUTPUT_RELATIVE_PATH"
+  sed -i.bak -E "s/^interface/export interface/" "$OUTPUT_RELATIVE_PATH"
+  sed -i.bak -E "s/^type/export type/" "$OUTPUT_RELATIVE_PATH"
 cd -
 
-mv "${SCRIPT_DIR}/dist/grpc-types.d.ts" "$GRPC_TYPES_PATH"
+mv "$SCRIPT_DIR/$OUTPUT_RELATIVE_PATH" "$GRPC_TYPES_PATH"
+rm -rf "${SCRIPT_DIR}"/{dist,dts,types}
+
 yarn run lint:fix "${GRPC_TYPES_PATH}"
 yarn prettier --write "${GRPC_TYPES_PATH}"
+yarn copyright

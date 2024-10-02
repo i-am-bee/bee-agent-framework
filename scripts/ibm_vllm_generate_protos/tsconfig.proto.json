@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "node",
+    "rootDir": ".",
     "baseUrl": ".",
+    "target": "ESNext",
+    "module": "ES6",
+    "outDir": "dist",
     "declaration": true,
     "emitDeclarationOnly": true,
     "skipLibCheck": true,
-    "outDir": "dts"
-  },
-  "files": ["./types/generation.ts"]
+    "sourceMap": false
+  }
 }

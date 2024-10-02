@@ -25,7 +25,7 @@ import {
   LLMMeta,
 } from "@/llms/base.js";
 import { isEmpty, isString } from "remeda";
-import { SingleGenerationRequest } from "@/adapters/ibm-vllm/types.js";
+import type { SingleGenerationRequest } from "@/adapters/ibm-vllm/types.js";
 import { LLM, LLMInput } from "@/llms/llm.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GenerationResponse__Output } from "@/adapters/ibm-vllm/types.js";

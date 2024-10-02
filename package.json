@@ -140,7 +140,6 @@
     "@langchain/community": "~0.2.28",
     "@langchain/core": "~0.2.27",
     "@langchain/langgraph": "~0.0.34",
-    "@microsoft/api-extractor": "^7.47.9",
     "@release-it/conventional-changelog": "^8.0.1",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@swc/core": "^1.7.14",
