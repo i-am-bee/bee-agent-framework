@@ -140,11 +140,12 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
 
   protected async *_stream(
     messages: BaseMessage[],
-    options?: IBMvLLMGenerateOptions,
+    options: IBMvLLMGenerateOptions | undefined,
+    run: GetRunContext<typeof this>,
   ): AsyncStream<GrpcChatLLMOutput, void> {
     const prompt = this.messagesToPrompt(messages);
     // @ts-expect-error protected property
-    const response = this.llm._stream(prompt, options);
+    const response = this.llm._stream(prompt, options, run);
     return yield* transformAsyncIterable(response, (output) => new GrpcChatLLMOutput(output));
   }
 
