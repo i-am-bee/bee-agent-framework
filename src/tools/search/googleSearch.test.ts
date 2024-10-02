@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { GoogleSearchTool, GoogleSearchToolOutput } from "@/tools/search/googleCustomSearch.js";
+import { GoogleSearchTool, GoogleSearchToolOutput } from "@/tools/search/googleSearch.js";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { SlidingCache } from "@/cache/slidingCache.js";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
@@ -59,7 +59,7 @@ describe("GoogleCustomSearch Tool", () => {
 
   it("is a valid tool", () => {
     expect(googleSearchTool).toBeDefined();
-    expect(googleSearchTool.name).toBe("GoogleCustomSearch");
+    expect(googleSearchTool.name).toBe("GoogleSearch");
     expect(googleSearchTool.description).toBeDefined();
   });
 
