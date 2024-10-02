@@ -57,7 +57,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "yarn clean && yarn ts:check && NODE_OPTIONS='--max-old-space-size=8192' tsup",
+    "build": "yarn clean && yarn ts:check && NODE_OPTIONS='--max-old-space-size=8192' tsup && cp -r src/adapters/ibm-vllm/proto dist/adapters/ibm-vllm",
     "ts:check": "tsc --noEmit && tsc -p tsconfig.examples.json --noEmit",
     "start": "tsx --tsconfig tsconfig.examples.json",
     "start:bee": "yarn start -- examples/agents/bee.ts",
