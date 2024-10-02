@@ -27,22 +27,23 @@ import { UnaryCallback } from "@grpc/grpc-js/build/src/client.js";
 import { FrameworkError, ValueError } from "@/errors.js";
 import protoLoader from "@grpc/proto-loader";
 
-import { ProtoGrpcType as GenerationProtoGentypes } from "@/adapters/ibm-vllm/types/generation.js";
+import {
+  BatchedGenerationRequest,
+  BatchedGenerationResponse__Output,
+  BatchedTokenizeRequest,
+  BatchedTokenizeResponse__Output,
+  GenerationRequest__Output,
+  ModelInfoRequest,
+  ModelInfoResponse__Output,
+  ProtoGrpcType as GenerationProtoGentypes,
+  SingleGenerationRequest,
+} from "@/adapters/ibm-vllm/types.js";
 import { parseEnv } from "@/internals/env.js";
 import { z } from "zod";
-import { BatchedGenerationRequest } from "@/adapters/ibm-vllm/types/fmaas/BatchedGenerationRequest.js";
-import { SingleGenerationRequest } from "@/adapters/ibm-vllm/types/fmaas/SingleGenerationRequest.js";
-import { ModelInfoRequest } from "@/adapters/ibm-vllm/types/fmaas/ModelInfoRequest.js";
-import { ModelInfoResponse__Output } from "@/adapters/ibm-vllm/types/fmaas/ModelInfoResponse.js";
-import { BatchedGenerationResponse__Output } from "@/adapters/ibm-vllm/types/fmaas/BatchedGenerationResponse.js";
-import { GenerationRequest__Output } from "@/adapters/ibm-vllm/types/fmaas/GenerationRequest.js";
-import { BatchedTokenizeRequest } from "@/adapters/ibm-vllm/types/fmaas/BatchedTokenizeRequest.js";
-import { BatchedTokenizeResponse__Output } from "@/adapters/ibm-vllm/types/fmaas/BatchedTokenizeResponse.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { Serializable } from "@/internals/serializable.js";
 
-const generationProtoPath = "./proto/generation.proto"; // separate variable to avoid Vite transformation https://vitejs.dev/guide/assets#new-url-url-import-meta-url
-const GENERATION_PROTO_PATH = new URL(generationProtoPath, import.meta.url);
+const GENERATION_PROTO_PATH = new URL("./proto/generation.proto", import.meta.url);
 
 interface ClientOptions {
   modelRouterSubdomain?: string;
@@ -87,7 +88,7 @@ export class Client extends Serializable {
   private usedDefaultCredentials = false;
 
   @Cache({ ttl: GRPC_CLIENT_TTL })
-  cachedClientFactory(modelId: string) {
+  protected getClient(modelId: string) {
     const modelSpecificUrl = this.options.url.replace(/{model_id}/, modelId.replaceAll("/", "--"));
     const client = new generationPackageObject.fmaas.GenerationService(
       modelSpecificUrl,
@@ -108,11 +109,7 @@ export class Client extends Serializable {
     return client;
   }
 
-  protected getClient(modelId: string) {
-    return this.cachedClientFactory(modelId);
-  }
-
-  getDefaultCredentials() {
+  protected getDefaultCredentials() {
     this.usedDefaultCredentials = true;
     return {
       rootCert: parseEnv("IBM_VLLM_ROOT_CERT", z.string()),
@@ -211,6 +208,7 @@ export class Client extends Serializable {
       options: R.omit(this.options, ["credentials"]),
     };
   }
+
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
     Object.assign(this, snapshot);
     this.options.credentials = this.getDefaultCredentials();

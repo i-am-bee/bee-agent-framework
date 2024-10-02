@@ -8,13 +8,13 @@ import markdown from "@eslint/markdown";
 
 export default tseslint.config(
   {
-    ignores: ["node_modules/**", "dist/**"],
+    ignores: ["node_modules/**", "dist/**", "scripts/ibm_vllm_generate_protos/**"],
   },
   eslint.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
   {
-    files: ["src/adapters/ibm-vllm/types/**"],
+    files: ["src/adapters/ibm-vllm/types.ts"],
     rules: { "@typescript-eslint/unified-signatures": "off" },
   },
   {
