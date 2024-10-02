@@ -17,7 +17,7 @@ Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
 const llm = new OllamaChatLLM({
-  modelId: "llama3.1", // llama3.1:70b for better performance
+  modelId: "llama3.2", // llama3.2:3B 
 });
 
 const codeInterpreterUrl = process.env.CODE_INTERPRETER_URL;

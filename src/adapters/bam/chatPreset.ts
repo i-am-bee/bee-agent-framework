@@ -78,6 +78,21 @@ export const BAMChatLLMPreset = {
       },
     };
   },
+  "meta-llama/Llama-3.2-3B-Instruct": (): BAMChatLLMPreset => {
+    const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("llama3.2");
+    return {
+      base: {
+        parameters: {
+          decoding_method: "greedy",
+          include_stop_sequence: false,
+          stop_sequences: [...parameters.stop_sequence],
+        },
+      },
+      chat: {
+        messagesToPrompt: messagesToPrompt(template),
+      },
+    };
+  },
 } as const;
 
 export type BAMChatLLMPresetModel = keyof typeof BAMChatLLMPreset;

@@ -68,6 +68,22 @@ export const WatsonXChatLLMPreset = {
   "meta-llama/llama-3-8b-instruct"() {
     return this["meta-llama/llama-3-70b-instruct"]();
   },
+  "meta-llama/Llama-3.2-3B-Instruct": (): WatsonXChatLLMPreset => {
+    const { template, messagesToPrompt, parameters } = LLMChatTemplates.get("llama3.2");
+    return {
+      base: {
+        parameters: {
+          decoding_method: "greedy",
+          max_new_tokens: 1500,
+          include_stop_sequence: false,
+          stop_sequences: [...parameters.stop_sequence],
+        },
+      },
+      chat: {
+        messagesToPrompt: messagesToPrompt(template),
+      },
+    };
+  },
 } as const;
 
 export type WatsonXChatLLMPresetModel = keyof typeof WatsonXChatLLMPreset;
