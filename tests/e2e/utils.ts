@@ -112,7 +112,6 @@ export function verifyDeserialization(
       if (target instanceof ZodType) {
         target = toJsonSchema(target);
       }
-
       Serializer.findFactory(target);
       verifyDeserialization(value, target, parent, path.concat(key), ignoredPaths);
     }
