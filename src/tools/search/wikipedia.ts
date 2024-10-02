@@ -96,6 +96,10 @@ export class WikipediaToolOutput extends SearchToolOutput<WikipediaToolResult> {
 
   @Cache()
   getTextContent(): string {
+    if (this.isEmpty()) {
+      return `No results were found. Try to reformat your query.`;
+    }
+
     const target = this.results.length === 1 ? this.results[0] : this.results;
     const response = JSON.stringify(target);
 
@@ -307,10 +311,6 @@ export class WikipediaTool extends Tool<
 
     if (bestCandidates.at(0)?.score === 1 && runOptions.filters?.excludeOthersOnExactMatch) {
       bestCandidates.length = 1;
-    }
-
-    if (bestCandidates.length === 0) {
-      bestCandidates.push(...searchRawResults);
     }
 
     const results = await Promise.all(
