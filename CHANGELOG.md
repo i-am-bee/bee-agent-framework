@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.0.23](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.22...v0.0.23) (2024-10-03)
+
+### Features
+
+- **agent:** add fallback for invalid llm output ([5ac89c1](https://github.com/i-am-bee/bee-agent-framework/commit/5ac89c15fce25ce78698fd5a9b80437de0af5e88)), closes [#55](https://github.com/i-am-bee/bee-agent-framework/issues/55)
+- **agent:** improve LinePrefixParser error messages ([710f75b](https://github.com/i-am-bee/bee-agent-framework/commit/710f75b0f6cc5a4ba73c2ad0719bc3e359b690f1))
+- **agent:** update bee system prompt ([#56](https://github.com/i-am-bee/bee-agent-framework/issues/56)) ([08c4714](https://github.com/i-am-bee/bee-agent-framework/commit/08c471451ac574ad4598e87157aeb8987477bb33))
+- **agent:** update bee system prompt ([#58](https://github.com/i-am-bee/bee-agent-framework/issues/58)) ([572572b](https://github.com/i-am-bee/bee-agent-framework/commit/572572b903704a5bf983e5508a1c5143238b8254)), closes [#55](https://github.com/i-am-bee/bee-agent-framework/issues/55)
+- **tools:** improve wikipedia parsing ([#57](https://github.com/i-am-bee/bee-agent-framework/issues/57)) ([513572f](https://github.com/i-am-bee/bee-agent-framework/commit/513572f4627f8e96ce917c8998ae1813ee4fe119))
+
+### Bug Fixes
+
+- **llm:** add missing protos to build ibm-vllm ([#52](https://github.com/i-am-bee/bee-agent-framework/issues/52)) ([6fe7bca](https://github.com/i-am-bee/bee-agent-framework/commit/6fe7bcaa16de28354b0f871ad9bd93e1e62c3213))
+- **llm:** add missing run context parameter for ibm-vllm ([#54](https://github.com/i-am-bee/bee-agent-framework/issues/54)) ([9ee7957](https://github.com/i-am-bee/bee-agent-framework/commit/9ee7957d119723844bc05d05fd97ee6408f695d6))
+- **llm:** bam chat preset typo ([93b3167](https://github.com/i-am-bee/bee-agent-framework/commit/93b316741e699ca8f7fc18599a7ea8bdc6d88ed7))
+- **llm:** watsonx chat preset typo ([f7d5128](https://github.com/i-am-bee/bee-agent-framework/commit/f7d51283edf4bcd12faaf6fe1b9dee02621b8c3c))
+
 ## [0.0.22](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.21...v0.0.22) (2024-10-02)
 
 ### Features
