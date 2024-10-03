@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.24](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.23...v0.0.24) (2024-10-03)
+
+### Features
+
+- **agent:** update line prefix parser fallback and add tests ([6932379](https://github.com/i-am-bee/bee-agent-framework/commit/693237954d7a35b1e557b5f4f5e88168c7dbae9f))
+- **agent:** use fallback only if LLM output is not empty ([a6e582d](https://github.com/i-am-bee/bee-agent-framework/commit/a6e582d6856c288332ab8cf75ca3888617cca8a5))
+- **llm:** update ollama default parameters ([a9dc1a9](https://github.com/i-am-bee/bee-agent-framework/commit/a9dc1a945649210f73c9ca4305cf754f4391f9ef))
+
 ## [0.0.23](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.22...v0.0.23) (2024-10-03)
 
 ### Features
