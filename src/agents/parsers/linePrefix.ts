@@ -163,15 +163,17 @@ export class LinePrefixParser<
         if (this.lastNodeKey) {
           const lastNode = this.nodes[this.lastNodeKey];
           if (!lastNode.next.includes(parsedLine.key)) {
-            throw new LinePrefixParserError(
+            this.throwWithContext(
               `Transition from '${this.lastNodeKey}' to '${parsedLine.key}' does not exist!`,
+              { line },
             );
           }
 
           await this.emitFinalUpdate(this.lastNodeKey, lastNode.field);
         } else if (!this.nodes[parsedLine.key].isStart) {
-          throw new LinePrefixParserError(
+          this.throwWithContext(
             `Parsed text line corresponds to a node "${parsedLine.key}" which is not a start node!`,
+            { line },
           );
         }
 
@@ -206,6 +208,22 @@ export class LinePrefixParser<
     }
   }
 
+  protected throwWithContext(
+    message: string,
+    extra: { line?: Line; errors?: Error[] } = {},
+  ): never {
+    throw new LinePrefixParserError(
+      [`The generated output does not adhere to the schema.`, message].join(NEW_LINE_CHARACTER),
+      extra.errors,
+      {
+        context: {
+          lines: linesToString(this.lines.concat(extra.line ? [extra.line] : [])),
+          excludedLines: linesToString(this.excludedLines),
+        },
+      },
+    );
+  }
+
   async end() {
     if (this.done) {
       return this.finalState;
@@ -213,12 +231,7 @@ export class LinePrefixParser<
     this.done = true;
 
     if (!this.lastNodeKey) {
-      throw new LinePrefixParserError("Nothing valid has been parsed yet!", [], {
-        context: {
-          lines: linesToString(this.lines),
-          excludedLines: linesToString(this.excludedLines),
-        },
-      });
+      this.throwWithContext("Nothing valid has been parsed yet!");
     }
 
     const stash = linesToString(this.lines);
@@ -238,7 +251,7 @@ export class LinePrefixParser<
 
     const currentNode = this.nodes[this.lastNodeKey];
     if (!currentNode.isEnd) {
-      throw new LinePrefixParserError(`Node '${this.lastNodeKey}' is not an end node.`);
+      this.throwWithContext(`Node '${this.lastNodeKey}' is not an end node.`);
     }
 
     await Promise.allSettled(Object.values(this.nodes).map(({ field }) => field.end()));
@@ -247,9 +260,7 @@ export class LinePrefixParser<
 
   protected async emitPartialUpdate(data: InferCallbackValue<Callbacks<T>["partialUpdate"]>) {
     if (data.key in this.finalState) {
-      throw new LinePrefixParserError(
-        `Cannot update partial event for completed key '${data.key}'`,
-      );
+      this.throwWithContext(`Cannot update partial event for completed key '${data.key}'`);
     }
     if (!(data.key in this.partialState)) {
       this.partialState[data.key] = "";
@@ -260,7 +271,7 @@ export class LinePrefixParser<
 
   protected async emitFinalUpdate(key: StringKey<T>, field: ParserField<any, any>) {
     if (key in this.finalState) {
-      throw new LinePrefixParserError(`Duplicated key '${key}'`);
+      this.throwWithContext(`Duplicated key '${key}'`);
     }
 
     try {
@@ -273,9 +284,9 @@ export class LinePrefixParser<
       });
     } catch (e) {
       if (e instanceof ZodError) {
-        throw new LinePrefixParserError(
+        this.throwWithContext(
           `Value for ${key} cannot be retrieved because it's value does not adhere to the appropriate schema.`,
-          [e],
+          { errors: [e] },
         );
       }
       throw e;
