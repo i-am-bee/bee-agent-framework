@@ -167,6 +167,71 @@ But I can use GoogleSearch to find out.`,
     });
   });
 
+  describe("Fallback", () => {
+    const getParser = () =>
+      new LinePrefixParser(
+        {
+          thought: {
+            prefix: "Thought:",
+            field: new ZodParserField(z.string()),
+            isStart: true,
+            next: ["final_answer"],
+          },
+          final_answer: {
+            prefix: "Final Answer:",
+            field: new ZodParserField(z.string()),
+            isEnd: true,
+            next: [],
+          },
+        },
+        {
+          fallback: (value) =>
+            [
+              { key: "thought", value: "I now know the final answer." },
+              {
+                key: "final_answer",
+                value,
+              },
+            ] as const,
+        },
+      );
+
+    it("Process", async () => {
+      const parser = getParser();
+      await parser.add("2+2=4");
+      await expect(parser.end()).resolves.toMatchInlineSnapshot(`
+        {
+          "final_answer": "2+2=4",
+          "thought": "I now know the final answer.",
+        }
+      `);
+    });
+
+    it("Process #2", async () => {
+      const parser = getParser();
+      await parser.add("A\nB\nC");
+      await expect(parser.end()).resolves.toMatchInlineSnapshot(`
+        {
+          "final_answer": "A
+        B
+        C",
+          "thought": "I now know the final answer.",
+        }
+      `);
+    });
+
+    it("Process #3", async () => {
+      const parser = getParser();
+      await parser.add("Thought");
+      await expect(parser.end()).resolves.toMatchInlineSnapshot(`
+        {
+          "final_answer": "Thought",
+          "thought": "I now know the final answer.",
+        }
+      `);
+    });
+  });
+
   describe("Edge cases", () => {
     it("Prevents processing when line starts with a potential prefix", async () => {
       const parser = new LinePrefixParser({

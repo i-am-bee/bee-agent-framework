@@ -237,9 +237,10 @@ export class LinePrefixParser<
     }
 
     if (!this.lastNodeKey && this.options.fallback) {
-      const stash = linesToString(this.excludedLines);
-      this.lines.length = 0;
-      this.excludedLines.length = 0;
+      const stash = linesToString([
+        ...this.excludedLines.splice(0, Infinity),
+        ...this.lines.splice(0, Infinity),
+      ]);
 
       const nodes = this.options.fallback(stash);
       await this.add(
