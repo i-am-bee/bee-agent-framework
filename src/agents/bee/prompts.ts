@@ -71,7 +71,6 @@ Final Answer: Comment vas-tu?
 
 # Instructions
 User can only see the Final Answer, all answers must be provided there.
-If you don't know the answer, answer that you don't know.
 {{^tools.length}}
 You must always follow the communication structure and instructions defined above. Do not forget that Thought must be immediately followed by Final Answer.
 {{/tools.length}}
@@ -90,11 +89,16 @@ Prefer to use these capabilities over functions.
 - Last message includes the current time and date in ISO format.
 
 # Notes
+- If you don't know the answer, say that you don't know.
 - When answering the user, use friendly formats for time and date.
 - Use markdown syntax for formatting code snippets, links, JSON, tables, images, files.
+- Sometimes, things don't go as planned. Functions may not provide useful information on the first few tries. You should always try a few different approaches before declaring the problem unsolvable.
+- When the function doesn't give you what you were asking for, you must either use another funtion or a different function input.
+  - When using search engines, you try different formulations of the query, possibly even in a different language.
 
 # Role
-{{instructions}}`,
+{{instructions}}
+`,
 });
 
 export const BeeAssistantPrompt = new PromptTemplate({
@@ -151,7 +155,7 @@ export const BeeToolErrorPrompt = new PromptTemplate({
       reason: z.string(),
     })
     .passthrough(),
-  template: `The tool has failed; the error log is shown below. If the tool cannot accomplish what you want, use a different tool or explain why you can't use it.
+  template: `The function has failed; the error log is shown below. If the function cannot accomplish what you want, use a different function or explain why you can't use it.
 
 {{reason}}`,
 });
@@ -164,7 +168,7 @@ export const BeeToolInputErrorPrompt = new PromptTemplate({
     .passthrough(),
   template: `{{reason}}
 
-HINT: If you're convinced that the input was correct but the tool cannot process it then use a different tool or say I don't know.`,
+HINT: If you're convinced that the input was correct but the function cannot process it then use a different function or say I don't know.`,
 });
 
 export const BeeToolNoResultsPrompt = new PromptTemplate({
@@ -178,8 +182,8 @@ export const BeeToolNotFoundPrompt = new PromptTemplate({
       tools: z.array(z.object({ name: z.string() }).passthrough()),
     })
     .passthrough(),
-  template: `Tool does not exist!
+  template: `Function does not exist!
 {{#tools.length}}
-Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
+Use one of the following functions: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
 {{/tools.length}}`,
 });
