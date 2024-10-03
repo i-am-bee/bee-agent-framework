@@ -34,8 +34,7 @@ describe("Wikipedia", () => {
 
     const markdown = response.results[0].fields!.markdown;
     expect(markdown).toBeTruthy();
-    expect(markdown).not.match(/<a\s+[^>]*href=["'][^"']*["'][^>]*>/gim);
-    expect(markdown).not.match(/<img\s+[^>]*src=["'][^"']*["'][^>]*>/gim);
+    expect(markdown).not.match(/\[([^\]]+)\]\(([^)]+)\)/g);
   });
 
   it("Handles non-existing page", async () => {
