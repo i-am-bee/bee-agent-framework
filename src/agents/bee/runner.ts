@@ -208,10 +208,12 @@ export class BeeAgentRunner {
       } as const,
       {
         fallback: (stash) =>
-          [
-            { key: "thought", value: "I now know the final answer." },
-            { key: "final_answer", value: stash },
-          ] as const,
+          stash
+            ? [
+                { key: "thought", value: "I now know the final answer." },
+                { key: "final_answer", value: stash },
+              ]
+            : [],
       },
     );
 
