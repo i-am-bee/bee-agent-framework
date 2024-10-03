@@ -161,47 +161,59 @@ export class BeeAgentRunner {
     const parserRegex =
       /Thought:.+\n(?:Final Answer:[\S\s]+|Function Name:.+\nFunction Input:\{.+\}\nFunction Caption:.+\nFunction Output:)?/;
 
-    const parser = new LinePrefixParser({
-      thought: {
-        prefix: "Thought:",
-        next: ["tool_name", "final_answer"],
-        isStart: true,
-        field: new ZodParserField(z.string().min(1)),
+    const parser = new LinePrefixParser(
+      {
+        thought: {
+          prefix: "Thought:",
+          next: ["tool_name", "final_answer"],
+          isStart: true,
+          field: new ZodParserField(z.string().min(1)),
+        },
+        tool_name: {
+          prefix: "Function Name:",
+          next: ["tool_input"],
+          field: new ZodParserField(
+            z.enum(tools.map((tool) => tool.name) as [string, ...string[]]),
+          ),
+        },
+        tool_input: {
+          prefix: "Function Input:",
+          next: ["tool_caption", "tool_output"],
+          isEnd: true,
+          field: new JSONParserField({
+            schema: z.object({}).passthrough(),
+            base: {},
+            matchPair: ["{", "}"],
+          }),
+        },
+        tool_caption: {
+          prefix: "Function Caption:",
+          next: ["tool_output"],
+          isEnd: true,
+          field: new ZodParserField(z.string()),
+        },
+        tool_output: {
+          prefix: "Function Output:",
+          next: ["final_answer"],
+          isEnd: true,
+          field: new ZodParserField(z.string()),
+        },
+        final_answer: {
+          prefix: "Final Answer:",
+          next: [],
+          isStart: true,
+          isEnd: true,
+          field: new ZodParserField(z.string().min(1)),
+        },
+      } as const,
+      {
+        fallback: (stash) =>
+          [
+            { key: "thought", value: "I now know the final answer." },
+            { key: "final_answer", value: stash },
+          ] as const,
       },
-      tool_name: {
-        prefix: "Function Name:",
-        next: ["tool_input"],
-        field: new ZodParserField(z.enum(tools.map((tool) => tool.name) as [string, ...string[]])),
-      },
-      tool_input: {
-        prefix: "Function Input:",
-        next: ["tool_caption", "tool_output"],
-        isEnd: true,
-        field: new JSONParserField({
-          schema: z.object({}).passthrough(),
-          base: {},
-        }),
-      },
-      tool_caption: {
-        prefix: "Function Caption:",
-        next: ["tool_output"],
-        isEnd: true,
-        field: new ZodParserField(z.string()),
-      },
-      tool_output: {
-        prefix: "Function Output:",
-        next: ["final_answer"],
-        isEnd: true,
-        field: new ZodParserField(z.string()),
-      },
-      final_answer: {
-        prefix: "Final Answer:",
-        next: [],
-        isStart: true,
-        isEnd: true,
-        field: new ZodParserField(z.string().min(1)),
-      },
-    } as const);
+    );
 
     return {
       parser,

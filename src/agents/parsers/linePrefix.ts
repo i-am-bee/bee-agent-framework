@@ -100,7 +100,12 @@ export class LinePrefixParser<
     return this.done;
   }
 
-  constructor(protected readonly nodes: T) {
+  constructor(
+    protected readonly nodes: T,
+    protected readonly options: {
+      fallback?: (value: string) => readonly { key: StringKey<T>; value: string }[];
+    } = {},
+  ) {
     super();
 
     let hasStartNode = false;
@@ -219,6 +224,8 @@ export class LinePrefixParser<
         context: {
           lines: linesToString(this.lines.concat(extra.line ? [extra.line] : [])),
           excludedLines: linesToString(this.excludedLines),
+          finalState: this.finalState,
+          partialState: this.partialState,
         },
       },
     );
@@ -228,6 +235,18 @@ export class LinePrefixParser<
     if (this.done) {
       return this.finalState;
     }
+
+    if (!this.lastNodeKey && this.options.fallback) {
+      const stash = linesToString(this.excludedLines);
+      this.lines.length = 0;
+      this.excludedLines.length = 0;
+
+      const nodes = this.options.fallback(stash);
+      await this.add(
+        nodes.map((node) => `${this.nodes[node.key].prefix}${node.value}`).join(NEW_LINE_CHARACTER),
+      );
+    }
+
     this.done = true;
 
     if (!this.lastNodeKey) {
@@ -285,7 +304,7 @@ export class LinePrefixParser<
     } catch (e) {
       if (e instanceof ZodError) {
         this.throwWithContext(
-          `Value for ${key} cannot be retrieved because it's value does not adhere to the appropriate schema.`,
+          `Value for '${key}' cannot be retrieved because it's value does not adhere to the appropriate schema.`,
           { errors: [e] },
         );
       }
@@ -332,6 +351,7 @@ export class LinePrefixParser<
       emitter: this.emitter,
       done: this.done,
       lastNodeKey: this.lastNodeKey,
+      options: this.options,
     };
   }
 
