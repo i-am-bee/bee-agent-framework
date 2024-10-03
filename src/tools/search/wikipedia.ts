@@ -50,7 +50,7 @@ export type PageFunctions = Record<
   }
 > & {
   markdown: {
-    transform?: <T>(output: T) => T;
+    transform?: (output: string) => string;
     filter?: (node: HTMLElement) => boolean;
   };
 };
@@ -192,8 +192,10 @@ export class WikipediaTool extends Tool<
 
   @Cache()
   protected get _defaultRunOptions(): WikipediaToolRunOptions {
+    const unwrapTags = new Set(["a", "small", "sup"]);
+    const unwrapTagsSelector = Array.from(unwrapTags.values()).join(",");
+
     const ignoredTags = new Set([
-      "a",
       "img",
       "link",
       "style",
@@ -207,46 +209,82 @@ export class WikipediaTool extends Tool<
       "audio",
       "track",
       "figcaption",
-      "small",
     ]);
-    const ignoredTagsSelector = Array.from(ignoredTags.values()).join(",");
+    const ignoredClasses = new Set([
+      "toc",
+      "reflist",
+      "mw-references-wrap",
+      "box-More_footnotes_needed",
+      "navbox",
+      "navbox-styles",
+      "mw-editsection",
+      "sistersitebox",
+      "navbox-inner",
+      "refbegin",
+      "notpageimage",
+      "mw-file-element",
+      "box-Unreferenced_section",
+      "navigation-not-searchable",
+      "noexcerpt",
+      "infobox-image",
+      "mw-tmh-player",
+      "printfooter",
+      "ambox",
+      "infobox",
+    ]);
+    const ignoredRoles = new Set(["navigation"]);
+
+    const ignoredSelector = [
+      ...ignoredTags.values(),
+      Array.from(ignoredClasses.values()).map((cls) => `.${cls}`),
+      Array.from(ignoredRoles.values()).map((role) => `[role="${role}"]`),
+      "table>caption",
+    ].join(",");
 
     return {
       extraction: {
         fields: {
           markdown: {
+            transform: (output: string) => output.replace(/([^\\])(\$)/g, `$1\\$2`),
             filter: (node) => {
               const tagName = node.tagName.toLowerCase();
-              if (ignoredTags.has(tagName)) {
+              if (ignoredTags.has(tagName) || ignoredRoles.has(node.role ?? "")) {
                 return false;
               }
 
-              if (ignoredTagsSelector) {
-                for (const childNode of node.querySelectorAll(ignoredTagsSelector)) {
-                  childNode.remove();
+              for (const cls of node.className.trim().split(" ").filter(Boolean)) {
+                if (ignoredClasses.has(cls)) {
+                  return false;
                 }
               }
 
-              if (node.children.length === 0) {
-                return false;
+              for (const table of Array.from(node.querySelectorAll("table tr>th"))) {
+                let colspan = parseInt(table.getAttribute("colspan") || "1");
+                while (colspan > 1) {
+                  table.insertAdjacentHTML("afterend", `<th>&nbsp;</th>`);
+                  colspan--;
+                }
+                table.removeAttribute("colspan");
               }
 
-              return (
-                [
-                  "toc",
-                  "reflist",
-                  "mw-references-wrap",
-                  "navbox",
-                  "navbox-styles",
-                  "mw-editsection",
-                  "sistersitebox",
-                  "navbox-inner",
-                  "refbegin",
-                  "notpageimage",
-                  "mw-file-element",
-                ].every((cls) => !node.className.includes(cls)) &&
-                ["navigation"].every((role) => node.role !== role)
+              const ignoredTargets = Array.from(
+                ignoredSelector ? node.querySelectorAll(ignoredSelector) : [],
               );
+              for (const childNode of ignoredTargets) {
+                childNode.remove();
+              }
+
+              const unwrapTargets = Array.from(
+                unwrapTagsSelector ? node.querySelectorAll(unwrapTagsSelector) : [],
+              ).reverse();
+              if (unwrapTags.has(tagName)) {
+                unwrapTargets.push(node);
+              }
+              for (const childNode of unwrapTargets) {
+                childNode.outerHTML = childNode.innerHTML;
+              }
+
+              return true;
             },
           },
         },
