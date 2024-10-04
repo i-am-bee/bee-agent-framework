@@ -10,7 +10,8 @@
   },
   "git": {
     "commitMessage": "chore: release ${version}",
-    "tagName": "v${version}"
+    "tagName": "v${version}",
+    "commitArgs": ["-s"]
   },
   "npm": {
     "skipChecks": true,
