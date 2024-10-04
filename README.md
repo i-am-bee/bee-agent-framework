@@ -90,7 +90,7 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 > Docker distribution with support for compose is required, the following are supported:
 >
 > - [Docker](https://www.docker.com/)
-> - [Rancher](https://www.rancher.com/) - macOS users must use VZ instead of QEMU
+> - [Rancher](https://www.rancher.com/) - macOS users may want to use VZ instead of QEMU
 > - [Podman](https://podman.io/) - requires [compose](https://podman-desktop.io/docs/compose/setting-up-compose) and **rootful machine** (if your current machine is rootless, please create a new one)
 
 1. Clone the repository `git clone git@github.com:i-am-bee/bee-agent-framework`.
