@@ -14,7 +14,7 @@ To create a tool, the `Tool` class must be extended/ implemented or `DynamicTool
 
 Tools MUST do the following:
 
-- Implement the `Tool` class:
+- **Implement the `Tool` class:**
 
   - `MyNewToolOutput` is required, must be an implementation of `ToolOutput` such as `StringToolOutput` or `JSONToolOutput`
 
@@ -23,8 +23,13 @@ Tools MUST do the following:
   - `ToolRunOptions` is optional (default BaseToolRunOptions), optional parameters that are passed to the run method
 
   ```typescript
-  import { BaseToolOptions, BaseToolRunOptions } from "bee-agent-framework/tools/base";
+  import {
+    BaseToolOptions,
+    BaseToolRunOptions,
+    JSONToolOutput,
+  } from "bee-agent-framework/tools/base";
 
+  type MyNewToolOutput = JSONToolOutput<{ name: string; createdAt: Date }>;
   type ToolOptions = BaseToolOptions;
   type ToolRunOptions = BaseToolRunOptions;
 
@@ -33,7 +38,7 @@ Tools MUST do the following:
   }
   ```
 
-- Be given a unique name:
+- **Be given a unique name:**
 
   Note: Convention and best practice is to set the tool's name to the name of its class
 
@@ -41,7 +46,7 @@ Tools MUST do the following:
   name = "MyNewTool";
   ```
 
-- Provide a natural language description of what the tool does:
+- **Provide a natural language description of what the tool does:**
 
   ❗Important: this description is used by the agent to determine when the tool should be used. It's probably the most important aspect of your tool and you should experiment with different natural language descriptions to ensure the tool is used in the correct circumstances. You can also include usage tips and guidance for the agent in the description, but
   its advisable to keep the description succinct in order to reduce the probability of conflicting with other tools, or adversely affecting agent behavior.
@@ -50,7 +55,7 @@ Tools MUST do the following:
   description = "Takes X action when given Y input resulting in Z output";
   ```
 
-- Declare an input schema:
+- **Declare an input schema:**
 
   This is used to define the format of the input to your tool. The agent will formalise the natural language input(s) it has received and structure them into the fields described in the tool's input. The input schema can be specified using [Zod](https://github.com/colinhacks/zod) (recommended) or JSONSchema. It must be a function (either sync or async). Zod effects (e.g. `z.object().transform(...)`) are not supported. The return value of `inputSchema` must always be an object and pass validation by the `validateSchema()` function defined in [schema.ts](../src/internals/helpers/schema.ts). Keep your tool input schema simple and provide schema descriptions to help the agent to interpret fields.
 
@@ -62,16 +67,16 @@ Tools MUST do the following:
       return z.object({
         // list of key-value pairs
         expression: z
-                .string()
-                .min(1)
-                .describe(
-                  `The mathematical expression to evaluate (e.g., "2 + 3 * 4").`,
-                ),
+        .string()
+        .min(1)
+        .describe(
+          `The mathematical expression to evaluate (e.g., "2 + 3 * 4").`,
+        ),
       });
   }
   ```
 
-- Implement initialisation:
+- **Implement initialisation:**
 
   The unnamed static block is executed when your tool is called for the first time. It is used for registering your tool as `serializable` (you can then use the `serialize()` method).
 
@@ -83,12 +88,12 @@ Tools MUST do the following:
   }
   ```
 
-- Implement the `_run()` method:
+- **Implement the `_run()` method:**
 
   <!-- eslint-skip -->
 
   ```typescript
-  protected async _run(input: ToolInput<this>, options?: BaseToolRunOptions) {
+  protected async _run(input: ToolInput<this>, options: BaseToolRunOptions | undefined, run: RunContext<this>) {
       // insert custom code here
       // MUST: return an instance of the output type specified in the tool class definition
       // MAY: throw an instance of ToolError upon unrecoverable error conditions encountered by the tool
@@ -137,7 +142,7 @@ The simplest form of an example tool is the [helloworld](../examples/tools/hello
 
 ### Open Library
 
-The [openlibrary](../examples/tools/openLibrary.ts) tool allows an agent to query the [Open Library](https://openlibrary.org/) via its [book search API](https://openlibrary.org/dev/docs/api/search). This functionality injects knowledge about book metadata (not book content) into an agent. It serves as an example for several key aspects of tool creation:
+The [openLibrary](../examples/tools/openLibrary.ts) tool allows an agent to query the [Open Library](https://openlibrary.org/) via its [book search API](https://openlibrary.org/dev/docs/api/search). This functionality injects knowledge about book metadata (not book content) into an agent. It serves as an example for several key aspects of tool creation:
 
 - Implementing the `Tool` class
 - Specifying the input schema to a tool
