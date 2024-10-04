@@ -22,7 +22,7 @@ import { z } from "zod";
 Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
-const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
+const llm = BAMChatLLM.fromPreset("meta-llama/Llama-3.2-3B-Instruct");
 
 const agent = new BeeAgent({
   llm,

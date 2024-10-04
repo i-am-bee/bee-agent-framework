@@ -87,6 +87,20 @@ const llama3: LLMChatTemplate = {
 {{system}}<|eot_id|>{{/system}}{{#user}}<|start_header_id|>user<|end_header_id|>
 
 {{user}}<|eot_id|>{{/user}}{{#assistant}}<|start_header_id|>assistant<|end_header_id|>
+{{assistant}}<|eot_id|>{{/assistant}}{{/messages}}<|start_header_id|>assistant<|end_header_id|>
+`,
+  }),
+  messagesToPrompt: messagesToPromptFactory(),
+  parameters: {
+    stop_sequence: ["<|eot_id|>"],
+  },
+};
+const llama32: LLMChatTemplate = {
+  template: new PromptTemplate({
+    schema: templateSchemaFactory(["system", "user", "assistant" as const]),
+    template: `{#messages}}{{#system}}<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+{{system}}<|eot_id|>{{/system}}{{#user}}<|start_header_id|>user<|end_header_id|>
+{{user}}<|eot_id|>{{/user}}{{#assistant}}<|start_header_id|>assistant<|end_header_id|>
 
 {{assistant}}<|eot_id|>{{/assistant}}{{/messages}}<|start_header_id|>assistant<|end_header_id|>
 `,
@@ -120,6 +134,7 @@ export class LLMChatTemplates {
     "llama3.1": llama31,
     "llama3": llama3,
     "qwen2": qwen2,
+    "llama3.2": llama32,
   };
 
   static register(model: string, template: LLMChatTemplate, override = false) {

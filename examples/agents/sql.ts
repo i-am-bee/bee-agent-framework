@@ -6,7 +6,7 @@ import { FrameworkError } from "bee-agent-framework/errors";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 
 const llm = new GroqChatLLM({
-  modelId: "llama3-70b-8192",
+  modelId: "llama3.2",
   parameters: {
     temperature: 0,
     max_tokens: 8192,
