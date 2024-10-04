@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.25](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.24...v0.0.25) (2024-10-04)
+
+### Features
+
+- **agent:** simplify tools' schema that is passing to prompt ([c927201](https://github.com/i-am-bee/bee-agent-framework/commit/c92720170626644bd90a9a701cbf042d92e1650a))
+- **agent:** update CD regex, update tools description ([#60](https://github.com/i-am-bee/bee-agent-framework/issues/60)) ([50f86e6](https://github.com/i-am-bee/bee-agent-framework/commit/50f86e6532efb86591ac8d5afd7fc4615895e4a1))
+- **code-interpreter:** update to a new version ([5357215](https://github.com/i-am-bee/bee-agent-framework/commit/5357215b21a2c164eaf3e29a85135d25b90f3a8d))
+- **code-interpreter:** update to a new version ([699e45f](https://github.com/i-am-bee/bee-agent-framework/commit/699e45f2a55fc80029c793cf61bebcd53466f883))
+
 ## [0.0.24](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.23...v0.0.24) (2024-10-03)
 
 ### Features
