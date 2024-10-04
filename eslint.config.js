@@ -97,6 +97,17 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ["examples/playground/**/*.ts"],
+    languageOptions: {
+      parserOptions: {
+        project: "./tsconfig.examples.json",
+      },
+    },
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
   // @ts-expect-error wrong types
   ...markdown.configs.processor,
   prettierConfig,
