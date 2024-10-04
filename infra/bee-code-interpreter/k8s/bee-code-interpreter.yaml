@@ -35,12 +35,12 @@ spec:
   serviceAccountName: code-interpreter-sa
   containers:
     - name: code-interpreter
-      image: docker.io/iambeeagent/bee-code-interpreter:0.0.11
+      image: docker.io/iambeeagent/bee-code-interpreter:0.0.12
       ports:
         - containerPort: 50051
       env:
         - name: APP_EXECUTOR_IMAGE
-          value: docker.io/iambeeagent/bee-code-executor:0.0.11
+          value: docker.io/iambeeagent/bee-code-executor:0.0.12
         - name: APP_FILE_STORAGE_PATH
           value: /storage
       volumeMounts:
