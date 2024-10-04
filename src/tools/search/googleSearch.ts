@@ -65,9 +65,7 @@ export class GoogleSearchTool extends Tool<
   GoogleSearchToolRunOptions
 > {
   name = "GoogleSearch";
-  description = `Search a query using Google Custom Search Engine.
-     Useful for when you need to answer questions or find relevant content on all or specific websites. 
-     Output is a list of relevant websites with descriptions.`;
+  description = `Search for online trends, news, current events, real-time information, or research topics.`;
 
   @Cache()
   inputSchema() {

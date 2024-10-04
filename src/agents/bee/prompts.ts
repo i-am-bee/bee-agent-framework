@@ -97,8 +97,7 @@ Prefer to use these capabilities over functions.
   - When using search engines, you try different formulations of the query, possibly even in a different language.
 
 # Role
-{{instructions}}
-`,
+{{instructions}}`,
 });
 
 export const BeeAssistantPrompt = new PromptTemplate({
