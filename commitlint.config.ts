@@ -7,6 +7,9 @@ const Configuration: UserConfig = {
       return commit.includes("<support@github.com>") && commit.includes("dependabot");
     },
   ],
+  rules: {
+    "signed-off-by": [2, "always", "Signed-off-by"],
+  },
 };
 
 export default Configuration;
