@@ -95,10 +95,10 @@ Prefer to use these capabilities over functions.
 - Sometimes, things don't go as planned. Functions may not provide useful information on the first few tries. You should always try a few different approaches before declaring the problem unsolvable.
 - When the function doesn't give you what you were asking for, you must either use another funtion or a different function input.
   - When using search engines, you try different formulations of the query, possibly even in a different language.
+- You cannot do calculations, computations, or data manipulations.
 
 # Role
-{{instructions}}
-`,
+{{instructions}}`,
 });
 
 export const BeeAssistantPrompt = new PromptTemplate({
