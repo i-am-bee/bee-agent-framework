@@ -14,8 +14,8 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 
 ## Key Features
 
-- 🤖 **AI agents**: Use our powerful [Bee agent](https://github.com/i-am-bee/bee-agent-framework/tree/main?tab=readme-ov-file#get-started-with-bee) or [build your own](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#agents).
-- 🛠️ **Tools**: Use our [built-in tools](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#tools) or [create your own](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/tools.md) in Javascript/Python.
+- 🤖 **AI agents**: Use our powerful [Bee agent](./docs/agents.md) or [build your own](./docs/agents.md).
+- 🛠️ **Tools**: Use our [built-in tools](./docs/tools.md) or [create your own](./docs/tools.md) in Javascript/Python.
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
 - 💾 **Memory**: Multiple [strategies](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#memory) to optimize token spend.
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
@@ -116,7 +116,7 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 | `OpenMeteoTool`                                                           | Retrieve current, previous, or upcoming weather for a given destination.              |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                       |
 
-### 🔌️ Adapters (LLM - Inference providers)
+### 🔌️ Adapters
 
 | Name                                                                      | Description                                                                      |
 | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
@@ -132,20 +132,20 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 The source directory (`src`) provides numerous modules that one can use.
 
-| Name           | Description                                                                                 |
-| -------------- | ------------------------------------------------------------------------------------------- |
-| **agents**     | Base classes defining the common interface for agent.                                       |
-| **llms**       | Base classes defining the common interface for text inference (standard or chat).           |
-| **template**   | Prompt Templating system based on `Mustache` with various improvements\_.                   |
-| **memory**     | Various types of memories to use with agent.                                                |
-| **tools**      | Tools that an agent can use.                                                                |
-| **cache**      | Preset of different caching approaches that can be used together with tools.                |
-| **errors**     | Base framework error classes used by each module.                                           |
-| **adapters**   | Concrete implementations of given modules for different environments.                       |
-| **logger**     | Core component for logging all actions within the framework.                                |
-| **serializer** | Core component for the ability to serialize/deserialize modules into the serialized format. |
-| **version**    | Constants representing the framework (e.g., latest version)                                 |
-| **internals**  | Modules used by other modules within the framework.                                         |
+| Name                           | Description                                                                                 |
+| ------------------------------ | ------------------------------------------------------------------------------------------- |
+| [**agents**](./docs/agents.md) | Base classes defining the common interface for agent.                                       |
+| **llms**                       | Base classes defining the common interface for text inference (standard or chat).           |
+| **template**                   | Prompt Templating system based on `Mustache` with various improvements\_.                   |
+| **memory**                     | Various types of memories to use with agent.                                                |
+| [**tools**](./docs/tools.md)   | Tools that an agent can use.                                                                |
+| **cache**                      | Preset of different caching approaches that can be used together with tools.                |
+| **errors**                     | Base framework error classes used by each module.                                           |
+| **adapters**                   | Concrete implementations of given modules for different environments.                       |
+| **logger**                     | Core component for logging all actions within the framework.                                |
+| **serializer**                 | Core component for the ability to serialize/deserialize modules into the serialized format. |
+| **version**                    | Constants representing the framework (e.g., latest version)                                 |
+| **internals**                  | Modules used by other modules within the framework.                                         |
 
 To see more in-depth explanation see [docs](./docs/overview.md).
 
