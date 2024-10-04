@@ -119,6 +119,7 @@ export class BeeAgentRunner {
         },
       },
     });
+
     await memory.addMany([
       BaseMessage.of({
         role: Role.SYSTEM,
@@ -127,7 +128,13 @@ export class BeeAgentRunner {
             input.tools.map(async (tool) => ({
               name: tool.name,
               description: tool.description.replaceAll("\n", ".").replace(/\.$/, "").concat("."),
-              schema: JSON.stringify(await tool.getInputJsonSchema()),
+              schema: JSON.stringify(
+                await tool.getInputJsonSchema(),
+                (() => {
+                  const ignoredKeys = new Set(["minLength", "maxLength", "$schema"]);
+                  return (key, value) => (ignoredKeys.has(key) ? undefined : value);
+                })(),
+              ),
             })),
           ),
           instructions: undefined,
