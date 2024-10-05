@@ -93,8 +93,8 @@ export class DuckDuckGoSearchTool extends Tool<
     });
   }
 
-  public constructor(options: DuckDuckGoSearchToolOptions = { maxResultsPerPage: 15 }) {
-    super(options);
+  public constructor(options: Partial<DuckDuckGoSearchToolOptions> = {}) {
+    super({ ...options, maxResultsPerPage: options?.maxResultsPerPage ?? 15 });
 
     this.client = this._createClient();
   }
