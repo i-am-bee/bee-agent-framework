@@ -25,7 +25,7 @@ The source directory (`src`) provides numerous modules that one can use.
 
 An emitter is a core functionality of the framework that gives you the ability to see what is happening under the hood. Because the vast majority of the frameworks components uses it, you can easily observe them.
 
-```typescript
+```ts
 import { Emitter, EventMeta } from "@/emitter/emitter.js";
 
 Emitter.root.match("*.*", (data: unknown, event: EventMeta) => {
@@ -146,7 +146,7 @@ The primary purpose of a logger is to provide developers and system administrato
 
 Every component within the framework uses the `Logger` class either by directly creating an instance of it or because it is being passed from the creator.
 
-```typescript
+```ts
 import { Logger, LoggerLevel } from "bee-agent-framework/logger";
 
 Logger.defaults.pretty = true; // (override default settings)

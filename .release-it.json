@@ -18,7 +18,7 @@
     "publish": true
   },
   "hooks": {
-    "before:init": ["yarn lint", "yarn ts:check", "yarn test:all"],
+    "before:init": ["yarn docs:check", "yarn lint", "yarn ts:check", "yarn test:all"],
     "after:bump": ["yarn build"]
   },
   "github": {

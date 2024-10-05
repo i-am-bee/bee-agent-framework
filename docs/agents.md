@@ -46,7 +46,7 @@ For more complex tasks, the agent may do way more iterations.
 
 In the following example, we will transform the knowledge gained into code.
 
-```typescript
+```ts
 const response = await agent
   .run({ prompt: "What is the current weather in Las Vegas?" })
   .observe((emitter) => {
@@ -78,7 +78,7 @@ You can alter the agent's behavior in the following ways.
 
 #### Setting execution policy
 
-```typescript
+```ts
 await agent.run(
   { prompt: "What is the current weather in Las Vegas?" },
 

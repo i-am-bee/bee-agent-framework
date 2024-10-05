@@ -41,7 +41,7 @@ yarn add bee-agent-framework
 
 ### Example
 
-```typescript
+```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";

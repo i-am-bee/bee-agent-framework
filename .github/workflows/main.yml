@@ -34,6 +34,8 @@ jobs:
         run: yarn format
       - name: Commits Lint
         run: yarn commitlint  --verbose --from "${{ github.event.pull_request.base.sha || github.event.commits[0].id }}" --to "${{ github.event.pull_request.head.sha || github.event.head_commit.id }}"
+      - name: Documentation - code snippet embeddings
+        run: yarn docs:check
       - name: Build
         run: yarn build
       - name: Unit Tests

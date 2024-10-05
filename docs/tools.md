@@ -22,7 +22,7 @@ Tools MUST do the following:
 
   - `ToolRunOptions` is optional (default BaseToolRunOptions), optional parameters that are passed to the run method
 
-  ```typescript
+  ```ts
   import {
     BaseToolOptions,
     BaseToolRunOptions,
@@ -42,7 +42,7 @@ Tools MUST do the following:
 
   Note: Convention and best practice is to set the tool's name to the name of its class
 
-  ```typescript
+  ```ts
   name = "MyNewTool";
   ```
 
@@ -51,7 +51,7 @@ Tools MUST do the following:
   ❗Important: this description is used by the agent to determine when the tool should be used. It's probably the most important aspect of your tool and you should experiment with different natural language descriptions to ensure the tool is used in the correct circumstances. You can also include usage tips and guidance for the agent in the description, but
   its advisable to keep the description succinct in order to reduce the probability of conflicting with other tools, or adversely affecting agent behavior.
 
-  ```typescript
+  ```ts
   description = "Takes X action when given Y input resulting in Z output";
   ```
 
@@ -61,7 +61,7 @@ Tools MUST do the following:
 
   <!-- eslint-skip -->
 
-  ```typescript
+  ```ts
   inputSchema() {
       // any Zod definition is good here, this is typical simple example
       return z.object({
@@ -82,7 +82,7 @@ Tools MUST do the following:
 
   <!-- eslint-skip -->
 
-  ```typescript
+  ```ts
   static {
       this.register();
   }
@@ -92,7 +92,7 @@ Tools MUST do the following:
 
   <!-- eslint-skip -->
 
-  ```typescript
+  ```ts
   protected async _run(input: ToolInput<this>, options: BaseToolRunOptions | undefined, run: RunContext<this>) {
       // insert custom code here
       // MUST: return an instance of the output type specified in the tool class definition
@@ -104,7 +104,7 @@ Tools MUST do the following:
 
 In order for a tool to be of some utility within an agent, you must enable the agent with knowledge of the tool. To do this, the tool code module must be imported into the agent and passed to the tools array during creation of a `BeeAgent`. An example can be found in the [bee agent](../examples/agents/bee.ts) or you can use a code snippet such as the one below that creates an agent with the built-in [ArXiv tool](../src/tools/arxiv.ts):
 
-```typescript
+```ts
 import { ArXivTool } from "bee-agent-framework/tools/arxiv";
 
 const llm = new OllamaChatLLM({
