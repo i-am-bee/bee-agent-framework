@@ -34,6 +34,10 @@ export class FileCache<T> extends BaseCache<T> {
     this.register();
   }
 
+  get source() {
+    return this.input.fullPath;
+  }
+
   static async fromProvider<A>(provider: BaseCache<A>, input: Input) {
     await fs.promises.writeFile(input.fullPath, provider.serialize());
     return new FileCache<A>(input);
