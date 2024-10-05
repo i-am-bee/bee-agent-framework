@@ -20,7 +20,7 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 - 💾 **Memory**: Multiple [strategies](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#memory) to optimize token spend.
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
 - 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our MLflow integration (coming soon) to debug performance.
-- 🎛️ **Production-level** control with [caching](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#cache) and [error handling](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#errors).
+- 🎛️ **Production-level** control with [caching](./docs/cache.md) and [error handling](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#errors).
 - 🚧 (Coming soon) **API**: Configure and deploy your agents with a production-hardened API.
 - 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
 - ... more on our [Roadmap](#roadmap)
@@ -139,7 +139,7 @@ The source directory (`src`) provides numerous modules that one can use.
 | **template**                   | Prompt Templating system based on `Mustache` with various improvements\_.                   |
 | **memory**                     | Various types of memories to use with agent.                                                |
 | [**tools**](./docs/tools.md)   | Tools that an agent can use.                                                                |
-| **cache**                      | Preset of different caching approaches that can be used together with tools.                |
+| [**cache**](./docs/cache.md)   | Preset of different caching approaches that can be used together with tools.                |
 | **errors**                     | Base framework error classes used by each module.                                           |
 | **adapters**                   | Concrete implementations of given modules for different environments.                       |
 | **logger**                     | Core component for logging all actions within the framework.                                |
