@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.0.26](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.25...v0.0.26) (2024-10-07)
+
+### Features
+
+- **cache:** add getter for fullPath in FileCache ([d2beaea](https://github.com/i-am-bee/bee-agent-framework/commit/d2beaeafab4c41b3552947f91403669998718993))
+- **cache:** improve fileCache typings ([4c22dae](https://github.com/i-am-bee/bee-agent-framework/commit/4c22dae4dd8c6fb1ae7659039565b49ccf7fe81a))
+- **llm:** add caching support ([e330fb2](https://github.com/i-am-bee/bee-agent-framework/commit/e330fb246409296af41dce9f1bb56cde72cac556)), closes [#69](https://github.com/i-am-bee/bee-agent-framework/issues/69)
+- **tools:** add type coercion to the schema ([f0995ea](https://github.com/i-am-bee/bee-agent-framework/commit/f0995ea60b897e654496c6aaf2eaeb6610c3af95))
+- **tools:** update duckduckgo defaults propagation ([9ef508c](https://github.com/i-am-bee/bee-agent-framework/commit/9ef508c2ee7b621b229ccf9fbccf43735f9820f3))
+
 ## [0.0.25](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.24...v0.0.25) (2024-10-04)
 
 ### Features
