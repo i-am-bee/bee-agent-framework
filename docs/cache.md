@@ -127,7 +127,7 @@ const second = await llm.generate([BaseMessage.of({ role: "user", text: "Who was
 console.info(first === second); // true
 ```
 
-_Source: [examples/cache/llmCache.ts](/examples/cache/toolCache.ts)_
+_Source: [examples/cache/llmCache.ts](/examples/cache/llmCache.ts)_
 
 > [!TIP]
 >
