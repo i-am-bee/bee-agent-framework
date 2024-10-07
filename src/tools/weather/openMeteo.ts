@@ -79,8 +79,8 @@ export class OpenMeteoTool extends Tool<
             .strip(),
           z
             .object({
-              latitude: z.number(),
-              longitude: z.number(),
+              latitude: z.coerce.number(),
+              longitude: z.coerce.number(),
             })
             .strip(),
         ]),
@@ -91,7 +91,7 @@ export class OpenMeteoTool extends Tool<
           .union([z.string().date(), z.string().datetime()])
           .describe("End date for the weather forecast in the format YYYY-MM-DD (UTC)")
           .optional(),
-        elevation: z.number().nullish(),
+        elevation: z.coerce.number().nullish(),
         temperature_unit: z.enum(["celsius", "fahrenheit"]).default("celsius"),
       })
       .strip();

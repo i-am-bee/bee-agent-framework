@@ -80,7 +80,7 @@ export class DuckDuckGoSearchTool extends Tool<
   inputSchema() {
     return z.object({
       query: z.string({ description: `Search query` }).min(1).max(128),
-      page: z
+      page: z.coerce
         .number()
         .int()
         .min(1)
