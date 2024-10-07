@@ -20,6 +20,7 @@ import {
   ExecutionOptions,
   GenerateCallbacks,
   GenerateOptions,
+  LLMCache,
   LLMOutputError,
   StreamGenerateOptions,
 } from "@/llms/base.js";
@@ -111,6 +112,7 @@ interface Input {
   client?: Client;
   parameters?: Partial<Parameters>;
   executionOptions?: ExecutionOptions;
+  cache?: LLMCache<OllamaChatLLMOutput>;
 }
 
 export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
@@ -123,11 +125,11 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
   public readonly parameters: Partial<Parameters>;
 
   constructor(
-    { client, modelId, parameters, executionOptions = {} }: Input = {
+    { client, modelId, parameters, executionOptions = {}, cache }: Input = {
       modelId: "llama3.1",
     },
   ) {
-    super(modelId, executionOptions);
+    super(modelId, executionOptions, cache);
     this.client = client ?? new Client({ fetch });
     this.parameters = parameters ?? {
       temperature: 0,

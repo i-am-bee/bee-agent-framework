@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AsyncStream, GenerateCallbacks, LLMError } from "@/llms/base.js";
+import { AsyncStream, GenerateCallbacks, LLMCache, LLMError } from "@/llms/base.js";
 import {
   WatsonXLLM,
   WatsonXLLMGenerateOptions,
@@ -84,6 +84,7 @@ export interface WatsonXChatLLMInputConfig {
 export interface WatsonXChatLLMInput {
   llm: WatsonXLLM;
   config: WatsonXChatLLMInputConfig;
+  cache?: LLMCache<WatsonXChatLLMOutput>;
 }
 
 export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput> {
@@ -96,8 +97,8 @@ export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput> {
   protected readonly config: WatsonXChatLLMInputConfig;
   public readonly parameters: WatsonXLLMParameters;
 
-  constructor({ llm, config }: WatsonXChatLLMInput) {
-    super(llm.modelId, llm.executionOptions);
+  constructor({ llm, config, cache }: WatsonXChatLLMInput) {
+    super(llm.modelId, llm.executionOptions, cache);
     this.parameters = llm.parameters ?? {};
     this.llm = llm;
     this.config = config;
@@ -133,7 +134,7 @@ export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput> {
 
   protected async _generate(
     messages: BaseMessage[],
-    options: WatsonXLLMGenerateOptions,
+    options: WatsonXLLMGenerateOptions | undefined,
     run: GetRunContext<this>,
   ): Promise<WatsonXChatLLMOutput> {
     const prompt = this.messagesToPrompt(messages);
@@ -144,7 +145,7 @@ export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput> {
 
   protected async *_stream(
     messages: BaseMessage[],
-    options: WatsonXLLMGenerateOptions,
+    options: WatsonXLLMGenerateOptions | undefined,
     run: GetRunContext<this>,
   ): AsyncStream<WatsonXChatLLMOutput, void> {
     const prompt = this.messagesToPrompt(messages);

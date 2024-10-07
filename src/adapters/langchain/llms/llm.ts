@@ -22,7 +22,8 @@ import {
   BaseLLMTokenizeOutput,
   ExecutionOptions,
   GenerateCallbacks,
-  InternalGenerateOptions,
+  GenerateOptions,
+  LLMCache,
   LLMMeta,
   StreamGenerateOptions,
 } from "@/llms/base.js";
@@ -80,8 +81,9 @@ export class LangChainLLM extends LLM<LangChainLLMOutput> {
     public readonly lcLLM: LCBaseLLM,
     private modelMeta?: LLMMeta,
     executionOptions?: ExecutionOptions,
+    cache?: LLMCache<LangChainLLMOutput>,
   ) {
-    super(lcLLM._modelType(), executionOptions);
+    super(lcLLM._modelType(), executionOptions, cache);
     this.parameters = lcLLM.invocationParams();
   }
 
@@ -107,7 +109,7 @@ export class LangChainLLM extends LLM<LangChainLLMOutput> {
 
   protected async _generate(
     input: LLMInput,
-    options: InternalGenerateOptions,
+    _options: GenerateOptions | undefined,
     run: GetRunContext<this>,
   ): Promise<LangChainLLMOutput> {
     const { generations } = await this.lcLLM.generate([input], {
@@ -118,7 +120,7 @@ export class LangChainLLM extends LLM<LangChainLLMOutput> {
 
   protected async *_stream(
     input: string,
-    options: StreamGenerateOptions,
+    _options: StreamGenerateOptions | undefined,
     run: GetRunContext<this>,
   ): AsyncStream<LangChainLLMOutput> {
     const response = this.lcLLM._streamResponseChunks(input, {

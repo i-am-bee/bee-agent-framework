@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { AsyncStream, GenerateCallbacks, LLMError } from "@/llms/base.js";
+import {
+  AsyncStream,
+  GenerateCallbacks,
+  LLMCache,
+  LLMError,
+  StreamGenerateOptions,
+} from "@/llms/base.js";
 import { isFunction, isObjectType } from "remeda";
 import {
   BAMLLM,
@@ -88,6 +94,7 @@ export interface BAMChatLLMInputConfig {
 export interface BAMChatLLMInput {
   llm: BAMLLM;
   config: BAMChatLLMInputConfig;
+  cache?: LLMCache<BAMChatLLMOutput>;
 }
 
 export class BAMChatLLM extends ChatLLM<BAMChatLLMOutput> {
@@ -99,8 +106,8 @@ export class BAMChatLLM extends ChatLLM<BAMChatLLMOutput> {
   public readonly llm: BAMLLM;
   protected readonly config: BAMChatLLMInputConfig;
 
-  constructor({ llm, config }: BAMChatLLMInput) {
-    super(llm.modelId, llm.executionOptions);
+  constructor({ llm, config, cache }: BAMChatLLMInput) {
+    super(llm.modelId, llm.executionOptions, cache);
     this.llm = llm;
     this.config = config;
   }
@@ -130,8 +137,8 @@ export class BAMChatLLM extends ChatLLM<BAMChatLLMOutput> {
 
   protected async _generate(
     messages: BaseMessage[],
-    options: BAMLLMGenerateOptions,
-    run: GetRunContext<this>,
+    options: BAMLLMGenerateOptions | undefined,
+    run: GetRunContext<typeof this>,
   ): Promise<BAMChatLLMOutput> {
     const prompt = this.messagesToPrompt(messages);
     // @ts-expect-error protected property
@@ -141,8 +148,8 @@ export class BAMChatLLM extends ChatLLM<BAMChatLLMOutput> {
 
   protected async *_stream(
     messages: BaseMessage[],
-    options: BAMLLMGenerateOptions,
-    run: GetRunContext<this>,
+    options: StreamGenerateOptions | undefined,
+    run: GetRunContext<typeof this>,
   ): AsyncStream<BAMChatLLMOutput, void> {
     const prompt = this.messagesToPrompt(messages);
     // @ts-expect-error protected property

@@ -23,6 +23,7 @@ import {
   ExecutionOptions,
   GenerateCallbacks,
   GenerateOptions,
+  LLMCache,
   LLMMeta,
   LLMOutputError,
   StreamGenerateOptions,
@@ -41,6 +42,7 @@ interface Input {
   client?: Client;
   parameters?: Partial<Parameters>;
   executionOptions?: ExecutionOptions;
+  cache?: LLMCache<OllamaLLMOutput>;
 }
 
 export class OllamaLLMOutput extends BaseLLMOutput {
@@ -115,8 +117,8 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     registerClient();
   }
 
-  constructor({ client, modelId, parameters, executionOptions = {} }: Input) {
-    super(modelId, executionOptions);
+  constructor({ client, modelId, parameters, executionOptions = {}, cache }: Input) {
+    super(modelId, executionOptions, cache);
     this.client = client ?? new Client();
     this.parameters = parameters ?? {};
   }

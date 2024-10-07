@@ -99,6 +99,40 @@ _Source: [examples/cache/toolCache.ts](/examples/cache/toolCache.ts)_
 >
 > Cache key is created by serializing function parameters (the order of keys in the object does not matter).
 
+### Usage with LLMs
+
+<!-- embedme examples/cache/llmCache.ts -->
+
+```ts
+import { SlidingCache } from "bee-agent-framework/cache/slidingCache";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+
+const llm = new OllamaChatLLM({
+  modelId: "llama3.1",
+  parameters: {
+    temperature: 0,
+    num_predict: 50,
+  },
+  cache: new SlidingCache({
+    size: 50,
+  }),
+});
+
+console.info(await llm.cache.size()); // 0
+const first = await llm.generate([BaseMessage.of({ role: "user", text: "Who was Alan Turing?" })]);
+// upcoming requests with the EXACTLY same input will be retrieved from the cache
+console.info(await llm.cache.size()); // 1
+const second = await llm.generate([BaseMessage.of({ role: "user", text: "Who was Alan Turing?" })]);
+console.info(first === second); // true
+```
+
+_Source: [examples/cache/llmCache.ts](/examples/cache/toolCache.ts)_
+
+> [!TIP]
+>
+> Caching for non-chat LLMs works exactly the same way.
+
 ## Cache types
 
 The framework provides multiple out-of-the-box cache implementations.

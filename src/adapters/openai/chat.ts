@@ -20,6 +20,7 @@ import {
   ExecutionOptions,
   GenerateCallbacks,
   GenerateOptions,
+  LLMCache,
   LLMMeta,
   StreamGenerateOptions,
 } from "@/llms/base.js";
@@ -88,6 +89,7 @@ interface Input {
   client?: Client;
   parameters?: Partial<Parameters>;
   executionOptions?: ExecutionOptions;
+  cache?: LLMCache<OpenAIChatLLMOutput>;
 }
 
 export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
@@ -99,8 +101,14 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
   public readonly client: Client;
   public readonly parameters: Partial<Parameters>;
 
-  constructor({ client, modelId = "gpt-4o", parameters, executionOptions = {} }: Input = {}) {
-    super(modelId, executionOptions);
+  constructor({
+    client,
+    modelId = "gpt-4o",
+    parameters,
+    executionOptions = {},
+    cache,
+  }: Input = {}) {
+    super(modelId, executionOptions, cache);
     this.client = client ?? new Client();
     this.parameters = parameters ?? {};
   }
@@ -154,7 +162,7 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
 
   protected _prepareRequest(
     input: BaseMessage[],
-    options: GenerateOptions,
+    options?: GenerateOptions,
   ): Client.Chat.ChatCompletionCreateParams {
     return {
       ...this.parameters,
@@ -181,7 +189,7 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
 
   protected async _generate(
     input: BaseMessage[],
-    options: GenerateOptions,
+    options: GenerateOptions | undefined,
     run: GetRunContext<typeof this>,
   ): Promise<OpenAIChatLLMOutput> {
     const response = await this.client.chat.completions.create(
@@ -215,7 +223,7 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
 
   protected async *_stream(
     input: BaseMessage[],
-    options: StreamGenerateOptions,
+    options: StreamGenerateOptions | undefined,
     run: GetRunContext<typeof this>,
   ): AsyncStream<OpenAIChatLLMOutput> {
     for await (const chunk of await this.client.chat.completions.create(

@@ -20,6 +20,7 @@ import {
   ExecutionOptions,
   GenerateCallbacks,
   GenerateOptions,
+  LLMCache,
   LLMMeta,
 } from "@/llms/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
@@ -97,8 +98,9 @@ export class LangChainChatLLM<
     public readonly lcLLM: BaseChatModel<CallOptions, OutputMessageType>,
     protected modelMeta?: LLMMeta,
     executionOptions?: ExecutionOptions,
+    cache?: LLMCache<LangChainChatLLMOutput>,
   ) {
-    super(lcLLM._modelType(), executionOptions);
+    super(lcLLM._modelType(), executionOptions, cache);
     this.parameters = lcLLM.invocationParams();
   }
 

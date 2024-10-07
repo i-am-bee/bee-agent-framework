@@ -26,6 +26,7 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   GenerateCallbacks,
+  LLMCache,
   LLMError,
   LLMMeta,
 } from "@/llms/base.js";
@@ -87,6 +88,7 @@ export interface IBMVllmInputConfig {
 export interface GrpcChatLLMInput {
   llm: IBMvLLM;
   config: IBMVllmInputConfig;
+  cache?: LLMCache<GrpcChatLLMOutput>;
 }
 
 export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
@@ -98,8 +100,8 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
   public readonly llm: IBMvLLM;
   protected readonly config: IBMVllmInputConfig;
 
-  constructor({ llm, config }: GrpcChatLLMInput) {
-    super(llm.modelId, llm.executionOptions);
+  constructor({ llm, config, cache }: GrpcChatLLMInput) {
+    super(llm.modelId, llm.executionOptions, cache);
     this.llm = llm;
     this.config = config;
   }

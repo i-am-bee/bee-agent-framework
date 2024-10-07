@@ -24,6 +24,11 @@ import { Callback } from "@/emitter/types.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { pRetry } from "@/internals/helpers/retry.js";
 import { emitterToGenerator } from "@/internals/helpers/promise.js";
+import { BaseCache } from "@/cache/base.js";
+import { NullCache } from "@/cache/nullCache.js";
+import { ObjectHashKeyFn } from "@/cache/decoratorCache.js";
+import { omit } from "remeda";
+import { Task } from "promise-based-task";
 
 export interface GenerateCallbacks {
   newToken?: Callback<{ value: BaseLLMOutput; callbacks: { abort: () => void } }>;
@@ -111,6 +116,8 @@ export interface LLMMeta {
   tokenLimit: number;
 }
 
+export type LLMCache<T extends BaseLLMOutput> = BaseCache<Task<T[]>>;
+
 export abstract class BaseLLM<
   TInput,
   TOutput extends BaseLLMOutput,
@@ -121,6 +128,7 @@ export abstract class BaseLLM<
   constructor(
     public readonly modelId: string,
     public readonly executionOptions: ExecutionOptions = {},
+    public readonly cache: LLMCache<TOutput> = new NullCache(),
   ) {
     super();
   }
@@ -134,6 +142,8 @@ export abstract class BaseLLM<
       this,
       { params: [input, options] as const, signal: options?.signal },
       async (run) => {
+        const cacheEntry = await this.createCacheAccessor(input, options);
+
         try {
           await run.emitter.emit("start", { input, options });
 
@@ -142,14 +152,15 @@ export abstract class BaseLLM<
             const controller = createAbortController(options?.signal);
 
             const tokenEmitter = run.emitter.child({ groupId: "tokens" });
-            for await (const chunk of this._stream(
-              input,
-              {
-                ...options,
-                signal: controller.signal,
-              },
-              run,
-            )) {
+            for await (const chunk of cacheEntry.value ??
+              this._stream(
+                input,
+                {
+                  ...options,
+                  signal: controller.signal,
+                },
+                run,
+              )) {
               chunks.push(chunk);
               await tokenEmitter.emit("newToken", {
                 value: chunk,
@@ -162,19 +173,24 @@ export abstract class BaseLLM<
 
             const result = this._mergeChunks(chunks);
             await run.emitter.emit("success", { value: result });
+            cacheEntry.resolve(chunks);
             return result;
           }
 
-          // @ts-expect-error types
-          const result = await pRetry(() => this._generate(input, options ?? {}, run), {
-            retries: this.executionOptions.maxRetries || 0,
-            ...options,
-            signal: run.signal,
-          });
+          const result: TOutput =
+            cacheEntry?.value?.at(0) ||
+            // @ts-expect-error types
+            (await pRetry(() => this._generate(input, options ?? {}, run), {
+              retries: this.executionOptions.maxRetries || 0,
+              ...options,
+              signal: run.signal,
+            }));
           await run.emitter.emit("success", { value: result });
+          cacheEntry.resolve([result]);
           return result;
         } catch (error) {
           await run.emitter.emit("error", { input, error, options });
+          await cacheEntry.reject(error);
           if (error instanceof LLMError) {
             throw error;
           } else {
@@ -193,9 +209,14 @@ export abstract class BaseLLM<
         this,
         { params: [input, options] as const, signal: options?.signal },
         async (run) => {
-          for await (const token of this._stream(input, options ?? {}, run)) {
+          const cacheEntry = await this.createCacheAccessor(input, options);
+
+          const tokens: TOutput[] = [];
+          for await (const token of cacheEntry.value || this._stream(input, options ?? {}, run)) {
+            tokens.push(token);
             emit(token);
           }
+          cacheEntry.resolve(tokens);
         },
       );
     });
@@ -240,11 +261,42 @@ export abstract class BaseLLM<
       modelId: this.modelId,
       executionOptions: shallowCopy(this.executionOptions),
       emitter: this.emitter,
+      cache: this.cache,
     };
   }
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
     Object.assign(this, snapshot);
+  }
+
+  protected async createCacheAccessor(
+    input: TInput,
+    options: GenerateOptions | StreamGenerateOptions | undefined,
+    ...extra: any[]
+  ) {
+    const key = ObjectHashKeyFn(input, omit(options ?? {}, ["signal"]), ...extra);
+    const value = await this.cache.get(key);
+    const isNew = value === undefined;
+
+    let task: Task<TOutput[]> | null = null;
+    if (isNew) {
+      task = new Task();
+      await this.cache.set(key, task);
+    }
+
+    return {
+      key,
+      value,
+      resolve: <T2 extends TOutput>(value: T2 | T2[]) => {
+        task?.resolve?.(Array.isArray(value) ? value : [value]);
+      },
+      reject: async (error: Error) => {
+        task?.reject?.(error);
+        if (isNew) {
+          await this.cache.delete(key);
+        }
+      },
+    };
   }
 }
 

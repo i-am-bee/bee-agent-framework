@@ -20,6 +20,7 @@ import {
   ExecutionOptions,
   GenerateCallbacks,
   GenerateOptions,
+  LLMCache,
   LLMMeta,
   StreamGenerateOptions,
 } from "@/llms/base.js";
@@ -87,6 +88,7 @@ interface Input {
   client?: Client;
   parameters?: Parameters;
   executionOptions?: ExecutionOptions;
+  cache?: LLMCache<ChatGroqOutput>;
 }
 
 export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
@@ -105,8 +107,9 @@ export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
       temperature: 0,
     },
     executionOptions = {},
+    cache,
   }: Input = {}) {
-    super(modelId, executionOptions);
+    super(modelId, executionOptions, cache);
     this.client = client ?? new Client();
     this.parameters = parameters ?? {};
   }

@@ -22,6 +22,7 @@ import {
   ExecutionOptions,
   GenerateCallbacks,
   GenerateOptions,
+  LLMCache,
   LLMError,
   LLMMeta,
   LLMOutputError,
@@ -163,6 +164,7 @@ export interface BAMLLMInput {
   modelId: string;
   parameters?: BAMLLMParameters;
   executionOptions?: ExecutionOptions;
+  cache?: LLMCache<BAMLLMOutput>;
 }
 
 export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
@@ -174,8 +176,8 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
   public readonly client: Client;
   public readonly parameters: Partial<BAMLLMParameters>;
 
-  constructor({ client, parameters, modelId, executionOptions = {} }: BAMLLMInput) {
-    super(modelId, executionOptions);
+  constructor({ client, parameters, modelId, cache, executionOptions = {} }: BAMLLMInput) {
+    super(modelId, executionOptions, cache);
     this.client = client ?? new Client();
     this.parameters = parameters ?? {};
   }

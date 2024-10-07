@@ -21,6 +21,7 @@ import {
   ExecutionOptions,
   GenerateCallbacks,
   GenerateOptions,
+  LLMCache,
   LLMError,
   LLMMeta,
 } from "@/llms/base.js";
@@ -88,6 +89,7 @@ export interface IBMvLLMInput {
   modelId: string;
   parameters?: IBMvLLMParameters;
   executionOptions?: ExecutionOptions;
+  cache?: LLMCache<IBMvLLMOutput>;
 }
 
 export type IBMvLLMParameters = NonNullable<
@@ -105,8 +107,8 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
   public readonly client: Client;
   public readonly parameters: Partial<IBMvLLMParameters>;
 
-  constructor({ client, modelId, parameters = {}, executionOptions }: IBMvLLMInput) {
-    super(modelId, executionOptions);
+  constructor({ client, modelId, parameters = {}, executionOptions, cache }: IBMvLLMInput) {
+    super(modelId, executionOptions, cache);
     this.client = client ?? new Client();
     this.parameters = parameters ?? {};
   }

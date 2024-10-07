@@ -22,6 +22,7 @@ import {
   ExecutionOptions,
   GenerateCallbacks,
   GenerateOptions,
+  LLMCache,
   LLMError,
   LLMFatalError,
   LLMMeta,
@@ -179,6 +180,7 @@ export interface WatsonXLLMInput {
   moderations?: WatsonXLLMModerations;
   executionOptions?: ExecutionOptions;
   transform?: WatsonXLLMTransformFn;
+  cache?: LLMCache<WatsonXLLMOutput>;
 }
 
 type WatsonXLLMTransformFn = (body: Record<string, any>) => Record<string, any>;
@@ -283,7 +285,7 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
   public readonly parameters: WatsonXLLMParameters;
 
   constructor(input: WatsonXLLMInput) {
-    super(input.modelId, input.executionOptions);
+    super(input.modelId, input.executionOptions, input.cache);
     this.projectId = input.projectId;
     this.spaceId = input.spaceId;
     this.deploymentId = input.deploymentId;
@@ -380,7 +382,7 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
 
   protected async _generate(
     input: LLMInput,
-    options: WatsonXLLMGenerateOptions,
+    options: WatsonXLLMGenerateOptions | undefined,
     run: GetRunContext<this>,
   ): Promise<WatsonXLLMOutput> {
     try {
@@ -408,7 +410,7 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
 
   protected async *_stream(
     input: LLMInput,
-    options: WatsonXLLMGenerateOptions,
+    options: WatsonXLLMGenerateOptions | undefined,
     run: GetRunContext<this>,
   ): AsyncStream<WatsonXLLMOutput, void> {
     try {
