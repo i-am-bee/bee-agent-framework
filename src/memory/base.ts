@@ -47,6 +47,10 @@ export abstract class BaseMemory<TState = unknown> extends Serializable<TState> 
     return new ReadOnlyMemory(this);
   }
 
+  [Symbol.iterator]() {
+    return this.messages[Symbol.iterator]();
+  }
+
   abstract loadSnapshot(state: TState): void;
   abstract createSnapshot(): TState;
 }
