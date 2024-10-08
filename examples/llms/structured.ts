@@ -22,7 +22,7 @@ const response = await driver.generate(
   [
     BaseMessage.of({
       role: Role.USER,
-      text: "Generate a profile of a citizen of Europe.", // feel free to update it
+      text: "Generate a profile of a citizen of Europe.",
     }),
   ],
 );

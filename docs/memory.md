@@ -169,7 +169,6 @@ await memory.add(BaseMessage.of({ role: "assistant", text: "French" })); // remo
 console.info(memory.isEmpty()); // false
 console.log(memory.messages.length); // 3
 console.log(memory.messages);
-
 ```
 
 _Source: [examples/memory/slidingMemory.ts](/examples/memory/slidingMemory.ts)_
