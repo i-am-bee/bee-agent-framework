@@ -45,7 +45,7 @@ _Source: [examples/memory/unconstrainedMemory.ts](/examples/memory/unconstrained
 
 > [!TIP]
 >
-> You can create a new read-only memory instance by calling `asReadOnly` method on the exiting one.
+> You can create a new read-only memory instance by calling the `asReadOnly` method on the existing one.
 
 ### Usage with LLMs
 
@@ -115,11 +115,11 @@ _Source: [examples/memory/agentMemory.ts](/examples/memory/agentMemory.ts)_
 
 > [!NOTE]
 >
-> Agents internally uses `TokenMemory` to store intermediate steps for a given invocation.
+> Bee Agent internally uses `TokenMemory` to store intermediate steps for a given run.
 
 > [!NOTE]
 >
-> Agents typically works with the memory in a similar as was just shown.
+> Agent typically works with a memory similar to what was just shown.
 
 ## Memory types
 
@@ -143,7 +143,7 @@ console.log(memory.messages.length); // 1
 
 ### SlidingMemory
 
-Keeps last `k` entries in the memory. The oldest ones are deleted (if not specified otherwise).
+Keeps last `k` entries in the memory. The oldest ones are deleted (unless specified otherwise).
 
 <!-- embedme examples/memory/slidingMemory.ts -->
 
@@ -153,34 +153,9 @@ import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 
 const memory = new SlidingMemory({
   size: 3, // (required) number of messages that can be in the memory at a single moment
-});
-
-await memory.add(BaseMessage.of({ role: "system", text: "You are a guide through France." }));
-await memory.add(BaseMessage.of({ role: "user", text: "What is the capital?" }));
-await memory.add(BaseMessage.of({ role: "assistant", text: "Paris" }));
-await memory.add(BaseMessage.of({ role: "user", text: "What language is spoken there?" })); // removes the system message
-
-console.info(memory.isEmpty()); // false
-console.log(memory.messages.length); // 3
-console.log(memory.messages); // 3
-```
-
-_Source: [examples/memory/slidingMemory.ts](/examples/memory/slidingMemory.ts)_
-
-#### Advanced
-
-You can customize which messages should be deleted and which should be preserved.
-
-<!-- embedme examples/memory/slidingMemoryCustom.ts -->
-
-```ts
-import { SlidingMemory } from "bee-agent-framework/memory/slidingMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
-
-const memory = new SlidingMemory({
-  size: 3, // (required) number of messages that can be in the memory at a single moment
   handlers: {
-    // we select a first non-system message
+    // optional
+    // we select a first non-system message (default behaviour is to select the oldest one)
     removalSelector: (messages) => messages.find((msg) => msg.role !== "system")!,
   },
 });
@@ -193,14 +168,16 @@ await memory.add(BaseMessage.of({ role: "assistant", text: "French" })); // remo
 
 console.info(memory.isEmpty()); // false
 console.log(memory.messages.length); // 3
-console.log(memory.messages); // 3
+console.log(memory.messages);
+
 ```
 
-_Source: [examples/memory/slidingMemoryCustom.ts](/examples/memory/slidingMemoryCustom.ts)_
+_Source: [examples/memory/slidingMemory.ts](/examples/memory/slidingMemory.ts)_
 
 ### TokenMemory
 
-Ensures that the number of tokens of all messages is below the given threshold. The oldest are removed.
+Ensures that the token sum of all messages is below the given threshold.
+If overflow occurs, the oldest message will be removed.
 
 <!-- embedme examples/memory/tokenMemory.ts -->
 

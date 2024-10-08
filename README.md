@@ -137,7 +137,7 @@ The source directory (`src`) provides numerous modules that one can use.
 | [**agents**](./docs/agents.md) | Base classes defining the common interface for agent.                                       |
 | **llms**                       | Base classes defining the common interface for text inference (standard or chat).           |
 | **template**                   | Prompt Templating system based on `Mustache` with various improvements\_.                   |
-| [**memory**](./docs/memory.md) | Various types of memories to use with agent.                                                |
+| [**memory**](./docs/readme.md) | Various types of memories to use with agent.                                                |
 | [**tools**](./docs/tools.md)   | Tools that an agent can use.                                                                |
 | [**cache**](./docs/cache.md)   | Preset of different caching approaches that can be used together with tools.                |
 | **errors**                     | Base framework error classes used by each module.                                           |
