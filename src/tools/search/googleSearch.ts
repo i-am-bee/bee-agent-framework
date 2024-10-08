@@ -71,7 +71,7 @@ export class GoogleSearchTool extends Tool<
   inputSchema() {
     return z.object({
       query: z.string({ description: `Search query` }).min(1).max(2048),
-      page: z
+      page: z.coerce
         .number()
         .int()
         .min(1)
