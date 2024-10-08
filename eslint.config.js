@@ -26,6 +26,7 @@ export default tseslint.config(
     },
     rules: {
       "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
     },
   },
   {
@@ -84,6 +85,7 @@ export default tseslint.config(
       "no-console": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-vars": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
       "no-restricted-imports": [
         "error",
         {
