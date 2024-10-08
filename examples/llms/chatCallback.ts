@@ -22,7 +22,7 @@ for await (const { prompt } of reader) {
       emitter.match("*", (data, event) => {
         reader.write(`LLM 🤖 (event: ${event.name})`, JSON.stringify(data));
 
-        // if you want to premature close the stream, just uncomment the following line
+        // if you want to close the stream prematurely, just uncomment the following line
         // callbacks.abort()
       }),
     );
