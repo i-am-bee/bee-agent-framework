@@ -17,7 +17,7 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 - 🤖 **AI agents**: Use our powerful [Bee agent](./docs/agents.md) or [build your own](./docs/agents.md).
 - 🛠️ **Tools**: Use our [built-in tools](./docs/tools.md) or [create your own](./docs/tools.md) in Javascript/Python.
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
-- 💾 **Memory**: Multiple [strategies](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#memory) to optimize token spend.
+- 💾 **Memory**: Multiple [strategies](./docs/memory.md) to optimize token spend.
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
 - 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our MLflow integration (coming soon) to debug performance.
 - 🎛️ **Production-level** control with [caching](./docs/cache.md) and [error handling](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#errors).
@@ -137,7 +137,7 @@ The source directory (`src`) provides numerous modules that one can use.
 | [**agents**](./docs/agents.md) | Base classes defining the common interface for agent.                                       |
 | **llms**                       | Base classes defining the common interface for text inference (standard or chat).           |
 | **template**                   | Prompt Templating system based on `Mustache` with various improvements\_.                   |
-| **memory**                     | Various types of memories to use with agent.                                                |
+| [**memory**](./docs/memory.md) | Various types of memories to use with agent.                                                |
 | [**tools**](./docs/tools.md)   | Tools that an agent can use.                                                                |
 | [**cache**](./docs/cache.md)   | Preset of different caching approaches that can be used together with tools.                |
 | **errors**                     | Base framework error classes used by each module.                                           |
