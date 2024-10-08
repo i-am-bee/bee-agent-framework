@@ -64,7 +64,7 @@ export class OpenMeteoTool extends Tool<
   ToolRunOptions
 > {
   name = "OpenMeteo";
-  description = `Retrieves current, past, or future weather forecasts for a specified location.`;
+  description = `Retrieve current, past, or future weather forecasts for a location.`;
 
   inputSchema() {
     return z
@@ -85,13 +85,14 @@ export class OpenMeteoTool extends Tool<
             .strip(),
         ]),
         start_date: z
-          .union([z.string().date(), z.string().datetime()])
+          .string()
+          .date()
           .describe("Start date for the weather forecast in the format YYYY-MM-DD (UTC)"),
         end_date: z
-          .union([z.string().date(), z.string().datetime()])
+          .string()
+          .date()
           .describe("End date for the weather forecast in the format YYYY-MM-DD (UTC)")
           .optional(),
-        elevation: z.coerce.number().nullish(),
         temperature_unit: z.enum(["celsius", "fahrenheit"]).default("celsius"),
       })
       .strip();
