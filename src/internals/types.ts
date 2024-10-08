@@ -64,6 +64,10 @@ export type RequiredAll<T> = {
   [P in keyof T]-?: NonNullable<T[P]>;
 };
 
+export type RequiredNested<T> = {
+  [P in keyof T]-?: Required<T[P]>;
+};
+
 export type OmitEmpty<T> = OmitType<T, never | void>;
 export type NonEmptyArray<T> = [T, ...T[]];
 export type Unwrap<T> = T extends (infer X)[] ? X : T;

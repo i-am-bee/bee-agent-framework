@@ -15,15 +15,16 @@
  */
 
 import { BaseMessage } from "@/llms/primitives/message.js";
-import { FrameworkError } from "@/errors.js";
+import { FrameworkError, FrameworkErrorOptions } from "@/errors.js";
 import { Serializable } from "@/internals/serializable.js";
 
 export class MemoryError extends FrameworkError {}
 export class MemoryFatalError extends MemoryError {
-  constructor(message: string, errors?: Error[]) {
+  constructor(message: string, errors?: Error[], options?: FrameworkErrorOptions) {
     super(message, errors, {
       isFatal: true,
       isRetryable: false,
+      ...options,
     });
   }
 }
