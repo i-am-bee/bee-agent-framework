@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.27](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.26...v0.0.27) (2024-10-08)
+
+### Features
+
+- **agent:** improve time awareness ([89e8f0a](https://github.com/i-am-bee/bee-agent-framework/commit/89e8f0a4880cde474e3f9ad2770c1b7f5f88315c))
+- **agent:** update system prompt and open meteo schema ([#72](https://github.com/i-am-bee/bee-agent-framework/issues/72)) ([c235522](https://github.com/i-am-bee/bee-agent-framework/commit/c2355227a86bd2ad9017506f8592f3f03d0e952a))
+- **memory:** add iterator ([23bba65](https://github.com/i-am-bee/bee-agent-framework/commit/23bba65aac99fc24c2ae2002fd76677956520faa))
+- **memory:** rename SlidingWindowMemory, add removalSelector functionality ([69702b6](https://github.com/i-am-bee/bee-agent-framework/commit/69702b6559ff1ac80de98ee28c16df789eb98c98))
+- **memory:** switch from LLM to ChatLLM in SummarizeMemory ([022c05a](https://github.com/i-am-bee/bee-agent-framework/commit/022c05a727686a4b5260c6684759aafc01290631))
+- **serializer:** add aliases support ([72a6640](https://github.com/i-am-bee/bee-agent-framework/commit/72a664088e44293785c129e3c06f56f6092108db))
+- **tools:** auto coerce input for google search ([7236ba7](https://github.com/i-am-bee/bee-agent-framework/commit/7236ba7341d7ac24c39828ebe1201784e82eb320))
+
 ## [0.0.26](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.25...v0.0.26) (2024-10-07)
 
 ### Features
