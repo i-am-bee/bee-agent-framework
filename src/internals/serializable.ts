@@ -38,8 +38,8 @@ export abstract class Serializable<T = unknown> {
     Cache.init(this);
   }
 
-  protected static register<T>(this: SerializableClass<T>) {
-    Serializer.registerSerializable(this);
+  protected static register<T>(this: SerializableClass<T>, aliases?: string[]) {
+    Serializer.registerSerializable(this, undefined, aliases);
   }
 
   clone<T extends Serializable>(this: T): T {

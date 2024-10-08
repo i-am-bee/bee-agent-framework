@@ -24,6 +24,7 @@ import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { BAMLLM } from "@/adapters/bam/llm.js";
 import { BAMChatLLM } from "@/adapters/bam/chat.js";
 import { SerializerError } from "@/serializer/error.js";
+import { ValueOf } from "@/internals/types.js";
 
 describe("Serializer", () => {
   it.each([
@@ -272,6 +273,48 @@ describe("Serializer", () => {
       expect(() =>
         Serializer.deserialize(data, [BAMLLM, BAMChatLLM, BaseMessage]),
       ).not.toThrowError();
+    });
+
+    it("Handles aliases", () => {
+      const Name = {
+        new: "MyClass",
+        old: "MyOldClass",
+      } as const;
+
+      const getSerialized = (name: ValueOf<typeof Name>) =>
+        `{"__version":"0.0.0","__root":{"__serializer":true,"__class":"${name}","__ref":"1","__value":{"seed":{"__serializer":true,"__class":"Number","__ref":"2","__value":"1000"}}}}`;
+
+      class MyClass {
+        constructor(public readonly seed: number) {}
+      }
+      expect(Serializer.hasFactory(Name.new)).toBe(false);
+      expect(Serializer.hasFactory(Name.old)).toBe(false);
+      Serializer.register(
+        MyClass,
+        {
+          toPlain: (value) => ({ seed: value.seed }),
+          fromPlain: (value) => new MyClass(value.seed),
+        },
+        [Name.old],
+      );
+      expect(Serializer.hasFactory(Name.new)).toBe(true);
+      expect(Serializer.hasFactory(Name.old)).toBe(true);
+
+      // Override
+      Serializer.register(
+        MyClass,
+        {
+          toPlain: (value) => ({ seed: value.seed + 100 }),
+          fromPlain: (value) => new MyClass(value.seed + 100),
+        },
+        [],
+      );
+
+      const [a, b] = [
+        Serializer.deserialize(getSerialized(Name.new)),
+        Serializer.deserialize(getSerialized(Name.old)),
+      ];
+      verifyDeserialization(a, b);
     });
   });
 });

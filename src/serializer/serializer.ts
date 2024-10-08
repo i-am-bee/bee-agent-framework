@@ -58,14 +58,19 @@ export class Serializer {
   static registerSerializable<A>(
     ref: SerializableClass<A>,
     processors?: Partial<Omit<SerializeFactory<Serializable<A>, A>, "ref">>,
+    aliases?: string[],
   ) {
-    return Serializer.register(ref, {
-      toPlain: (value) => value.createSnapshot(),
-      fromPlain: (value) => ref.fromSnapshot(value),
-      createEmpty: () => Object.create(ref.prototype),
-      updateInstance: (instance, update) => instance.loadSnapshot(update),
-      ...R.pickBy(processors ?? {}, R.isDefined),
-    });
+    return Serializer.register(
+      ref,
+      {
+        toPlain: (value) => value.createSnapshot(),
+        fromPlain: (value) => ref.fromSnapshot(value),
+        createEmpty: () => Object.create(ref.prototype),
+        updateInstance: (instance, update) => instance.loadSnapshot(update),
+        ...R.pickBy(processors ?? {}, R.isDefined),
+      },
+      aliases,
+    );
   }
 
   static deregister(ref: ClassConstructor | NamedFunction) {
@@ -76,16 +81,37 @@ export class Serializer {
   static register<A, B = unknown>(
     ref: ClassConstructor<A> | NamedFunction<A>,
     processors: Omit<SerializeFactory<A, B>, "ref">,
+    aliases?: string[],
   ): void {
     const className = extractClassName(ref);
-    const currentFactory = Serializer.factories.get(className);
-    if (currentFactory && currentFactory.ref !== ref) {
-      throw new SerializerError(`Factory for class "${className}" already exists!`);
-    }
-
-    Serializer.factories.set(className, {
+    const oldFactory = Serializer.factories.get(className);
+    const newFactory: SerializeFactory<A, B> = {
       ref,
       ...processors,
+    };
+
+    if (oldFactory) {
+      if (oldFactory.ref !== ref) {
+        throw new SerializerError(`Factory for class "${className}" already exists!`);
+      }
+
+      for (const [key, value] of Serializer.factories.entries()) {
+        if (value === oldFactory) {
+          Serializer.factories.set(key, newFactory);
+        }
+      }
+    }
+    Serializer.factories.set(className, newFactory);
+
+    aliases?.forEach((alias) => {
+      const aliasTarget = Serializer.factories.get(alias);
+      if (!aliasTarget) {
+        this.factories.set(alias, newFactory);
+      } else if (aliasTarget !== newFactory) {
+        throw new SerializerError(
+          `Factory for class "${className}" already exists! Cannot add alias.`,
+        );
+      }
     });
   }
 
