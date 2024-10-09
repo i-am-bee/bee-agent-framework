@@ -158,15 +158,19 @@ export class LinePrefixParser<
       const line = this.lines[0];
       const isLastLine = this.lines.length === 1;
 
-      const parsedLine = this.extractLine(line.value);
+      const lastNode = this.lastNodeKey ? this.nodes[this.lastNodeKey] : null;
+      const isTerminationNode = lastNode
+        ? Boolean(lastNode.isEnd && lastNode.next.length === 0)
+        : false;
+
+      const parsedLine = isTerminationNode ? null : this.extractLine(line.value);
       if (isLastLine && (parsedLine?.partial || !line.value)) {
         break;
       }
       this.lines.shift();
 
       if (parsedLine && !parsedLine.partial) {
-        if (this.lastNodeKey) {
-          const lastNode = this.nodes[this.lastNodeKey];
+        if (lastNode) {
           if (!lastNode.next.includes(parsedLine.key)) {
             this.throwWithContext(
               `Transition from '${this.lastNodeKey}' to '${parsedLine.key}' does not exist!`,
@@ -174,7 +178,7 @@ export class LinePrefixParser<
             );
           }
 
-          await this.emitFinalUpdate(this.lastNodeKey, lastNode.field);
+          await this.emitFinalUpdate(this.lastNodeKey!, lastNode.field);
         } else if (!this.nodes[parsedLine.key].isStart) {
           this.throwWithContext(
             `Parsed text line corresponds to a node "${parsedLine.key}" which is not a start node!`,
