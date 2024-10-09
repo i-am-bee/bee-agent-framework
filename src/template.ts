@@ -15,7 +15,7 @@
  */
 
 import { FrameworkError } from "@/errors.js";
-import { ObjectLike } from "@/internals/types.js";
+import { ObjectLike, PlainObject } from "@/internals/types.js";
 import * as R from "remeda";
 import Mustache from "mustache";
 import { Serializable } from "@/internals/serializable.js";
@@ -26,7 +26,12 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { pickBy } from "remeda";
 import { getProp } from "@/internals/helpers/object.js";
 
-export type InferValue<T> = T extends ZodType<infer A> ? A : never;
+type PostInfer<T> = T extends PlainObject
+  ? {
+      [K in keyof T]: T[K] extends Date ? string : T[K];
+    }
+  : T;
+type InferValue<T> = T extends ZodType<infer A> ? PostInfer<A> : never;
 export type PromptTemplateRenderFn<K extends ZodType> = (this: InferValue<K>) => any;
 
 export type PromptTemplateRenderInput<T extends ZodType, T2 extends z.input<T> = z.input<T>> = {
