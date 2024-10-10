@@ -77,6 +77,8 @@
     "test:e2e:watch": "vitest watch tests",
     "test:all": "vitest run",
     "test:watch": "vitest watch",
+    "test:examples": "vitest run tests/examples",
+    "test:examples:watch": "vitest run tests/examples",
     "prepare": "husky",
     "copyright": "./scripts/copyright.sh",
     "release": "release-it",
