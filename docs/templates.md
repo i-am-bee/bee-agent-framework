@@ -60,7 +60,6 @@ const output = template.render({
   colors: ["Green", "Yellow"],
 });
 console.log(output); // Colors: Green,Yellow
-
 ```
 
 _Source: [examples/templates/arrays.ts](/examples/templates/arrays.ts)_
@@ -89,7 +88,6 @@ const output = template.render({
   responses: [{ duration: 3 }, { duration: 5 }, { duration: 6 }],
 });
 console.log(output); // Expected Duration: 5ms; Retrieved: 3ms 5ms 6ms
-
 ```
 
 _Source: [examples/templates/objects.ts](/examples/templates/objects.ts)_
@@ -123,7 +121,6 @@ const output = modified.render({
   objective: "fulfill the user needs",
 });
 console.log(output); // You are a helpful assistant called Bee. Your objective is to fulfill the user needs. Your answers must be concise.
-
 ```
 
 _Source: [examples/templates/forking.ts](/examples/templates/forking.ts)_
