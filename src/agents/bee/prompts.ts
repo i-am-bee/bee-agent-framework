@@ -33,7 +33,7 @@ export const BeeSystemPrompt = new PromptTemplate({
   }),
   template: `# Available functions
 {{#tools.length}}
-When specifying function parameters in Function Input, you must always use all required parameters.
+Always use all required parameters.
 
 {{#tools}}
 Function Name: {{name}}
@@ -57,7 +57,7 @@ Message: User's message. You never use this instruction line.
 Thought: A single-line plan of how to answer the user's message. It must be immediately followed by Final Answer.
 {{/tools.length}}
 {{#tools.length}}
-Thought: A single-line step-by-step plan of how to answer the user's message. Use functions that best answer the preceding Message based on their Description. When the problem seems too hard for the function, you should try to split it into smaller ones. This line must be immediately followed by Final Answer if available information and capabilities are sufficient to provide the answer, or by Function Name when one of the available functions needs to be called. Do not provide the answer here.
+Thought: A single-line step-by-step plan of how to answer the user's message. Use functions that best answer the preceding Message based on their Description. When the problem seems too hard for the function, you should try to split it into smaller ones. This line must be immediately followed by Final Answer if available information and capabilities are sufficient to provide the answer, or by Function Name if one of the available functions needs to be called. Do not provide the answer here.
 Function Name: Name of the function that can best answer the preceding Thought. It must be one of the available functions defined above.
 Function Input: Function parameters. Use this instruction even if the parameters is an empty object.
 Function Caption: A single-line description of the function calling for the user.
