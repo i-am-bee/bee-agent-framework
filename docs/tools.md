@@ -1,42 +1,292 @@
 # Tools
 
-## Introduction
+> [!TIP]
+>
+> Location within the framework `bee-agent-framework/tools`.
 
 Tools in the context of an agent refer to additional functionalities or capabilities integrated with the agent to perform specific tasks beyond text processing.
 
 These tools extend the agent's abilities, allowing it to interact with external systems, access information, and execute actions.
 
-## Development
+## Built-in tools
 
-### Writing a new tool
+| Name                                                                      | Description                                                                                        |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `PythonTool`                                                              | Run arbitrary Python code in the remote environment.                                               |
+| `WikipediaTool`                                                           | Search for data on Wikipedia.                                                                      |
+| `GoogleSearchTool`                                                        | Search for data on Google using Custom Search Engine.                                              |
+| `DuckDuckGoTool`                                                          | Search for data on DuckDuckGo.                                                                     |
+| `SQLTool`                                                                 | Execute SQL queries against relational databases. Instructions can be found [here](./sql-tool.md). |
+| `CustomTool`                                                              | Run your own Python function in the remote environment.                                            |
+| `LLMTool`                                                                 | Use an LLM to process input data.                                                                  |
+| `DynamicTool`                                                             | Construct to create dynamic tools.                                                                 |
+| `ArXivTool`                                                               | Retrieve research articles published on arXiv.                                                     |
+| `WebCrawlerTool`                                                          | Retrieve content of an arbitrary website.                                                          |
+| `OpenMeteoTool`                                                           | Retrieve current, previous, or upcoming weather for a given destination.                           |
+| ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                                    |
 
-To create a tool, the `Tool` class must be extended/ implemented or `DynamicTool` created from [tools base](../src/tools/base.ts). When starting to write tools, it is recommended to implement the `Tool` class. The `DynamicTool` class is an extension of the `Tool` class that allows for dynamic forms of input. Refer to the list of [examples](#examples) for some simple examples or any of the built-in tools in order to guide the creation of new tools.
+All examples can be found [here](/examples/tools).
 
-Tools MUST do the following:
+> [!TIP]
+>
+> Would you like to use a tool from LangChain? See the [example](/examples/tools/langchain.ts).
+
+## Usage
+
+### Basic
+
+<!-- embedme examples/tools/base.ts -->
+
+```ts
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
+
+const tool = new OpenMeteoTool();
+const result = await tool.run({
+  location: { name: "New York" },
+  start_date: "2024-10-10",
+  end_date: "2024-10-10",
+});
+console.log(result.getTextContent());
+```
+
+_Source: [examples/tools/base.ts](/examples/tools/base.ts)_
+
+### Advanced
+
+<!-- embedme examples/tools/advanced.ts -->
+
+```ts
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
+import { UnconstrainedCache } from "bee-agent-framework/cache/unconstrainedCache";
+
+const tool = new OpenMeteoTool({
+  cache: new UnconstrainedCache(),
+  retryOptions: {
+    maxRetries: 3,
+  },
+});
+console.log(tool.name); // OpenMeteo
+console.log(tool.description); // Retrieve current, past, or future weather forecasts for a location.
+console.log(tool.inputSchema()); // (zod/json schema)
+
+await tool.cache.clear();
+
+const result = await tool.run({
+  location: { name: "New York" },
+  start_date: "2024-10-10",
+  end_date: "2024-10-10",
+  temperature_unit: "celsius",
+});
+console.log(result.isEmpty()); // false
+console.log(result.result); // prints raw data
+console.log(result.getTextContent()); // prints data as text
+```
+
+_Source: [examples/tools/advanced.ts](/examples/tools/advanced.ts)_
+
+> [!TIP]
+>
+> To learn more about caching, refer to the [Cache documentation page](./cache.md).
+
+### Usage with agents
+
+<!-- embedme examples/tools/agent.ts -->
+
+```ts
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { ArXivTool } from "bee-agent-framework/tools/arxiv";
+import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
+import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
+
+const agent = new BeeAgent({
+  llm: new OllamaChatLLM(),
+  memory: new UnconstrainedMemory(),
+  tools: [new ArXivTool()],
+});
+```
+
+_Source: [examples/tools/agent.ts](/examples/tools/agent.ts)_
+
+## Writing a new tool
+
+To create a new tool, you have the following options on how to do that:
+
+- Implement the base [`Tool`](/src/tools/base.ts) class.
+- Initiate the [`DynamicTool`](/src/tools/base.ts) by passing your own handler (function) with the `name`, `description` and `input schema`.
+- Initiate the [`CustomTool`](/src/tools/custom.ts) by passing your own Python function (code interpreter needed).
+
+### Implementing the `Tool` class
+
+The recommended and most sustainable way to create a tool is by implementing the base `Tool` class.
+
+#### Basic
+
+<!-- embedme examples/tools/custom/base.ts -->
+
+```ts
+import {
+  StringToolOutput,
+  Tool,
+  ToolInput,
+  ToolInputValidationError,
+} from "bee-agent-framework/tools/base";
+import { z } from "zod";
+import { randomInteger } from "remeda";
+
+export class RiddleTool extends Tool<StringToolOutput> {
+  name = "Riddle";
+  description = "It generates a random puzzle to test your knowledge.";
+
+  inputSchema() {
+    return z.object({
+      index: z
+        .number()
+        .int()
+        .min(0)
+        .max(RiddleTool.length - 1)
+        .optional(),
+    });
+  }
+
+  public static data = [
+    "What has hands but can’t clap?",
+    "What has a face and two hands but no arms or legs?",
+    "What gets wetter the more it dries?",
+    "What has to be broken before you can use it?",
+    "What has a head, a tail, but no body?",
+    "The more you take, the more you leave behind. What am I?",
+    "What goes up but never comes down?",
+  ];
+
+  static {
+    // Makes the class serializable
+    this.register();
+  }
+
+  protected async _run(input: ToolInput<this>): Promise<StringToolOutput> {
+    const index = input.index ?? randomInteger(0, RiddleTool.data.length - 1);
+    const riddle = RiddleTool.data[index];
+    if (!riddle) {
+      throw new ToolInputValidationError(`Riddle with such index (${index}) does not exist!`);
+    }
+    return new StringToolOutput(riddle);
+  }
+}
+```
+
+_Source: [examples/tools/custom/base.ts](/examples/tools/custom/base.ts)_
+
+> [!TIP]
+>
+> `inputSchema` can be asynchronous.
+
+> [!TIP]
+>
+> If you want to return an array or a plain object, use `JSONToolOutput` or implement your own.
+
+#### Advanced
+
+If your tool is more complex, you may want to use the full power of the tool abstraction, as the following example shows.
+
+<!-- embedme examples/tools/custom/openLibrary.ts -->
+
+```ts
+import {
+  BaseToolOptions,
+  BaseToolRunOptions,
+  Tool,
+  ToolInput,
+  JSONToolOutput,
+  ToolError,
+} from "bee-agent-framework/tools/base";
+import { z } from "zod";
+import { createURLParams } from "bee-agent-framework/internals/fetcher";
+import { RunContext } from "bee-agent-framework/context";
+
+type ToolOptions = BaseToolOptions & { maxResults?: number };
+type ToolRunOptions = BaseToolRunOptions;
+
+export interface OpenLibraryResponse {
+  numFound: number;
+  start: number;
+  numFoundExact: boolean;
+  q: string;
+  offset: number;
+  docs: Record<string, any>[];
+}
+
+export class OpenLibraryToolOutput extends JSONToolOutput<OpenLibraryResponse> {
+  isEmpty(): boolean {
+    return !this.result || this.result.numFound === 0 || this.result.docs.length === 0;
+  }
+}
+
+export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, ToolRunOptions> {
+  name = "OpenLibrary";
+  description =
+    "Provides access to a library of books with information about book titles, authors, contributors, publication dates, publisher and isbn.";
+
+  inputSchema() {
+    return z
+      .object({
+        title: z.string(),
+        author: z.string(),
+        isbn: z.string(),
+        subject: z.string(),
+        place: z.string(),
+        person: z.string(),
+        publisher: z.string(),
+      })
+      .partial();
+  }
+
+  static {
+    this.register();
+  }
+
+  protected async _run(
+    input: ToolInput<this>,
+    _options: ToolRunOptions | undefined,
+    run: RunContext<this>,
+  ) {
+    const response = await fetch(`https://openlibrary.org`, {
+      signal: run.signal,
+      body: createURLParams({
+        searchon: input,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new ToolError(
+        "Request to Open Library API has failed!",
+        [new Error(await response.text())],
+        {
+          context: { input },
+        },
+      );
+    }
+
+    const json: OpenLibraryResponse = await response.json();
+    if (this.options.maxResults) {
+      json.docs.length = this.options.maxResults;
+    }
+
+    return new OpenLibraryToolOutput(json);
+  }
+}
+```
+
+_Source: [examples/tools/custom/openLibrary.ts](/examples/tools/custom/openLibrary.ts)_
+
+#### Implementation Notes
 
 - **Implement the `Tool` class:**
 
-  - `MyNewToolOutput` is required, must be an implementation of `ToolOutput` such as `StringToolOutput` or `JSONToolOutput`
+  - `MyNewToolOutput` is required, must be an implementation of `ToolOutput` such as `StringToolOutput` or `JSONToolOutput`.
 
   - `ToolOptions` is optional (default BaseToolOptions), constructor parameters that are passed during tool creation
 
   - `ToolRunOptions` is optional (default BaseToolRunOptions), optional parameters that are passed to the run method
-
-  ```ts
-  import {
-    BaseToolOptions,
-    BaseToolRunOptions,
-    JSONToolOutput,
-  } from "bee-agent-framework/tools/base";
-
-  type MyNewToolOutput = JSONToolOutput<{ name: string; createdAt: Date }>;
-  type ToolOptions = BaseToolOptions;
-  type ToolRunOptions = BaseToolRunOptions;
-
-  export class MyNewTool extends Tool<MyNewToolOutput, ToolOptions, ToolRunOptions> {
-    // tool implementation
-  }
-  ```
 
 - **Be given a unique name:**
 
@@ -48,7 +298,7 @@ Tools MUST do the following:
 
 - **Provide a natural language description of what the tool does:**
 
-  ❗Important: this description is used by the agent to determine when the tool should be used. It's probably the most important aspect of your tool and you should experiment with different natural language descriptions to ensure the tool is used in the correct circumstances. You can also include usage tips and guidance for the agent in the description, but
+  ❗Important: the agent uses this description to determine when the tool should be used. It's probably the most important aspect of your tool and you should experiment with different natural language descriptions to ensure the tool is used in the correct circumstances. You can also include usage tips and guidance for the agent in the description, but
   its advisable to keep the description succinct in order to reduce the probability of conflicting with other tools, or adversely affecting agent behavior.
 
   ```ts
@@ -78,7 +328,7 @@ Tools MUST do the following:
 
 - **Implement initialisation:**
 
-  The unnamed static block is executed when your tool is called for the first time. It is used for registering your tool as `serializable` (you can then use the `serialize()` method).
+  The unnamed static block is executed when your tool is called for the first time. It is used to register your tool as `serializable` (you can then use the `serialize()` method).
 
   <!-- eslint-skip -->
 
@@ -100,51 +350,95 @@ Tools MUST do the following:
   }
   ```
 
-### Using tools with agents
+### Using the `DynamicTool` class
 
-In order for a tool to be of some utility within an agent, you must enable the agent with knowledge of the tool. To do this, the tool code module must be imported into the agent and passed to the tools array during creation of a `BeeAgent`. An example can be found in the [bee agent](../examples/agents/bee.ts) or you can use a code snippet such as the one below that creates an agent with the built-in [ArXiv tool](../src/tools/arxiv.ts):
+The `DynamicTool` allows you to create a tool without extending the base tool class.
+
+<!-- embedme examples/tools/custom/dynamic.ts -->
 
 ```ts
-import { ArXivTool } from "bee-agent-framework/tools/arxiv";
+import { DynamicTool, StringToolOutput } from "bee-agent-framework/tools/base";
+import { z } from "zod";
 
-const llm = new OllamaChatLLM({
-  modelId: "insert-model-id-here",
-});
+const tool = new DynamicTool({
+  name: "GenerateRandomNumber",
+  description: "Generates a random number in the given interval.",
+  inputSchema: z.object({
+    min: z.number().int().min(0),
+    max: z.number().int(),
+  }),
+  async handler(input) {
+    const min = Math.min(input.min, input.max);
+    const max = Math.max(input.max, input.min);
 
-const agent = new BeeAgent({
-  llm,
-  memory: new TokenMemory({ llm }),
-  tools: [new ArXivTool()],
+    const number = Math.floor(Math.random() * (max - min + 1)) + min;
+    return new StringToolOutput(number.toString());
+  },
 });
 ```
+
+_Source: [examples/tools/custom/dynamic.ts](/examples/tools/custom/dynamic.ts)_
+
+### Using the `CustomTool` (Python functions)
+
+If you want to use the Python function, use the [`CustomTool`](/src/tools/custom.ts).
+
+<!-- embedme examples/tools/custom/python.ts -->
+
+```ts
+import "dotenv/config";
+import { CustomTool } from "bee-agent-framework/tools/custom";
+
+const customTool = await CustomTool.fromSourceCode(
+  {
+    // Ensure the env exists
+    url: process.env.CODE_INTERPRETER_URL!,
+  },
+  `import requests
+from typing import Optional, Union, Dict
+
+def get_riddle() -> Optional[Dict[str, str]]:
+  """
+  Fetches a random riddle from the Riddles API.
+
+  This function retrieves a random riddle and its answer. It does not accept any input parameters.
+
+  Returns:
+      Optional[Dict[str, str]]: A dictionary containing:
+          - 'riddle' (str): The riddle question.
+          - 'answer' (str): The answer to the riddle.
+      Returns None if the request fails.
+  """
+  url = 'https://riddles-api.vercel.app/random'
+  
+  try:
+      response = requests.get(url)
+      response.raise_for_status() 
+      return response.json() 
+  except Exception as e:
+      return None`,
+);
+```
+
+_Source: [examples/tools/custom/python.ts](/examples/tools/custom/python.ts)_
+
+> [!IMPORTANT]
+>
+> Custom tools are executed within the code interpreter, but they cannot access any files.
+> Only `PythonTool` does.
 
 ## General Tips
 
 ### Data Minimization
 
-If your tool is providing data to the agent, try to ensure that the data is relevant and free of extraneous metatdata. Preprocessing data to improve relevance and minimizing unnecessary data conserves agent memory, and tends to improve overall performance.
+If your tool is providing data to the agent, try to ensure that the data is relevant and free of extraneous metatdata. Preprocessing data to improve relevance and minimize unnecessary data conserves agent memory, improving overall performance.
 
 ### Provide Hints
 
-If your tool encounters an error that is fixable you can return a hint to the agent, the agent will try to reuse the tool in the context of the hint. This can improve the agents ability
+If your tool encounters an error that is fixable, you can return a hint to the agent; the agent will try to reuse the tool in the context of the hint. This can improve the agent's ability
 to recover from errors.
 
 ### Security & Stability
 
-When building tools consider that the tool is being invoked by a somewhat unpredictable third party (the agent). You should ensure that sufficient guardrails are in place to prevent
+When building tools, consider that the tool is being invoked by a somewhat unpredictable third party (the agent). You should ensure that sufficient guardrails are in place to prevent
 adverse outcomes.
-
-## Examples
-
-### Hello World
-
-The simplest form of an example tool is the [helloworld](../examples/tools/helloWorld.ts) tool. This example implements the Tool class and will simply prepend the word "Hello" to a given input such as "Please give a special greeting to Bee!". It is not intended for usage with any agents since the functionality provided is highly trivial. However, it may serve as a starter template for writing new tools.
-
-### Open Library
-
-The [openLibrary](../examples/tools/openLibrary.ts) tool allows an agent to query the [Open Library](https://openlibrary.org/) via its [book search API](https://openlibrary.org/dev/docs/api/search). This functionality injects knowledge about book metadata (not book content) into an agent. It serves as an example for several key aspects of tool creation:
-
-- Implementing the `Tool` class
-- Specifying the input schema to a tool
-- Calling out to a third-party service and handling responses and errors
-- Using `JSONToolOutput` to return JSON formatted data to the agent
