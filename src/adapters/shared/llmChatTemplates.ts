@@ -17,8 +17,9 @@
 import { PromptTemplate } from "@/template.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { ValueError } from "@/errors.js";
-import { isDefined, mapToObj, mapValues, pickBy } from "remeda";
+import { isDefined, mapToObj, pickBy } from "remeda";
 import { z } from "zod";
+import { toBoundedFunction } from "@/serializer/utils.js";
 
 export type LLMChatPromptTemplate = PromptTemplate.infer<{ messages: Record<string, string[]>[] }>;
 
@@ -42,13 +43,29 @@ export function messagesToPromptFactory(rolesOverride: Record<string, string | u
   );
 
   return (template: LLMChatPromptTemplate) => {
-    return (messages: BaseMessage[]) => {
-      return template.render({
-        messages: messages.map((message) =>
-          mapValues(roles, (role) => (message.role === role ? [message.text] : [])),
-        ),
-      });
-    };
+    return toBoundedFunction(
+      (messages: BaseMessage[]) => {
+        return template.render({
+          messages: messages.map((message) =>
+            Object.fromEntries(
+              Object.entries(roles).map(([key, role]) =>
+                message.role === role ? [key, [message.text]] : [key, []],
+              ),
+            ),
+          ),
+        });
+      },
+      [
+        {
+          name: "template",
+          value: template,
+        },
+        {
+          name: "roles",
+          value: roles,
+        },
+      ],
+    );
   };
 }
 
