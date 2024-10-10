@@ -57,7 +57,7 @@ Message: User's message. You never use this instruction line.
 Thought: A single-line plan of how to answer the user's message. It must be immediately followed by Final Answer.
 {{/tools.length}}
 {{#tools.length}}
-Thought: A single-line step-by-step plan of how to answer the user's message. You can use the available functions defined above. This instruction line must be immediately followed by Function Name if one of the available functions defined above needs to be called, or by Final Answer. Do not provide the answer here.
+Thought: A single-line step-by-step plan of how to answer the user's message. You can use the available functions defined above. When the problem seems too hard for the function, you should try to split it into smaller ones. This instruction line must be immediately followed by Function Name if one of the available functions defined above needs to be called, or by Final Answer. Do not provide the answer here.
 Function Name: Name of the function. This instruction line must be immediately followed by Function Input.
 Function Input: Function parameters. Empty object is a valid parameter.
 Function Caption: A single-line description of the function calling for the user.
