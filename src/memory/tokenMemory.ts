@@ -151,7 +151,7 @@ export class TokenMemory extends BaseMemory {
       threshold: this.threshold,
       syncThreshold: this.syncThreshold,
       messages: shallowCopy(this.messages),
-      handlers: this.handlers,
+      handlers: shallowCopy(this.handlers),
       tokensByMessage: this.messages
         .map((message) => [message, this.tokensByMessage.get(message)])
         .filter(([_, value]) => value !== undefined) as [BaseMessage, number][],
