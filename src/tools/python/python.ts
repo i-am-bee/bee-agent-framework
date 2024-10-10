@@ -53,7 +53,24 @@ export interface PythonToolOptions extends BaseToolOptions {
 
 export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
   name = "Python";
-  description = `Run Python code and return the console output. Use for isolated calculations, computations, or data manipulation. Before using it, make sure you have all information. If files are created inside Python code, the user won't see them right away -- tool output will provide hashes of the created files, and the assistant must reference them using a Markdown link or image, by using the provided URN. To work with some files, you must specify them in the input schema; otherwise, the file will not be accessible.It is necessary to always print() results. Available libraries include numpy, pandas, scipy, matplotlib (but you have to save the plot as a file, showing does not work), but you can import any library and it will be installed for you.The execution state is not preserved -- each invocation is a new environment. Do not use this tool multiple times in a row, always write the full code you want to run in a single invocation.`;
+  description = [
+    "Run Python and/or shell code and return the console output. Use for isolated calculations, computations, data or file manipulation.",
+    "Files provided by the user, or created in a previous run, will be accesible if and only if they are specified in the input. It is necessary to always print() results.",
+    "The following shell commands are available:",
+    "Use ffmpeg to convert videos.",
+    "Use yt-dlp to download videos, and unless specified otherwise use `-S vcodec:h264,res,acodec:m4a` for video and `-x --audio-format mp3` for audio-only.",
+    "Use pandoc to convert documents between formats (like MD, DOC, DOCX, PDF) -- and don't forget that you can create PDFs by writing markdown and then converting.",
+    "In Python, the following modules are available:",
+    "Use numpy, pandas, scipy and sympy for working with data.",
+    "Use matplotlib to plot charts.",
+    "Use pillow (import PIL) to create and manipulate images.",
+    "Use moviepy for complex manipulations with videos.",
+    "Use pikepdf to manipulate PDFs.",
+    "Other Python libraries are also available -- however, prefer using the ones above.",
+    "Do not attempt to install libraries manually -- it will not work.",
+    "Each invocation of Python runs in a completely fresh VM -- it will not remember anything from before.",
+    "Do not use this tool multiple times in a row, always write the full code you want to run in a single invocation.",
+  ].join(" ");
 
   public readonly storage: PythonStorage;
 
@@ -61,7 +78,8 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
     const files = await this.storage.list();
 
     return z.object({
-      code: z.string().min(1).describe("full source code file in Python that will be executed"),
+      language: z.enum(["python", "shell"]).describe("Use shell for ffmpeg, pandoc, yt-dlp"),
+      code: z.string().describe("full source code file that will be executed"),
       inputFiles: z
         .object(
           mapToObj(files, (value) => [
@@ -78,7 +96,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
             files.length > 0
               ? `Example: {"${files[0].id}":"${files[0].filename}"} -- the files will be available to the Python code in the working directory.`
               : `Example: {"e6979b7bec732b89a736fd19436ec295f6f64092c0c6c0c86a2a7f27c73519d6":"file.txt"} -- the files will be available to the Python code in the working directory.`,
-          ].join(""),
+          ].join(" "),
         ),
     });
   }
@@ -145,7 +163,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
         .filter(([k, v]) => Boolean(k && v))
         .map(([id, filename]) => ({
           id,
-          filename: filename!,
+          filename: filename!.split(":").at(-1) ?? filename!,
         })),
     );
 
