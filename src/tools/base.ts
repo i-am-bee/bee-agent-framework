@@ -292,7 +292,7 @@ export abstract class Tool<
   protected abstract _run(
     arg: ToolInput<this>,
     options: TRunOptions | undefined,
-    run: GetRunContext<this>,
+    run: GetRunContext<typeof this>,
   ): Promise<TOutput>;
 
   async getInputJsonSchema() {
@@ -400,7 +400,11 @@ export class DynamicTool<
     name: string;
     description: string;
     inputSchema: TInputSchema;
-    handler: (input: TInput, options?: TRunOptions) => Promise<TOutput>;
+    handler: (
+      input: TInput,
+      options: TRunOptions | undefined,
+      run: GetRunContext<DynamicTool<TOutput, TInputSchema, TOptions, TRunOptions, TInput>>,
+    ) => Promise<TOutput>;
     options?: TOptions;
   }) {
     validate(
@@ -420,8 +424,12 @@ export class DynamicTool<
     this.handler = fields.handler;
   }
 
-  protected _run(arg: TInput, options?: TRunOptions): Promise<TOutput> {
-    return this.handler(arg, options);
+  protected _run(
+    arg: TInput,
+    options: TRunOptions | undefined,
+    run: GetRunContext<DynamicTool<TOutput, TInputSchema, TOptions, TRunOptions, TInput>>,
+  ): Promise<TOutput> {
+    return this.handler(arg, options, run);
   }
 
   createSnapshot() {
