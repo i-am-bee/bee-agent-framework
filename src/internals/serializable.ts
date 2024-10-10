@@ -29,6 +29,10 @@ interface SerializableStructure<T> {
   snapshot: T;
 }
 
+interface DeserializeOptions {
+  extraClasses?: SerializableClass<unknown>[];
+}
+
 export abstract class Serializable<T = unknown> {
   abstract createSnapshot(): T;
   abstract loadSnapshot(snapshot: T): void;
@@ -58,8 +62,11 @@ export abstract class Serializable<T = unknown> {
     });
   }
 
-  protected deserialize(value: string): T {
-    const { __root } = Serializer.deserializeWithMeta<SerializableStructure<T>>(value);
+  protected deserialize(value: string, options?: DeserializeOptions): T {
+    const { __root } = Serializer.deserializeWithMeta<SerializableStructure<T>>(
+      value,
+      options?.extraClasses,
+    );
     if (!__root.target) {
       // eslint-disable-next-line
       console.warn(
@@ -90,9 +97,10 @@ export abstract class Serializable<T = unknown> {
   static fromSerialized<T extends Serializable>(
     this: abstract new (...args: any[]) => T,
     serialized: string,
+    options: DeserializeOptions = {},
   ): PromiseOrPlain<T, T["loadSnapshot"]> {
     const target = Object.create(this.prototype) as T;
-    const state = target.deserialize(serialized);
+    const state = target.deserialize(serialized, options);
     const load = target.loadSnapshot(state);
     Cache.init(target);
 
