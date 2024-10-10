@@ -2737,9 +2737,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bee-agent-framework@npm:^0.0.26":
-  version: 0.0.26
-  resolution: "bee-agent-framework@npm:0.0.26"
+"bee-agent-framework@file:../bee-agent-framework::locator=bee-agent-framework%40workspace%3A.":
+  version: 0.0.27
+  resolution: "bee-agent-framework@file:../bee-agent-framework#../bee-agent-framework::hash=f7190e&locator=bee-agent-framework%40workspace%3A."
   dependencies:
     "@ai-zen/node-fetch-event-source": "npm:^2.1.4"
     "@connectrpc/connect": "npm:^1.4.0"
@@ -2784,7 +2784,7 @@ __metadata:
     openai: ^4.56.0
     openai-chat-tokens: ^0.2.8
     sequelize: ^6.37.3
-  checksum: 10c0/52f7e0c9b20275f1dc8ca9cdade5588a926c84224222581de6c9d6f0ed06e7523cf321495af38945142078d68c29dc9e881749ec08ae968f1747dd67569c2578
+  checksum: 10c0/3837bbbd0af4c5e3b7e7965a0726e53725d0e6f30bdbb4734c5f6894bf2889d68f34c2be5011f95207e0bcb92ffd9c8f89b5bab1ec1962b7866b4fcfe15fd31c
   languageName: node
   linkType: hard
 
@@ -2821,8 +2821,8 @@ __metadata:
     "@types/turndown": "npm:^5.0.5"
     ajv: "npm:^8.17.1"
     ajv-formats: "npm:^3.0.1"
-    bee-agent-framework: "npm:^0.0.26"
-    bee-observe-connector: "npm:^0.0.2"
+    bee-agent-framework: "file:../bee-agent-framework"
+    bee-observe-connector: "npm:^0.0.3"
     bee-proto: "npm:0.0.2"
     dirty-json: "npm:0.9.2"
     dotenv: "npm:^16.4.5"
@@ -2896,14 +2896,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"bee-observe-connector@npm:^0.0.2":
-  version: 0.0.2
-  resolution: "bee-observe-connector@npm:0.0.2"
+"bee-observe-connector@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "bee-observe-connector@npm:0.0.3"
   dependencies:
     openapi-fetch: "npm:^0.11.1"
   peerDependencies:
-    bee-agent-framework: ^0.0.26
-  checksum: 10c0/4d873726040388be25891d3306edaf9bf8bdd6971d252e5dfbfda5c0abfe827825886ea3170097064662ce5e40d4a6fde77bb738c1be35666541c4b47c2af88e
+    bee-agent-framework: ">=0.0.27 <0.1.0"
+  checksum: 10c0/5aeeda3797118fef55a5ae7958f935e8a89ef8bc0c4431dea3c03f048da32603228dc927f6ca386d15547688726c8851c68653849e1a8999220b9b5cfc54b64e
   languageName: node
   linkType: hard
 

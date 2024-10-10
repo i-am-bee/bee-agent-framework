@@ -71,7 +71,7 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 ➡️ See a more [advanced example](./examples/agents/bee.ts).
 
-➡️ See the [Observe API / mlflow example](./examples/agents/bee_observe.ts).
+➡️ See the [Observe API / MLFlow example](./examples/agents/bee_observe.ts).
 
 ➡️ All examples can be found in the [examples](./examples) directory.
 
@@ -101,10 +101,14 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 4. Start the code interpreter `yarn run infra:start-code-interpreter`.
 5. Start the agent `yarn run start:bee` (it runs ./examples/agents/bee.ts file).
 
-#### Observe / mlflow
+#### Observe / MLFlow
+
+The [MLFlow](https://mlflow.org/) is used as UI for observability.
 
 1. Start all services related to Observe `yarn infra:start-observe`
-2. Start the agent using the observe and mlflow `yarn start:observe` (it runs ./examples/agents/bee_observe.ts file).
+2. Start the agent using the observe and MLFlow `yarn start:bee_observe` (it runs ./examples/agents/bee_observe.ts file). The output of the `curl` command is saved in the **./examples/tmp/observability/trace.json** file
+
+> The MLFlow instance is running on http://localhost:8080/
 
 ### 🛠️ Tools
 

@@ -146,4 +146,4 @@ dist
 /examples/tmp/local/*
 
 # Observe data
-trace.json
+/examples/tmp/observability/*

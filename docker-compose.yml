@@ -24,7 +24,7 @@ services:
       retries: 10
       start_period: 30s
   mongo:
-    image: mongo:7
+    image: mongo:7.0.14
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo

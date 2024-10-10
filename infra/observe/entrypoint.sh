@@ -1,4 +1,7 @@
 #!/bin/bash
+
+set -e
+
 # Create experiment directory and ensure it has the correct permissions
 mkdir -p /app/mlruns/0
 chmod 755 /app/mlruns/0

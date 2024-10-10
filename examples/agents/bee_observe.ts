@@ -43,7 +43,7 @@ try {
           api: beeObserveApiSetting,
           cb: async (err, data) => {
             if (err) {
-              console.log(ObserveError.ensure(err).explain());
+              reader.write(`Agent 🤖 : `, ObserveError.ensure(err).explain());
             } else {
               const { id, request, response } = data?.result || {};
               reader.write(`Agent 🤖 : `, response?.text || "Invalid output");
@@ -54,7 +54,7 @@ try {
                 `curl -X GET "${beeObserveApiSetting.baseUrl}/trace/${id}?include_tree=true&include_mlflow=true" \\
   \t-H "x-bee-authorization: ${beeObserveApiSetting.apiAuthKey}" \\
   \t-H "Content-Type: application/json" \\
-  \t-o trace.json`,
+  \t-o examples/tmp/observability/trace.json`,
               );
             }
           },
