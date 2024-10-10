@@ -19,7 +19,7 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
 - 💾 **Memory**: Multiple [strategies](./docs/memory.md) to optimize token spend.
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
-- 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our MLflow integration (coming soon) to debug performance.
+- 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our [MLflow integration](./examples/agents/bee_observe.ts) ([readme](https://github.com/i-am-bee/bee-observe-connector)) to debug performance.
 - 🎛️ **Production-level** control with [caching](./docs/cache.md) and [error handling](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#errors).
 - 🚧 (Coming soon) **API**: Configure and deploy your agents with a production-hardened API.
 - 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
@@ -71,6 +71,8 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 ➡️ See a more [advanced example](./examples/agents/bee.ts).
 
+➡️ See the [Observe API / MLFlow example](./examples/agents/bee_observe.ts).
+
 ➡️ All examples can be found in the [examples](./examples) directory.
 
 ➡️ To run an arbitrary example, use the following command `yarn start -- examples/agents/bee.ts` (just pass the appropriate path to the desired example).
@@ -98,6 +100,15 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 3. Create `.env` (from `.env.template`) and fill in missing values (if any).
 4. Start the code interpreter `yarn run infra:start-code-interpreter`.
 5. Start the agent `yarn run start:bee` (it runs ./examples/agents/bee.ts file).
+
+#### Observe / MLFlow
+
+The [MLFlow](https://mlflow.org/) is used as UI for observability.
+
+1. Start all services related to Observe `yarn infra:start-observe`
+2. Start the agent using the observe and MLFlow `yarn start:bee_observe` (it runs ./examples/agents/bee_observe.ts file). The output of the `curl` command is saved in the **./examples/tmp/observability/trace.json** file
+
+> The MLFlow instance is running on http://localhost:8080/
 
 ### 🛠️ Tools
 
@@ -155,7 +166,6 @@ To see more in-depth explanation see [docs](./docs/overview.md).
 
 ## Roadmap
 
-- MLFlow integration for trace observability
 - Improvements to Bee agent and performance optimization with Llama3.1 and Granite model suites
 - API
 - Python SDK
