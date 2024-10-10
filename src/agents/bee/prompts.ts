@@ -47,7 +47,7 @@ No functions are available.
 
 {{/tools.length}}
 # Communication structure
-You communicate in instruction lines. The format is: "Instruction: expected output". You must not enter empty lines or anything else between instruction lines.
+You communicate in instruction lines. The format is: "Instruction: expected output". You must only use these instruction lines and must not enter empty lines or anything else between instruction lines.
 {{#tools.length}}
 You must skip the instruction lines Function Name, Function Input, Function Caption and Function Output if no function calling is required.
 {{/tools.length}}
@@ -57,9 +57,9 @@ Message: User's message. You never use this instruction line.
 Thought: A single-line plan of how to answer the user's message. It must be immediately followed by Final Answer.
 {{/tools.length}}
 {{#tools.length}}
-Thought: A single-line step-by-step plan of how to answer the user's message. You can use the available functions defined above. This line must be immediately followed by Function Name if one of the available functions defined above needs to be called, or by Final Answer. Do not provide the answer here.
-Function Name: Name of the function.
-Function Input: Function parameters. Use this instruction even if the parameters is an empty object.
+Thought: A single-line step-by-step plan of how to answer the user's message. You can use the available functions defined above. This instruction line must be immediately followed by Function Name if one of the available functions defined above needs to be called, or by Final Answer. Do not provide the answer here.
+Function Name: Name of the function. This instruction line must be immediately followed by Function Input.
+Function Input: Function parameters. Empty object is a valid parameter.
 Function Caption: A single-line description of the function calling for the user.
 Function Output: Output of the function in JSON format.
 Thought: Continue your thinking process.
