@@ -132,20 +132,20 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 The source directory (`src`) provides numerous modules that one can use.
 
-| Name                                | Description                                                                                 |
-| ----------------------------------- | ------------------------------------------------------------------------------------------- |
+| Name                         | Description                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------- |
 | [**agents**](agents.md)      | Base classes defining the common interface for agent.                                       |
 | [**llms**](llms.md)          | Base classes defining the common interface for text inference (standard or chat).           |
 | [**template**](templates.md) | Prompt Templating system based on `Mustache` with various improvements.                     |
 | [**memory**](readme.md)      | Various types of memories to use with agent.                                                |
 | [**tools**](tools.md)        | Tools that an agent can use.                                                                |
 | [**cache**](cache.md)        | Preset of different caching approaches that can be used together with tools.                |
-| **errors**                          | Base framework error classes used by each module.                                           |
-| **adapters**                        | Concrete implementations of given modules for different environments.                       |
-| **logger**                          | Core component for logging all actions within the framework.                                |
-| **serializer**                      | Core component for the ability to serialize/deserialize modules into the serialized format. |
-| **version**                         | Constants representing the framework (e.g., latest version)                                 |
-| **internals**                       | Modules used by other modules within the framework.                                         |
+| **errors**                   | Base framework error classes used by each module.                                           |
+| **adapters**                 | Concrete implementations of given modules for different environments.                       |
+| **logger**                   | Core component for logging all actions within the framework.                                |
+| **serializer**               | Core component for the ability to serialize/deserialize modules into the serialized format. |
+| **version**                  | Constants representing the framework (e.g., latest version)                                 |
+| **internals**                | Modules used by other modules within the framework.                                         |
 
 To see more in-depth explanation see [docs](overview.md).
 

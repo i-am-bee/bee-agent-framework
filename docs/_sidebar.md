@@ -12,5 +12,3 @@
   - [Tools](tools.md)
   - [Cache](cache.md)
   - [SQL Tools](sql-tools.md)
-  
-  
