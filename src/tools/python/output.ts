@@ -38,21 +38,25 @@ export class PythonToolOutput extends ToolOutput {
   }
 
   getTextContent() {
-    const fileList = this.outputFiles
-      .map((file) => `- [${file.filename}](${PythonToolOutput.FILE_PREFIX}:${file.id})`)
-      .join("\n");
-    return `The code exited with code ${this.exitCode}.
-stdout:
-\`\`\`
-${this.stdout}
-\`\`\`
+    const executionStatus =
+      this.exitCode === 0
+        ? "The code executed successfully."
+        : `The code exited with error code ${this.exitCode}.`;
+    const stdout = this.stdout.trim() ? `Standard output: \n\`\`\`\n${this.stdout}\n\`\`\`` : null;
+    const stderr = this.stderr.trim() ? `Error output: \n\`\`\`\n${this.stderr}\n\`\`\`` : null;
+    const isImage = (filename: string) =>
+      [".png", ".jpg", ".jpeg", ".gif", ".bmp"].some((ext) => filename.toLowerCase().endsWith(ext));
+    const files = this.outputFiles.length
+      ? "The following files were created or modified. The user does not see them yet. To present a file to the user, send them the link below, verbatim:\n" +
+        this.outputFiles
+          .map(
+            (file) =>
+              `${isImage(file.filename) ? "!" : ""}[${file.filename}](${PythonToolOutput.FILE_PREFIX}:${file.id})`,
+          )
+          .join("\n")
+      : null;
 
-stderr:
-\`\`\`
-${this.stderr}
-\`\`\`
-
-${fileList ? "Files that were created or modified:\n" + fileList : "No files were created or modified."}`;
+    return [executionStatus, stdout, stderr, files].filter(Boolean).join("\n");
   }
 
   createSnapshot() {
