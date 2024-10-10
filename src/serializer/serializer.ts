@@ -450,29 +450,40 @@ Serializer.register(Function, {
     }
 
     const toParsableForm = (): string => {
-      if (value.fn.match(/^\s*function.*?\(/)) {
-        return value.fn;
+      let fn = value.fn;
+
+      if (fn.match(/^\s*function.*?\(/)) {
+        return fn;
       }
 
-      const arrowStart = value.fn.indexOf("=>");
-      const bracketStart = value.fn.indexOf("(");
+      const [a, b, c] = [fn.indexOf("=>"), fn.indexOf("("), fn.indexOf("{")];
+      if (a > -1) {
+        if (b === -1 || b > a || (c === -1 && c > a)) {
+          const [p, p2] = halveString(fn, "=>", false);
+          fn = `(${p.replace("async", "").replace("*", "").trim()})=>${p2}`;
+          fn = [p.includes("async") && "async ", p.includes("*") && "*", fn]
+            .filter(Boolean)
+            .join(" ");
+        }
+      }
+
+      const arrowStart = fn.indexOf("=>");
+      const bracketStart = fn.indexOf("(");
 
       const [fnPrefix, fnContent = ""] =
         bracketStart === -1 || bracketStart > arrowStart
-          ? halveString(value.fn, "{", true)
-          : halveString(value.fn, "(", true);
-
-      const reservedSymbols = new Set(["async", "*"]);
+          ? halveString(fn, "{", true)
+          : halveString(fn, "(", true);
 
       const nonReservedSymbols = fnPrefix
         .trim()
         .split(" ")
         .map((x) => x.trim())
         .filter(Boolean)
-        .every((content) => reservedSymbols.has(content));
+        .every((content) => ["async", "*"].includes(content));
 
       if (nonReservedSymbols) {
-        return value.fn;
+        return fn;
       }
 
       const name = value.name && fnPrefix.includes(value.name) ? value.name : "";
