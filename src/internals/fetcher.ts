@@ -23,11 +23,14 @@ import {
 } from "@ai-zen/node-fetch-event-source";
 import { FetchEventSourceInit } from "@ai-zen/node-fetch-event-source/lib/cjs/fetch.js";
 import { emitterToGenerator } from "@/internals/helpers/promise.js";
+import { isPlainObject } from "remeda";
 
 export class RestfulClientError extends FrameworkError {}
 
 type URLParamType = string | number | boolean | null | undefined;
-export function createURLParams(data: Record<string, URLParamType | URLParamType[]>) {
+export function createURLParams(
+  data: Record<string, URLParamType | URLParamType[] | Record<string, any>>,
+) {
   const urlTokenParams = new URLSearchParams();
   for (const [key, value] of Object.entries(data)) {
     if (value === undefined) {
@@ -40,6 +43,8 @@ export function createURLParams(data: Record<string, URLParamType | URLParamType
           urlTokenParams.append(key, String(v));
         }
       });
+    } else if (isPlainObject(value)) {
+      urlTokenParams.set(key, createURLParams(value).toString());
     } else {
       urlTokenParams.set(key, String(value));
     }
