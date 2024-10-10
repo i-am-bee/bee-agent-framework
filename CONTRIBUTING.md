@@ -77,7 +77,7 @@ Ref: #15
 
 ```shell
 yarn lint # or yarn lint:fix
-yarn format # or yarn lint:format
+yarn format # or yarn format:fix
 ```
 
 8.  **Run Tests:** Ensure your changes pass all tests (unit, integration, E2E). Run the following commands:
