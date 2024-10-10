@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.28](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.27...v0.0.28) (2024-10-10)
+
+### Features
+
+- **agent:** update system prompt ([#76](https://github.com/i-am-bee/bee-agent-framework/issues/76)) ([46e45b7](https://github.com/i-am-bee/bee-agent-framework/commit/46e45b773b3cbf6dd373ac6b25fe62b43414892c))
+- improve Python tool ([#79](https://github.com/i-am-bee/bee-agent-framework/issues/79)) ([feb2f4a](https://github.com/i-am-bee/bee-agent-framework/commit/feb2f4a44946ad82580b6943c39111ffccf94b0e))
+- **internals:** createURLParams handles nested objects ([2f0ec77](https://github.com/i-am-bee/bee-agent-framework/commit/2f0ec77b97479f7e9dbfdb8ef061c82f996d95c2))
+- **tools:** propagate run context to the CustomTool ([b3cc10a](https://github.com/i-am-bee/bee-agent-framework/commit/b3cc10ae558758eda6f08d4a79ee15dfb99037c7))
+
+### Bug Fixes
+
+- **agent:** LinePrefixParser - handling termination nodes ([2a5ce16](https://github.com/i-am-bee/bee-agent-framework/commit/2a5ce1660c6e0e63d505d01551fa00c2c61b4403))
+- **llm:** templates serialization ([d7584ef](https://github.com/i-am-bee/bee-agent-framework/commit/d7584ef11a38e3541c53265d2e51e4adacd83096)), closes [#78](https://github.com/i-am-bee/bee-agent-framework/issues/78)
+
 ## [0.0.27](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.26...v0.0.27) (2024-10-08)
 
 ### Features
