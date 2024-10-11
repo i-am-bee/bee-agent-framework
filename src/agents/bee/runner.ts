@@ -214,6 +214,7 @@ export class BeeAgentRunner {
         },
       } as const,
       {
+        waitForStartNode: true,
         endOnRepeat: true,
         fallback: (stash) =>
           stash
