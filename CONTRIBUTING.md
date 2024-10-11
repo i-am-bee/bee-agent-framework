@@ -11,6 +11,22 @@ If you are new to Bee contributing, we recommend you do the following before div
 - Read [Bee Overview](./docs/overview.md) to understand core concepts.
 - Read [Code of Conduct](./CODE_OF_CONDUCT.md).
 
+
+## Style and lint
+
+Bee uses the following tools to meet code quality standards and ensure a unified code style across the codebase.
+
+- [ESLint](https://eslint.org/) - Linting Utility
+- [Prettier](https://prettier.io/) - Code Formatter
+- [commitlint](https://commitlint.js.org/) - Lint commit messages according to [Conventional Commits](https://www.conventionalcommits.org/).
+
+## Issues and pull requests
+
+We use GitHub pull requests to accept contributions.
+
+While not required, opening a new issue about the bug you're fixing or the feature you're working on before you open a pull request is important in starting a discussion with the community about your work. The issue gives us a place to talk about the idea and how we can work together to implement it in the code. It also lets the community know what you're working on, and if you need help, you can reference the issue when discussing it with other community and team members.
+If you've written some code but need help finishing it, want to get initial feedback on it before finishing it, or want to share it and discuss it prior to completing the implementation, you can open a Draft pull request and prepend the title with the [WIP] tag (for Work In Progress). This will indicate to reviewers that the code in the PR isn't in its final state and will change. It also means we will only merge the commit once it is finished. You or a reviewer can remove the [WIP] tag when the code is ready to be thoroughly reviewed for merging.
+
 ## Choose an issue to work on
 
 Bee uses the following labels to help non-maintainers find issues best suited to their interests and experience level:
@@ -49,6 +65,7 @@ yarn install
 # At least one provider API key must be defined!
 GENAI_API_KEY=""
 OPENAI_API_KEY=""
+GROQ_API_KEY=""
 WATSONX_API_KEY=""
 WATSONX_PROJECT_ID=""
 
@@ -68,7 +85,7 @@ Subject: A short description of the changes (required).
 _Example:_
 
 ```
-feat(watsonx): add llm streaming support
+feat(llm): add streaming support for watsonx adapter
 
 Ref: #15
 ```
@@ -88,21 +105,6 @@ yarn test:e2e
 ```
 
 By following these steps, you'll be all set to contribute to our project! If you encounter any issues during the setup process, please feel free to open an issue.
-
-## Style and lint
-
-Bee uses the following tools to meet code quality standards and ensure a unified code style across the codebase.
-
-- [ESLint](https://eslint.org/) - Linting Utility
-- [Prettier](https://prettier.io/) - Code Formatter
-- [commitlint](https://commitlint.js.org/) - Lint commit messages according to [Conventional Commits](https://www.conventionalcommits.org/).
-
-## Issues and pull requests
-
-We use GitHub pull requests to accept contributions.
-
-While not required, opening a new issue about the bug you're fixing or the feature you're working on before you open a pull request is important in starting a discussion with the community about your work. The issue gives us a place to talk about the idea and how we can work together to implement it in the code. It also lets the community know what you're working on, and if you need help, you can reference the issue when discussing it with other community and team members.
-If you've written some code but need help finishing it, want to get initial feedback on it before finishing it, or want to share it and discuss it prior to completing the implementation, you can open a Draft pull request and prepend the title with the [WIP] tag (for Work In Progress). This will indicate to reviewers that the code in the PR isn't in its final state and will change. It also means we will only merge the commit once it is finished. You or a reviewer can remove the [WIP] tag when the code is ready to be thoroughly reviewed for merging.
 
 ## Legal
 
