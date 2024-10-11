@@ -214,6 +214,7 @@ export class BeeAgentRunner {
         },
       } as const,
       {
+        endOnRepeat: true,
         fallback: (stash) =>
           stash
             ? [
