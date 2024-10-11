@@ -102,7 +102,7 @@ export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
 
   constructor({
     client,
-    modelId = "llama3-8b-8192",
+    modelId = "llama-3.1-70b-versatile",
     parameters = {
       temperature: 0,
     },
