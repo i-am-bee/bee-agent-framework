@@ -19,6 +19,7 @@ import process from "node:process";
 import { BAMChatLLM } from "@/adapters/bam/chat.js";
 import { OpenAIChatLLM } from "@/adapters/openai/chat.js";
 import { WatsonXChatLLM } from "@/adapters/watsonx/chat.js";
+import { GroqChatLLM } from "@/adapters/groq/chat.js";
 
 export function createChatLLM(): ChatLLM<ChatLLMOutput> {
   if (process.env.GENAI_API_KEY) {
@@ -28,6 +29,11 @@ export function createChatLLM(): ChatLLM<ChatLLMOutput> {
   } else if (process.env.WATSONX_API_KEY && process.env.WATSONX_PROJECT_ID) {
     return WatsonXChatLLM.fromPreset("meta-llama/llama-3-70b-instruct", {
       projectId: process.env.WATSONX_PROJECT_ID,
+    });
+  } else if (process.env.GROQ_API_KEY) {
+    return new GroqChatLLM({
+      modelId: `llama-3.1-70b-versatile`,
+      parameters: { temperature: 0 },
     });
   } else {
     throw new Error("No API key for any LLM provider has been provided. Cannot run test case.");
