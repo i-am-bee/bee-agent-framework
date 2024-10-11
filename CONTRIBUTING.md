@@ -11,7 +11,6 @@ If you are new to Bee contributing, we recommend you do the following before div
 - Read [Bee Overview](./docs/overview.md) to understand core concepts.
 - Read [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-
 ## Style and lint
 
 Bee uses the following tools to meet code quality standards and ensure a unified code style across the codebase.
