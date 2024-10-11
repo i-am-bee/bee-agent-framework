@@ -27,4 +27,3 @@ const response = await driver.generate(
   ],
 );
 console.info(response);
-process.exit(0);

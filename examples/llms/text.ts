@@ -13,8 +13,7 @@ const llm = new WatsonXLLM({
 });
 
 const reader = createConsoleReader();
-
 const prompt = await reader.prompt();
 const response = await llm.generate(prompt);
 reader.write(`LLM 🤖 (text) : `, response.getTextContent());
-process.exit(0);
+reader.close();

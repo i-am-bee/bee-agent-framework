@@ -33,6 +33,10 @@ export function createConsoleReader({
       }
       process.exit(0);
     },
+    close() {
+      stdin.pause();
+      rl.close();
+    },
     async *[Symbol.asyncIterator]() {
       if (!isActive) {
         return;

@@ -119,5 +119,5 @@ try {
 } catch (error) {
   logger.error(FrameworkError.ensure(error).dump());
 } finally {
-  process.exit(0);
+  reader.close();
 }

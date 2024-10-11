@@ -49,11 +49,10 @@ const llm = new WatsonXLLM({
 });
 
 const reader = createConsoleReader();
-
 const prompt = await reader.prompt();
 const response = await llm.generate(prompt);
 reader.write(`LLM 🤖 (text) : `, response.getTextContent());
-process.exit(0);
+reader.close();
 ```
 
 _Source: [examples/llms/text.ts](/examples/llms/text.ts)_
@@ -209,7 +208,6 @@ const response = await driver.generate(
   ],
 );
 console.info(response);
-process.exit(0);
 ```
 
 _Source: [examples/llms/structured.ts](/examples/llms/structured.ts)_
