@@ -19,7 +19,7 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
 - 💾 **Memory**: Multiple [strategies](./docs/memory.md) to optimize token spend.
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#serializer).
-- 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our MLflow integration (coming soon) to debug performance.
+- 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#logger) all running events, and use our MLFlow integration (coming out next week) to debug performance.
 - 🎛️ **Production-level** control with [caching](./docs/cache.md) and [error handling](https://github.com/i-am-bee/bee-agent-framework/blob/main/docs/overview.md#errors).
 - 🚧 (Coming soon) **API**: Configure and deploy your agents with a production-hardened API.
 - 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
@@ -79,11 +79,11 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 > [!NOTE]
 >
-> `yarn` should be installed via Corepack ([tutorial](https://yarnpkg.com/corepack))\_
+> `yarn` should be installed via Corepack ([tutorial](https://yarnpkg.com/corepack))
 
 > [!NOTE]
 >
-> To make any asset available to a local code interpreter place them the following directory: ./examples/tmp/local\_
+> To make any asset available to a local code interpreter place them the following directory: `./examples/tmp/local`
 
 > [!NOTE]
 >
@@ -99,55 +99,26 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 4. Start the code interpreter `yarn run infra:start-code-interpreter`.
 5. Start the agent `yarn run start:bee` (it runs ./examples/agents/bee.ts file).
 
-### 🛠️ Tools
-
-| Name                                                                      | Description                                                                           |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `PythonTool`                                                              | Run arbitrary Python code in the remote environment.                                  |
-| `WikipediaTool`                                                           | Search for data on Wikipedia.                                                         |
-| `GoogleSearchTool`                                                        | Search for data on Google using Custom Search Engine.                                 |
-| `DuckDuckGoTool`                                                          | Search for data on DuckDuckGo.                                                        |
-| `SQLTool`                                                                 | Execute SQL queries against relational databases. [Instructions](./docs/sql-tool.md). |
-| `CustomTool`                                                              | Run your own Python function in the remote environment.                               |
-| `LLMTool`                                                                 | Use an LLM to process input data.                                                     |
-| `DynamicTool`                                                             | Construct to create dynamic tools.                                                    |
-| `ArXivTool`                                                               | Retrieve research articles published on arXiv.                                        |
-| `WebCrawlerTool`                                                          | Retrieve content of an arbitrary website.                                             |
-| `OpenMeteoTool`                                                           | Retrieve current, previous, or upcoming weather for a given destination.              |
-| ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                       |
-
-### 🔌️ Adapters
-
-| Name                                                                      | Description                                                                      |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `Ollama`                                                                  | LLM + ChatLLM support ([example](./examples/llms/providers/ollama.ts))           |
-| `OpenAI`                                                                  | LLM + ChatLLM support ([example](./examples/llms/providers/openai.ts))           |
-| `LangChain`                                                               | LLM + ChatLLM + Tool support ([example](./examples/llms/providers/langchain.ts)) |
-| `WatsonX`                                                                 | LLM + ChatLLM support ([example](./examples/llms/providers/watsonx.ts))          |
-| `Groq`                                                                    | ChatLLM support ([example](./examples/llms/providers/groq.ts))                   |
-| `BAM (Internal)`                                                          | LLM + ChatLLM support ([example](./examples/llms/providers/bam.ts))              |
-| ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                  |
-
 ### 📦 Modules
 
 The source directory (`src`) provides numerous modules that one can use.
 
-| Name                                | Description                                                                                 |
-| ----------------------------------- | ------------------------------------------------------------------------------------------- |
-| [**agents**](./docs/agents.md)      | Base classes defining the common interface for agent.                                       |
-| [**llms**](./docs/llms.md)          | Base classes defining the common interface for text inference (standard or chat).           |
-| [**template**](./docs/templates.md) | Prompt Templating system based on `Mustache` with various improvements.                     |
-| [**memory**](./docs/readme.md)      | Various types of memories to use with agent.                                                |
-| [**tools**](./docs/tools.md)        | Tools that an agent can use.                                                                |
-| [**cache**](./docs/cache.md)        | Preset of different caching approaches that can be used together with tools.                |
-| **errors**                          | Base framework error classes used by each module.                                           |
-| **adapters**                        | Concrete implementations of given modules for different environments.                       |
-| **logger**                          | Core component for logging all actions within the framework.                                |
-| **serializer**                      | Core component for the ability to serialize/deserialize modules into the serialized format. |
-| **version**                         | Constants representing the framework (e.g., latest version)                                 |
-| **internals**                       | Modules used by other modules within the framework.                                         |
+| Name                                      | Description                                                                                 |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [**agents**](./docs/agents.md)            | Base classes defining the common interface for agent.                                       |
+| [**llms**](./docs/llms.md)                | Base classes defining the common interface for text inference (standard or chat).           |
+| [**template**](./docs/templates.md)       | Prompt Templating system based on `Mustache` with various improvements.                     |
+| [**memory**](./docs/memory.md)            | Various types of memories to use with agent.                                                |
+| [**tools**](./docs/tools.md)              | Tools that an agent can use.                                                                |
+| [**cache**](./docs/cache.md)              | Preset of different caching approaches that can be used together with tools.                |
+| **errors**                                | Base framework error classes used by each module.                                           |
+| **adapters**                              | Concrete implementations of given modules for different environments.                       |
+| **logger**                                | Core component for logging all actions within the framework.                                |
+| [**serializer**](./docs/serialization.md) | Core component for the ability to serialize/deserialize modules into the serialized format. |
+| **version**                               | Constants representing the framework (e.g., latest version)                                 |
+| **internals**                             | Modules used by other modules within the framework.                                         |
 
-To see more in-depth explanation see [docs](./docs/overview.md).
+To see more in-depth explanation see [overview](./docs/overview.md).
 
 ## Tutorials
 
@@ -155,13 +126,10 @@ To see more in-depth explanation see [docs](./docs/overview.md).
 
 ## Roadmap
 
-- MLFlow integration for trace observability
+- MLFlow integration for trace observability (coming out next week)
 - Improvements to Bee agent and performance optimization with Llama3.1 and Granite model suites
-- API
+- API + UI (chat interface)
 - Python SDK
-- Structured outputs
-- Chat Client (GUI)
-
 - 🚧 TBD 🚧
 
 ## Contribution guidelines
