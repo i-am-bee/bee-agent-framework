@@ -80,6 +80,11 @@ const linesToString = (lines: Line[]) =>
     "",
   );
 
+interface Options<T extends NonNullable<unknown>> {
+  fallback?: (value: string) => readonly { key: StringKey<T>; value: string }[];
+  endOnRepeat?: boolean;
+}
+
 export class LinePrefixParser<
   T extends Record<string, ParserNode<Extract<keyof T, string>, ParserField<any, any>>>,
 > extends Serializable {
@@ -102,9 +107,7 @@ export class LinePrefixParser<
 
   constructor(
     protected readonly nodes: T,
-    protected readonly options: {
-      fallback?: (value: string) => readonly { key: StringKey<T>; value: string }[];
-    } = {},
+    protected readonly options: Options<T> = {},
   ) {
     super();
 
@@ -172,6 +175,11 @@ export class LinePrefixParser<
       if (parsedLine && !parsedLine.partial) {
         if (lastNode) {
           if (!lastNode.next.includes(parsedLine.key)) {
+            if (parsedLine.key in this.finalState && this.options.endOnRepeat && lastNode.isEnd) {
+              await this.end();
+              return;
+            }
+
             this.throwWithContext(
               `Transition from '${this.lastNodeKey}' to '${parsedLine.key}' does not exist!`,
               { line },

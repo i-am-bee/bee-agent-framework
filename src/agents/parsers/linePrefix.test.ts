@@ -269,35 +269,90 @@ But I can use GoogleSearch to find out.`,
       expect(deltas.length).toBe(3);
     });
 
-    it("Ignores other prefixes when the current node is a termination node", async () => {
-      const parser = new LinePrefixParser({
-        thought: {
-          prefix: "Thought:",
-          field: new ZodParserField(z.string()),
-          isStart: true,
-          isEnd: true,
-          next: ["answer"],
-        },
-        answer: {
-          prefix: "Answer:",
-          field: new ZodParserField(z.string()),
-          isStart: true,
-          isEnd: true,
-          next: [],
-        },
-      });
+    it.each([true, false])(
+      "Ignores other prefixes when the current node is a termination node",
+      async (endOnRepeat) => {
+        const parser = new LinePrefixParser(
+          {
+            thought: {
+              prefix: "Thought:",
+              field: new ZodParserField(z.string()),
+              isStart: true,
+              isEnd: true,
+              next: ["answer"],
+            },
+            answer: {
+              prefix: "Answer:",
+              field: new ZodParserField(z.string()),
+              isStart: true,
+              isEnd: true,
+              next: [],
+            },
+          },
+          {
+            endOnRepeat,
+          },
+        );
 
-      await parser.add(`Answer: The answer is 39, see the intermediate steps that I did:\n`);
-      await parser.add(`Thought: 3*(2+5+6)=? can be rewritten as 3*13\n`);
-      await parser.add(`Analyze: 3*13=39\n`);
-      await parser.add(`Outcome: 39`);
-      await parser.end();
+        await parser.add(`Answer: The answer is 39, see the intermediate steps that I did:\n`);
+        await parser.add(`Thought: 3*(2+5+6)=? can be rewritten as 3*13\n`);
+        await parser.add(`Analyze: 3*13=39\n`);
+        await parser.add(`Outcome: 39`);
+        await parser.end();
+        expect(parser.finalState).toStrictEqual({
+          answer: `The answer is 39, see the intermediate steps that I did:
+Thought: 3*(2+5+6)=? can be rewritten as 3*13
+Analyze: 3*13=39
+Outcome: 39`,
+        });
+      },
+    );
+
+    it("Premature ends when existing node visited", async () => {
+      const parser = new LinePrefixParser(
+        {
+          thought: {
+            prefix: "Thought:",
+            field: new ZodParserField(z.string()),
+            isStart: true,
+            isEnd: false,
+            next: ["tool_input", "final_answer"],
+          },
+          tool_input: {
+            prefix: "Tool Input:",
+            field: new ZodParserField(z.string()),
+            isStart: false,
+            isEnd: true,
+            next: ["tool_output"],
+          },
+          tool_output: {
+            prefix: "Tool Output:",
+            field: new ZodParserField(z.string()),
+            isStart: false,
+            isEnd: true,
+            next: [],
+          },
+          final_answer: {
+            prefix: "Final Answer:",
+            field: new ZodParserField(z.string()),
+            isStart: false,
+            isEnd: true,
+            next: [],
+          },
+        },
+        {
+          endOnRepeat: true,
+        },
+      );
+
+      await parser.add(
+        [`Thought: Hello!`, `Tool Input: {}`, `Thought: This is ignored.`].join("\n"),
+      );
+      expect(parser.isDone).toBe(true);
       expect(parser.finalState).toMatchInlineSnapshot(`
         {
-          "answer": "The answer is 39, see the intermediate steps that I did:
-        Thought: 3*(2+5+6)=? can be rewritten as 3*13
-        Analyze: 3*13=39
-        Outcome: 39",
+          "thought": "Hello!",
+          "tool_input": "{}",
         }
       `);
     });
