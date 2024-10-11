@@ -269,6 +269,43 @@ But I can use GoogleSearch to find out.`,
       expect(deltas.length).toBe(3);
     });
 
+    it("Ignores unrelated text and non-starting nodes", async () => {
+      const parser = new LinePrefixParser(
+        {
+          first: {
+            prefix: "First:",
+            field: new ZodParserField(z.string()),
+            isStart: true,
+            isEnd: false,
+            next: ["second"],
+          },
+          second: {
+            prefix: "Second:",
+            field: new ZodParserField(z.string()),
+            isStart: false,
+            isEnd: true,
+            next: [],
+          },
+        },
+        {
+          waitForStartNode: true,
+        },
+      );
+
+      await parser.add("      Random text\nthat\nshould be ignored.\n");
+      await parser.add("  Second: This should be ignored too.\n");
+      await parser.add("First: first\n");
+      await parser.add("Second: second\n");
+      await parser.end();
+      expect(parser.finalState).toMatchInlineSnapshot(`
+        {
+          "first": "first",
+          "second": "second
+        ",
+        }
+      `);
+    });
+
     it.each([true, false])(
       "Ignores other prefixes when the current node is a termination node",
       async (endOnRepeat) => {
