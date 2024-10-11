@@ -31,9 +31,9 @@ import { Emitter } from "@/emitter/emitter.js";
 import { ClientOptions, OpenAI as Client } from "openai";
 import { GetRunContext } from "@/context.js";
 import { promptTokensEstimate } from "openai-chat-tokens";
-import { isString } from "remeda";
 import { Serializer } from "@/serializer/serializer.js";
-import { getPropStrict } from "@/internals/helpers/object.js";
+import { getProp, getPropStrict } from "@/internals/helpers/object.js";
+import { isString } from "remeda";
 
 type Parameters = Omit<Client.Chat.ChatCompletionCreateParams, "stream" | "messages" | "model">;
 type Response = Omit<Client.Chat.ChatCompletionChunk, "object">;
@@ -176,14 +176,26 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
             response_metadata: message.meta,
           }) as Client.Chat.ChatCompletionMessageParam,
       ),
-      ...(options?.guided?.json && {
-        response_format: {
-          type: "json_schema",
-          json_schema: isString(options.guided.json)
+      response_format: (() => {
+        if (options?.guided?.json) {
+          const schema = isString(options.guided.json)
             ? JSON.parse(options.guided.json)
-            : options.guided.json,
-        },
-      }),
+            : options.guided.json;
+
+          // OpenAI requires that 'properties' must be defined when type equals 'object'
+          if (getProp(schema, ["type"]) === "object" && !getProp(schema, ["properties"])) {
+            schema.properties = {};
+          }
+
+          return {
+            type: "json_schema",
+            json_schema: {
+              name: "schema",
+              schema,
+            },
+          };
+        }
+      })(),
     };
   }
 

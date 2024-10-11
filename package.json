@@ -126,7 +126,7 @@
     "@langchain/langgraph": "~0.0.34",
     "groq-sdk": "^0.7.0",
     "ollama": "^0.5.8",
-    "openai": "^4.56.0",
+    "openai": "^4.67.3",
     "openai-chat-tokens": "^0.2.8",
     "sequelize": "^6.37.3"
   },
