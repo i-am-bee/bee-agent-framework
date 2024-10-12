@@ -12,7 +12,7 @@ The source directory (`src`) provides numerous modules that one can use.
 | [**memory**](./memory.md)            | Various types of memories to use with agent.                                                |
 | [**tools**](./tools.md)              | Tools that an agent can use.                                                                |
 | [**cache**](./cache.md)              | Preset of different caching approaches that can be used together with tools.                |
-| **errors**                           | Base framework error classes used by each module.                                           |
+| [**errors**](./errors.md)            | Base framework error classes used by each module.                                           |
 | **adapters**                         | Concrete implementations of given modules for different environments.                       |
 | **logger**                           | Core component for logging all actions within the framework.                                |
 | [**serializer**](./serialization.md) | Core component for the ability to serialize/deserialize modules into the serialized format. |
@@ -63,11 +63,7 @@ Moved to a [standalone page](./cache.md).
 
 ### Errors
 
-> Location within the framework `bee-agent-framework/error`.
-
-> Note: We guarantee that every framework-related error is an instance of the `FrameworkError` class.
-
-🚧 TBD
+Moved to a [standalone page](./errors.md).
 
 ### Logger
 
