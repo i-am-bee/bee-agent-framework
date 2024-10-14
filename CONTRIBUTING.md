@@ -37,13 +37,13 @@ Bee uses the following labels to help non-maintainers find issues best suited to
 
 To start contributing to the Bee Agent framework, follow these steps to set up your development environment:
 
-1.  **Install Node Version Manager (NVM):** We use `.nvmrc` to specify the required Node.js version. Install [nvm](https://github.com/nvm-sh/nvm) by following the official installation instructions.
+1.  **Install Node Version Manager (NVM):** We use `nvm` to specify the required Node.js version. Install [nvm](https://github.com/nvm-sh/nvm) by following the official installation instructions.
 
-2.  **Install the Correct Node.js Version:** Use `nvm` to install and use the Node.js version specified in the `.nvmrc` file:
+2.  **Install the Correct LTS Node.js Version:** Use `nvm` to install and use the Node.js version that is currently supported.
 
 ```bash
-nvm install
-nvm use
+nvm install 20.15
+nvm use 20.15
 ```
 
 3. **Install [Yarn](https://yarnpkg.com/) via Corepack:** This project uses Yarn as the package manager. Ensure you have Corepack enabled and install Yarn:
