@@ -61,10 +61,6 @@
     "ts:check": "tsc --noEmit && tsc -p tsconfig.examples.json --noEmit",
     "start": "tsx --tsconfig tsconfig.examples.json",
     "start:bee": "yarn start -- examples/agents/bee.ts",
-    "infra:start-all": "yarn _docker compose up --detach --wait",
-    "infra:start-code-interpreter": "yarn _docker compose up bee-code-interpreter-k3s --detach --wait",
-    "infra:stop-all": "yarn _docker compose down",
-    "infra:clean-all": "yarn _docker compose down --volumes",
     "docs:build": "embedme --source-root=. docs/**/*.md",
     "docs:check": "yarn docs:build --verify",
     "lint": "yarn eslint",
@@ -81,8 +77,7 @@
     "copyright": "./scripts/copyright.sh",
     "release": "release-it",
     "ibm-vllm:generate-types": "./scripts/ibm_vllm_generate_protos/ibm_vllm_generate_protos.sh",
-    "_ensure_env": "cp -n .env.template .env || true",
-    "_docker": "yarn _ensure_env && bash -c 'source ./.env && docker_cmd=$(which docker >/dev/null 2>&1 && printf docker || printf podman) && $docker_cmd \"$@\"' sh"
+    "_ensure_env": "cp -n .env.template .env || true"
   },
   "dependencies": {
     "@ai-zen/node-fetch-event-source": "^2.1.4",

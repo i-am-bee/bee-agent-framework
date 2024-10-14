@@ -73,31 +73,18 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 ➡️ All examples can be found in the [examples](./examples) directory.
 
-➡️ To run an arbitrary example, use the following command `yarn start -- examples/agents/bee.ts` (just pass the appropriate path to the desired example).
+➡️ To run an arbitrary example, use the following command `yarn start examples/agents/bee.ts` (just pass the appropriate path to the desired example).
 
-### Local Installation (Python Interpreter + Interactive CLI)
+### Local Installation
 
 > [!NOTE]
 >
 > `yarn` should be installed via Corepack ([tutorial](https://yarnpkg.com/corepack))
 
-> [!NOTE]
->
-> To make any asset available to a local code interpreter place them the following directory: `./examples/tmp/local`
-
-> [!NOTE]
->
-> Docker distribution with support for compose is required, the following are supported:
->
-> - [Docker](https://www.docker.com/)
-> - [Rancher](https://www.rancher.com/) - macOS users may want to use VZ instead of QEMU
-> - [Podman](https://podman.io/) - requires [compose](https://podman-desktop.io/docs/compose/setting-up-compose) and **rootful machine** (if your current machine is rootless, please create a new one)
-
 1. Clone the repository `git clone git@github.com:i-am-bee/bee-agent-framework`.
 2. Install dependencies `yarn install`.
 3. Create `.env` (from `.env.template`) and fill in missing values (if any).
-4. Start the code interpreter `yarn run infra:start-code-interpreter`.
-5. Start the agent `yarn run start:bee` (it runs ./examples/agents/bee.ts file).
+4. Start the agent `yarn run start:bee` (it runs `./examples/agents/bee.ts` file).
 
 ### 📦 Modules
 

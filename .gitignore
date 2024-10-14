@@ -2,9 +2,6 @@ scripts/ibm_vllm_generate_protos/dist
 scripts/ibm_vllm_generate_protos/dts
 scripts/ibm_vllm_generate_protos/types
 
-infra/bee-code-interpreter/*
-!infra/bee-code-interpreter/bee-code-interpreter.yaml
-
 ### Node template
 # Logs
 logs
@@ -140,7 +137,3 @@ dist
 .idea
 /experiments
 .npmrc
-
-# Code interpreter data
-/examples/tmp/code_interpreter/*
-/examples/tmp/local/*
