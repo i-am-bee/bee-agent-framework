@@ -94,20 +94,20 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 The source directory (`src`) provides numerous modules that one can use.
 
-| Name                                      | Description                                                                                 |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [**agents**](./docs/agents.md)            | Base classes defining the common interface for agent.                                       |
-| [**llms**](./docs/llms.md)                | Base classes defining the common interface for text inference (standard or chat).           |
-| [**template**](./docs/templates.md)       | Prompt Templating system based on `Mustache` with various improvements.                     |
-| [**memory**](./docs/memory.md)            | Various types of memories to use with agent.                                                |
-| [**tools**](./docs/tools.md)              | Tools that an agent can use.                                                                |
-| [**cache**](./docs/cache.md)              | Preset of different caching approaches that can be used together with tools.                |
-| [**errors**](./docs/errors.md)            | Error classes and helpers to catch errors fast.                                             |
-| **adapters**                              | Concrete implementations of given modules for different environments.                       |
-| [**logger**](./docs/logger.md)            | Core component for logging all actions within the framework.                                |
-| [**serializer**](./docs/serialization.md) | Core component for the ability to serialize/deserialize modules into the serialized format. |
-| [**version**](./docs/version.md)          | Constants representing the framework (e.g., latest version)                                 |
-| **internals**                             | Modules used by other modules within the framework.                                         |
+| Name                                              | Description                                                                                 |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [**agents**](./docs/agents.md)                    | Base classes defining the common interface for agent.                                       |
+| [**llms**](./docs/llms.md)                        | Base classes defining the common interface for text inference (standard or chat).           |
+| [**template**](./docs/templates.md)               | Prompt Templating system based on `Mustache` with various improvements.                     |
+| [**memory**](./docs/memory.md)                    | Various types of memories to use with agent.                                                |
+| [**tools**](./docs/tools.md)                      | Tools that an agent can use.                                                                |
+| [**cache**](./docs/cache.md)                      | Preset of different caching approaches that can be used together with tools.                |
+| [**errors**](./docs/errors.md)                    | Error classes and helpers to catch errors fast.                                             |
+| [**adapters**](./docs/llms.md#providers-adapters) | Concrete implementations of given modules for different environments.                       |
+| [**logger**](./docs/logger.md)                    | Core component for logging all actions within the framework.                                |
+| [**serializer**](./docs/serialization.md)         | Core component for the ability to serialize/deserialize modules into the serialized format. |
+| [**version**](./docs/version.md)                  | Constants representing the framework (e.g., latest version)                                 |
+| **internals**                                     | Modules used by other modules within the framework.                                         |
 
 To see more in-depth explanation see [overview](./docs/overview.md).
 
