@@ -25,7 +25,11 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 - 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
 - ... more on our [Roadmap](#roadmap)
 
-## Get started with Bee
+## Getting started
+
+> [!TIP]
+>
+> Would you like a fully set-up TypeScript project with Bee, Code Interpreter, and Observability? Check out our [Bee Framework Starter](https://github.com/i-am-bee/bee-agent-framework-starter).
 
 ### Installation
 
