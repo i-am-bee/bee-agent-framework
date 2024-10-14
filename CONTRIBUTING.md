@@ -77,10 +77,11 @@ WATSONX_DEPLOYMENT_ID=""  # optional
 
 ```
 <type>(<scope>): <subject>
-Type: feat, fix, chore, docs, style, refactor, perf, test, etc.
-Scope: The area of the codebase your changes affect (optional).
-Subject: A short description of the changes (required).
 ```
+
+- Type: feat, fix, chore, docs, style, refactor, perf, test, etc.
+- Scope: The area of the codebase your changes affect (optional). The allowed values are: adapters, agents, llms, tools, cache, emitter, internals, logger, memory, serializer, infra, deps, instrumentation. The latest values are listed in [package.json](./package.json)
+- Subject: A short description of the changes (required).
 
 _Example:_
 
