@@ -13,9 +13,58 @@
     "NodeJS Agent Framework"
   ],
   "packageManager": "yarn@4.1.1",
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "signed-off-by": [2, "always", "Signed-off-by"]
+    }
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint --fix",
+    "*": "prettier --ignore-unknown --write"
+  },
   "prettier": {
     "printWidth": 100,
     "quoteProps": "consistent"
+  },
+  "release-it": {
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": {
+          "name": "conventionalcommits"
+        },
+        "header": "# Changelog",
+        "infile": "CHANGELOG.md"
+      }
+    },
+    "git": {
+      "commitMessage": "chore: release ${version}",
+      "tagName": "v${version}",
+      "commitArgs": [
+        "-s"
+      ]
+    },
+    "npm": {
+      "skipChecks": true,
+      "publish": true
+    },
+    "hooks": {
+      "before:init": [
+        "yarn docs:check",
+        "yarn lint",
+        "yarn ts:check",
+        "yarn test:all"
+      ],
+      "after:bump": [
+        "yarn build"
+      ]
+    },
+    "github": {
+      "release": true,
+      "releaseName": "v${version}"
+    }
   },
   "type": "module",
   "main": "./dist/index.js",
