@@ -104,7 +104,7 @@ The source directory (`src`) provides numerous modules that one can use.
 | [**cache**](./docs/cache.md)              | Preset of different caching approaches that can be used together with tools.                |
 | [**errors**](./docs/errors.md)            | Error classes and helpers to catch errors fast.                                             |
 | **adapters**                              | Concrete implementations of given modules for different environments.                       |
-| **logger**                                | Core component for logging all actions within the framework.                                |
+| [**logger**](./docs/logger.md)            | Core component for logging all actions within the framework.                                |
 | [**serializer**](./docs/serialization.md) | Core component for the ability to serialize/deserialize modules into the serialized format. |
 | [**version**](./docs/version.md)          | Constants representing the framework (e.g., latest version)                                 |
 | **internals**                             | Modules used by other modules within the framework.                                         |

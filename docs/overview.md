@@ -14,7 +14,7 @@ The source directory (`src`) provides numerous modules that one can use.
 | [**cache**](./cache.md)              | Preset of different caching approaches that can be used together with tools.                |
 | [**errors**](./errors.md)            | Base framework error classes used by each module.                                           |
 | **adapters**                         | Concrete implementations of given modules for different environments.                       |
-| **logger**                           | Core component for logging all actions within the framework.                                |
+| [**logger**](./logger.md)            | Core component for logging all actions within the framework.                                |
 | [**serializer**](./serialization.md) | Core component for the ability to serialize/deserialize modules into the serialized format. |
 | [**version**](./version.md)          | Constants representing the framework (e.g., latest version)                                 |
 | **internals**                        | Modules used by other modules within the framework.                                         |
@@ -67,28 +67,7 @@ Moved to a [standalone page](./errors.md).
 
 ### Logger
 
-> Location within the framework `bee-agent-framework/logger`.
-> To log all events in the framework set log level to 'TRACE' (root logger observes the root emitter).
-
-A logger is a component used for recording and tracking events, errors, and other significant actions that occur during an application's execution.
-The primary purpose of a logger is to provide developers and system administrators with insights into the application's behavior, performance, and potential issues.
-
-Every component within the framework uses the `Logger` class either by directly creating an instance of it or because it is being passed from the creator.
-
-```ts
-import { Logger, LoggerLevel } from "bee-agent-framework/logger";
-
-Logger.defaults.pretty = true; // (override default settings)
-const root = Logger.root; // get root logger
-root.level = LoggerLevel.WARN; // update the logger level (default is LoggerLevel.INFO)
-```
-
-Some of the `Logger` defaults can be controlled via the following environmental variables.
-
-- `BEE_FRAMEWORK_LOG_LEVEL`
-- `BEE_FRAMEWORK_LOG_PRETTY`
-
-> Note: The framework `Logger` class is an abstraction on top of the most popular `pino` logger.
+Moved to a [standalone page](./logger.md).
 
 ### Serializer
 

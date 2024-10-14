@@ -27,7 +27,6 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { stdout } from "node:process";
 import * as url from "node:url";
 import path from "node:path";
-import { Emitter } from "@/emitter/emitter.js";
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
@@ -114,14 +113,7 @@ export class Logger extends Serializable implements pinoLogger.BaseLogger {
 
   @Cache()
   static get root() {
-    const logger = new Logger(Logger.defaults, Logger.createRaw(Logger.defaults));
-    Emitter.root.on("*.*", (event, data) => {
-      logger.trace({
-        event,
-        data,
-      });
-    });
-    return logger;
+    return new Logger(Logger.defaults, Logger.createRaw(Logger.defaults));
   }
 
   @Cache()
