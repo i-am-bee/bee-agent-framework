@@ -140,13 +140,16 @@ export class LocalPythonStorage extends PythonStorage {
   async upload(files: PythonUploadFile[]): Promise<PythonFile[]> {
     await this.init();
 
+    const fileList = await this.list();
+
     await Promise.all(
-      files.map((file) =>
-        copyFile(
-          path.join(this.input.localWorkingDir.toString(), file.filename),
-          path.join(this.input.interpreterWorkingDir.toString(), file.id),
-        ),
-      ),
+      files.map((file) => {
+        const filesystemFile = fileList.find((filesystemFile) => filesystemFile.id === file.id)!;
+        return copyFile(
+          path.join(this.input.localWorkingDir.toString(), filesystemFile.filename),
+          path.join(this.input.interpreterWorkingDir.toString(), filesystemFile.id),
+        );
+      }),
     );
     return files.map((file) => ({ ...file, hash: file.id }));
   }
