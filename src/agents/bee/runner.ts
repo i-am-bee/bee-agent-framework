@@ -180,7 +180,10 @@ export class BeeAgentRunner {
           prefix: "Function Name:",
           next: ["tool_input"],
           field: new ZodParserField(
-            z.enum(tools.map((tool) => tool.name) as [string, ...string[]]),
+            z.pipeline(
+              z.string().trim(),
+              z.enum(tools.map((tool) => tool.name) as [string, ...string[]]),
+            ),
           ),
         },
         tool_input: {
