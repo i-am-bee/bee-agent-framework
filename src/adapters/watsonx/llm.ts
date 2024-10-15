@@ -213,8 +213,13 @@ function createApiClient({
     };
   })();
 
-  accessToken = accessToken || getEnv("WATSONX_ACCESS_TOKEN");
-  apiKey = apiKey || getEnv("WATSONX_API_KEY");
+  if (accessToken && apiKey) {
+    throw new ValueError(`Use either "accessToken" or "apiKey".`);
+  } else if (!accessToken && !apiKey) {
+    accessToken = getEnv("WATSONX_ACCESS_TOKEN");
+    apiKey = accessToken ? undefined : getEnv("WATSONX_API_KEY");
+  }
+
   if (!accessToken && !apiKey) {
     throw new ValueError(
       [
