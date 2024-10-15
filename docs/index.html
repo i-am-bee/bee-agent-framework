@@ -12,21 +12,34 @@
     <div id="app"></div>
     <script>
       window.$docsify = {
-        name: "Bee Agent Framework",
-        repo: "i-am-bee/bee-agent-framework",
-        loadSidebar: true,
-        subMaxLevel: 2,
-        auto2top: true,
-        markdown: {
+        "name": "Bee Agent Framework",
+        "repo": "i-am-bee/bee-agent-framework",
+        "loadSidebar": true,
+        "subMaxLevel": 2,
+        "auto2top": true,
+        "flexible-alerts": {
+          important: {
+            label: "Important",
+            icon: "icon-note",
+            className: "note",
+          },
+        },
+        "markdown": {
           smartypants: true,
           renderer: {
-            link: function (link, renderer, text) {
-              const example = link.match(/examples\/(.*)/);
-              if (example) {
-                link = "https://github.com/i-am-bee/bee-agent-framework/tree/main".concat(link);
-              }
-              return this.origin.link.apply(this, [link, renderer, text]);
-            },
+            link: (function () {
+              var main = "https://github.com/i-am-bee/bee-agent-framework/tree/main";
+
+              var exampleRegex = /examples\/(.*)/;
+              var srcRegex = /src\/(.*)/;
+
+              return function (link, renderer, text) {
+                if (link.match(exampleRegex) || link.match(srcRegex) || link === "/package.json") {
+                  link = main.concat(link);
+                }
+                return this.origin.link.apply(this, [link, renderer, text]);
+              };
+            })(),
           },
         },
       };

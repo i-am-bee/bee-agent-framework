@@ -180,7 +180,6 @@
     "sequelize": "^6.37.3"
   },
   "devDependencies": {
-    "docsify-cli": "^4.4.4",
     "@commitlint/cli": "^19.4.1",
     "@commitlint/config-conventional": "^19.4.1",
     "@eslint/js": "^9.9.0",
@@ -204,6 +203,7 @@
     "@types/node": "^20.16.1",
     "@types/object-hash": "^3.0.6",
     "@types/turndown": "^5.0.5",
+    "docsify-cli": "^4.4.4",
     "dotenv": "^16.4.5",
     "embedme": "^1.22.1",
     "eslint": "^9.9.0",
