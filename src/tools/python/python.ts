@@ -28,13 +28,14 @@ import { z } from "zod";
 import { BaseLLMOutput } from "@/llms/base.js";
 import { LLM } from "@/llms/llm.js";
 import { PromptTemplate } from "@/template.js";
-import { differenceWith, isShallowEqual, isTruthy, mapToObj, unique } from "remeda";
-import { PythonStorage } from "@/tools/python/storage.js";
+import { differenceWith, isShallowEqual, isTruthy, map, unique } from "remeda";
+import { PythonFile, PythonStorage } from "@/tools/python/storage.js";
 import { PythonToolOutput } from "@/tools/python/output.js";
 import { ValidationError } from "ajv";
 import { ConnectionOptions } from "node:tls";
 import { AnySchemaLike } from "@/internals/helpers/schema.js";
 import { RunContext } from "@/context.js";
+import { hasMinLength } from "@/internals/helpers/array.js";
 
 export interface CodeInterpreterOptions {
   url: string;
@@ -76,28 +77,36 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
   async inputSchema() {
     const files = await this.storage.list();
+    const fileIds = unique(map(files, ({ id }) => id));
+
+    const zodFileId = hasMinLength(files, 2)
+      ? z.union(map(files, (file) => z.literal(file.id).describe(file.filename)))
+      : hasMinLength(files, 1)
+        ? z.literal(files[0].id).describe(files[0].filename)
+        : z.undefined();
 
     return z.object({
       language: z.enum(["python", "shell"]).describe("Use shell for ffmpeg, pandoc, yt-dlp"),
       code: z.string().describe("full source code file that will be executed"),
-      inputFiles: z
-        .object(
-          mapToObj(files, (value) => [
-            value.id,
-            z.literal(value.filename).describe("filename of a file"),
-          ]),
-        )
-        .partial()
-        .optional()
-        .describe(
-          [
-            "To access an existing file, you must specify it; otherwise, the file will not be accessible. IMPORTANT: If the file is not provided in the input, it will not be accessible.",
-            "The key is the final segment of a file URN, and the value is the filename. ",
-            files.length > 0
-              ? `Example: {"${files[0].id}":"${files[0].filename}"} -- the files will be available to the Python code in the working directory.`
-              : `Example: {"e6979b7bec732b89a736fd19436ec295f6f64092c0c6c0c86a2a7f27c73519d6":"file.txt"} -- the files will be available to the Python code in the working directory.`,
-          ].join(" "),
-        ),
+      ...(hasMinLength(fileIds, 1)
+        ? {
+            inputFiles: z
+              .array(
+                z.object({
+                  id: zodFileId,
+                  filename: z
+                    .string()
+                    .min(1)
+                    .describe(
+                      "name under which the file will be available to the Python code in the working directory",
+                    ),
+                }),
+              )
+              .describe(
+                "To access an existing file, you must specify it; otherwise, the file will not be accessible. IMPORTANT: If the file is not provided in the input, it will not be accessible.",
+              ),
+          }
+        : {}),
     });
   }
 
@@ -107,7 +116,9 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
   ): asserts rawInput is ToolInput<this> {
     super.validateInput(schema, rawInput);
 
-    const fileNames = Object.values(rawInput.inputFiles ?? {}).filter(Boolean) as string[];
+    const fileNames = (rawInput.inputFiles as { filename: string }[])
+      ?.map(({ filename }) => filename)
+      .filter(Boolean) as string[];
     const diff = differenceWith(fileNames, unique(fileNames), isShallowEqual);
     if (diff.length > 0) {
       throw new ToolInputValidationError(
@@ -158,14 +169,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
     _options: BaseToolRunOptions | undefined,
     run: RunContext<this>,
   ) {
-    const inputFiles = await this.storage.upload(
-      Object.entries(input.inputFiles ?? {})
-        .filter(([k, v]) => Boolean(k && v))
-        .map(([id, filename]) => ({
-          id,
-          filename: filename!.split(":").at(-1) ?? filename!,
-        })),
-    );
+    const inputFiles = await this.storage.upload((input.inputFiles as PythonFile[]) ?? []);
 
     // replace relative paths in "files" with absolute paths by prepending "/workspace"
     const getSourceCode = async () => {
