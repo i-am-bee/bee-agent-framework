@@ -1,6 +1,7 @@
 import { OllamaLLM } from "bee-agent-framework/adapters/ollama/llm";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Ollama } from "ollama";
 
 {
   console.info("===RAW===");
@@ -28,6 +29,27 @@ import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
       num_predict: 10,
       temperature: 0,
     },
+  });
+
+  console.info("Meta", await llm.meta());
+
+  const response = await llm.generate([
+    BaseMessage.of({
+      role: "user",
+      text: "Hello world!",
+    }),
+  ]);
+  console.info(response.finalResult);
+}
+
+{
+  console.info("===REMOTE OLLAMA===");
+  const llm = new OllamaChatLLM({
+    modelId: "llama3.1",
+    client: new Ollama({
+      // use the IP for the server you have ollama running on
+      host: "http://10.1.2.38:11434",
+    }),
   });
 
   console.info("Meta", await llm.meta());
