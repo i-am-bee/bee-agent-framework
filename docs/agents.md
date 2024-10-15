@@ -120,10 +120,10 @@ The agent uses the following prompt templates.
 
 7. Tool Not Found Error
 
-Please refer to the [following example](../examples/agents/bee_advanced.ts) to see how to modify them.
+Please refer to the [following example](/examples/agents/bee_advanced.ts) to see how to modify them.
 
 ## Creating your own agent
 
 To create your own agent, you must implement the agent's base class (`BaseAgent`).
 
-The example can be found [here](../examples/agents/custom_agent.ts).
+The example can be found [here](/examples/agents/custom_agent.ts).
