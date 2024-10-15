@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { Task, TaskState } from "promise-based-task";
 import { isFunction, isPromise } from "remeda";
 import { getProp } from "@/internals/helpers/object.js";
 
@@ -39,32 +38,33 @@ export async function arrayFromAsync<A, B>(
 
 export type EmitterToGeneratorFn<T, R> = (data: { emit: (data: T) => void }) => Promise<R>;
 export async function* emitterToGenerator<T, R>(fn: EmitterToGeneratorFn<T, R>) {
-  const EmptyTag = Symbol("EMPTY");
-
-  let task = new Task<T | typeof EmptyTag, Error>();
-  const emit = (data: T) => {
-    void task.resolve(data);
-    task = new Task<T, never>();
-  };
-
-  const promise = fn({
-    emit,
-  })
-    .catch((err) => {
-      task.reject(err);
-    })
-    .finally(() => {
-      task.resolve(EmptyTag);
-    });
-
-  while (task && task.state === TaskState.PENDING) {
-    const result = await task;
-    if (result !== EmptyTag) {
-      yield result;
-    }
+  interface Data {
+    data?: T;
+    error?: Error;
+    done?: boolean;
   }
 
-  return await promise;
+  const queue: Data[] = [];
+  void fn({
+    emit: (data: T) => queue.push({ data }),
+  })
+    .then(() => queue.push({ done: true }))
+    .catch((error) => queue.push({ error, done: true }));
+
+  while (true) {
+    while (queue.length === 0) {
+      await new Promise((resolve) => setImmediate(resolve));
+    }
+
+    const { data, done, error } = queue.shift()!;
+    if (error) {
+      throw error;
+    }
+    if (done) {
+      break;
+    }
+    yield data!;
+  }
 }
 
 export async function asyncProperties<T extends NonNullable<unknown>>(
