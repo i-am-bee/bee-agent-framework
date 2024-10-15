@@ -25,6 +25,7 @@ import { BAMLLM } from "@/adapters/bam/llm.js";
 import { BAMChatLLM } from "@/adapters/bam/chat.js";
 import { SerializerError } from "@/serializer/error.js";
 import { ValueOf } from "@/internals/types.js";
+import { toBoundedFunction } from "@/serializer/utils.js";
 
 describe("Serializer", () => {
   it.each([
@@ -263,6 +264,31 @@ describe("Serializer", () => {
 
     it("Parses when class is passed as external parameter.", () => {
       expect(() => Serializer.deserialize(json, [BaseMessage])).not.toThrowError();
+    });
+
+    it("Handles bounded functions", () => {
+      const a = 1;
+      const b = 2;
+
+      let fn = toBoundedFunction(
+        (...args: any[]) => [a, b, ...args].reduce((a, b) => a + b, 0),
+        [
+          {
+            name: "a",
+            value: a,
+          },
+          {
+            name: "b",
+            value: b,
+          },
+        ],
+      );
+
+      for (let i = 0; i < 5; ++i) {
+        const serialized = Serializer.serialize(fn);
+        fn = Serializer.deserialize(serialized);
+        expect(fn(3)).toBe(6);
+      }
     });
 
     it("Handles nested functions", () => {
