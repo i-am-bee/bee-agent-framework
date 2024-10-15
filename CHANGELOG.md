@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.0.30](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.29...v0.0.30) (2024-10-15)
+
+### Bug Fixes
+
+- add info on running with remote ollama ([#83](https://github.com/i-am-bee/bee-agent-framework/issues/83)) ([ed6405d](https://github.com/i-am-bee/bee-agent-framework/commit/ed6405d3dd071f0b1c64b4e89a6ddd4f0de2e0ff))
+- **agent:** ignore newlines for a tool name ([a2c6202](https://github.com/i-am-bee/bee-agent-framework/commit/a2c6202e479baba7331b1a148373f2f92ba427c6))
+- **serialization:** handle bounded functions ([58d072f](https://github.com/i-am-bee/bee-agent-framework/commit/58d072f0a16794e96e07302cac8169c74017c14c)), closes [#92](https://github.com/i-am-bee/bee-agent-framework/issues/92)
+
+## [0.0.29](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.28...v0.0.29) (2024-10-15)
+
+### Features
+
+- **agent:** add endOnRepeat option to the LinePrefixParser ([de24beb](https://github.com/i-am-bee/bee-agent-framework/commit/de24bebf6eb5a66c6f7d5ea6412e1eb4e8d89988))
+- **agent:** add waitForStartNode option to the LinePrefixParser ([a27a60a](https://github.com/i-am-bee/bee-agent-framework/commit/a27a60ae82c89506e1bfbc3a8a524503d4f87a53))
+- **agent:** update parser settings ([42027e2](https://github.com/i-am-bee/bee-agent-framework/commit/42027e217ee40a2d8cd8f0f9d1ccad22a8815b2e))
+- **agent:** update parser settings ([fdfca98](https://github.com/i-am-bee/bee-agent-framework/commit/fdfca98e9ee0949c64f2a1b4f3fd41da2a26b657))
+- **agent:** update SQL tool example ([325e1ed](https://github.com/i-am-bee/bee-agent-framework/commit/325e1ed2f703ca77a560e24936398be52b79441b))
+- **code-interpreter:** improve file input prompt ([#86](https://github.com/i-am-bee/bee-agent-framework/issues/86)) ([e0c5985](https://github.com/i-am-bee/bee-agent-framework/commit/e0c5985b0efffa283c17d58813dfb7e7f59459a6))
+- **code-interpreter:** remove functionality ([739036c](https://github.com/i-am-bee/bee-agent-framework/commit/739036cd2bd537ce4d1465da5115320a088b64d9))
+- **code-interpreter:** remove functionality ([18302f9](https://github.com/i-am-bee/bee-agent-framework/commit/18302f9887a4cbdb17f6173c5acda2acf13b7333))
+- **code-interpreter:** rename "hash" to "pythonId" ([#90](https://github.com/i-am-bee/bee-agent-framework/issues/90)) ([c25cbc5](https://github.com/i-am-bee/bee-agent-framework/commit/c25cbc52a33aa8cf1c0070850a44925aacee0319))
+- **examples:** replace process exit with reader close ([65b7da4](https://github.com/i-am-bee/bee-agent-framework/commit/65b7da4c624e4734f30d27690c8d7cf910210c35))
+- **llm:** update credentials loading for watsonx ([44a79d3](https://github.com/i-am-bee/bee-agent-framework/commit/44a79d35a815392d73029429e56067d45e969433))
+- **llm:** update default model for groq adapter ([67c3270](https://github.com/i-am-bee/bee-agent-framework/commit/67c32709bff22dcc65e28eed81f0919774ba513d))
+- **serialization:** allows to pass extra classes to bootstrap ([60f8953](https://github.com/i-am-bee/bee-agent-framework/commit/60f89533dc3d31c5ffdbc5000d9e6ea3045c4a9b))
+
+### Bug Fixes
+
+- **internals:** fix race condition in emitterToGenerator ([dfe63f8](https://github.com/i-am-bee/bee-agent-framework/commit/dfe63f84ba0997028332b86392c13ad2508f979f))
+- **llm:** handles OpenAI structured output ([23e4e0e](https://github.com/i-am-bee/bee-agent-framework/commit/23e4e0e153f570d992b26f7cf4da46d16a4e2e42))
+- **memory:** make shallow copy of handlers ([be82ed5](https://github.com/i-am-bee/bee-agent-framework/commit/be82ed5e132145821cfd00b16d713d6e5a51f8ef))
+- **serialization:** properly deserialize arrow functions ([25234df](https://github.com/i-am-bee/bee-agent-framework/commit/25234df75369eac3d4a2c484c13a72b9003cf8e4))
+
 ## [0.0.28](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.27...v0.0.28) (2024-10-10)
 
 ### Features

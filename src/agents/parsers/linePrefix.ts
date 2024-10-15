@@ -83,6 +83,7 @@ const linesToString = (lines: Line[]) =>
 interface Options<T extends NonNullable<unknown>> {
   fallback?: (value: string) => readonly { key: StringKey<T>; value: string }[];
   endOnRepeat?: boolean;
+  waitForStartNode?: boolean;
 }
 
 export class LinePrefixParser<
@@ -188,10 +189,14 @@ export class LinePrefixParser<
 
           await this.emitFinalUpdate(this.lastNodeKey!, lastNode.field);
         } else if (!this.nodes[parsedLine.key].isStart) {
-          this.throwWithContext(
-            `Parsed text line corresponds to a node "${parsedLine.key}" which is not a start node!`,
-            { line },
-          );
+          if (!this.options.waitForStartNode) {
+            this.throwWithContext(
+              `Parsed text line corresponds to a node "${parsedLine.key}" which is not a start node!`,
+              { line },
+            );
+          }
+          this.excludedLines.push(line);
+          continue;
         }
 
         const node = this.nodes[parsedLine.key];

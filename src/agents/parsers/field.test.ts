@@ -94,6 +94,16 @@ describe("Parser Fields", () => {
   });
 
   describe("Zod", () => {
+    it("Enum", async () => {
+      const values = {
+        apple: "apple",
+      };
+      const field = new ZodParserField(z.pipeline(z.string().trim(), z.nativeEnum(values)));
+      field.write(" apple\n");
+      await field.end();
+      expect(field.get()).toBe(values.apple);
+    });
+
     it("Number", async () => {
       const field = new ZodParserField(z.coerce.number().int());
       expect(field.getPartial()).toBe("");

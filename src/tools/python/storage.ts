@@ -26,7 +26,7 @@ import { shallowCopy } from "@/serializer/utils.js";
 
 export interface PythonFile {
   id: string;
-  hash: string;
+  pythonId: string;
   filename: string;
 }
 
@@ -38,7 +38,7 @@ export interface PythonUploadFile {
 export interface PythonDownloadFile {
   id?: string;
   filename: string;
-  hash: string;
+  pythonId: string;
 }
 
 export abstract class PythonStorage extends Serializable {
@@ -68,7 +68,7 @@ export class TemporaryStorage extends PythonStorage {
   async upload(files: PythonUploadFile[]): Promise<PythonFile[]> {
     return files.map((file) => ({
       id: file.id,
-      hash: file.id,
+      pythonId: file.id,
       filename: file.filename,
     }));
   }
@@ -76,7 +76,7 @@ export class TemporaryStorage extends PythonStorage {
   async download(files: PythonDownloadFile[]) {
     this.files = [
       ...this.files.filter((file) => files.every((f) => f.filename !== file.filename)),
-      ...files.map((file) => ({ id: file.hash, ...file })),
+      ...files.map((file) => ({ id: file.pythonId, ...file })),
     ];
     return this.files.slice();
   }
@@ -124,14 +124,14 @@ export class LocalPythonStorage extends PythonStorage {
       files
         .filter((file) => file.isFile() && !this.input.ignoredFiles.has(file.name))
         .map(async (file) => {
-          const hash = await this.computeHash(
+          const pythonId = await this.computeHash(
             path.join(this.input.localWorkingDir.toString(), file.name),
           );
 
           return {
-            id: hash,
+            id: pythonId,
             filename: file.name,
-            hash,
+            pythonId,
           };
         }),
     );
@@ -140,15 +140,18 @@ export class LocalPythonStorage extends PythonStorage {
   async upload(files: PythonUploadFile[]): Promise<PythonFile[]> {
     await this.init();
 
+    const fileList = await this.list();
+
     await Promise.all(
-      files.map((file) =>
-        copyFile(
-          path.join(this.input.localWorkingDir.toString(), file.filename),
-          path.join(this.input.interpreterWorkingDir.toString(), file.id),
-        ),
-      ),
+      files.map((file) => {
+        const filesystemFile = fileList.find((filesystemFile) => filesystemFile.id === file.id)!;
+        return copyFile(
+          path.join(this.input.localWorkingDir.toString(), filesystemFile.filename),
+          path.join(this.input.interpreterWorkingDir.toString(), filesystemFile.id),
+        );
+      }),
     );
-    return files.map((file) => ({ ...file, hash: file.id }));
+    return files.map((file) => ({ ...file, pythonId: file.id }));
   }
 
   async download(files: PythonDownloadFile[]) {
@@ -157,12 +160,12 @@ export class LocalPythonStorage extends PythonStorage {
     await Promise.all(
       files.map((file) =>
         copyFile(
-          path.join(this.input.interpreterWorkingDir.toString(), file.hash),
+          path.join(this.input.interpreterWorkingDir.toString(), file.pythonId),
           path.join(this.input.localWorkingDir.toString(), file.filename),
         ),
       ),
     );
-    return files.map((file) => ({ ...file, id: file.hash }));
+    return files.map((file) => ({ ...file, id: file.pythonId }));
   }
 
   protected async computeHash(file: PathLike) {

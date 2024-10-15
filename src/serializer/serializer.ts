@@ -31,6 +31,7 @@ import {
   RootNode,
   SerializerNode,
   SerializerRefIdentifier,
+  toBoundedFunction,
   traverseObject,
   traverseWithUpdate,
 } from "@/serializer/utils.js";
@@ -43,6 +44,7 @@ import { SerializerError } from "@/serializer/error.js";
 import { ZodType } from "zod";
 import { toJsonSchema } from "@/internals/helpers/schema.js";
 import { createAbortController } from "@/internals/helpers/cancellation.js";
+import { hasMinLength } from "@/internals/helpers/array.js";
 
 export interface SerializeFactory<A = unknown, B = unknown> {
   ref: ClassConstructor<A> | NamedFunction<A>;
@@ -530,7 +532,7 @@ Serializer.register(Function, {
         value: () => value.fn,
       }),
     );
-    return fn;
+    return hasMinLength(binds, 1) ? toBoundedFunction(fn, binds) : fn;
   },
 });
 
