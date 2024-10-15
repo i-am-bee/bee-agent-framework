@@ -72,4 +72,3 @@ Moved to a [standalone page](logger.md).
 ### Serializer
 
 Moved to a [standalone page](serialization.md).
-
