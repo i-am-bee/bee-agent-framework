@@ -161,7 +161,6 @@ To see more in-depth explanation see [docs](overview.md).
 - Python SDK
 - Structured outputs
 - Chat Client (GUI)
-
 - 🚧 TBD 🚧
 
 ## Contribution guidelines
