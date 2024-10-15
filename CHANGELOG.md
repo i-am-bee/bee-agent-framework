@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.30](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.29...v0.0.30) (2024-10-15)
+
+### Bug Fixes
+
+- add info on running with remote ollama ([#83](https://github.com/i-am-bee/bee-agent-framework/issues/83)) ([ed6405d](https://github.com/i-am-bee/bee-agent-framework/commit/ed6405d3dd071f0b1c64b4e89a6ddd4f0de2e0ff))
+- **agent:** ignore newlines for a tool name ([a2c6202](https://github.com/i-am-bee/bee-agent-framework/commit/a2c6202e479baba7331b1a148373f2f92ba427c6))
+- **serialization:** handle bounded functions ([58d072f](https://github.com/i-am-bee/bee-agent-framework/commit/58d072f0a16794e96e07302cac8169c74017c14c)), closes [#92](https://github.com/i-am-bee/bee-agent-framework/issues/92)
+
 ## [0.0.29](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.28...v0.0.29) (2024-10-15)
 
 ### Features
