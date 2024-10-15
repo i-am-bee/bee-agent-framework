@@ -133,7 +133,6 @@
     "_ensure_env": "cp -n .env.template .env || true"
   },
   "dependencies": {
-    "@ai-zen/node-fetch-event-source": "^2.1.4",
     "@connectrpc/connect": "^1.4.0",
     "@connectrpc/connect-node": "^1.4.0",
     "@streamparser/json": "^0.0.21",
@@ -142,6 +141,7 @@
     "bee-proto": "0.0.2",
     "dirty-json": "0.9.2",
     "duck-duck-scrape": "^2.2.5",
+    "eventsource-client": "^1.1.2",
     "fast-xml-parser": "^4.4.1",
     "header-generator": "^2.1.54",
     "joplin-turndown-plugin-gfm": "^1.0.12",

@@ -5,7 +5,7 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@ai-zen/node-fetch-event-source@npm:^2.1.2, @ai-zen/node-fetch-event-source@npm:^2.1.4":
+"@ai-zen/node-fetch-event-source@npm:^2.1.2":
   version: 2.1.4
   resolution: "@ai-zen/node-fetch-event-source@npm:2.1.4"
   dependencies:
@@ -2741,7 +2741,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "bee-agent-framework@workspace:."
   dependencies:
-    "@ai-zen/node-fetch-event-source": "npm:^2.1.4"
     "@commitlint/cli": "npm:^19.4.1"
     "@commitlint/config-conventional": "npm:^19.4.1"
     "@connectrpc/connect": "npm:^1.4.0"
@@ -2778,6 +2777,7 @@ __metadata:
     eslint: "npm:^9.9.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-unused-imports: "npm:^4.1.3"
+    eventsource-client: "npm:^1.1.2"
     fast-xml-parser: "npm:^4.4.1"
     glob: "npm:^11.0.0"
     groq-sdk: "npm:^0.7.0"
@@ -4510,6 +4510,22 @@ __metadata:
   version: 3.3.0
   resolution: "events@npm:3.3.0"
   checksum: 10c0/d6b6f2adbccbcda74ddbab52ed07db727ef52e31a61ed26db9feb7dc62af7fc8e060defa65e5f8af9449b86b52cc1a1f6a79f2eafcf4e62add2b7a1fa4a432f6
+  languageName: node
+  linkType: hard
+
+"eventsource-client@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "eventsource-client@npm:1.1.2"
+  dependencies:
+    eventsource-parser: "npm:^1.1.2"
+  checksum: 10c0/390567748f089e4717ae522d443af07dccdabaff8baacd7aa721d1798c464c3a7b4d5042c97e6dab0ccfbe2cd7c8cde2cad4fda087bfd952a9c5373f794472d4
+  languageName: node
+  linkType: hard
+
+"eventsource-parser@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "eventsource-parser@npm:1.1.2"
+  checksum: 10c0/b38948bc81ae6c2a8b9c88383d4f8c2bfbaf23955827a9af68d39bc0550ae83cc400b197e814bea9aef6e0cdc9bae5afd95787418ee3d9ad01ffc4774cf1b84a
   languageName: node
   linkType: hard
 
