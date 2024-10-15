@@ -191,7 +191,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
         sourceCode: await getSourceCode(),
         executorId: this.options.executorId ?? "default",
         files: Object.fromEntries(
-          inputFiles.map((file) => [`${prefix}${file.filename}`, file.hash]),
+          inputFiles.map((file) => [`${prefix}${file.filename}`, file.pythonId]),
         ),
       },
       { signal: run.signal },
@@ -203,18 +203,22 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
     const filesOutput = await this.storage.download(
       Object.entries(result.files)
         .map(([k, v]) => {
-          const file = { path: k, hash: v };
+          const file = { path: k, pythonId: v };
           if (!file.path.startsWith(prefix)) {
             return;
           }
 
           const filename = file.path.slice(prefix.length);
-          if (inputFiles.some((input) => input.filename === filename && input.hash === file.hash)) {
+          if (
+            inputFiles.some(
+              (input) => input.filename === filename && input.pythonId === file.pythonId,
+            )
+          ) {
             return;
           }
 
           return {
-            hash: file.hash,
+            pythonId: file.pythonId,
             filename,
           };
         })
