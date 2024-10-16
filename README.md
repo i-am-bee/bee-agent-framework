@@ -155,5 +155,5 @@ All content in these repositories including code has been provided by IBM under 
 Special thanks to our contributors for helping us improve Bee Agent Framework.
 
 <a href="https://github.com/i-am-bee/bee-agent-framework/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=i-am-bee/bee-agent-framework" />
+  <img alt="Contributors list" src="https://contrib.rocks/image?repo=i-am-bee/bee-agent-framework" />
 </a>
