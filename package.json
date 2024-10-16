@@ -61,6 +61,9 @@
         "yarn ts:check",
         "yarn test:all"
       ],
+      "after:@release-it/conventional-changelog:bump": [
+        "yarn docs:build"
+      ],
       "after:bump": [
         "yarn build"
       ]
@@ -114,7 +117,7 @@
     "ts:check": "tsc --noEmit && tsc -p tsconfig.examples.json --noEmit",
     "start": "tsx --tsconfig tsconfig.examples.json",
     "start:bee": "yarn start -- examples/agents/bee.ts",
-    "docs:build": "embedme --source-root=. docs/**/*.md",
+    "docs:build": "embedme --source-root=. docs/**/*.md && cp *.md docs/ && yarn lint:fix docs/ && yarn prettier --write docs/",
     "docs:check": "yarn docs:build --verify",
     "docs:watch": "docsify serve ./docs --open",
     "lint": "yarn eslint",
