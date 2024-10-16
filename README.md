@@ -1,20 +1,23 @@
 <p align="center">
-    <img src="./docs/assets/Bee_Dark.svg" height="128">
+    <img alt="Bee Framework logo" src="./docs/assets/Bee_Dark.svg" height="128">
     <h1 align="center">Bee Agent Framework</h1>
 </p>
 
 <p align="center">
   <a aria-label="Join the community on GitHub" href="https://github.com/i-am-bee/bee-agent-framework/discussions">
-    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-blueviolet.svg?style=for-the-badge&labelColor=000000&label=Bee">
+    <img alt="join the community" src="https://img.shields.io/badge/Join%20the%20community-blueviolet.svg?style=for-the-badge&labelColor=000000&label=Bee">
   </a>
+
   <h4 align="center">Open-source framework for building, deploying, and serving powerful agentic workflows at scale.</h4>
 </p>
 
-The Bee Agent Framework makes it easy to build scalable agent-based workflows with your model of choice. Our default agent, [Bee](https://github.com/i-am-bee/bee-agent-framework/tree/main?tab=readme-ov-file#get-started-with-bee), is designed to perform robustly with [Llama 3.1](https://ai.meta.com/blog/meta-llama-3-1/), and we're actively working on optimizing its performance with other popular LLMs.<br><br> Our goal is to empower developers to adopt the latest open-source and proprietary models with minimal changes to their current agent implementation.
+![Alpha](https://img.shields.io/badge/Status-Alpha-red)
+
+The Bee Agent Framework makes it easy to build scalable agent-based workflows with your model of choice. The framework is been designed to perform robustly with [IBM Granite](https://www.ibm.com/granite?adoper=255252_0_LS1) and [Llama 3.x](https://ai.meta.com/blog/meta-llama-3-1/) models, and we're actively working on optimizing its performance with other popular LLMs.<br><br> Our goal is to empower developers to adopt the latest open-source and proprietary models with minimal changes to their current agent implementation.
 
 ## Key Features
 
-- 🤖 **AI agents**: Use our powerful [Bee agent](./docs/agents.md) or [build your own](./docs/agents.md).
+- 🤖 **AI agents**: Use our powerful [Bee agent](./docs/agents.md) refined for Llama 3.1 or [build your own](./docs/agents.md).
 - 🛠️ **Tools**: Use our [built-in tools](./docs/tools.md) or [create your own](./docs/tools.md) in Javascript/Python.
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
 - 💾 **Memory**: Multiple [strategies](./docs/memory.md) to optimize token spend.
@@ -70,14 +73,14 @@ const response = await agent
 
 console.log(`Agent 🤖 : `, response.result.text);
 ```
-
-To run this example, be sure that you have installed [ollama](https://ollama.com) with the [llama3.1](https://ollama.com/library/llama3.1) model downloaded.
-
 ➡️ See a more [advanced example](./examples/agents/bee.ts).
 
-➡️ All examples can be found in the [examples](./examples) directory.
+➡️ you can run this example after local installation, using the command `yarn start examples/agents/simple.ts`
 
-➡️ To run an arbitrary example, use the following command `yarn start examples/agents/bee.ts` (just pass the appropriate path to the desired example).
+> [!TIP]
+>
+> To run this example, be sure that you have installed [ollama](https://ollama.com) with the [llama3.1](https://ollama.com/library/llama3.1) model downloaded.
+
 
 ### Local Installation
 
@@ -89,6 +92,11 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 2. Install dependencies `yarn install`.
 3. Create `.env` (from `.env.template`) and fill in missing values (if any).
 4. Start the agent `yarn run start:bee` (it runs `./examples/agents/bee.ts` file).
+
+➡️ All examples can be found in the [examples](./examples) directory.
+
+➡️ To run an arbitrary example, use the following command `yarn start examples/agents/bee.ts` (just pass the appropriate path to the desired example).
+
 
 ### 📦 Modules
 
@@ -118,9 +126,10 @@ To see more in-depth explanation see [overview](./docs/overview.md).
 ## Roadmap
 
 - MLFlow integration for trace observability (coming out next week)
-- Improvements to Bee agent and performance optimization with Llama3.1 and Granite model suites
+- Improvements to Bee agent and performance optimization with Granite and Llama3.x model suites
 - API + UI (chat interface)
 - Python SDK
+- Multi-Agent support
 - 🚧 TBD 🚧
 
 ## Contribution guidelines
