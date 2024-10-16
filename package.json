@@ -61,11 +61,11 @@
         "yarn ts:check",
         "yarn test:all"
       ],
-      "after:@release-it/conventional-changelog:bump": [
-        "yarn docs:build"
-      ],
       "after:bump": [
         "yarn build"
+      ],
+      "before:release": [
+        "yarn docs:build && git add . --update"
       ]
     },
     "github": {
