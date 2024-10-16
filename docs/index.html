@@ -38,6 +38,10 @@
 
       window.$docsify = {
         "name": "Bee Agent Framework",
+        "basePath": (function () {
+          var path = window.location.pathname;
+          return path.replace(/index.html/gi, "").replace("/#/", "") || "/";
+        })(),
         "repo": "i-am-bee/bee-agent-framework",
         "loadSidebar": true,
         "subMaxLevel": 2,
