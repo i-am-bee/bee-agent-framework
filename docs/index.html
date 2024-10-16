@@ -35,13 +35,11 @@
       }
 
       var fixLink = fixLinkFactory();
+      var basePath = window.location.pathname.replace(/index.html/gi, "").replace("/#/", "") || "/";
 
       window.$docsify = {
         "name": "Bee Agent Framework",
-        "basePath": (function () {
-          var path = window.location.pathname;
-          return path.replace(/index.html/gi, "").replace("/#/", "") || "/";
-        })(),
+        "basePath": basePath,
         "repo": "i-am-bee/bee-agent-framework",
         "loadSidebar": true,
         "subMaxLevel": 2,
@@ -60,8 +58,8 @@
               return this.origin.link.apply(this, [fixLink(link), renderer, text]);
             },
             html: function (html) {
-              var regex = /src\s*=\s*(['"])\/docs\/(.+?)(\1)/gi;
-              html = html.replace(regex, `src=$1/$2$3`);
+              var regex = /(src|href)\s*=\s*(['"])\/docs\/(.+?)\2/gi;
+              html = html.replace(regex, "$1=$2" + basePath + "$3$2");
               return html;
             },
           },
