@@ -14,7 +14,4 @@
   - [Cache](cache.md)
   - [Logger](logger.md)
   - [Version](version.md)
-
-- Tools
-
-  - [SQL Tool](sql-tool.md)
+  - [Error Handling](errors.md)
