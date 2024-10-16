@@ -19,7 +19,7 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
 - 💾 **Memory**: Multiple [strategies](./docs/memory.md) to optimize token spend.
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](./docs/serialization.md).
-- 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](./docs/logger.md) all running events, and use our MLFlow integration (coming out next week) to debug performance.
+- 🔍 **Traceability**: Get full visibility of your agent’s inner workings, [log](./docs/logger.md) all running events, and use our [MLFlow integration](https://github.com/i-am-bee/bee-observe-connector) to debug performance.
 - 🎛️ **Production-level** control with [caching](./docs/cache.md) and [error handling](./docs/errors.md).
 - 🚧 (Coming soon) **API**: Configure and deploy your agents with a production-hardened API.
 - 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
@@ -117,7 +117,6 @@ To see more in-depth explanation see [overview](./docs/overview.md).
 
 ## Roadmap
 
-- MLFlow integration for trace observability (coming out next week)
 - Improvements to Bee agent and performance optimization with Llama3.1 and Granite model suites
 - API + UI (chat interface)
 - Python SDK
