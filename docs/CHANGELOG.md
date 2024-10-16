@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.32](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.30...v0.0.32) (2024-10-16)
+
+### Bug Fixes
+
+- **code-interpreter:** avoid crash when no files supplied ([#97](https://github.com/i-am-bee/bee-agent-framework/issues/97)) ([60c3317](https://github.com/i-am-bee/bee-agent-framework/commit/60c3317ed9b0b6ddc94422b02e1b53e4f07d4b5a))
+
 ## [0.0.30](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.29...v0.0.30) (2024-10-15)
 
 ### Bug Fixes
