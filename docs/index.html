@@ -11,6 +11,31 @@
   <body>
     <div id="app"></div>
     <script>
+      function fixLinkFactory() {
+        var main = "https://github.com/i-am-bee/bee-agent-framework/tree/main";
+        var exampleRegex = /^[\/]{0,1}examples\/(.*)/;
+        var srcRegex = /^[\/]{0,1}src\/(.*)/;
+        var docsMatch = /^[\/]{0,1}docs\/(.*)/;
+
+        return function (url) {
+          if (url === "LICENSE") {
+            return main.concat("/LICENSE");
+          }
+          if (url.substring(0, 2) === "./") {
+            url = url.substring(2);
+          }
+          if (url.match(docsMatch)) {
+            url = url.replace(docsMatch, "$1");
+          }
+          if (url.match(exampleRegex) || url.match(srcRegex) || url === "/package.json") {
+            url = main.concat(url);
+          }
+          return url;
+        };
+      }
+
+      var fixLink = fixLinkFactory();
+
       window.$docsify = {
         "name": "Bee Agent Framework",
         "repo": "i-am-bee/bee-agent-framework",
@@ -27,19 +52,14 @@
         "markdown": {
           smartypants: true,
           renderer: {
-            link: (function () {
-              var main = "https://github.com/i-am-bee/bee-agent-framework/tree/main";
-
-              var exampleRegex = /examples\/(.*)/;
-              var srcRegex = /src\/(.*)/;
-
-              return function (link, renderer, text) {
-                if (link.match(exampleRegex) || link.match(srcRegex) || link === "/package.json") {
-                  link = main.concat(link);
-                }
-                return this.origin.link.apply(this, [link, renderer, text]);
-              };
-            })(),
+            link: function (link, renderer, text) {
+              return this.origin.link.apply(this, [fixLink(link), renderer, text]);
+            },
+            html: function (html) {
+              var regex = /src\s*=\s*(['"])\/docs\/(.+?)(\1)/gi;
+              html = html.replace(regex, `src=$1/$2$3`);
+              return html;
+            },
           },
         },
       };

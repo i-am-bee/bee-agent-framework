@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./docs/assets/Bee_Dark.svg" height="128">
+    <img src="/docs/assets/Bee_Dark.svg" height="128">
     <h1 align="center">Bee Agent Framework</h1>
 </p>
 
