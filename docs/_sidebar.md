@@ -9,6 +9,7 @@
   - [LLMs](llms.md)
   - [Templates](templates.md)
   - [Memory](memory.md)
+  - [Emitter](emitter.md)
   - [Serialization](serialization.md)
   - [Tools](tools.md)
   - [Cache](cache.md)

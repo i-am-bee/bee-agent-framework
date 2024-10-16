@@ -17,25 +17,12 @@ The source directory (`src`) provides numerous modules that one can use.
 | [**logger**](./logger.md)                    | Core component for logging all actions within the framework.                                |
 | [**serializer**](./serialization.md)         | Core component for the ability to serialize/deserialize modules into the serialized format. |
 | [**version**](./version.md)                  | Constants representing the framework (e.g., latest version)                                 |
+| [**emitter**](./emitter.md)                  | Bringing visibility to the system by emitting events.                                       |
 | **internals**                                | Modules used by other modules within the framework.                                         |
 
 ### Emitter
 
-> Location within the framework `bee-agent-framework/emitter`.
-
-An emitter is a core functionality of the framework that gives you the ability to see what is happening under the hood. Because the vast majority of the frameworks components uses it, you can easily observe them.
-
-```ts
-import { Emitter, EventMeta } from "bee-agent-framework/emitter/emitter";
-
-Emitter.root.match("*.*", (data: unknown, event: EventMeta) => {
-  console.info(event.path, { data });
-});
-```
-
-🚧 TBD
-
-**👉 [Emitter + Agent example](/examples/agents/bee.ts) 👈**
+Moved to a [standalone page](emitter.md).
 
 ### LLMs
 

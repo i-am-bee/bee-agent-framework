@@ -23,7 +23,7 @@ import {
   Matcher,
   StringKey,
 } from "@/emitter/types.js";
-export type { EventMeta, EventTrace };
+export type { EventMeta, EventTrace, Callback };
 import { Cache } from "@/cache/decoratorCache.js";
 import { createFullPath, isPath, assertValidName, assertValidNamespace } from "@/emitter/utils.js";
 import { EmitterError } from "@/emitter/errors.js";
