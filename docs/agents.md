@@ -24,22 +24,22 @@ For the sake of simplicity, imagine that the input prompt is "What is the curren
 First iteration:
 
 ```
-thought: 'The user wants to know the current weather in Las Vegas. I can use OpenMeteo to get the current weather.'
-tool_name: 'OpenMeteo'
-tool_input: {"location": {"name": "Las Vegas"}, "start_date": "2024-10-04", "end_date": "2024-10-04", "temperature_unit": "celsius"}
-tool_caption: 'Retrieving current weather forecast for Las Vegas.'
+thought: I need to retrieve the current weather in Las Vegas. I can use the OpenMeteo function to get the current weather forecast for a location.
+tool_name: OpenMeteo
+tool_input: {"location": {"name": "Las Vegas"}, "start_date": "2024-10-17", "end_date": "2024-10-17", "temperature_unit": "celsius"}
+tool_caption: Retrieving current weather forecast for Las Vegas.
 ```
 
 > [!NOTE]
 >
-> Agent emitted 4 complete updates in the following order (`thought, `tool_name`, `tool_input`, `tool_caption`) and tons of partial updates in the same order.
+> Agent emitted 4 complete updates in the following order (`thought`, `tool_name`, `tool_input`, `tool_caption`) and tons of partial updates in the same order.
 > Partial update means that new tokens are being added to the iteration. Updates are always in strict order: You first get many partial updates for thought, followed by a final update for thought (that means no final updates are coming for a given key).
 
 Second iteration:
 
 ```
-thought: "I have the current weather in Las Vegas. I can now provide the user with the current temperature and other weather information."
-final_answer: "The first commercial typewriter was invented in 1874.";
+thought: I have the current weather in Las Vegas in Celsius.
+final_answer: The current weather in Las Vegas is 20.5°C with an apparent temperature of 18.3°C.
 ```
 
 For more complex tasks, the agent may do way more iterations.
