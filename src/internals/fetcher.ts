@@ -16,16 +16,16 @@
 
 import { FrameworkError } from "@/errors.js";
 import { Serializable } from "@/internals/serializable.js";
-import {
-  EventSourceMessage,
-  EventStreamContentType,
-  fetchEventSource,
-} from "@ai-zen/node-fetch-event-source";
-import { FetchEventSourceInit } from "@ai-zen/node-fetch-event-source/lib/cjs/fetch.js";
-import { emitterToGenerator } from "@/internals/helpers/promise.js";
 import { isPlainObject } from "remeda";
+import { createEventSource, FetchLikeInit } from "eventsource-client";
 
 export class RestfulClientError extends FrameworkError {}
+
+export interface EventSourceMessage {
+  id: string;
+  event: string;
+  data: string;
+}
 
 type URLParamType = string | number | boolean | null | undefined;
 export function createURLParams(
@@ -65,44 +65,40 @@ export class RestfulClient<K extends Record<string, string>> extends Serializabl
 
   async *stream(
     path: keyof K,
-    init: FetchEventSourceInit,
+    init: FetchLikeInit = {},
   ): AsyncGenerator<EventSourceMessage, void, void> {
     const { paths, baseUrl, headers } = this.input;
 
     const target = new URL(paths[path] ?? path, baseUrl);
-    return yield* emitterToGenerator(async ({ emit }) =>
-      fetchEventSource(target.toString(), {
-        method: "POST",
-        headers: await headers().then((raw) => Object.fromEntries(raw.entries())),
-        async onopen(response) {
-          if (response.ok && response.headers.get("content-type") === EventStreamContentType) {
-            return;
-          }
-          throw new RestfulClientError("Failed to stream!", [], {
-            context: {
-              url: response.url,
-              err: await response.text(),
-              response,
-            },
-            isRetryable: response.status >= 400 && response.status < 500 && response.status !== 429,
+    const client = createEventSource({
+      ...init,
+      url: target.toString(),
+      method: "POST",
+      headers: await headers().then((raw) => Object.fromEntries(raw.entries())),
+      onDisconnect: () => {
+        client.close();
+      },
+    });
+
+    try {
+      client.connect();
+
+      for await (const message of client) {
+        if (message.event === "error") {
+          throw new RestfulClientError(`Error during streaming has occurred.`, [], {
+            context: message,
           });
-        },
-        onmessage(msg) {
-          if (msg?.event === "error") {
-            throw new RestfulClientError(`Error during streaming has occurred.`, [], {
-              context: msg,
-            });
-          }
-          emit(msg);
-        },
-        onclose() {},
-        onerror(err) {
-          throw new RestfulClientError(`Error during streaming has occurred.`, [err]);
-        },
-        ...init,
-        fetch,
-      }),
-    );
+        }
+
+        yield {
+          id: message.id!,
+          event: message.event!,
+          data: message.data,
+        };
+      }
+    } finally {
+      client.close();
+    }
   }
 
   async fetch(path: keyof K, init?: RequestInit & { searchParams?: URLSearchParams }) {
