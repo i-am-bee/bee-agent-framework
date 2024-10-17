@@ -21,8 +21,8 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](./docs/serialization.md).
 - 🔍 **Traceability**: Get full [visibility](./docs/emitter.md) of your agent’s inner workings, [log](./docs/logger.md) all running events, and use our [MLFlow integration](https://github.com/i-am-bee/bee-observe-connector) to debug performance.
 - 🎛️ **Production-level** control with [caching](./docs/cache.md) and [error handling](./docs/errors.md).
-- 🚧 (Coming soon) **API**: Configure and deploy your agents with a production-hardened API.
-- 🚧 (Coming soon) **Chat UI**: Serve your agent to users in a delightful GUI with built-in transparency, explainability, and user controls.
+- 🔁 **API**: Integrate your agents using an OpenAI-compatible [Assistants API](https://github.com/i-am-bee/bee-api) and [Python SDK](https://github.com/i-am-bee/bee-python-sdk).
+- 🖥️ **Chat UI**: Serve your agent to users in a [delightful UI](https://github.com/i-am-bee/bee-ui) with built-in transparency, explainability, and user controls.
 - ... more on our [Roadmap](#roadmap)
 
 ## Getting started
@@ -118,10 +118,10 @@ To see more in-depth explanation see [overview](./docs/overview.md).
 
 ## Roadmap
 
-- Improvements to Bee agent and performance optimization with Llama3.1 and Granite model suites
-- API + UI (chat interface)
-- Python SDK
-- 🚧 TBD 🚧
+- Bee agent performance optimization with additional models
+- Examples, tutorials, and docs
+- Improbements to building custom agents
+- Multi-agent orchestration
 
 ## Contribution guidelines
 
