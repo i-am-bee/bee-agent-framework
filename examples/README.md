@@ -127,7 +127,6 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 
 To run these examples, make sure you have the Bee Agent Framework cloned and properly configured. Each file demonstrates a specific feature or use case of the framework. You can run individual examples using Node.js with TypeScript support.
 
-
 1. Clone the repository:
    ```
    git clone git@github.com:i-am-bee/bee-agent-framework
@@ -140,14 +139,12 @@ To run these examples, make sure you have the Bee Agent Framework cloned and pro
 
 4. Run an arbitrary example, use the following command:
 
-    ```
-    yarn start examples/path/to/example.ts
-    ```
-   
-For more detailed information on the Bee Agent Framework, please refer to the [documentation](../docs/README.md).
+   ```
+   yarn start examples/path/to/example.ts
+   ```
 
+For more detailed information on the Bee Agent Framework, please refer to the [documentation](../docs/README.md).
 
 > [!TIP]
 >
 > To run examples that use Ollama, be sure that you have installed [Ollama](https://ollama.com) with the [llama3.1](https://ollama.com/library/llama3.1) model downloaded.
-

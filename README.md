@@ -73,6 +73,7 @@ const response = await agent
 
 console.log(`Agent 🤖 : `, response.result.text);
 ```
+
 ➡️ See a more [advanced example](./examples/agents/bee.ts).
 
 ➡️ you can run this example after local installation, using the command `yarn start examples/agents/simple.ts`
@@ -80,7 +81,6 @@ console.log(`Agent 🤖 : `, response.result.text);
 > [!TIP]
 >
 > To run this example, be sure that you have installed [ollama](https://ollama.com) with the [llama3.1](https://ollama.com/library/llama3.1) model downloaded.
-
 
 ### Local Installation
 
@@ -96,7 +96,6 @@ console.log(`Agent 🤖 : `, response.result.text);
 ➡️ All examples can be found in the [examples](./examples) directory.
 
 ➡️ To run an arbitrary example, use the following command `yarn start examples/agents/bee.ts` (just pass the appropriate path to the desired example).
-
 
 ### 📦 Modules
 
