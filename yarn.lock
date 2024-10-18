@@ -2853,7 +2853,7 @@ __metadata:
     pino-pretty: "npm:^11.2.2"
     pino-test: "npm:^1.0.1"
     prettier: "npm:^3.3.3"
-    promise-based-task: "npm:^3.1.0"
+    promise-based-task: "npm:^3.1.1"
     release-it: "npm:^17.7.0"
     remeda: "npm:^2.14.0"
     rimraf: "npm:^6.0.1"
@@ -9397,10 +9397,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"promise-based-task@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "promise-based-task@npm:3.1.0"
-  checksum: 10c0/e55e94aee121a4559c607165ef36828d6291fb6efe838333d911126bfdb1c9648e850e19eae92c53f59b67d134f89a849d3f6e3d5e29cf8ef5c8bcb4b8c63761
+"promise-based-task@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "promise-based-task@npm:3.1.1"
+  checksum: 10c0/ad18d1f2e9c153c40fbb498ea8ccee5b1ea15b3b88e10d39272b27e063763a60c23dd1c11461fd4415f264208e5f5bbbee80b6e727f703f922903b598c97bcf4
   languageName: node
   linkType: hard
 
