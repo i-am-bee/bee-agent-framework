@@ -116,9 +116,10 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
   ): asserts rawInput is ToolInput<this> {
     super.validateInput(schema, rawInput);
 
-    const fileNames = (rawInput.inputFiles as { filename: string }[])
-      ?.map(({ filename }) => filename)
-      .filter(Boolean) as string[];
+    const fileNames: string[] =
+      (rawInput.inputFiles as { filename: string }[])
+        ?.map(({ filename }) => filename)
+        .filter(Boolean) ?? [];
     const diff = differenceWith(fileNames, unique(fileNames), isShallowEqual);
     if (diff.length > 0) {
       throw new ToolInputValidationError(

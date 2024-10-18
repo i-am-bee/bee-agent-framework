@@ -16,7 +16,7 @@ These tools extend the agent's abilities, allowing it to interact with external 
 | `WikipediaTool`                                                           | Search for data on Wikipedia.                                                                      |
 | `GoogleSearchTool`                                                        | Search for data on Google using Custom Search Engine.                                              |
 | `DuckDuckGoTool`                                                          | Search for data on DuckDuckGo.                                                                     |
-| `SQLTool`                                                                 | Execute SQL queries against relational databases. Instructions can be found [here](./sql-tool.md). |
+| [`SQLTool`](./sql-tool.md)                                                | Execute SQL queries against relational databases. Instructions can be found [here](./sql-tool.md). |
 | `CustomTool`                                                              | Run your own Python function in the remote environment.                                            |
 | `LLMTool`                                                                 | Use an LLM to process input data.                                                                  |
 | `DynamicTool`                                                             | Construct to create dynamic tools.                                                                 |
