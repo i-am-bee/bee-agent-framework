@@ -2,6 +2,7 @@
     <img alt="Bee Framework logo" src="./docs/assets/Bee_Dark.svg" height="128">
 
     <h1 align="center">Bee Agent Framework</h1>
+
 </p>
 
 <p align="center">
