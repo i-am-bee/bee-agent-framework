@@ -77,7 +77,7 @@ WATSONX_DEPLOYMENT_ID=""  # optional
 ```
 <type>(<scope>): <subject>
 Type: feat, fix, chore, docs, style, refactor, perf, test, etc.
-Scope: The area of the codebase your changes affect (optional).
+Scope: The area of the codebase your changes affect (optional).    The allowed values are: adapters, agents, llms, tools, cache, emitter, internals, logger, memory, serializer, repo-infra, deps.
 Subject: A short description of the changes (required).
 ```
 
