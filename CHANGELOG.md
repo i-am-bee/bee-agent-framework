@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.33](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.32...v0.0.33) (2024-10-19)
+
+### Bug Fixes
+
+- **code-interpreter:** prevent agent from misusing IDs ([#98](https://github.com/i-am-bee/bee-agent-framework/issues/98)) ([b366007](https://github.com/i-am-bee/bee-agent-framework/commit/b3660071fd70696bcea21f6a10a9a53cfcb24b8d))
+
 ## [0.0.32](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.30...v0.0.32) (2024-10-16)
 
 ### Bug Fixes
