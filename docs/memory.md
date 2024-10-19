@@ -10,7 +10,7 @@ Memory in the context of an agent refers to the system's capability to store, re
 
 ### Capabilities showcase
 
-<!-- embedme examples/memory/unconstrainedMemory.ts -->
+<!-- embedme examples/memory/base.ts -->
 
 ```ts
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
@@ -22,17 +22,14 @@ const memory = new UnconstrainedMemory();
 await memory.add(
   BaseMessage.of({
     role: "system",
-    text: `You are a helpful and funny assistant.`,
+    text: `You are a helpful assistant.`,
   }),
 );
 
 // Multiple messages
 await memory.addMany([
   BaseMessage.of({ role: "user", text: `What can you do?` }),
-  BaseMessage.of({
-    role: "assistant",
-    text: `Get it? I'm a helpful assistant, I can answer questions, provide information, and even tell jokes!`,
-  }),
+  BaseMessage.of({ role: "assistant", text: `Everything!` }),
 ]);
 
 console.info(memory.isEmpty()); // false
@@ -41,11 +38,7 @@ console.info(memory.asReadOnly()); // returns a NEW read only instance
 memory.reset(); // removes all messages
 ```
 
-_Source: [examples/memory/unconstrainedMemory.ts](/examples/memory/unconstrainedMemory.ts)_
-
-> [!TIP]
->
-> You can create a new read-only memory instance by calling the `asReadOnly` method on the existing one.
+_Source: [examples/memory/base.ts](/examples/memory/base.ts)_
 
 ### Usage with LLMs
 
@@ -129,17 +122,26 @@ The framework provides multiple out-of-the-box memory implementations.
 
 Unlimited in size.
 
+<!-- embedme examples/memory/unconstrainedMemory.ts -->
+
 ```ts
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 
 const memory = new UnconstrainedMemory();
-await memory.add(BaseMessage.of({ role: "user", text: `Give me first 5 prime numbers.` }));
+await memory.add(
+  BaseMessage.of({
+    role: "user",
+    text: `Hello world!`,
+  }),
+);
 
-console.log(memory.isEmpty()); // false
+console.info(memory.isEmpty()); // false
 console.log(memory.messages.length); // 1
+console.log(memory.messages);
 ```
+
+_Source: [examples/memory/unconstrainedMemory.ts](/examples/memory/unconstrainedMemory.ts)_
 
 ### SlidingMemory
 
@@ -208,6 +210,8 @@ console.log(memory.tokensUsed); // number of used tokens
 console.log(memory.stats()); // prints statistics
 await memory.sync(); // calculates real token usage for all messages marked as "dirty"
 ```
+
+_Source: [examples/memory/tokenMemory.ts](/examples/memory/tokenMemory.ts)_
 
 ### SummarizeMemory
 
