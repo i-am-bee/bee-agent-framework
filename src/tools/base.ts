@@ -410,9 +410,17 @@ export class DynamicTool<
     validate(
       fields,
       z.object({
-        name: z.string().min(1),
-        description: z.string().min(1),
-        inputSchema: z.union([z.instanceof(ZodSchema), z.object({}).passthrough()]),
+        name: z
+          .string({ message: "Tool must have a name" })
+          .refine((val) => /^[a-zA-Z0-9\-_]+$/.test(val), {
+            message: "Tool name must only have -, _, letters or numbers",
+          }),
+        description: z
+          .string({ message: "Tool must have a description" })
+          .refine((val) => val && val !== "", { message: "Tool must have a description" }),
+        inputSchema: z.union([z.instanceof(ZodSchema), z.object({}).passthrough()], {
+          message: "Tool must have a schema",
+        }),
         handler: z.function(),
         options: z.object({}).passthrough().optional(),
       }),
