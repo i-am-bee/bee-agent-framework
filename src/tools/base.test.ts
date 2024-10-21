@@ -27,7 +27,7 @@ import {
 import { AnyFn } from "@/internals/types.js";
 import { setTimeout } from "node:timers/promises";
 import { beforeEach, expect, vi } from "vitest";
-import { z } from "zod";
+import { z, ZodType } from "zod";
 
 import { SlidingCache } from "@/cache/slidingCache.js";
 import { Serializer } from "@/serializer/serializer.js";
@@ -326,6 +326,81 @@ describe("Base Tool", () => {
         Input Schema: "{"type":"object","properties":{"foo":{"type":"string"},"bar":{"type":"string"}},"required":["foo","bar"],"additionalProperties":false,"$schema":"http://json-schema.org/draft-07/schema#"}"
         Validation Errors: [{"instancePath":"","schemaPath":"#/type","keyword":"type","params":{"type":"object"},"message":"must be object"}]
       `);
+    });
+  });
+
+  describe("DynamicTool Construction", () => {
+    it("Error if description is empty", async () => {
+      expect(
+        () =>
+          new DynamicTool({
+            name: "missing-desc-tool",
+            description: "",
+            inputSchema: z.string(),
+            async handler(input) {
+              return new StringToolOutput(input);
+            },
+          }),
+      ).toThrowError(/Tool must have a description/);
+    });
+
+    it("Error if description is not defined", async () => {
+      let description: string;
+      expect(
+        () =>
+          new DynamicTool({
+            name: "missing-desc-tool",
+            description,
+            inputSchema: z.string(),
+            async handler(input) {
+              return new StringToolOutput(input);
+            },
+          }),
+      ).toThrowError(/Tool must have a description/);
+    });
+
+    it("Error if schema is undefined", async () => {
+      let inputSchema: ZodType;
+      expect(
+        () =>
+          new DynamicTool({
+            name: "missing-schema-tool",
+            inputSchema,
+            description: "some description",
+            async handler(input) {
+              return new StringToolOutput(input);
+            },
+          }),
+      ).toThrowError(/Tool must have a schema/);
+    });
+
+    it("Error if name is missing", async () => {
+      let name: string;
+      expect(
+        () =>
+          new DynamicTool({
+            name,
+            inputSchema: z.string(),
+            description: "some description",
+            async handler(input) {
+              return new StringToolOutput(input);
+            },
+          }),
+      ).toThrowError(/Tool must have a name/);
+    });
+
+    it("Error if name does not match requirements", async () => {
+      expect(
+        () =>
+          new DynamicTool({
+            name: ";;;;;;",
+            inputSchema: z.string(),
+            description: "some description",
+            async handler(input) {
+              return new StringToolOutput(input);
+            },
+          }),
+      ).toThrowError(/Tool name must only have -, _, letters or numbers/);
     });
   });
 
