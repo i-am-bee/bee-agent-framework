@@ -20,6 +20,9 @@ import { BAMChatLLM } from "@/adapters/bam/chat.js";
 import { OpenAIChatLLM } from "@/adapters/openai/chat.js";
 import { WatsonXChatLLM } from "@/adapters/watsonx/chat.js";
 import { GroqChatLLM } from "@/adapters/groq/chat.js";
+import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
+import { Ollama } from "ollama";
+import { Agent } from "undici";
 
 export function createChatLLM(): ChatLLM<ChatLLMOutput> {
   if (process.env.GENAI_API_KEY) {
@@ -34,6 +37,22 @@ export function createChatLLM(): ChatLLM<ChatLLMOutput> {
     return new GroqChatLLM({
       modelId: `llama-3.1-70b-versatile`,
       parameters: { temperature: 0 },
+    });
+  } else if (process.env.OLLAMA_HOST) {
+    const noTimeoutFetch = (input: any, init: any) => {
+      const someInit = init || {};
+      return fetch(input, { ...someInit, dispatcher: new Agent({ headersTimeout: 2700000 }) });
+    };
+
+    return new OllamaChatLLM({
+      modelId: "llama3.1:70b-instruct-q5_K_M",
+      parameters: {
+        temperature: 0,
+      },
+      client: new Ollama({
+        host: process.env.OLLAMA_HOST,
+        fetch: noTimeoutFetch,
+      }),
     });
   } else {
     throw new Error("No API key for any LLM provider has been provided. Cannot run test case.");

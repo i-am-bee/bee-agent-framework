@@ -127,6 +127,7 @@
     "test:unit": "vitest run src",
     "test:unit:watch": "vitest run src",
     "test:e2e": "vitest run tests",
+    "test:e2e:slow": "vitest run tests --testTimeout 1200000",
     "test:e2e:watch": "vitest watch tests",
     "test:all": "vitest run",
     "test:watch": "vitest watch",
