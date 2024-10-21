@@ -61,12 +61,13 @@ yarn install
 5.  **Setup environmental variables:** To run E2E Tests, you should set the following variables in your `.env` file in the repository’s root.
 
 ```bash
-# At least one provider API key must be defined!
+# At least one provider API key or an OLLAMA_HOST must be defined!
 GENAI_API_KEY=""
 OPENAI_API_KEY=""
 GROQ_API_KEY=""
 WATSONX_API_KEY=""
 WATSONX_PROJECT_ID=""
+OLLAMA_HOST=""
 
 WATSONX_SPACE_ID="" # optional
 WATSONX_DEPLOYMENT_ID=""  # optional
@@ -102,6 +103,8 @@ yarn format # or yarn format:fix
 yarn test:unit
 yarn test:e2e
 ```
+
+If you are using an ollama host and it takes longer to run you can use `yarn test:e2e:slow` which has a longer timeout.
 
 By following these steps, you'll be all set to contribute to our project! If you encounter any issues during the setup process, please feel free to open an issue.
 
