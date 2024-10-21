@@ -84,6 +84,10 @@ console.log(`Agent 🤖 : `, response.result.text);
 >
 > To run this example, be sure that you have installed [ollama](https://ollama.com) with the [llama3.1](https://ollama.com/library/llama3.1) model downloaded.
 
+> [!TIP]
+>
+> Documentation is available at https://i-am-bee.github.io/bee-agent-framework/
+
 ### Local Installation
 
 > [!NOTE]

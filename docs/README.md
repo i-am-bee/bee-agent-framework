@@ -79,6 +79,10 @@ To run this example, be sure that you have installed [ollama](https://ollama.com
 
 ➡️ To run an arbitrary example, use the following command `yarn start examples/agents/bee.ts` (just pass the appropriate path to the desired example).
 
+> [!TIP]
+>
+> Documentation is available at https://i-am-bee.github.io/bee-agent-framework/
+
 ### Local Installation
 
 > [!NOTE]
