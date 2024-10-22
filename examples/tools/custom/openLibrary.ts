@@ -56,11 +56,11 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
     _options: ToolRunOptions | undefined,
     run: RunContext<this>,
   ) {
-    const response = await fetch(`https://openlibrary.org`, {
+    const query = createURLParams({
+      searchon: input,
+    });
+    const response = await fetch(`https://openlibrary.org?${query}`, {
       signal: run.signal,
-      body: createURLParams({
-        searchon: input,
-      }),
     });
 
     if (!response.ok) {
