@@ -26,6 +26,7 @@
           }
           if (url.match(docsMatch)) {
             url = url.replace(docsMatch, "$1");
+            console.info({ url });
           }
           if (url.match(exampleRegex) || url.match(srcRegex) || url === "/package.json") {
             url = main.concat(url);
@@ -58,7 +59,7 @@
               return this.origin.link.apply(this, [fixLink(link), renderer, text]);
             },
             html: function (html) {
-              var regex = /(src|href)\s*=\s*(['"])\/docs\/(.+?)\2/gi;
+              var regex = /(src|href)\s*=\s*(['"])[\.]{0,1}\/docs\/(.+?)\2/gi;
               html = html.replace(regex, "$1=$2" + basePath + "$3$2");
               return html;
             },
