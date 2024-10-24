@@ -17,12 +17,21 @@
 import { expect } from "vitest";
 import { exec } from "child_process";
 import { glob } from "glob";
-import { promisify } from "util";
 import { isTruthy } from "remeda";
 import { hasEnv } from "@/internals/env.js";
 import { ExecException } from "node:child_process";
 
-const execAsync = promisify(exec);
+const execAsync = (command: string) =>
+  new Promise<{ stdout: string; stderr: string }>((resolve, reject) =>
+    exec(
+      command,
+      {
+        shell: process.env.SHELL || "/bin/bash",
+      },
+      (error, stdout, stderr) => (error ? reject(error) : resolve({ stdout, stderr })),
+    ),
+  );
+
 const includePattern = process.env.INCLUDE_PATTERN || `./examples/**/*.ts`;
 const excludePattern = process.env.EXCLUDE_PATTERN || ``;
 
