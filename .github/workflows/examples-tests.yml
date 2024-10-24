@@ -51,5 +51,6 @@ jobs:
           # WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
           # WATSONX_SPACE_ID: ${{ secrets.WATSONX_SPACE_ID }}
           # WATSONX_DEPLOYMENT_ID: ${{ secrets.WATSONX_DEPLOYMENT_ID }}
+        shell: bash
         run: |
           yarn test:examples
