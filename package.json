@@ -131,7 +131,7 @@
     "test:all": "vitest run",
     "test:watch": "vitest watch",
     "test:examples": "vitest --config ./examples/vitest.examples.config.ts run tests/examples",
-    "test:examples:watch": "vitest --config ./examples/vitest.examples.config.ts run tests/examples",
+    "test:examples:watch": "vitest --config ./examples/vitest.examples.config.ts watch tests/examples",
     "prepare": "husky",
     "copyright": "./scripts/copyright.sh",
     "release": "release-it",

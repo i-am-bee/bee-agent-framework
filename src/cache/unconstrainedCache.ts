@@ -19,6 +19,10 @@ import { BaseCache } from "@/cache/base.js";
 export class UnconstrainedCache<T> extends BaseCache<T> {
   protected readonly provider = new Map<string, T>();
 
+  static {
+    this.register();
+  }
+
   async get(key: string) {
     return this.provider.get(key);
   }

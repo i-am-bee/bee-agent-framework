@@ -32,9 +32,13 @@ const exclude: string[] = [
     "examples/llms/providers/watsonx.ts",
   ],
   !hasEnv("GROQ_API_KEY") && ["examples/agents/sql.ts", "examples/llms/providers/groq.ts"],
-  !hasEnv("OPENAI_API_KEY") && ["agents/bee_reusable.ts", "examples/llms/providers/openai.ts"],
+  !hasEnv("OPENAI_API_KEY") && [
+    "examples/agents/bee_reusable.ts",
+    "examples/llms/providers/openai.ts",
+  ],
   !hasEnv("IBM_VLLM_URL") && ["examples/llms/providers/ibm-vllm.ts"],
   !hasEnv("COHERE_API_KEY") && ["examples/llms/providers/langchain.ts"],
+  !hasEnv("CODE_INTERPRETER_URL") && ["examples/tools/custom/python.ts"],
   ["examples/llms/providers/bam.ts", "examples/llms/providers/bam_verbose.ts"],
 ]
   .filter(isTruthy)
