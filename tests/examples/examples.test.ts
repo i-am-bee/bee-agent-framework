@@ -20,6 +20,7 @@ import { glob } from "glob";
 import { promisify } from "util";
 import { isTruthy } from "remeda";
 import { hasEnv } from "@/internals/env.js";
+import { ExecException } from "node:child_process";
 
 const execAsync = promisify(exec);
 const includePattern = process.env.INCLUDE_PATTERN || `./examples/**/*.ts`;
@@ -52,26 +53,25 @@ describe("E2E Examples", async () => {
     ignore: [exclude, excludePattern].flat(),
   });
 
-  for (const example of exampleFiles) {
-    it.concurrent(`Run ${example}`, async () => {
-      await execAsync(`yarn start -- ${example} <<< "Hello world"`)
-        .then((stdout) => {
-          // eslint-disable-next-line no-console
-          console.log({
-            path: example,
-            result: stdout.stdout,
-            error: stdout.stderr,
-          });
-          expect(stdout.stderr).toBeFalsy();
-        })
-        .catch((error) => {
-          // eslint-disable-next-line no-console
-          console.log({
-            path: example,
-            errorCode: error.code,
-          });
-          expect(error.code).toBe(0);
+  it.concurrent.each(exampleFiles)(`Run %s`, async (example) => {
+    await execAsync(`yarn start -- ${example} <<< "Hello world"`)
+      .then((stdout) => {
+        // eslint-disable-next-line no-console
+        console.log({
+          path: example,
+          result: stdout.stdout,
+          error: stdout.stderr,
         });
-    });
-  }
+        expect(stdout.stderr).toBeFalsy();
+      })
+      .catch((_e) => {
+        const error = _e as ExecException;
+
+        // eslint-disable-next-line no-console
+        console.error("STDOUT:", error.stderr);
+
+        expect(error.stderr).toBeFalsy();
+        expect(error.code).toBe(0);
+      });
+  });
 });
