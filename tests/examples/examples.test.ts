@@ -64,20 +64,16 @@ describe("E2E Examples", async () => {
 
   it.concurrent.each(exampleFiles)(`Run %s`, async (example) => {
     await execAsync(`yarn start -- ${example} <<< "Hello world"`)
-      .then((stdout) => {
+      .then(({ stdout, stderr }) => {
         // eslint-disable-next-line no-console
-        console.log({
-          path: example,
-          result: stdout.stdout,
-          error: stdout.stderr,
-        });
-        expect(stdout.stderr).toBeFalsy();
+        console.log("STDOUT:", stdout);
+        expect(stderr).toBeFalsy();
       })
       .catch((_e) => {
         const error = _e as ExecException;
 
         // eslint-disable-next-line no-console
-        console.error("STDOUT:", error.stderr);
+        console.error("STDOUT:", error.stdout);
 
         expect(error.stderr).toBeFalsy();
         expect(error.code).toBe(0);

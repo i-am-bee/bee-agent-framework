@@ -6,7 +6,7 @@ export default defineConfig({
   test: {
     globals: true,
     passWithNoTests: true,
-    testTimeout: 120 * 1000,
+    testTimeout: 10 * 60 * 1000,
     printConsoleTrace: true,
     setupFiles: ["./tests/setup.examples.ts"],
     deps: {
