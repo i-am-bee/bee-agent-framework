@@ -28,6 +28,7 @@ import { HeaderGenerator } from "header-generator";
 import type { NeedleOptions } from "needle";
 import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 export { SafeSearchType as DuckDuckGoSearchToolSearchType };
 
@@ -36,6 +37,8 @@ export interface DuckDuckGoSearchToolOptions extends SearchToolOptions {
   throttle?: ThrottleOptions | false;
   httpClientOptions?: NeedleOptions;
   maxResultsPerPage: number;
+  apiKey?: string;
+  http_proxy_url?: string;
 }
 
 export interface DuckDuckGoSearchToolRunOptions extends SearchToolRunOptions {
@@ -121,6 +124,19 @@ export class DuckDuckGoSearchTool extends Tool<
   ) {
     const headers = new HeaderGenerator().getHeaders();
 
+    if (this.options.apiKey) {
+      headers["Authorization"] = `Bearer ${this.options.apiKey}`;
+    }
+
+    const httpClientOptions = {
+      ...this.options?.httpClientOptions,
+      ...options?.httpClientOptions,
+    };
+
+    if (this.options.http_proxy_url) {
+      httpClientOptions.agent = new HttpsProxyAgent(this.options.http_proxy_url);
+    }
+
     const { results } = await this.client(
       input,
       {
@@ -132,8 +148,7 @@ export class DuckDuckGoSearchTool extends Tool<
       {
         headers,
         user_agent: headers["user-agent"],
-        ...this.options?.httpClientOptions,
-        ...options?.httpClientOptions,
+        ...httpClientOptions,
       },
     );
 

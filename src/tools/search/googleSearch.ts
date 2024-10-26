@@ -28,11 +28,13 @@ import { ValueError } from "@/errors.js";
 import { ValidationError } from "ajv";
 import { parseEnv } from "@/internals/env.js";
 import { RunContext } from "@/context.js";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 export interface GoogleSearchToolOptions extends SearchToolOptions {
   apiKey?: string;
   cseId?: string;
   maxResultsPerPage: number;
+  http_proxy_url?: string;
 }
 
 type GoogleSearchToolRunOptions = SearchToolRunOptions;
@@ -129,18 +131,21 @@ export class GoogleSearchTool extends Tool<
     run: RunContext<this>,
   ) {
     const startIndex = (page - 1) * this.options.maxResultsPerPage + 1;
-    const response = await this.client.cse.list(
-      {
-        cx: this.cseId,
-        q: input,
-        num: this.options.maxResultsPerPage,
-        start: startIndex,
-        safe: "active",
-      },
-      {
-        signal: run.signal,
-      },
-    );
+    const requestOptions: GoogleSearchAPI.Params$Resource$Cse$List = {
+      cx: this.cseId,
+      q: input,
+      num: this.options.maxResultsPerPage,
+      start: startIndex,
+      safe: "active",
+    };
+
+    if (this.options.http_proxy_url) {
+      requestOptions.agent = new HttpsProxyAgent(this.options.http_proxy_url);
+    }
+
+    const response = await this.client.cse.list(requestOptions, {
+      signal: run.signal,
+    });
 
     const results = response.data.items || [];
 

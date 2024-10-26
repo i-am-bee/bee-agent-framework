@@ -27,8 +27,9 @@ import { createURLParams } from "@/internals/fetcher.js";
 import { isNullish, pick, pickBy } from "remeda";
 import { Cache } from "@/cache/decoratorCache.js";
 import { RunContext } from "@/context.js";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
-type ToolOptions = { apiKey?: string } & BaseToolOptions;
+type ToolOptions = { apiKey?: string; http_proxy_url?: string } & BaseToolOptions;
 type ToolRunOptions = BaseToolRunOptions;
 
 interface Location {
@@ -107,7 +108,7 @@ export class OpenMeteoTool extends Tool<
     _options: BaseToolRunOptions | undefined,
     run: RunContext<this>,
   ) {
-    const { apiKey } = this.options;
+    const { apiKey, http_proxy_url } = this.options;
 
     const prepareParams = async () => {
       const extractLocation = async (): Promise<Location> => {
@@ -141,14 +142,20 @@ export class OpenMeteoTool extends Tool<
     };
 
     const params = await prepareParams();
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, {
+    const fetchOptions: RequestInit = {
       headers: {
         ...(apiKey && {
           Authorization: `Bearer ${apiKey}`,
         }),
       },
       signal: run.signal,
-    });
+    };
+
+    if (http_proxy_url) {
+      fetchOptions.agent = new HttpsProxyAgent(http_proxy_url);
+    }
+
+    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, fetchOptions);
 
     if (!response.ok) {
       throw new ToolError("Request to OpenMeteo API has failed!", [
@@ -162,7 +169,7 @@ export class OpenMeteoTool extends Tool<
 
   @Cache()
   protected async _geocode(location: LocationSearch, signal: AbortSignal) {
-    const { apiKey } = this.options;
+    const { apiKey, http_proxy_url } = this.options;
 
     const params = createURLParams({
       name: location.name,
@@ -171,14 +178,21 @@ export class OpenMeteoTool extends Tool<
       format: "json",
       count: 1,
     });
-    const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?${params}`, {
+
+    const fetchOptions: RequestInit = {
       headers: {
         ...(apiKey && {
           Authorization: `Bearer ${apiKey}`,
         }),
       },
       signal,
-    });
+    };
+
+    if (http_proxy_url) {
+      fetchOptions.agent = new HttpsProxyAgent(http_proxy_url);
+    }
+
+    const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?${params}`, fetchOptions);
     if (!response.ok) {
       throw new ToolError(`Failed to GeoCode provided location (${location.name}).`, [
         new Error(await response.text()),
