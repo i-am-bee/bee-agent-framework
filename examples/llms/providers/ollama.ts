@@ -48,7 +48,7 @@ import { Ollama } from "ollama";
     modelId: "llama3.1",
     client: new Ollama({
       // use the IP for the server you have ollama running on
-      host: "http://127.0.0.1:11434",
+      host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434",
     }),
   });
 
