@@ -1,10 +1,11 @@
 name: E2E Examples
 
 on:
-  push:
-    branches: ["main"]
-    paths-ignore:
-      - "**/*.md"
+  # TODO: ollama hangs
+  #push:
+  #  branches: ["main"]
+  #  paths-ignore:
+  #    - "**/*.md"
   workflow_dispatch:
 
 concurrency:
