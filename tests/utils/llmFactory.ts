@@ -20,6 +20,9 @@ import { BAMChatLLM } from "@/adapters/bam/chat.js";
 import { OpenAIChatLLM } from "@/adapters/openai/chat.js";
 import { WatsonXChatLLM } from "@/adapters/watsonx/chat.js";
 import { GroqChatLLM } from "@/adapters/groq/chat.js";
+import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
+import { Ollama } from "ollama";
+import { Agent, Dispatcher } from "undici";
 
 export function createChatLLM(): ChatLLM<ChatLLMOutput> {
   if (process.env.GENAI_API_KEY) {
@@ -34,6 +37,31 @@ export function createChatLLM(): ChatLLM<ChatLLMOutput> {
     return new GroqChatLLM({
       modelId: `llama-3.1-70b-versatile`,
       parameters: { temperature: 0 },
+    });
+  } else if (process.env.OLLAMA_HOST) {
+    // the undici definition of RequestInit does not extend the default
+    // fetch RequestInit so we can't use its type directly. Define
+    // and interface that adds the field we need to the default fetch
+    // interface to that we can make TypeScript accept it.
+    interface UndiciRequestInit extends RequestInit {
+      dispatcher: Dispatcher;
+    }
+    return new OllamaChatLLM({
+      modelId: process.env.OLLAMA_MODEL ?? "llama3.1:8b",
+      parameters: {
+        temperature: 0,
+      },
+      client: new Ollama({
+        host: process.env.OLLAMA_HOST,
+        fetch: (input, init?) => {
+          const someInit = init || {};
+          const requestInit: UndiciRequestInit = {
+            ...someInit,
+            dispatcher: new Agent({ headersTimeout: 2700000 }),
+          };
+          return fetch(input, requestInit);
+        },
+      }),
     });
   } else {
     throw new Error("No API key for any LLM provider has been provided. Cannot run test case.");
