@@ -36,6 +36,7 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { signalRace } from "@/internals/helpers/promise.js";
 import { customMerge } from "@/internals/helpers/object.js";
 import { extractModelMeta, registerClient } from "@/adapters/ollama/shared.js";
+import { getEnv } from "@/internals/env.js";
 
 interface Input {
   modelId: string;
@@ -119,7 +120,7 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
 
   constructor({ client, modelId, parameters, executionOptions = {}, cache }: Input) {
     super(modelId, executionOptions, cache);
-    this.client = client ?? new Client();
+    this.client = client ?? new Client({ host: getEnv("OLLAMA_HOST") });
     this.parameters = parameters ?? {};
   }
 

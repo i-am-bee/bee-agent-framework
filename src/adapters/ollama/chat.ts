@@ -35,6 +35,7 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { customMerge } from "@/internals/helpers/object.js";
 import { safeSum } from "@/internals/helpers/number.js";
 import { extractModelMeta, registerClient } from "@/adapters/ollama/shared.js";
+import { getEnv } from "@/internals/env.js";
 
 export class OllamaChatLLMOutput extends ChatLLMOutput {
   public readonly results: ChatResponse[];
@@ -130,7 +131,7 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     },
   ) {
     super(modelId, executionOptions, cache);
-    this.client = client ?? new Client({ fetch });
+    this.client = client ?? new Client({ fetch, host: getEnv("OLLAMA_HOST") });
     this.parameters = parameters ?? {
       temperature: 0,
       repeat_penalty: 1.0,
