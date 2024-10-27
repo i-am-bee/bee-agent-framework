@@ -73,6 +73,8 @@ describe("E2E Examples", async () => {
         const error = _e as ExecException;
 
         // eslint-disable-next-line no-console
+        console.error(error.message);
+        // eslint-disable-next-line no-console
         console.error("STDOUT:", error.stdout);
 
         expect(error.stderr).toBeFalsy();
