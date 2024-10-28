@@ -46,12 +46,14 @@ import { Emitter } from "@/emitter/emitter.js";
 import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
 import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
+import { Serializable } from "@/internals/serializable.js";
+import { shallowCopy } from "@/serializer/utils.js";
 
 export class BeeAgentRunnerFatalError extends BeeAgentError {
   isFatal = true;
 }
 
-export class BeeAgentRunner {
+export class BeeAgentRunner extends Serializable {
   protected readonly failedAttemptsCounter;
 
   constructor(
@@ -59,7 +61,12 @@ export class BeeAgentRunner {
     protected readonly options: BeeRunOptions,
     public readonly memory: TokenMemory,
   ) {
+    super();
     this.failedAttemptsCounter = new RetryCounter(options?.execution?.totalMaxRetries, AgentError);
+  }
+
+  static {
+    this.register();
   }
 
   static async create(input: BeeInput, options: BeeRunOptions, prompt: string | null) {
@@ -434,5 +441,18 @@ export class BeeAgentRunner {
         }
       },
     }).get();
+  }
+
+  createSnapshot() {
+    return {
+      input: shallowCopy(this.input),
+      options: shallowCopy(this.options),
+      memory: this.memory,
+      failedAttemptsCounter: this.failedAttemptsCounter,
+    };
+  }
+
+  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
+    Object.assign(this, snapshot);
   }
 }
