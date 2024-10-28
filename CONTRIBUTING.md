@@ -39,7 +39,7 @@ To start contributing to the Bee Agent framework, follow these steps to set up y
 
 1.  **Install Node Version Manager (NVM):** We use `nvm` to specify the required Node.js version. Install [nvm](https://github.com/nvm-sh/nvm) by following the official installation instructions.
 
-2.  **Install the Correct LTS Node.js Version:** Use `nvm` to install and use the Node.js version that is currently supported.
+2.  **Install the Correct Node.js Version:** Use `nvm` to install and use the Node.js version that is currently recommended.
 
 ```bash
 nvm install 20.15
