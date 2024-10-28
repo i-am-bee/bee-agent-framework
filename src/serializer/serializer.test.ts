@@ -301,6 +301,25 @@ describe("Serializer", () => {
       ).not.toThrowError();
     });
 
+    it("Handles self factory references", () => {
+      class A {
+        static secret = 42;
+      }
+      class B {
+        constructor(public readonly target: typeof A) {}
+      }
+
+      Serializer.register(A, {
+        toPlain: () => ({}),
+        fromPlain: () => new A(),
+      });
+      Serializer.register(B, {
+        toPlain: (instance) => ({ target: instance.target }),
+        fromPlain: (plain) => new B(plain.target),
+      });
+      expect(Serializer.deserialize(Serializer.serialize(new B(A))).target.secret).toBe(42);
+    });
+
     it("Handles aliases", () => {
       const Name = {
         new: "MyClass",

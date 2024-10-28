@@ -31,6 +31,7 @@ import {
   RootNode,
   SerializerNode,
   SerializerRefIdentifier,
+  SerializerSelfRefIdentifier,
   toBoundedFunction,
   traverseObject,
   traverseWithUpdate,
@@ -133,7 +134,7 @@ export class Serializer {
 
     if (Serializer.hasFactory(targetClass)) {
       const factory = Serializer.getFactory(targetClass);
-      return { targetClass, factory };
+      return { targetClass, factory, isSelfRef: factory.ref === value };
     }
 
     const excluded = new Set([null, Object.prototype]);
@@ -142,7 +143,7 @@ export class Serializer {
 
       const factory = this.factories.get(targetClass);
       if (factory) {
-        return { targetClass, factory };
+        return { targetClass, factory, isSelfRef: false };
       }
     }
 
@@ -196,12 +197,12 @@ export class Serializer {
         Serializer.registerSerializable(Class);
       }
 
-      const { targetClass, factory } = Serializer.findFactory(rawValue);
+      const { targetClass, factory, isSelfRef } = Serializer.findFactory(rawValue);
       if (!isSerializationRequired(factory.ref)) {
         return rawValue;
       }
 
-      const snapshot = factory.toPlain(rawValue);
+      const snapshot = isSelfRef ? SerializerSelfRefIdentifier : factory.toPlain(rawValue);
       assertValidSnapshot(snapshot, factory);
 
       const result: SerializerNode = {
@@ -244,6 +245,10 @@ export class Serializer {
         const clsName = String(contentRaw.__class);
         const factory = Serializer.getFactory(clsName);
         const rawData = contentRaw.__value;
+
+        if (rawData === SerializerSelfRefIdentifier) {
+          return factory.ref;
+        }
 
         if (rawData === SerializerRefIdentifier) {
           if (!instances.has(contentRaw.__ref!)) {

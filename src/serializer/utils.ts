@@ -23,6 +23,7 @@ import { getProp, hasProp } from "@/internals/helpers/object.js";
 import { isDirectInstanceOf } from "@/internals/helpers/prototype.js";
 import { SerializerError } from "@/serializer/error.js";
 
+export const SerializerSelfRefIdentifier = "__self_ref";
 export const SerializerRefIdentifier = "__ref";
 export class RefPlaceholder<T = unknown> {
   private static EmptyPlaceholder = Symbol();
