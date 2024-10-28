@@ -36,6 +36,7 @@ const includePattern = process.env.INCLUDE_PATTERN || `./examples/**/*.ts`;
 const excludePattern = process.env.EXCLUDE_PATTERN || ``;
 
 const exclude: string[] = [
+  "examples/playground/**/*.ts",
   !hasEnv("WATSONX_API_KEY") && [
     "examples/llms/text.ts",
     "examples/llms/providers/watsonx_verbose.ts",
