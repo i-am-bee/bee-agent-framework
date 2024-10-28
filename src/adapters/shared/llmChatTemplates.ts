@@ -69,7 +69,7 @@ export function messagesToPromptFactory(rolesOverride: Record<string, string | u
   };
 }
 
-function templateSchemaFactory(roles: readonly string[]) {
+export function templateSchemaFactory(roles: readonly string[]) {
   return z.object({
     messages: z.array(z.object(mapToObj(roles, (role) => [role, z.array(z.string())] as const))),
   });
