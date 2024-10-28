@@ -19,10 +19,8 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { Ajv, SchemaObject, ValidateFunction, Options as AjvOptions } from "ajv";
 import addFormats from "ajv-formats";
 import { findFirstPair } from "@/internals/helpers/string.js";
-// @ts-expect-error missing types
-import djson from "dirty-json";
 import { FrameworkErrorOptions, ValueError } from "@/errors.js";
-
+import { jsonrepair } from "jsonrepair";
 export type AnyToolSchemaLike = AnyZodObject | SchemaObject;
 export type AnySchemaLike = ZodTypeAny | SchemaObject;
 export type FromSchemaLike<T> = T extends ZodTypeAny ? TypeOf<T> : unknown;
@@ -86,9 +84,9 @@ export function parseBrokenJson(input: string | undefined, options?: ParseBroken
       const pair = options?.pair;
       if (pair) {
         const [start, end] = findFirstPair(input, pair) ?? [0, input.length - 1];
-        return djson.parse(input.substring(start, end + 1));
+        return JSON.parse(jsonrepair(input.substring(start, end + 1)));
       } else {
-        return djson.parse(input);
+        return JSON.parse(jsonrepair(input));
       }
     }
   } catch {
