@@ -1,6 +1,6 @@
 {
   "name": "bee-agent-framework",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "license": "Apache-2.0",
   "description": "Bee - LLM Agent Framework",
   "author": "IBM Corp.",

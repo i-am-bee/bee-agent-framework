@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.0.34](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.33...v0.0.34) (2024-10-28)
+
+### Features
+
+- add additional validation for DynamicTool ([#100](https://github.com/i-am-bee/bee-agent-framework/issues/100)) ([b69d64c](https://github.com/i-am-bee/bee-agent-framework/commit/b69d64cc34cffb828b0cce94fbe5fe925fac26b9))
+- **agent:** make bee runner easier to override ([e7b99a0](https://github.com/i-am-bee/bee-agent-framework/commit/e7b99a0e2ea8dea9a833d467876ab3f4acec09f2))
+- **agent:** make bee runner serializable ([c8960ce](https://github.com/i-am-bee/bee-agent-framework/commit/c8960ce57e4b9805badbfe69fd660db2fc74f9b8))
+- **llm:** export templateSchemaFactory ([8fce700](https://github.com/i-am-bee/bee-agent-framework/commit/8fce7001b9b265fc400366b693871cc5ec8bbcfe))
+- **llm:** set ollama host from env ([4712e87](https://github.com/i-am-bee/bee-agent-framework/commit/4712e877c46be98208a5721f25c55308d2f91706))
+- **tools:** improve python PDF capabilities ([#108](https://github.com/i-am-bee/bee-agent-framework/issues/108)) ([9e107d7](https://github.com/i-am-bee/bee-agent-framework/commit/9e107d75f570032528f1b46dec231f8d23db8741))
+
+### Bug Fixes
+
+- **examples:** update open library tool ([9054deb](https://github.com/i-am-bee/bee-agent-framework/commit/9054deb30c59986186410667bc2852e9595033b4)), closes [#104](https://github.com/i-am-bee/bee-agent-framework/issues/104)
+- **GH:** update CODEOWNERS ([#109](https://github.com/i-am-bee/bee-agent-framework/issues/109)) ([3ea6fe5](https://github.com/i-am-bee/bee-agent-framework/commit/3ea6fe5ffe1421bbe21bedcb0cbf0c0242db7c1d))
+- **serialization:** handle constructor references ([8a9a91b](https://github.com/i-am-bee/bee-agent-framework/commit/8a9a91b93350708ce95ac626c61aa69739c28ca9))
+
 ## [0.0.33](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.32...v0.0.33) (2024-10-19)
 
 ### Bug Fixes
