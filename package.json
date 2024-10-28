@@ -13,12 +13,6 @@
     "NodeJS Agent Framework"
   ],
   "packageManager": "yarn@4.1.1",
-  "devEngines": {
-    "packageManager": {
-      "name": "yarn",
-      "onFail": "error"
-    }
-  },
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
