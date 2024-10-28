@@ -18,7 +18,7 @@ import { NonUndefined } from "@/internals/types.js";
 import type { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
 import type { BeeAgentRunner } from "@/agents/bee/runner.js";
 
-type Parser = ReturnType<typeof BeeAgentRunner.createParser>["parser"];
+type Parser = ReturnType<InstanceType<typeof BeeAgentRunner>["createParser"]>["parser"];
 export type BeeIterationResult = LinePrefixParser.inferOutput<Parser>;
 export type BeeIterationResultPartial = LinePrefixParser.inferPartialOutput<Parser>;
 export type BeeIterationToolResult = NonUndefined<BeeIterationResult, "tool_input" | "tool_name">;

@@ -161,10 +161,10 @@ export class BeeAgentRunner {
       );
     }
 
-    return new BeeAgentRunner(input, options, memory);
+    return new this(input, options, memory);
   }
 
-  static createParser(tools: AnyTool[]) {
+  protected createParser(tools: AnyTool[]) {
     const parserRegex =
       /Thought:.+\n(?:Final Answer:[\S\s]+|Function Name:.+\nFunction Input: \{.*\}\nFunction Caption:.+\nFunction Output:)?/;
 
@@ -251,7 +251,7 @@ export class BeeAgentRunner {
       executor: async () => {
         await emitter.emit("start", { meta });
 
-        const { parser, parserRegex } = BeeAgentRunner.createParser(this.input.tools);
+        const { parser, parserRegex } = this.createParser(this.input.tools);
         const llmOutput = await this.input.llm
           .generate(this.memory.messages.slice(), {
             signal,

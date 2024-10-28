@@ -33,10 +33,10 @@ import {
   BeeRunOutput,
 } from "@/agents/bee/types.js";
 import { GetRunContext } from "@/context.js";
-import { BeeAgentRunner } from "@/agents/bee/runner.js";
 import { BeeAgentError } from "@/agents/bee/errors.js";
 import { BeeIterationToolResult } from "@/agents/bee/parser.js";
 import { assign } from "@/internals/helpers/object.js";
+import { BeeAgentRunner } from "@/agents/bee/runner.js";
 
 export interface BeeInput {
   llm: ChatLLM<ChatLLMOutput>;
@@ -51,6 +51,8 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
     namespace: ["agent", "bee"],
     creator: this,
   });
+
+  protected runner: typeof BeeAgentRunner = BeeAgentRunner;
 
   constructor(protected readonly input: BeeInput) {
     super();
@@ -102,7 +104,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
     const iterations: BeeAgentRunIteration[] = [];
     const maxIterations = options?.execution?.maxIterations ?? Infinity;
 
-    const runner = await BeeAgentRunner.create(this.input, options, input.prompt);
+    const runner = await this.runner.create(this.input, options, input.prompt);
 
     let finalMessage: BaseMessage | undefined;
     while (!finalMessage) {
@@ -195,6 +197,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
     return {
       input: this.input,
       emitter: this.emitter,
+      runner: this.runner,
     };
   }
 
