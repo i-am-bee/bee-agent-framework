@@ -195,7 +195,7 @@
     "@langchain/community": "~0.3.7",
     "@langchain/core": "~0.3.13",
     "@langchain/langgraph": "~0.2.16",
-    "@release-it/conventional-changelog": "^9.0.1",
+    "@release-it/conventional-changelog": "^8.0.2",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@swc/core": "^1.7.36",
     "@types/eslint": "^9.6.1",
