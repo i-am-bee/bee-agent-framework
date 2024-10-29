@@ -16,7 +16,7 @@ The source directory (`src`) provides numerous modules that one can use.
 | [**adapters**](./llms.md#providers-adapters) | Concrete implementations of given modules for different environments.                       |
 | [**logger**](./logger.md)                    | Core component for logging all actions within the framework.                                |
 | [**serializer**](./serialization.md)         | Core component for the ability to serialize/deserialize modules into the serialized format. |
-| [**version**](./version.md)                  | Constants representing the framework (e.g., latest version)                                 |
+| [**version**](./version.md)                  | Constants representing the framework (e.g., the latest version)                                 |
 | [**emitter**](./emitter.md)                  | Bringing visibility to the system by emitting events.                                       |
 | **internals**                                | Modules used by other modules within the framework.                                         |
 

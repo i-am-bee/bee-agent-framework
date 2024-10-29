@@ -11,7 +11,7 @@ An agent can be thought of as a program powered by LLM. The LLM generates struct
 Your program then decides what to do next based on the retrieved content. It may leverage a tool, reflect, or produce a final answer.
 Before the agent determines the final answer, it performs a series of `steps`. A step might be calling an LLM, parsing the LLM output, or calling a tool.
 
-Steps are grouped in an `iteration`, and every update (either complete or partial) is emitted to the user.
+Steps are grouped in a `iteration`, and every update (either complete or partial) is emitted to the user.
 
 ### Bee Agent
 

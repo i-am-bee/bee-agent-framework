@@ -119,11 +119,11 @@
 
 ### Features
 
-- **agent:** add fallback for invalid llm output ([5ac89c1](https://github.com/i-am-bee/bee-agent-framework/commit/5ac89c15fce25ce78698fd5a9b80437de0af5e88)), closes [#55](https://github.com/i-am-bee/bee-agent-framework/issues/55)
+- **agent:** add fallback for invalid LLM output ([5ac89c1](https://github.com/i-am-bee/bee-agent-framework/commit/5ac89c15fce25ce78698fd5a9b80437de0af5e88)), closes [#55](https://github.com/i-am-bee/bee-agent-framework/issues/55)
 - **agent:** improve LinePrefixParser error messages ([710f75b](https://github.com/i-am-bee/bee-agent-framework/commit/710f75b0f6cc5a4ba73c2ad0719bc3e359b690f1))
 - **agent:** update bee system prompt ([#56](https://github.com/i-am-bee/bee-agent-framework/issues/56)) ([08c4714](https://github.com/i-am-bee/bee-agent-framework/commit/08c471451ac574ad4598e87157aeb8987477bb33))
 - **agent:** update bee system prompt ([#58](https://github.com/i-am-bee/bee-agent-framework/issues/58)) ([572572b](https://github.com/i-am-bee/bee-agent-framework/commit/572572b903704a5bf983e5508a1c5143238b8254)), closes [#55](https://github.com/i-am-bee/bee-agent-framework/issues/55)
-- **tools:** improve wikipedia parsing ([#57](https://github.com/i-am-bee/bee-agent-framework/issues/57)) ([513572f](https://github.com/i-am-bee/bee-agent-framework/commit/513572f4627f8e96ce917c8998ae1813ee4fe119))
+- **tools:** improve Wikipedia parsing ([#57](https://github.com/i-am-bee/bee-agent-framework/issues/57)) ([513572f](https://github.com/i-am-bee/bee-agent-framework/commit/513572f4627f8e96ce917c8998ae1813ee4fe119))
 
 ### Bug Fixes
 
