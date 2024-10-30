@@ -146,7 +146,7 @@ We automatically verify that all commit messages contain a `Signed-off-by:` line
 
 There are a number of tools that make it easier for developers to manage DCO signoffs.
 
-- DCO command line tool, which let's you do a single signoff for an entire repo ( <https://github.com/coderanger/dco> )
+- DCO command line tool, which lets you do a single signoff for an entire repo ( <https://github.com/coderanger/dco> )
 - GitHub UI integrations for adding the signoff automatically ( <https://github.com/scottrigby/dco-gh-ui> )
 - Chrome - <https://chrome.google.com/webstore/detail/dco-github-ui/onhgmjhnaeipfgacbglaphlmllkpoijo>
 - Firefox - <https://addons.mozilla.org/en-US/firefox/addon/scott-rigby/?src=search>
