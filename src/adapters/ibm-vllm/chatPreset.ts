@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import { LLMChatTemplate, LLMChatTemplates } from "@/adapters/shared/llmChatTemplates.js";
-import { z } from "zod";
-
+import { LLMChatTemplates } from "@/adapters/shared/llmChatTemplates.js";
 import { IBMVllmInputConfig } from "./chat.js";
 import { IBMvLLMInput } from "./llm.js";
-
-import { PromptTemplate } from "@/template.js";
 
 interface IBMVllmChatLLMPreset {
   chat: IBMVllmInputConfig;
