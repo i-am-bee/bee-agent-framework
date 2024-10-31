@@ -132,11 +132,47 @@ const qwen2: LLMChatTemplate = {
   },
 };
 
+const granite3Instruct: LLMChatTemplate = {
+  template: new PromptTemplate({
+    schema: templateSchemaFactory([
+      "system",
+      "user",
+      "assistant",
+      "available_tools",
+      "tool_call",
+      "tool_response",
+    ] as const),
+    template: `{{#messages}}{{#system}}<|start_of_role|>system<|end_of_role|>
+{{system}}<|end_of_text|>
+{{ end }}{{/system}}{{#available_tools}}<|start_of_role|>available_tools<|end_of_role|>
+{{available_tools}}<|end_of_text|>
+{{ end }}{{/available_tools}}{{#user}}<|start_of_role|>user<|end_of_role|>
+{{user}}<|end_of_text|>
+{{ end }}{{/user}}{{#assistant}}<|start_of_role|>assistant<|end_of_role|>
+{{assistant}}<|end_of_text|>
+{{ end }}{{/assistant}}{{#tool_call}}<|start_of_role|>assistant<|end_of_role|><|tool_call|>
+{{tool_call}}<|end_of_text|>
+{{ end }}{{/tool_call}}{{#tool_response}}<|start_of_role|>tool_response<|end_of_role|>
+{{tool_response}}<|end_of_text|>
+{{ end }}{{/tool_response}}{{/messages}}<|start_of_role|>assistant<|end_of_role|>
+`,
+  }),
+  messagesToPrompt: messagesToPromptFactory({
+    available_tools: "available_tools",
+    tool_response: "tool_response",
+    tool_call: "tool_call",
+  }),
+  parameters: {
+    stop_sequence: ["<|end_of_text|>"],
+  },
+};
+
 export class LLMChatTemplates {
   protected static readonly registry = {
     "llama3.1": llama31,
     "llama3": llama3,
     "qwen2": qwen2,
+    "granite3Instruct": granite3Instruct,
   };
 
   static register(model: string, template: LLMChatTemplate, override = false) {

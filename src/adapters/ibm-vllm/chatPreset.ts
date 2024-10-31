@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import { LLMChatTemplate, LLMChatTemplates } from "@/adapters/shared/llmChatTemplates.js";
-import { z } from "zod";
-
+import { LLMChatTemplates } from "@/adapters/shared/llmChatTemplates.js";
 import { IBMVllmInputConfig } from "./chat.js";
 import { IBMvLLMInput } from "./llm.js";
-
-import { PromptTemplate } from "@/template.js";
 
 interface IBMVllmChatLLMPreset {
   chat: IBMVllmInputConfig;
@@ -100,35 +96,7 @@ export const IBMVllmChatLLMPreset = {
     };
   },
   [IBMVllmModel.GRANITE_INSTRUCT]: (): IBMVllmChatLLMPreset => {
-    const llama31config = LLMChatTemplates.get("llama3.1");
-    const { template, parameters, messagesToPrompt } = {
-      template: new PromptTemplate({
-        schema: z.object({
-          messages: z.array(
-            z.object({
-              system: z.array(z.string()),
-              user: z.array(z.string()),
-              assistant: z.array(z.string()),
-              ipython: z.array(z.string()),
-            }),
-          ),
-        }),
-        template: `{{#messages}}{{#system}}<|start_of_role|>system<|end_of_role|>
-    
-    {{system}}<|end_of_text|>{{/system}}{{#user}}<|start_of_role|>user<|end_of_role|>
-    
-    {{user}}<|end_of_text|>{{/user}}{{#assistant}}<|start_of_role|>assistant<|end_of_role|>
-    
-    {{assistant}}<|end_of_text|>{{/assistant}}{{#ipython}}<|start_of_role|>ipython<|end_of_role|>
-    
-    {{ipython}}<|end_of_text|>{{/ipython}}{{/messages}}<|start_of_role|>assistant<|end_of_role|>
-    `,
-      }),
-      messagesToPrompt: llama31config.messagesToPrompt,
-      parameters: {
-        stop_sequence: ["<|end_of_text|>"],
-      },
-    } satisfies LLMChatTemplate;
+    const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("granite3Instruct");
     return {
       base: {
         modelId: IBMVllmModel.GRANITE_INSTRUCT,
