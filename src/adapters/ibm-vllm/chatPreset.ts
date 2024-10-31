@@ -113,6 +113,6 @@ export const IBMVllmChatLLMPreset = {
       },
     };
   },
-} as const satisfies { [key in IBMVllmModel]: () => IBMVllmChatLLMPreset };
+} as const satisfies Record<IBMVllmModel, () => IBMVllmChatLLMPreset>;
 
 export type IBMVllmChatLLMPresetModel = keyof typeof IBMVllmChatLLMPreset;
