@@ -172,7 +172,7 @@ export class LLMChatTemplates {
     "llama3.1": llama31,
     "llama3": llama3,
     "qwen2": qwen2,
-    "granite3Instruct": granite3Instruct
+    "granite3Instruct": granite3Instruct,
   };
 
   static register(model: string, template: LLMChatTemplate, override = false) {
