@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Bee Framework logo" src="./docs/assets/Bee_Dark.svg" height="128">
+    <img alt="Bee Framework logo" src="/docs/assets/Bee_Dark.svg" height="128">
     <h1 align="center">Bee Agent Framework</h1>
 </p>
 
@@ -17,13 +17,13 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 
 ## Key Features
 
-- 🤖 **AI agents**: Use our powerful [Bee agent](./docs/agents.md) refined for Llama 3.1 or [build your own](./docs/agents.md).
-- 🛠️ **Tools**: Use our [built-in tools](./docs/tools.md) or [create your own](./docs/tools.md) in Javascript/Python.
+- 🤖 **AI agents**: Use our powerful [Bee agent](/docs/agents.md) refined for Llama 3.1 or [build your own](/docs/agents.md).
+- 🛠️ **Tools**: Use our [built-in tools](/docs/tools.md) or [create your own](/docs/tools.md) in Javascript/Python.
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
-- 💾 **Memory**: Multiple [strategies](./docs/memory.md) to optimize token spend.
-- ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](./docs/serialization.md).
-- 🔍 **Traceability**: Get full [visibility](./docs/emitter.md) of your agent’s inner workings, [log](./docs/logger.md) all running events, and use our [MLFlow integration](https://github.com/i-am-bee/bee-observe-connector) to debug performance.
-- 🎛️ **Production-level** control with [caching](./docs/cache.md) and [error handling](./docs/errors.md).
+- 💾 **Memory**: Multiple [strategies](/docs/memory.md) to optimize token spend.
+- ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](/docs/serialization.md).
+- 🔍 **Traceability**: Get full [visibility](/docs/emitter.md) of your agent’s inner workings, [log](/docs/logger.md) all running events, and use our [MLFlow integration](https://github.com/i-am-bee/bee-observe-connector) to debug performance.
+- 🎛️ **Production-level** control with [caching](/docs/cache.md) and [error handling](/docs/errors.md).
 - 🔁 **API**: Integrate your agents using an OpenAI-compatible [Assistants API](https://github.com/i-am-bee/bee-api) and [Python SDK](https://github.com/i-am-bee/bee-python-sdk).
 - 🖥️ **Chat UI**: Serve your agent to users in a [delightful UI](https://github.com/i-am-bee/bee-ui) with built-in transparency, explainability, and user controls.
 - ... more on our [Roadmap](#roadmap)
@@ -74,7 +74,7 @@ const response = await agent
 console.log(`Agent 🤖 : `, response.result.text);
 ```
 
-➡️ See a more [advanced example](./examples/agents/bee.ts).
+➡️ See a more [advanced example](/examples/agents/bee.ts).
 
 ➡️ you can run this example after local installation, using the command `yarn start examples/agents/simple.ts`
 
@@ -95,9 +95,9 @@ console.log(`Agent 🤖 : `, response.result.text);
 1. Clone the repository `git clone git@github.com:i-am-bee/bee-agent-framework`.
 2. Install dependencies `yarn install`.
 3. Create `.env` (from `.env.template`) and fill in missing values (if any).
-4. Start the agent `yarn run start:bee` (it runs `./examples/agents/bee.ts` file).
+4. Start the agent `yarn run start:bee` (it runs `/examples/agents/bee.ts` file).
 
-➡️ All examples can be found in the [examples](./examples) directory.
+➡️ All examples can be found in the [examples](/examples) directory.
 
 ➡️ To run an arbitrary example, use the following command `yarn start examples/agents/bee.ts` (just pass the appropriate path to the desired example).
 
@@ -105,23 +105,23 @@ console.log(`Agent 🤖 : `, response.result.text);
 
 The source directory (`src`) provides numerous modules that one can use.
 
-| Name                                              | Description                                                                                 |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [**agents**](./docs/agents.md)                    | Base classes defining the common interface for agent.                                       |
-| [**llms**](./docs/llms.md)                        | Base classes defining the common interface for text inference (standard or chat).           |
-| [**template**](./docs/templates.md)               | Prompt Templating system based on `Mustache` with various improvements.                     |
-| [**memory**](./docs/memory.md)                    | Various types of memories to use with agent.                                                |
-| [**tools**](./docs/tools.md)                      | Tools that an agent can use.                                                                |
-| [**cache**](./docs/cache.md)                      | Preset of different caching approaches that can be used together with tools.                |
-| [**errors**](./docs/errors.md)                    | Error classes and helpers to catch errors fast.                                             |
-| [**adapters**](./docs/llms.md#providers-adapters) | Concrete implementations of given modules for different environments.                       |
-| [**logger**](./docs/logger.md)                    | Core component for logging all actions within the framework.                                |
-| [**serializer**](./docs/serialization.md)         | Core component for the ability to serialize/deserialize modules into the serialized format. |
-| [**version**](./docs/version.md)                  | Constants representing the framework (e.g., latest version)                                 |
-| [**emitter**](./docs/emitter.md)                  | Bringing visibility to the system by emitting events.                                       |
-| **internals**                                     | Modules used by other modules within the framework.                                         |
+| Name                                             | Description                                                                                 |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| [**agents**](/docs/agents.md)                    | Base classes defining the common interface for agent.                                       |
+| [**llms**](/docs/llms.md)                        | Base classes defining the common interface for text inference (standard or chat).           |
+| [**template**](/docs/templates.md)               | Prompt Templating system based on `Mustache` with various improvements.                     |
+| [**memory**](/docs/memory.md)                    | Various types of memories to use with agent.                                                |
+| [**tools**](/docs/tools.md)                      | Tools that an agent can use.                                                                |
+| [**cache**](/docs/cache.md)                      | Preset of different caching approaches that can be used together with tools.                |
+| [**errors**](/docs/errors.md)                    | Error classes and helpers to catch errors fast.                                             |
+| [**adapters**](/docs/llms.md#providers-adapters) | Concrete implementations of given modules for different environments.                       |
+| [**logger**](/docs/logger.md)                    | Core component for logging all actions within the framework.                                |
+| [**serializer**](/docs/serialization.md)         | Core component for the ability to serialize/deserialize modules into the serialized format. |
+| [**version**](/docs/version.md)                  | Constants representing the framework (e.g., latest version)                                 |
+| [**emitter**](/docs/emitter.md)                  | Bringing visibility to the system by emitting events.                                       |
+| **internals**                                    | Modules used by other modules within the framework.                                         |
 
-To see more in-depth explanation see [overview](./docs/overview.md).
+To see more in-depth explanation see [overview](/docs/overview.md).
 
 ## Tutorials
 
