@@ -32,7 +32,11 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 
 > [!TIP]
 >
-> Would you like a fully set-up TypeScript project with Bee, Code Interpreter, and Observability? Check out our [Bee Framework Starter](https://github.com/i-am-bee/bee-agent-framework-starter).
+> 🚀 Would you like a fully set-up TypeScript project with Bee, Code Interpreter, and Observability? Check out our [Bee Framework Starter](https://github.com/i-am-bee/bee-agent-framework-starter).
+
+> [!TIP]
+>
+> 🚀 Would you like to work with Bee in your web browser? See [Bee Stack](https://github.com/i-am-bee/bee-stack)
 
 ### Installation
 
