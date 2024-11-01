@@ -161,7 +161,7 @@ import { SlidingCache } from "bee-agent-framework/cache/slidingCache";
 
 const cache = new SlidingCache<number>({
   size: 3, // (required) number of items that can be live in the cache at a single moment
-  ttl: 1000, // (optional, default is Infinity) Time in miliseconds after the element is removed from a cache
+  ttl: 1000, // (optional, default is Infinity) Time in milliseconds after the element is removed from a cache
 });
 
 await cache.set("a", 1);
