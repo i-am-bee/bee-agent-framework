@@ -211,6 +211,7 @@ export abstract class Tool<
         let errorPropagated = false;
 
         try {
+          this.preprocessInput(input);
           await this.assertInput(input);
 
           const output = await new Retryable({
@@ -339,6 +340,9 @@ export abstract class Tool<
 
     this.validateInput(schema, input);
   }
+
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  protected preprocessInput(rawInput: unknown): void {}
 
   protected validateInput(
     schema: AnyToolSchemaLike,

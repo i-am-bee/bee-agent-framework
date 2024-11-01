@@ -65,7 +65,7 @@ export function getPropStrict(target: NonNullable<unknown>, path: string): any {
 
 export function getProp(
   target: unknown,
-  paths: readonly (string | symbol)[],
+  paths: readonly (keyof any)[],
   defaultValue: any = undefined,
 ) {
   let value: any = target;
