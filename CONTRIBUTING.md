@@ -8,7 +8,7 @@ community in this goal.
 
 If you are new to Bee contributing, we recommend you do the following before diving into the code:
 
-- Read [Bee Overview](./docs/overview.md) to understand core concepts.
+- Read [Bee Overview](/docs/overview.md) to understand core concepts.
 - Read [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## Style and lint
@@ -116,7 +116,7 @@ Distributed under the [Apache License, Version 2.0](http://www.apache.org/licens
 
 SPDX-License-Identifier: [Apache-2.0](https://spdx.org/licenses/Apache-2.0)
 
-If you would like to see the detailed LICENSE click [here](LICENSE).
+If you would like to see the detailed LICENSE click [here](/LICENSE).
 
 ### Developer Certificate of Origin (DCO)
 
