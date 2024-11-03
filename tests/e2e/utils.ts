@@ -31,6 +31,7 @@ import { OpenAI } from "openai";
 import { Groq } from "groq-sdk";
 import { customsearch_v1 } from "@googleapis/customsearch";
 import { LangChainTool } from "@/adapters/langchain/tools.js";
+import { Client as esClient } from "@elastic/elasticsearch";
 
 interface CallbackOptions<T> {
   required?: boolean;
@@ -127,6 +128,7 @@ verifyDeserialization.ignoredClasses = [
   LCBaseLLM,
   RunContext,
   Emitter,
+  esClient,
 ] as ClassConstructor[];
 verifyDeserialization.isIgnored = (key: string, value: unknown, parent?: any) => {
   if (verifyDeserialization.ignoredKeys.has(key)) {
