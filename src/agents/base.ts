@@ -20,6 +20,8 @@ import { Serializable } from "@/internals/serializable.js";
 import { GetRunContext, RunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { BaseMemory } from "@/memory/base.js";
+import { createTelemetryMiddleware } from "@/instrumentation/create-telemetry-middleware.js";
+import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
 
 export class AgentError extends FrameworkError {}
 
@@ -45,7 +47,7 @@ export abstract class BaseAgent<
       throw new AgentError("Agent is already running!");
     }
 
-    return RunContext.enter(
+    const run = RunContext.enter(
       this,
       { signal: options?.signal, params: [input, options] as const },
       async (context) => {
@@ -63,6 +65,12 @@ export abstract class BaseAgent<
         }
       },
     );
+
+    if (INSTRUMENTATION_ENABLED) {
+      return run.middleware(createTelemetryMiddleware());
+    } else {
+      return run;
+    }
   }
 
   protected abstract _run(

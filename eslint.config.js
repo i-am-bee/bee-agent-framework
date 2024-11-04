@@ -77,7 +77,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["examples/**/*.ts"],
+    files: ["examples/**/*.{ts,js}"],
     languageOptions: {
       parserOptions: {
         project: "./tsconfig.examples.json",
