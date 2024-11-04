@@ -253,7 +253,7 @@ export abstract class Tool<
           }
           throw error;
         } finally {
-          await this.emitter.emit("finish", null);
+          await run.emitter.emit("finish", null);
         }
       },
     );
