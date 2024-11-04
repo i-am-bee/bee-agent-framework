@@ -82,6 +82,9 @@ export default tseslint.config(
       parserOptions: {
         project: "./tsconfig.examples.json",
       },
+      globals: {
+        setTimeout: "readonly",
+      },
     },
     rules: {
       "no-console": "off",

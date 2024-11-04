@@ -18,7 +18,7 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
 - 💾 **Memory**: Multiple [strategies](/docs/memory.md) to optimize token spend.
 - ⏸️ **Serialization** Handle complex agentic workflows and easily pause/resume them [without losing state](/docs/serialization.md).
-- 🔍 **Instrumentation**: Use [Instrumentation](./docs/instrumentation.md) based on [Emitter](./docs/emitter.md) to have full visibility of your agent’s inner workings.
+- 🔍 **Instrumentation**: Use [Instrumentation](/docs/instrumentation.md) based on [Emitter](/docs/emitter.md) to have full visibility of your agent’s inner workings.
 - 🎛️ **Production-level** control with [caching](/docs/cache.md) and [error handling](/docs/errors.md).
 - 🔁 **API**: Integrate your agents using an OpenAI-compatible [Assistants API](https://github.com/i-am-bee/bee-api) and [Python SDK](https://github.com/i-am-bee/bee-python-sdk).
 - 🖥️ **Chat UI**: Serve your agent to users in a [delightful UI](https://github.com/i-am-bee/bee-ui) with built-in transparency, explainability, and user controls.

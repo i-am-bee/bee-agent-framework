@@ -18,29 +18,49 @@ import { getSerializedObjectSafe } from "./helpers/get-serialized-object-safe.js
 import { createSpan } from "./helpers/create-span.js";
 import { IdNameManager } from "./helpers/id-name-manager.js";
 import { getErrorSafe } from "./helpers/get-error-safe.js";
-import { isDeepEqual } from "remeda";
-import { BeeCallbacks } from "@/agents/bee/types.js";
-import { InferCallbackValue } from "@/emitter/types.js";
-import { GenerateCallbacks } from "@/llms/base.js";
+import { isDeepEqual, isEmpty } from "remeda";
+import type { BeeCallbacks } from "@/agents/bee/types.js";
+import type { InferCallbackValue } from "@/emitter/types.js";
+import type { GenerateCallbacks } from "@/llms/base.js";
 import { FrameworkError } from "@/errors.js";
-import { ChatLLM } from "@/llms/chat.js";
 import { Version } from "@/version.js";
 import { Role } from "@/llms/primitives/message.js";
-import { RunContext } from "@/context.js";
-import { GeneratedResponse, FrameworkSpan } from "./types.js";
-import { BaseAgent } from "@/agents/base.js";
-import { buildTraceTree } from "./tracer.js";
+import type { GetRunContext, RunInstance } from "@/context.js";
+import type { GeneratedResponse, FrameworkSpan } from "./types.js";
+import { activeTracesMap, buildTraceTree } from "./tracer.js";
 import { traceSerializer } from "./helpers/trace-serializer.js";
 import { INSTRUMENTATION_IGNORED_KEYS } from "./config.js";
+import { createFullPath } from "@/emitter/utils.js";
+import type { BeeAgent } from "@/agents/bee/agent.js";
+import { Serializable } from "@/internals/serializable.js";
+import { instrumentationLogger } from "./logger.js";
 
-export function createTelemetryMiddleware<T extends BaseAgent<any, any>>() {
-  return (context: RunContext<T>) => {
-    const {
-      emitter,
-      runParams: [{ prompt }],
-      instance,
-    } = context;
-    const basePath = emitter.namespace.join(".");
+export function createTelemetryMiddleware() {
+  return (context: GetRunContext<RunInstance, unknown>) => {
+    if (!context.emitter?.trace?.id) {
+      throw new FrameworkError(`Fatal error. Missing traceId`);
+    }
+
+    const traceId = context.emitter?.trace?.id;
+    if (activeTracesMap.has(traceId)) {
+      return;
+    }
+    activeTracesMap.set(traceId, context.instance.constructor.name);
+
+    instrumentationLogger.debug(
+      {
+        source: context.instance.constructor.name,
+        traceId: traceId,
+      },
+      "createTelemetryMiddleware",
+    );
+    const { emitter, runParams, instance } = context;
+    const basePath = createFullPath(emitter.namespace, "");
+
+    let prompt: string | undefined | null = null;
+    if (instance.constructor.name === "BeeAgent") {
+      prompt = (runParams as Parameters<BeeAgent["run"]>)[0].prompt;
+    }
 
     const spansMap = new Map<string, FrameworkSpan>();
     const parentIdsMap = new Map<string, number>();
@@ -100,26 +120,38 @@ export function createTelemetryMiddleware<T extends BaseAgent<any, any>>() {
     emitter.match(
       (event) => event.path === `${basePath}.run.${finishEventName}`,
       async (_, meta) => {
-        if (!meta.trace?.id) {
-          throw new FrameworkError(`Fatal error. Missing trace id for event: ${meta.path}`);
-        }
-        // create tracer spans from collected data
-        buildTraceTree({
-          prompt:
-            prompt ??
-            instance.memory.messages
+        try {
+          instrumentationLogger.debug({ path: meta.path, traceId: traceId }, "run finish event");
+
+          if (!prompt && instance.constructor.name === "BeeAgent") {
+            prompt = (instance as BeeAgent).memory.messages
               .slice()
               .reverse()
-              .find((message) => message.role === Role.USER)?.text,
-          history,
-          generatedMessage,
-          spans: JSON.parse(serializer(Array.from(spansMap.values()))),
-          traceId: meta.trace.id,
-          version: Version,
-          runErrorSpanKey: `${basePath}.run.${errorEventName}`,
-          startTime,
-          endTime: new Date(),
-        });
+              .find((message) => message.role === Role.USER)?.text;
+
+            if (!prompt) {
+              throw new FrameworkError("The prompt must be defined for the Agent's run");
+            }
+          }
+
+          // create tracer spans from collected data
+          buildTraceTree({
+            prompt: prompt,
+            history,
+            generatedMessage,
+            spans: JSON.parse(serializer(Array.from(spansMap.values()))),
+            traceId,
+            version: Version,
+            runErrorSpanKey: `${basePath}.run.${errorEventName}`,
+            startTime,
+            endTime: new Date(),
+            source: activeTracesMap.get(traceId)!,
+          });
+        } catch (e) {
+          instrumentationLogger.warn(e, "Instrumentation error");
+        } finally {
+          activeTracesMap.delete(traceId);
+        }
       },
     );
 
@@ -164,6 +196,11 @@ export function createTelemetryMiddleware<T extends BaseAgent<any, any>>() {
       });
 
       const serializedData = getSerializedObjectSafe(data);
+
+      // skip partialUpdate events with no data
+      if (meta.name === partialUpdateEventName && isEmpty(serializedData)) {
+        return;
+      }
 
       const span = createSpan({
         id: spanId,
@@ -227,26 +264,28 @@ export function createTelemetryMiddleware<T extends BaseAgent<any, any>>() {
     emitter.on(
       successEventName as any,
       (data: InferCallbackValue<BeeCallbacks[typeof successEventName]>) => {
-        const { data: dataObject, memory } = data as InferCallbackValue<
-          BeeCallbacks[typeof successEventName]
-        >;
+        if ("data" in data && "memory" in data) {
+          const { data: dataObject, memory } = data as InferCallbackValue<
+            BeeCallbacks[typeof successEventName]
+          >;
 
-        generatedMessage = {
-          role: dataObject.role,
-          text: dataObject.text,
-        };
-        history = memory.messages.map((msg) => ({ text: msg.text, role: msg.role }));
+          generatedMessage = {
+            role: dataObject.role,
+            text: dataObject.text,
+          };
+          history = memory.messages.map((msg) => ({ text: msg.text, role: msg.role }));
+        }
       },
     );
 
     // Read rawPrompt from llm input only for supported adapters and create the custom event with it
     emitter.match(
-      (event) => event.creator instanceof ChatLLM && event.name === startEventName,
+      (event) => "messagesToPrompt" in event.creator && event.name === startEventName,
       ({ input }: InferCallbackValue<GenerateCallbacks[typeof startEventName]>, meta) => {
         if (
           "messagesToPrompt" in meta.creator &&
           typeof meta.creator.messagesToPrompt === "function" &&
-          meta.creator instanceof ChatLLM &&
+          meta.creator instanceof Serializable &&
           meta.trace
         ) {
           const rawPrompt = meta.creator.messagesToPrompt(input);

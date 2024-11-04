@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-export const INSTRUMENTATION_ENABLED = process.env.INSTRUMENTATION_ENABLED === "true";
+import { parseEnv } from "@/internals/env.js";
+import { z } from "zod";
 
-export const INSTRUMENTATION_IGNORED_KEYS =
-  process.env.INSTRUMENTATION_IGNORED_KEYS && process.env.INSTRUMENTATION_IGNORED_KEYS?.length > 1
-    ? process.env.INSTRUMENTATION_IGNORED_KEYS.split(",")
-    : [];
+export const INSTRUMENTATION_ENABLED = parseEnv.asBoolean("BEE_FRAMEWORK_INSTRUMENTATION_ENABLED");
+
+export const INSTRUMENTATION_IGNORED_KEYS = parseEnv(
+  "BEE_FRAMEWORK_INSTRUMENTATION_IGNORED_KEYS",
+  z.string(),
+  "",
+)
+  .split(",")
+  .filter((item) => item.length > 0);

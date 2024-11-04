@@ -16,30 +16,16 @@ Follow the official OpenTelemetry [Node.js Getting Started Guide](https://opente
 
 ### Environment Variable
 
-Use the environment variable `INSTRUMENTATION_ENABLED` to enable or disable instrumentation.
+Use the environment variable `BEE_FRAMEWORK_INSTRUMENTATION_ENABLED` to enable or disable instrumentation.
 
 ```bash
 # Enable instrumentation
-export INSTRUMENTATION_ENABLED=true
+export BEE_FRAMEWORK_INSTRUMENTATION_ENABLED=true
 # Ignore sensitive keys from collected events data
 export INSTRUMENTATION_IGNORED_KEYS="apiToken,accessToken"
 ```
 
-If `INSTRUMENTATION_ENABLED` is false or unset, the framework will run without instrumentation.
-
-### Implementation
-
-The OpenTelemetry middleware is implemented in the `BaseAgent` class in the `run` method
-
-Here's the code snippet demonstrating this configuration:
-
-```ts
-if (INSTRUMENTATION_ENABLED) {
-  return run.middleware(createTelemetryMiddleware());
-} else {
-  return run;
-}
-```
+If `BEE_FRAMEWORK_INSTRUMENTATION_ENABLED` is false or unset, the framework will run without instrumentation.
 
 ## Creating Custom Spans
 
@@ -70,18 +56,46 @@ function exampleFunction() {
 Once you have enabled the instrumentation, you can view telemetry data using any [compatible OpenTelemetry backend](https://opentelemetry.io/docs/languages/js/exporters/), such as [Jaeger](https://www.jaegertracing.io/), [Zipkin](https://zipkin.io/), [Prometheus](https://prometheus.io/docs/prometheus/latest/feature_flags/#otlp-receiver), etc...
 Ensure your OpenTelemetry setup is properly configured to export trace data to your chosen backend.
 
-## Run example
+## Run examples
+
+> the right version of node.js must be correctly set
+
+```
+nvm use
+```
+
+> Build the codebase before you run the instrumented example file!
+
+```
+yarn build
+```
+
+### Agent instrumentation
 
 Running the Instrumented Application (`examples/agents/bee_instrumentation.js`) file.
 
 ```bash
-nvm use
-
-## build the codebase
-yarn build
-
 ## the telemetry example is run on built js files
-yarn start:bee_telemetry
+yarn start:telemetry ./examples/agents/bee_instrumentation.js
+```
+
+### LLM instrumentation
+
+Running (`./examples/llms/instrumentation.js`) file.
+
+```bash
+## the telemetry example is run on built js files
+
+yarn start:telemetry ./examples/llms/instrumentation.js
+```
+
+### Tool instrumentation
+
+Running (`./examples/tools/instrumentation.js`) file.
+
+```bash
+## the telemetry example is run on built js files
+yarn start:telemetry ./examples/tools/instrumentation.js
 ```
 
 ## Conclusion

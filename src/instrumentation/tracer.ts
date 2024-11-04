@@ -20,8 +20,10 @@ import { FrameworkSpan, GeneratedResponse } from "./types.js";
 
 export const tracer = opentelemetry.trace.getTracer("bee-agent-framework", Version);
 
+export const activeTracesMap = new Map<string, string>();
+
 interface ComputeTreeProps {
-  prompt: string;
+  prompt?: string | null;
   history: GeneratedResponse[] | undefined;
   generatedMessage: GeneratedResponse | undefined;
   spans: FrameworkSpan[];
@@ -30,6 +32,7 @@ interface ComputeTreeProps {
   runErrorSpanKey: string;
   startTime: Date;
   endTime: Date;
+  source: string;
 }
 
 interface BuildSpansForParentProps {
@@ -78,17 +81,18 @@ export function buildTraceTree({
   runErrorSpanKey,
   startTime,
   endTime,
+  source,
 }: ComputeTreeProps) {
   tracer.startActiveSpan(
-    "main",
+    `bee-agent-framework-${source}-${traceId}`,
     {
       // custom start time
       startTime,
       // set main span important attributes
       attributes: {
-        prompt,
         traceId,
         version,
+        ...(prompt && { prompt }),
         ...(generatedMessage !== undefined && { response: JSON.stringify(generatedMessage) }),
         ...(history && { history: JSON.stringify(history) }),
       },

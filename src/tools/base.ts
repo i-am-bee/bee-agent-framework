@@ -37,6 +37,9 @@ import { Emitter } from "@/emitter/emitter.js";
 import { Callback } from "@/emitter/types.js";
 import { GetRunContext, RunContext } from "@/context.js";
 import { shallowCopy } from "@/serializer/utils.js";
+import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
+import { createTelemetryMiddleware } from "@/instrumentation/create-telemetry-middleware.js";
+import { doNothing } from "remeda";
 
 export class ToolError extends FrameworkError {}
 
@@ -258,7 +261,7 @@ export abstract class Tool<
           await run.emitter.emit("finish", null);
         }
       },
-    );
+    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing);
   }
 
   protected async _runCached(
