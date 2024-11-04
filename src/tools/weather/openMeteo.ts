@@ -27,6 +27,7 @@ import { createURLParams } from "@/internals/fetcher.js";
 import { isNullish, pick, pickBy } from "remeda";
 import { Cache } from "@/cache/decoratorCache.js";
 import { RunContext } from "@/context.js";
+import { getProp, setProp } from "@/internals/helpers/object.js";
 
 type ToolOptions = { apiKey?: string } & BaseToolOptions;
 type ToolRunOptions = BaseToolRunOptions;
@@ -100,6 +101,20 @@ export class OpenMeteoTool extends Tool<
 
   static {
     this.register();
+  }
+
+  protected preprocessInput(rawInput: unknown) {
+    super.preprocessInput(rawInput);
+
+    const fixDate = (key: keyof ToolInput<this>) => {
+      const value = getProp(rawInput, [key]);
+      if (value) {
+        setProp(rawInput, [key], value.substring(0, 10));
+      }
+    };
+
+    fixDate("start_date");
+    fixDate("end_date");
   }
 
   protected async _run(
