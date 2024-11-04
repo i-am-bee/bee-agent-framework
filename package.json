@@ -119,7 +119,7 @@
     "start:bee": "yarn start -- examples/agents/bee.ts",
     "docs:build": "embedme --source-root=. docs/**/*.md && cp *.md docs/ && yarn lint:fix docs/ && yarn prettier --write docs/",
     "docs:check": "yarn docs:build --verify && yarn docs:links",
-    "docs:links": "linkinator \"**/*.md\" --markdown --directory-listing --skip node_modules --skip \"https://ai.meta.com/blog/meta-llama-3-1/\" ",
+    "docs:links": "linkinator \"**/*.md\" --timeout=10000 --markdown --directory-listing --skip node_modules --skip \"https://ai.meta.com/blog/meta-llama-3-1/\" ",
     "docs:watch": "docsify serve ./docs --open",
     "lint": "yarn eslint",
     "lint:fix": "yarn eslint --fix",
