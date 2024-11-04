@@ -35,7 +35,7 @@ interface AgentInput {
 export class CustomAgent extends BaseAgent<RunInput, RunOutput, RunOptions> {
   protected driver: JsonDriver;
   public readonly memory: BaseMemory;
-  public emitter = new Emitter({
+  public emitter = Emitter.root.child({
     namespace: ["agent", "custom"],
     creator: this,
   });
