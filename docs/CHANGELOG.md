@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.36](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.34...v0.0.36) (2024-11-04)
+
+### Features
+
+- **agent:** remove unused agent manager ([b22b1d0](https://github.com/i-am-bee/bee-agent-framework/commit/b22b1d04948c3c050b09dd0d132ceedc59663a66))
+- **agent:** update custom agent example ([e942b18](https://github.com/i-am-bee/bee-agent-framework/commit/e942b18e3ad595309ca134bd85f199676fa2673c))
+- **llm:** update the granite chat template for tools ([#125](https://github.com/i-am-bee/bee-agent-framework/issues/125)) ([b554031](https://github.com/i-am-bee/bee-agent-framework/commit/b554031908a1fb480a4fcf17f7b1b28ec2aa35ec))
+- **tool:** add optional input preprocessor ([#128](https://github.com/i-am-bee/bee-agent-framework/issues/128)) ([cec2cb9](https://github.com/i-am-bee/bee-agent-framework/commit/cec2cb9b1ce2689750097e82c4ca843a50dd98e7))
+
+### Bug Fixes
+
+- **tool:** attach under the root emitter ([92b0a38](https://github.com/i-am-bee/bee-agent-framework/commit/92b0a38fcb31146cebe2c2a7f1376075d2d72d12))
+- **tool:** propagate finish event on a run level ([b434e32](https://github.com/i-am-bee/bee-agent-framework/commit/b434e32daa77a5f6a987e6cea616559917eedd33))
+
 ## [0.0.34](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.33...v0.0.34) (2024-10-28)
 
 ### Features
