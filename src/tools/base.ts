@@ -203,6 +203,8 @@ export abstract class Tool<
   }
 
   run(input: ToolInputRaw<this>, options?: TRunOptions): Promise<TOutput> {
+    input = shallowCopy(input);
+
     return RunContext.enter(
       this,
       { signal: options?.signal, params: [input, options] as const },
