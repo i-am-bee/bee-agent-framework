@@ -47,7 +47,8 @@
       "commitMessage": "chore: release ${version}",
       "tagName": "v${version}",
       "commitArgs": [
-        "-s"
+        "-s",
+        "--no-verify"
       ]
     },
     "npm": {
