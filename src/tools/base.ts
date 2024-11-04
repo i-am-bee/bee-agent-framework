@@ -176,7 +176,7 @@ export abstract class Tool<
   public readonly cache: BaseCache<Task<TOutput>>;
   protected readonly options: TOptions;
 
-  public readonly emitter = new Emitter<ToolCallbacks<ToolInput<this>, TOutput>>({
+  public readonly emitter = Emitter.root.child<ToolCallbacks<ToolInput<this>, TOutput>>({
     namespace: ["tool"],
     creator: this,
   });
