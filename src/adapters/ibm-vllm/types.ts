@@ -338,26 +338,6 @@ export interface SingleGenerationRequest__Output {
 }
 
 export interface GenerationServiceClient extends grpc.Client {
-  Generate(
-    argument: BatchedGenerationRequest,
-    metadata: grpc.Metadata,
-    options: grpc.CallOptions,
-    callback: grpc.requestCallback<BatchedGenerationResponse__Output>,
-  ): grpc.ClientUnaryCall;
-  Generate(
-    argument: BatchedGenerationRequest,
-    metadata: grpc.Metadata,
-    callback: grpc.requestCallback<BatchedGenerationResponse__Output>,
-  ): grpc.ClientUnaryCall;
-  Generate(
-    argument: BatchedGenerationRequest,
-    options: grpc.CallOptions,
-    callback: grpc.requestCallback<BatchedGenerationResponse__Output>,
-  ): grpc.ClientUnaryCall;
-  Generate(
-    argument: BatchedGenerationRequest,
-    callback: grpc.requestCallback<BatchedGenerationResponse__Output>,
-  ): grpc.ClientUnaryCall;
   generate(
     argument: BatchedGenerationRequest,
     metadata: grpc.Metadata,
@@ -378,15 +358,6 @@ export interface GenerationServiceClient extends grpc.Client {
     argument: BatchedGenerationRequest,
     callback: grpc.requestCallback<BatchedGenerationResponse__Output>,
   ): grpc.ClientUnaryCall;
-  GenerateStream(
-    argument: SingleGenerationRequest,
-    metadata: grpc.Metadata,
-    options?: grpc.CallOptions,
-  ): grpc.ClientReadableStream<GenerationResponse__Output>;
-  GenerateStream(
-    argument: SingleGenerationRequest,
-    options?: grpc.CallOptions,
-  ): grpc.ClientReadableStream<GenerationResponse__Output>;
   generateStream(
     argument: SingleGenerationRequest,
     metadata: grpc.Metadata,
@@ -396,26 +367,6 @@ export interface GenerationServiceClient extends grpc.Client {
     argument: SingleGenerationRequest,
     options?: grpc.CallOptions,
   ): grpc.ClientReadableStream<GenerationResponse__Output>;
-  ModelInfo(
-    argument: ModelInfoRequest,
-    metadata: grpc.Metadata,
-    options: grpc.CallOptions,
-    callback: grpc.requestCallback<ModelInfoResponse__Output>,
-  ): grpc.ClientUnaryCall;
-  ModelInfo(
-    argument: ModelInfoRequest,
-    metadata: grpc.Metadata,
-    callback: grpc.requestCallback<ModelInfoResponse__Output>,
-  ): grpc.ClientUnaryCall;
-  ModelInfo(
-    argument: ModelInfoRequest,
-    options: grpc.CallOptions,
-    callback: grpc.requestCallback<ModelInfoResponse__Output>,
-  ): grpc.ClientUnaryCall;
-  ModelInfo(
-    argument: ModelInfoRequest,
-    callback: grpc.requestCallback<ModelInfoResponse__Output>,
-  ): grpc.ClientUnaryCall;
   modelInfo(
     argument: ModelInfoRequest,
     metadata: grpc.Metadata,
@@ -435,26 +386,6 @@ export interface GenerationServiceClient extends grpc.Client {
   modelInfo(
     argument: ModelInfoRequest,
     callback: grpc.requestCallback<ModelInfoResponse__Output>,
-  ): grpc.ClientUnaryCall;
-  Tokenize(
-    argument: BatchedTokenizeRequest,
-    metadata: grpc.Metadata,
-    options: grpc.CallOptions,
-    callback: grpc.requestCallback<BatchedTokenizeResponse__Output>,
-  ): grpc.ClientUnaryCall;
-  Tokenize(
-    argument: BatchedTokenizeRequest,
-    metadata: grpc.Metadata,
-    callback: grpc.requestCallback<BatchedTokenizeResponse__Output>,
-  ): grpc.ClientUnaryCall;
-  Tokenize(
-    argument: BatchedTokenizeRequest,
-    options: grpc.CallOptions,
-    callback: grpc.requestCallback<BatchedTokenizeResponse__Output>,
-  ): grpc.ClientUnaryCall;
-  Tokenize(
-    argument: BatchedTokenizeRequest,
-    callback: grpc.requestCallback<BatchedTokenizeResponse__Output>,
   ): grpc.ClientUnaryCall;
   tokenize(
     argument: BatchedTokenizeRequest,
