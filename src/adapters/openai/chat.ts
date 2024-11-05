@@ -110,7 +110,7 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
   }: Input = {}) {
     super(modelId, executionOptions, cache);
     this.client = client ?? new Client();
-    this.parameters = parameters ?? {};
+    this.parameters = parameters ?? { temperature: 0 };
   }
 
   static {
