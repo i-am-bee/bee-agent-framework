@@ -39,7 +39,10 @@ export interface ElasticSearchToolOptions extends BaseToolOptions {
   connection: ClientOptions;
 }
 
-export type ElasticSearchToolResult = CatIndicesResponse | IndicesGetMappingResponse | SearchResponse;
+export type ElasticSearchToolResult =
+  | CatIndicesResponse
+  | IndicesGetMappingResponse
+  | SearchResponse;
 
 export const ElasticSearchAction = {
   ListIndices: "LIST_INDICES",
