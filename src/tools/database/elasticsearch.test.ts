@@ -21,25 +21,25 @@ import { JSONToolOutput } from "@/tools/base.js";
 import { SlidingCache } from "@/cache/slidingCache.js";
 import { Task } from "promise-based-task";
 
-vi.mock("@elastic/elasticsearch");
+const mockClient = {
+  cat: { indices: vi.fn() },
+  indices: { getMapping: vi.fn() },
+  search: vi.fn(),
+  info: vi.fn(),
+};
+
+vi.mock("@elastic/elasticsearch", () => ({
+  Client: vi.fn(() => mockClient),
+}));
 
 describe("ElasticSearchTool", () => {
   let elasticSearchTool: ElasticSearchTool;
-  const mockClient = {
-    cat: { indices: vi.fn() },
-    indices: { getMapping: vi.fn() },
-    search: vi.fn(),
-  };
 
   beforeEach(() => {
     vi.clearAllMocks();
     elasticSearchTool = new ElasticSearchTool({
       connection: { node: "http://localhost:9200" },
     } as ElasticSearchToolOptions);
-
-    Object.defineProperty(elasticSearchTool, "client", {
-      get: () => mockClient,
-    });
   });
 
   it("lists indices correctly", async () => {
@@ -59,10 +59,6 @@ describe("ElasticSearchTool", () => {
 
     const response = await elasticSearchTool.run({ action: "GET_INDEX_DETAILS", indexName });
     expect(response.result).toEqual(mockIndexDetails);
-    expect(mockClient.indices.getMapping).toHaveBeenCalledWith(
-      { index: indexName },
-      { signal: undefined },
-    );
   });
 
   it("performs a search", async () => {

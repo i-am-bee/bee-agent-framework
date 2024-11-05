@@ -23,6 +23,7 @@ import {
   JSONToolOutput,
 } from "@/tools/base.js";
 import { Cache } from "@/cache/decoratorCache.js";
+import { RunContext } from "@/context.js";
 import { z } from "zod";
 import { Client, ClientOptions } from "@elastic/elasticsearch";
 import {
@@ -34,28 +35,34 @@ import {
 } from "@elastic/elasticsearch/lib/api/types.js";
 import { ValidationError } from "ajv";
 
-type ToolRunOptions = BaseToolRunOptions;
-
 export interface ElasticSearchToolOptions extends BaseToolOptions {
   connection: ClientOptions;
 }
 
+export type ElasticSearchToolResult = CatIndicesResponse | IndicesGetMappingResponse | SearchResponse;
+
+export const ElasticSearchAction = {
+  ListIndices: "LIST_INDICES",
+  getIndexDetails: "GET_INDEX_DETAILS",
+  search: "SEARCH",
+};
+
 export class ElasticSearchTool extends Tool<
-  JSONToolOutput<any>,
+  JSONToolOutput<ElasticSearchToolResult>,
   ElasticSearchToolOptions,
-  ToolRunOptions
+  BaseToolRunOptions
 > {
   name = "ElasticSearchTool";
 
   description = `Can query data from an ElasticSearch database. IMPORTANT: strictly follow this order of actions:
-   1. LIST_INDICES - retrieve a list of available indices
-   2. GET_INDEX_DETAILS - get details of index fields
-   3. SEARCH - perform search or aggregation query on a specific index or pass the original user query without modifications if it's a valid JSON ElasticSearch query`;
+   1. ${ElasticSearchAction.ListIndices} - retrieve a list of available indices
+   2. ${ElasticSearchAction.getIndexDetails} - get details of index fields
+   3. ${ElasticSearchAction.search} - perform search or aggregation query on a specific index or pass the original user query without modifications if it's a valid JSON ElasticSearch query`;
 
   inputSchema() {
     return z.object({
       action: z
-        .enum(["LIST_INDICES", "GET_INDEX_DETAILS", "SEARCH"])
+        .nativeEnum(ElasticSearchAction)
         .describe(
           "The action to perform. LIST_INDICES lists all indices, GET_INDEX_DETAILS fetches details for a specified index, and SEARCH executes a search or aggregation query",
         ),
@@ -104,9 +111,11 @@ export class ElasticSearchTool extends Tool<
   }
 
   @Cache()
-  protected get client(): Client {
+  protected async client(): Promise<Client> {
     try {
-      return new Client(this.options.connection);
+      const client = new Client(this.options.connection);
+      await client.info();
+      return client;
     } catch (error) {
       throw new ToolError(`Unable to connect to ElasticSearch: ${error}`, [], {
         isRetryable: false,
@@ -117,28 +126,30 @@ export class ElasticSearchTool extends Tool<
 
   protected async _run(
     input: ToolInput<this>,
-    _options?: ToolRunOptions,
+    _options: BaseToolRunOptions | undefined,
+    run: RunContext<this>,
   ): Promise<JSONToolOutput<any>> {
-    if (input.action === "LIST_INDICES") {
-      const indices = await this.listIndices(_options?.signal);
+    if (input.action === ElasticSearchAction.ListIndices) {
+      const indices = await this.listIndices(run.signal);
       return new JSONToolOutput(indices);
-    } else if (input.action === "GET_INDEX_DETAILS") {
-      const indexDetails = await this.getIndexDetails(input, _options?.signal);
+    } else if (input.action === ElasticSearchAction.getIndexDetails) {
+      const indexDetails = await this.getIndexDetails(input, run.signal);
       return new JSONToolOutput(indexDetails);
-    } else if (input.action === "SEARCH") {
-      const response = await this.search(input, _options?.signal);
+    } else if (input.action === ElasticSearchAction.search) {
+      const response = await this.search(input, run.signal);
       if (response.aggregations) {
         return new JSONToolOutput(response.aggregations);
       } else {
         return new JSONToolOutput(response.hits.hits.map((hit: SearchHit) => hit._source));
       }
     } else {
-      throw new ToolError("Invalid action specified.");
+      throw new ToolError(`Invalid action specified: ${input.action}`);
     }
   }
 
   private async listIndices(signal?: AbortSignal): Promise<CatIndicesResponse> {
-    const response = await this.client.cat.indices(
+    const client = await this.client();
+    const response = await client.cat.indices(
       {
         expand_wildcards: "open",
         h: "index",
@@ -151,14 +162,15 @@ export class ElasticSearchTool extends Tool<
       .map((record) => ({ index: record.index }));
   }
 
-  private async getIndexDetails(
+  protected async getIndexDetails(
     input: ToolInput<this>,
-    signal?: AbortSignal,
+    signal: AbortSignal,
   ): Promise<IndicesGetMappingResponse> {
     if (!input.indexName) {
       throw new ToolError("Index name is required for GET_INDEX_DETAILS action.");
     }
-    return await this.client.indices.getMapping(
+    const client = await this.client();
+    return await client.indices.getMapping(
       {
         index: input.indexName,
       },
@@ -166,7 +178,7 @@ export class ElasticSearchTool extends Tool<
     );
   }
 
-  private async search(input: ToolInput<this>, signal?: AbortSignal): Promise<SearchResponse> {
+  protected async search(input: ToolInput<this>, signal: AbortSignal): Promise<SearchResponse> {
     if (!input.indexName || !input.query) {
       throw new ToolError("Both index name and query are required for SEARCH action.");
     }
@@ -182,17 +194,13 @@ export class ElasticSearchTool extends Tool<
       from: parsedQuery.from || input.start,
       size: parsedQuery.size || input.size,
     };
-
-    return await this.client.search(
+    const client = await this.client();
+    return await client.search(
       {
         index: input.indexName,
         body: searchBody,
       },
       { signal: signal },
     );
-  }
-
-  loadSnapshot({ ...snapshot }: ReturnType<typeof this.createSnapshot>): void {
-    super.loadSnapshot(snapshot);
   }
 }

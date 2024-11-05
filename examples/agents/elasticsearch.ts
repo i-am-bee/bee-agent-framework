@@ -55,6 +55,4 @@ try {
   console.log(`Agent 🤖 : `, response.result.text);
 } catch (error) {
   console.error(FrameworkError.ensure(error).dump());
-} finally {
-  process.exit(0);
 }
