@@ -16,7 +16,6 @@
 
 import wiki from "wikipedia";
 import { Cache } from "@/cache/decoratorCache.js";
-import stringComparison from "string-comparison";
 import * as R from "remeda";
 import type { Page, pageFunctions, searchOptions } from "wikipedia";
 import { ArrayKeys, Common } from "@/internals/types.js";
@@ -33,6 +32,8 @@ import Turndown from "turndown";
 // @ts-expect-error missing types
 import turndownPlugin from "joplin-turndown-plugin-gfm";
 import { keys, mapValues } from "remeda";
+import stringComparison from "string-comparison";
+import { pageResult } from "wikipedia/dist/resultTypes.js";
 
 wiki.default.setLang("en");
 
@@ -118,6 +119,11 @@ export class WikipediaToolOutput extends SearchToolOutput<WikipediaToolResult> {
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
     Object.assign(this, snapshot);
   }
+}
+
+interface SearchResponse {
+  results: Pick<pageResult, "title" | "pageid">[];
+  suggestion: string;
 }
 
 export class WikipediaTool extends Tool<
@@ -326,33 +332,27 @@ export class WikipediaTool extends Tool<
   ): Promise<WikipediaToolOutput> {
     const runOptions = this._createRunOptions(_options);
 
-    const { results: searchRawResults, suggestion } = await wiki.default.search(input, {
-      suggestion: Boolean(_options?.search?.suggestion),
-      ...runOptions.search,
-    });
+    const { results: searchRawResults, suggestion }: SearchResponse = await wiki.default.search(
+      input,
+      {
+        suggestion: Boolean(_options?.search?.suggestion),
+        ...runOptions.search,
+      },
+    );
 
     if (searchRawResults.length === 0 && suggestion && runOptions.search?.suggestion) {
       return await this._run({ query: suggestion }, _options);
     }
 
-    const bestCandidates = stringComparison.jaccardIndex
-      .sortMatch(
-        input,
-        searchRawResults.map((result) => result.title),
-      )
-      .map((result) => ({
-        pageId: searchRawResults[result.index].pageid,
-        score: result.rating,
-      }))
-      .filter((result) => result.score >= (runOptions.filters?.minPageNameSimilarity ?? 0))
-      .sort((a, b) => b.score - a.score);
-
-    if (bestCandidates.at(0)?.score === 1 && runOptions.filters?.excludeOthersOnExactMatch) {
-      bestCandidates.length = 1;
-    }
+    const bestCandidates = this.extractBestCandidates(
+      input,
+      searchRawResults,
+      runOptions?.filters ?? {},
+    );
 
     const results = await Promise.all(
       bestCandidates.map(async ({ pageId }) => {
+        // @ts-expect-error wrong library's typing, passing a string would lead to a classic text search instead of a concrete page retrieval
         const page = await wiki.default.page(pageId, {
           redirect: true,
           preload: false,
@@ -379,6 +379,37 @@ export class WikipediaTool extends Tool<
       }),
     );
     return new WikipediaToolOutput(results, runOptions.output?.maxSerializedLength ?? Infinity);
+  }
+
+  protected extractBestCandidates(
+    query: string,
+    candidates: SearchResponse["results"],
+    options: FilterOptions,
+  ) {
+    const normalize = (text: string) =>
+      text
+        .normalize("NFKD")
+        .replace(/[^\w| ]/g, "") // remove diacritics and special characters (except whitespace)
+        .replace(/\s\s+/g, " ") // collapse multiple whitespaces into one
+        .trim();
+
+    const bestCandidates = stringComparison.jaccardIndex
+      .sortMatch(
+        normalize(query),
+        candidates.map((candidate) => normalize(candidate.title)),
+      )
+      .map((result) => ({
+        pageId: candidates[result.index].pageid,
+        score: result.rating,
+      }))
+      .filter((result) => result.score >= (options.minPageNameSimilarity ?? 0))
+      .sort((a, b) => b.score - a.score);
+
+    if (bestCandidates.at(0)?.score === 1 && options.excludeOthersOnExactMatch) {
+      bestCandidates.length = 1;
+    }
+
+    return bestCandidates;
   }
 
   createSnapshot() {
