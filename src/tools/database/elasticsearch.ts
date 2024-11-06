@@ -114,6 +114,13 @@ export class ElasticSearchTool extends Tool<
         `Both index name and query are required for ${ElasticSearchAction.search} action.`,
       );
     }
+    if (input.action === ElasticSearchAction.search && input.query) {
+      try {
+        JSON.parse(input.query);
+      } catch (error) {
+        throw new ToolInputValidationError(`Invalid JSON format for query ${error}`);
+      }
+    }
   }
 
   static {
@@ -169,7 +176,7 @@ export class ElasticSearchTool extends Tool<
     }
   }
 
-  private async listIndices(signal?: AbortSignal): Promise<CatIndicesResponse> {
+  protected async listIndices(signal?: AbortSignal): Promise<CatIndicesResponse> {
     const client = await this.client();
     const response = await client.cat.indices(
       {
@@ -198,13 +205,7 @@ export class ElasticSearchTool extends Tool<
   }
 
   protected async search(input: ToolInput<this>, signal: AbortSignal): Promise<SearchResponse> {
-    let parsedQuery;
-    try {
-      parsedQuery = JSON.parse(input.query!);
-    } catch {
-      throw new ToolError(`Invalid JSON format for query`);
-    }
-
+    const parsedQuery = JSON.parse(input.query!);
     const searchBody: SearchRequest = {
       ...parsedQuery,
       from: parsedQuery.from || input.start,
