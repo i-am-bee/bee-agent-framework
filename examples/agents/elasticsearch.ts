@@ -5,11 +5,7 @@ import { ElasticSearchTool } from "bee-agent-framework/tools/database/elasticsea
 import { FrameworkError } from "bee-agent-framework/errors";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 
-const llm = new OpenAIChatLLM({
-  parameters: {
-    temperature: 0,
-  },
-});
+const llm = new OpenAIChatLLM();
 
 const elasticSearchTool = new ElasticSearchTool({
   connection: {

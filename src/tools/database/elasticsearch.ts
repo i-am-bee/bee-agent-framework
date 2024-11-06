@@ -21,10 +21,13 @@ import {
   BaseToolOptions,
   BaseToolRunOptions,
   JSONToolOutput,
+  ToolInputValidationError,
 } from "@/tools/base.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { RunContext } from "@/context.js";
 import { z } from "zod";
+import { ValidationError } from "ajv";
+import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
 import { Client, ClientOptions } from "@elastic/elasticsearch";
 import {
   CatIndicesResponse,
@@ -33,7 +36,6 @@ import {
   SearchResponse,
   SearchHit,
 } from "@elastic/elasticsearch/lib/api/types.js";
-import { ValidationError } from "ajv";
 
 export interface ElasticSearchToolOptions extends BaseToolOptions {
   connection: ClientOptions;
@@ -95,6 +97,23 @@ export class ElasticSearchTool extends Tool<
         .optional()
         .describe("How many records will be retrieved from the ElasticSearch query. Maximum is 10"),
     });
+  }
+
+  protected validateInput(
+    schema: AnyToolSchemaLike,
+    input: unknown,
+  ): asserts input is ToolInput<this> {
+    super.validateInput(schema, input);
+    if (input.action === ElasticSearchAction.getIndexDetails && !input.indexName) {
+      throw new ToolInputValidationError(
+        `Index name is required for ${ElasticSearchAction.getIndexDetails} action.`,
+      );
+    }
+    if (input.action === ElasticSearchAction.search && (!input.indexName || !input.query)) {
+      throw new ToolInputValidationError(
+        `Both index name and query are required for ${ElasticSearchAction.search} action.`,
+      );
+    }
   }
 
   static {
@@ -169,9 +188,6 @@ export class ElasticSearchTool extends Tool<
     input: ToolInput<this>,
     signal: AbortSignal,
   ): Promise<IndicesGetMappingResponse> {
-    if (!input.indexName) {
-      throw new ToolError("Index name is required for GET_INDEX_DETAILS action.");
-    }
     const client = await this.client();
     return await client.indices.getMapping(
       {
@@ -182,12 +198,9 @@ export class ElasticSearchTool extends Tool<
   }
 
   protected async search(input: ToolInput<this>, signal: AbortSignal): Promise<SearchResponse> {
-    if (!input.indexName || !input.query) {
-      throw new ToolError("Both index name and query are required for SEARCH action.");
-    }
     let parsedQuery;
     try {
-      parsedQuery = JSON.parse(input.query);
+      parsedQuery = JSON.parse(input.query!);
     } catch {
       throw new ToolError(`Invalid JSON format for query`);
     }
