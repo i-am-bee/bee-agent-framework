@@ -71,16 +71,6 @@ export class GoogleSearchTool extends Tool<
   inputSchema() {
     return z.object({
       query: z.string({ description: `Search query` }).min(1).max(2048),
-      page: z.coerce
-        .number()
-        .int()
-        .min(1)
-        .max(10)
-        .describe(
-          `Search result page (each page contains maximally ${this.options.maxResultsPerPage} results)`,
-        )
-        .default(1)
-        .optional(),
     });
   }
 
@@ -124,17 +114,15 @@ export class GoogleSearchTool extends Tool<
   }
 
   protected async _run(
-    { query: input, page = 1 }: ToolInput<this>,
+    { query: input }: ToolInput<this>,
     _options: GoogleSearchToolRunOptions | undefined,
     run: RunContext<this>,
   ) {
-    const startIndex = (page - 1) * this.options.maxResultsPerPage + 1;
     const response = await this.client.cse.list(
       {
         cx: this.cseId,
         q: input,
         num: this.options.maxResultsPerPage,
-        start: startIndex,
         safe: "active",
       },
       {

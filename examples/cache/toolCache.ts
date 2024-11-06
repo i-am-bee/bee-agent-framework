@@ -10,6 +10,5 @@ const ddg = new DuckDuckGoSearchTool({
 
 const response = await ddg.run({
   query: "the time of the fastest marathon run",
-  page: 1,
 });
 // upcoming requests with the EXACTLY same input will be retrieved from the cache

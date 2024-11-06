@@ -80,16 +80,6 @@ export class DuckDuckGoSearchTool extends Tool<
   inputSchema() {
     return z.object({
       query: z.string({ description: `Search query` }).min(1).max(128),
-      page: z.coerce
-        .number()
-        .int()
-        .min(1)
-        .max(10)
-        .describe(
-          `Search result page (each page contains maximally ${this.options.maxResultsPerPage} results)`,
-        )
-        .default(1)
-        .optional(),
     });
   }
 
@@ -116,7 +106,7 @@ export class DuckDuckGoSearchTool extends Tool<
   }
 
   protected async _run(
-    { query: input, page = 1 }: ToolInput<this>,
+    { query: input }: ToolInput<this>,
     options?: DuckDuckGoSearchToolRunOptions,
   ) {
     const headers = new HeaderGenerator().getHeaders();
@@ -124,7 +114,6 @@ export class DuckDuckGoSearchTool extends Tool<
     const { results } = await this.client(
       input,
       {
-        offset: this.options.maxResultsPerPage * (page - 1),
         safeSearch: SafeSearchType.MODERATE,
         ...this.options.search,
         ...options?.search,

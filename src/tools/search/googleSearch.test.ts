@@ -78,7 +78,6 @@ describe("GoogleCustomSearch Tool", () => {
         cx: "test-cse-id",
         q: query,
         num: 10,
-        start: 1,
         safe: "active",
       },
       {
@@ -104,51 +103,6 @@ describe("GoogleCustomSearch Tool", () => {
           maxResultsPerPage: 11,
         }),
     ).toThrowError("validation failed");
-  });
-
-  it("paginates correctly", async () => {
-    const query = "paginated search";
-    const mockFirstPageResults = generateResults(10);
-    const mockSecondPageResults = generateResults(10);
-
-    mockCustomSearchClient.cse.list
-      .mockResolvedValueOnce(mockFirstPageResults)
-      .mockResolvedValueOnce(mockSecondPageResults);
-
-    const responsePage1 = await googleSearchTool.run({ query });
-    const responsePage2 = await googleSearchTool.run({ query, page: 2 });
-
-    const combinedResults = [...responsePage1.results, ...responsePage2.results];
-
-    expect(combinedResults.length).toBe(20);
-
-    expect(mockCustomSearchClient.cse.list).toHaveBeenCalledTimes(2);
-    expect(mockCustomSearchClient.cse.list).toHaveBeenNthCalledWith(
-      1,
-      {
-        cx: "test-cse-id",
-        q: query,
-        num: 10,
-        start: 1,
-        safe: "active",
-      },
-      {
-        signal: expect.any(AbortSignal),
-      },
-    );
-    expect(mockCustomSearchClient.cse.list).toHaveBeenNthCalledWith(
-      2,
-      {
-        cx: "test-cse-id",
-        q: query,
-        num: 10,
-        start: 11,
-        safe: "active",
-      },
-      {
-        signal: expect.any(AbortSignal),
-      },
-    );
   });
 
   it("Serializes", async () => {
