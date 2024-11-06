@@ -36,7 +36,7 @@ describe("Bee Agent", () => {
       tools: [
         new DuckDuckGoSearchTool({
           cache: new UnconstrainedCache(),
-          maxResultsPerPage: 10,
+          maxResults: 10,
           throttle: {
             interval: 5000,
             limit: 1,
