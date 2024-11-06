@@ -143,9 +143,13 @@ export class OpenMeteoTool extends Tool<
         return location;
       };
 
-      const now = new Date()
-      const start = startDate ? new Date(startDate) : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-      const end = endDate ? new Date(endDate) : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+      const now = new Date();
+      const start = startDate
+        ? new Date(startDate)
+        : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+      const end = endDate
+        ? new Date(endDate)
+        : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
 
       const toDateString = (date: Date) => date.toISOString().split("T")[0];
 
