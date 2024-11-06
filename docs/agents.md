@@ -27,12 +27,11 @@ First iteration:
 thought: I need to retrieve the current weather in Las Vegas. I can use the OpenMeteo function to get the current weather forecast for a location.
 tool_name: OpenMeteo
 tool_input: {"location": {"name": "Las Vegas"}, "start_date": "2024-10-17", "end_date": "2024-10-17", "temperature_unit": "celsius"}
-tool_caption: Retrieving current weather forecast for Las Vegas.
 ```
 
 > [!NOTE]
 >
-> Agent emitted 4 complete updates in the following order (`thought`, `tool_name`, `tool_input`, `tool_caption`) and tons of partial updates in the same order.
+> Agent emitted 3 complete updates in the following order (`thought`, `tool_name`, `tool_input`) and tons of partial updates in the same order.
 > Partial update means that new tokens are being added to the iteration. Updates are always in strict order: You first get many partial updates for thought, followed by a final update for thought (that means no final updates are coming for a given key).
 
 Second iteration:

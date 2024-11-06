@@ -173,7 +173,7 @@ export class BeeAgentRunner extends Serializable {
 
   protected createParser(tools: AnyTool[]) {
     const parserRegex =
-      /Thought:.+\n(?:Final Answer:[\S\s]+|Function Name:.+\nFunction Input: \{.*\}\nFunction Caption:.+\nFunction Output:)?/;
+      /Thought:.+\n(?:Final Answer:[\S\s]+|Function Name:.+\nFunction Input: \{.*\}\nFunction Output:)?/;
 
     const parser = new LinePrefixParser(
       {
@@ -195,19 +195,13 @@ export class BeeAgentRunner extends Serializable {
         },
         tool_input: {
           prefix: "Function Input:",
-          next: ["tool_caption", "tool_output"],
+          next: ["tool_output"],
           isEnd: true,
           field: new JSONParserField({
             schema: z.object({}).passthrough(),
             base: {},
             matchPair: ["{", "}"],
           }),
-        },
-        tool_caption: {
-          prefix: "Function Caption:",
-          next: ["tool_output"],
-          isEnd: true,
-          field: new ZodParserField(z.string()),
         },
         tool_output: {
           prefix: "Function Output:",
