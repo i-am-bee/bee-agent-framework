@@ -31,7 +31,7 @@ describe("OpenMeteo", () => {
         location: {
           name: "Boston",
         },
-        start_date: "2023-09-10",
+        start_date: "2024-11-06",
         temperature_unit: "celsius",
       },
       {
@@ -42,12 +42,13 @@ describe("OpenMeteo", () => {
 
     expect(response.isEmpty()).toBe(false);
     expect(response.result).toMatchObject({
-      latitude: expect.any(Number),
-      longitude: expect.any(Number),
-      generationtime_ms: expect.any(Number),
-      utc_offset_seconds: 0,
       timezone: "UTC",
-      timezone_abbreviation: "UTC",
+      current: expect.any(Object),
+      current_units: expect.any(Object),
+      hourly: expect.any(Object),
+      hourly_units: expect.any(Object),
+      daily: expect.any(Object),
+      daily_units: expect.any(Object),
     });
   });
 
