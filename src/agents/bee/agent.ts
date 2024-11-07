@@ -120,7 +120,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       const emitter = run.emitter.child({ groupId: `iteration-${meta.iteration}` });
       const iteration = await runner.llm({ emitter, signal: run.signal, meta });
 
-      if (iteration.state.tool_name || iteration.state.tool_caption || iteration.state.tool_input) {
+      if (iteration.state.tool_name || iteration.state.tool_input) {
         const { output, success } = await runner.tool({
           iteration: iteration.state as BeeIterationToolResult,
           signal: run.signal,
@@ -144,7 +144,6 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
             role: Role.ASSISTANT,
             text: BeeAssistantPrompt.clone().render({
               toolName: [iteration.state.tool_name].filter(R.isTruthy),
-              toolCaption: [iteration.state.tool_caption].filter(R.isTruthy),
               toolInput: [iteration.state.tool_input]
                 .filter(R.isTruthy)
                 .map((call) => JSON.stringify(call)),
