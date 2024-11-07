@@ -29,11 +29,15 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { RunContext } from "@/context.js";
 import { getProp, setProp } from "@/internals/helpers/object.js";
 
-type ToolOptions = {
+export interface ResponseFilterOptions {
+  omittedResponseKeys: (keyof OpenMeteoToolResponse)[];
+}
+
+interface ToolOptions extends BaseToolOptions {
   apiKey?: string;
-  hourly?: boolean;
-  daily?: boolean;
-} & BaseToolOptions;
+  responseFilter?: ResponseFilterOptions;
+}
+
 type ToolRunOptions = BaseToolRunOptions;
 
 interface Location {
@@ -47,19 +51,16 @@ interface LocationSearch {
   language?: string;
 }
 
-const omittedKeys: string[] = [
-  "latitude",
-  "longitude",
-  "generationtime_ms",
-  "utc_offset_seconds",
-  "timezone_abbreviation",
-  "elevation",
-];
-
 export interface OpenMeteoToolResponse {
-  timezone: string;
-  current_units: Record<string, string>;
-  current: Record<string, any[]>;
+  latitude?: number;
+  longitude?: number;
+  generationtime_ms?: number;
+  utc_offset_seconds?: number;
+  timezone?: string;
+  timezone_abbreviation?: string;
+  elevation?: number;
+  current_units?: Record<string, string>;
+  current?: Record<string, string>;
   hourly_units?: Record<string, string>;
   hourly?: Record<string, any[]>;
   daily_units?: Record<string, string>;
@@ -110,9 +111,6 @@ export class OpenMeteoTool extends Tool<
     this.register();
   }
 
-  public constructor(options: Partial<ToolOptions> = {}) {
-    super({ ...options, daily: options?.daily ?? true, hourly: options?.hourly ?? true });
-  }
   protected preprocessInput(rawInput: unknown) {
     super.preprocessInput(rawInput);
 
@@ -132,7 +130,7 @@ export class OpenMeteoTool extends Tool<
     _options: BaseToolRunOptions | undefined,
     run: RunContext<this>,
   ) {
-    const { apiKey, daily, hourly } = this.options;
+    const { apiKey } = this.options;
 
     const prepareParams = async () => {
       const extractLocation = async (): Promise<Location> => {
@@ -159,8 +157,8 @@ export class OpenMeteoTool extends Tool<
         start_date: toDateString(start),
         end_date: toDateString(end),
         current: ["temperature_2m", "rain", "relative_humidity_2m", "wind_speed_10m"],
-        ...(daily && { daily: ["temperature_2m_max", "temperature_2m_min", "rain_sum"] }),
-        ...(hourly && { hourly: ["temperature_2m", "relative_humidity_2m", "rain"] }),
+        daily: ["temperature_2m_max", "temperature_2m_min", "rain_sum"],
+        hourly: ["temperature_2m", "relative_humidity_2m", "rain"],
         timezone: "UTC",
       });
     };
@@ -181,10 +179,11 @@ export class OpenMeteoTool extends Tool<
       ]);
     }
 
-    const data: OpenMeteoToolResponse = omit(
-      await response.json(),
-      omittedKeys,
-    ) as unknown as OpenMeteoToolResponse;
+    let data: OpenMeteoToolResponse = await response.json();
+
+    if (this.options?.responseFilter?.omittedResponseKeys) {
+      data = omit(data, this.options.responseFilter.omittedResponseKeys);
+    }
 
     return new JSONToolOutput(data);
   }

@@ -52,6 +52,47 @@ describe("OpenMeteo", () => {
     });
   });
 
+  it("Filters", async () => {
+    instance = new OpenMeteoTool({
+      responseFilter: {
+        omittedResponseKeys: [
+          "latitude",
+          "longitude",
+          "timezone_abbreviation",
+          "elevation",
+          "utc_offset_seconds",
+          "generationtime_ms",
+          "timezone",
+          "hourly",
+          "hourly_units",
+        ],
+      },
+    });
+
+    const response = await instance.run(
+      {
+        location: {
+          name: "Anchorage",
+        },
+        start_date: "2024-11-07",
+        temperature_unit: "fahrenheit",
+      },
+      {
+        signal: AbortSignal.timeout(60 * 1000),
+        retryOptions: {},
+      },
+    );
+
+    expect(response.isEmpty()).toBe(false);
+    expect(response.result).toMatchObject({
+      current: expect.any(Object),
+      current_units: expect.any(Object),
+      daily: expect.any(Object),
+      daily_units: expect.any(Object),
+    });
+    expect(response.result.daily).toHaveProperty("time", ["2024-11-07"]);
+  });
+
   it("Throws", async () => {
     await expect(
       instance.run({
