@@ -1,11 +1,11 @@
 ---
-title: Bee Framework Classes
-slug: architecture/diagrams/classes
+title: Bee Framework Class
+slug: architecture/diagrams/class
 ---
 
-# Bee Framework Class
+# Bee Framework Classes
 
-Diagram with the key classes defined in Bee Framework.
+Class Diagram of Key Classes in Bee Framework
 
 ```mermaid
 classDiagram
@@ -21,8 +21,8 @@ classDiagram
         class WebCrawlerTool
         class CalculatorTool
         class SearchTool
-    } 
-    
+    }
+
     namespace Agent {
         %% Agents Module
             class BaseAgent {
@@ -63,7 +63,7 @@ classDiagram
         class SlidingCache
         class DecoratorCache
     }
-    
+
     namespace LLM {
         class BaseLLM {
             +generate()
@@ -83,7 +83,7 @@ classDiagram
         class OllamaAdapter
         class LangChainAdapter
     }
-    
+
     namespace Serialization {
        class Serializer {
             +serialize()
@@ -113,7 +113,7 @@ classDiagram
             +error()
         }
     }
-    
+
     %% Inheritance Relationships
     BaseAgent --|> Serializable
     BaseLLM --|> Serializable

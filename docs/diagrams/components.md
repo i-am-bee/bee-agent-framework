@@ -30,7 +30,7 @@ flowchart LR
         UI[Bee ui]
         Observer[observe]
         Observer_connector[observe connector]
-    
+
         UI --> API
         Agent_Framework --> API
         API --> Code_Interpreter
