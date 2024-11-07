@@ -8,8 +8,8 @@ slug: architecture/diagrams
 This diagram shows all the key Services in the Bee Stack project.
 
 ```mermaid
-flowchart 
-    
+flowchart
+
     subgraph user["Client"]
         WebApp[WebApp]
         TSclient["TS Client"]
@@ -24,7 +24,7 @@ flowchart
         auth("Auth")
         Queue("channel")
         AgentInstanciate("Agent Instance")
-        
+
         server <==> Queue
         AgentInstanciate <==> Queue
         db --> server
@@ -38,7 +38,7 @@ flowchart
         Comunication["Emiter"]
         LLM("LLM")
         Tools["Tools"]
-        
+
         Agent --> Memory
         Agent --> Comunication
         Agent --> LLM
