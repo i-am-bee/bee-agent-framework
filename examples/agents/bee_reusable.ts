@@ -1,13 +1,13 @@
 import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { OpenAIChatLLM } from "bee-agent-framework/adapters/openai/chat";
+import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 
 // We create an agent
 let agent = new BeeAgent({
   llm: new OpenAIChatLLM(),
-  tools: [new DuckDuckGoSearchTool()],
+  tools: [new WikipediaTool()],
   memory: new UnconstrainedMemory(),
 });
 

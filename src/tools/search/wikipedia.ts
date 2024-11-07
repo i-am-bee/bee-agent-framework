@@ -152,7 +152,9 @@ export class WikipediaTool extends Tool<
     this.register();
   }
 
-  @Cache()
+  @Cache({
+    enumerable: false,
+  })
   protected get _mappers(): Record<
     keyof PageFunctions,
     (page: Page, runOptions: WikipediaToolRunOptions) => Promise<any>
@@ -196,7 +198,9 @@ export class WikipediaTool extends Tool<
     };
   }
 
-  @Cache()
+  @Cache({
+    enumerable: false,
+  })
   protected get _defaultRunOptions(): WikipediaToolRunOptions {
     const unwrapTags = new Set(["a", "small", "sup"]);
     const unwrapTagsSelector = Array.from(unwrapTags.values()).join(",");
