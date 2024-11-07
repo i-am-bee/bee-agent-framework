@@ -66,15 +66,15 @@ describe("DuckDuckGoSearch Tool", () => {
     options: DuckDuckGoSearchToolOptions;
   }
   it.each([
-    { query: "LLM", options: { maxResultsPerPage: 1 } },
+    { query: "LLM", options: { maxResults: 1 } },
     { query: "IBM Research" },
-    { query: "NLP", options: { maxResultsPerPage: 3 } },
+    { query: "NLP", options: { maxResults: 3 } },
   ] as RetrieveDataInput[])("Retrieves data (%o)", async (input) => {
     const globalMaxResults = 10;
     const maxResultsPerPage = (input as any).options?.maxResultsPerPage ?? globalMaxResults;
 
     const tool = new DuckDuckGoSearchTool({
-      maxResultsPerPage: globalMaxResults,
+      maxResults: globalMaxResults,
       cache: false,
       throttle: false,
     });
@@ -97,7 +97,7 @@ describe("DuckDuckGoSearch Tool", () => {
         size: 10,
         ttl: 1000,
       }),
-      maxResultsPerPage: 1,
+      maxResults: 1,
     });
 
     await tool.cache!.set(
