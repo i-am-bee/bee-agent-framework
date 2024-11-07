@@ -213,8 +213,7 @@ export abstract class Tool<
         let errorPropagated = false;
 
         try {
-          this.preprocessInput(input);
-          await this.assertInput(input);
+          input = Object.assign({ ref: input }, { ref: await this.parse(input) }).ref;
 
           const output = await new Retryable({
             executor: async () => {
@@ -326,7 +325,7 @@ export abstract class Tool<
     ) as RetryableConfig;
   }
 
-  protected async assertInput(input: unknown) {
+  async parse(input: unknown | ToolInputRaw<this> | ToolInput<this>): Promise<ToolInput<this>> {
     const schema = await this.inputSchema();
     if (schema) {
       validateSchema(schema, {
@@ -340,7 +339,10 @@ export abstract class Tool<
       });
     }
 
-    this.validateInput(schema, input);
+    const copy = shallowCopy(input);
+    this.preprocessInput(copy);
+    this.validateInput(schema, copy);
+    return copy;
   }
 
   // eslint-disable-next-line unused-imports/no-unused-vars
