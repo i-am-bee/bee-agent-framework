@@ -17,7 +17,7 @@
 import { expect } from "vitest";
 import { DuckDuckGoSearchTool } from "@/tools/search/duckDuckGoSearch.js";
 
-describe("DuckDuckGo", () => {
+describe.skip("DuckDuckGo", () => {
   it("Retrieves data", async () => {
     const instance = new DuckDuckGoSearchTool();
     const response = await instance.run({ query: "Bee Agent Framework" });

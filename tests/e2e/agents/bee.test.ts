@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { DuckDuckGoSearchTool } from "@/tools/search/duckDuckGoSearch.js";
 import { FrameworkError } from "@/errors.js";
 import { beforeEach, expect, vi } from "vitest";
 import { Logger } from "@/logger/logger.js";
@@ -26,25 +25,21 @@ import { omitEmptyValues } from "@/internals/helpers/object.js";
 import * as process from "node:process";
 import { createChatLLM } from "@tests/utils/llmFactory.js";
 import { BeeMeta } from "@/agents/bee/types.js";
-import { UnconstrainedCache } from "@/cache/unconstrainedCache.js";
+import { GoogleSearchTool } from "@/tools/search/googleSearch.js";
 
-describe("Bee Agent", () => {
+const googleSearchApiKey = process.env.GOOGLE_API_KEY;
+const googleSearchCseId = process.env.GOOGLE_CSE_ID;
+
+describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", () => {
   const createAgent = () => {
     return new BeeAgent({
       llm: createChatLLM(),
       memory: new UnconstrainedMemory(),
       tools: [
-        new DuckDuckGoSearchTool({
-          cache: new UnconstrainedCache(),
+        new GoogleSearchTool({
+          apiKey: googleSearchApiKey,
+          cseId: googleSearchCseId,
           maxResults: 10,
-          throttle: {
-            interval: 5000,
-            limit: 1,
-            strict: true,
-          },
-          httpClientOptions: {
-            proxy: process.env.PROXY,
-          },
         }),
       ],
     });
