@@ -100,7 +100,7 @@ export class PromptTemplate<T extends ZodType> extends Serializable {
     this.register();
   }
 
-  protected validateInput(input: unknown): asserts input is T {
+  validateInput(input: unknown): asserts input is T {
     const validator = createSchemaValidator(this.config.schema, {
       coerceTypes: false,
     }) as ValidateFunction<T>;
