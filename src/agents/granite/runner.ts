@@ -17,12 +17,11 @@ import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { BeeRunOptions } from "@/agents/bee/types.js";
 import { AnyTool } from "@/tools/base.js";
 import { BeeInput } from "@/agents/bee/agent.js";
-import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
-import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
 import * as R from "remeda";
 import { BeeAgentRunner } from "@/agents/bee/runner.js";
 import { PromptTemplate } from "@/template.js";
+import { BeeParserInput } from "@/agents/bee/parser.js";
 
 const graniteBeeSystemPrompt = new PromptTemplate({
   schema: z.object({
@@ -143,59 +142,18 @@ export class GraniteAgentRunner extends BeeAgentRunner {
   }
 
   protected createParser(tools: AnyTool[]) {
-    const parserRegex = /Thought:.+\n(?:Final Answer:[\S\s]+|Tool Name:.+\nTool Input:\{.*\})?/;
+    const { parser } = super.createParser(tools);
 
-    const parser = new LinePrefixParser(
-      {
-        thought: {
-          prefix: "Thought:",
-          next: ["tool_name", "final_answer"],
-          isStart: true,
-          field: new ZodParserField(z.string().min(1)),
-        },
-        tool_name: {
-          prefix: "Tool Name:",
-          next: ["tool_input"],
-          field: new ZodParserField(
-            z.pipeline(
-              z.string().trim(),
-              z.enum(tools.map((tool) => tool.name) as [string, ...string[]]),
-            ),
-          ),
-        },
-        tool_input: {
-          prefix: "Tool Input:",
-          next: [],
-          isEnd: true,
-          field: new JSONParserField({
-            schema: z.object({}).passthrough(),
-            base: {},
-            matchPair: ["{", "}"],
-          }),
-        },
-        final_answer: {
-          prefix: "Final Answer:",
-          next: [],
-          isStart: true,
-          isEnd: true,
-          field: new ZodParserField(z.string().min(1)),
-        },
-      } as const,
-      {
-        waitForStartNode: true,
-        endOnRepeat: true,
-        fallback: (stash) =>
-          stash
-            ? [
-                { key: "thought", value: "I now know the final answer." },
-                { key: "final_answer", value: stash },
-              ]
-            : [],
-      },
-    ) as unknown as ReturnType<InstanceType<typeof BeeAgentRunner>["createParser"]>["parser"];
     return {
-      parser,
-      parserRegex,
-    } as const;
+      parserRegex: /Thought:.+\n(?:Final Answer:[\S\s]+|Tool Name:.+\nTool Input:\{.*\})?/,
+      parser: parser.fork<BeeParserInput>((nodes, options) => ({
+        options,
+        nodes: {
+          ...nodes,
+          tool_name: { ...nodes.tool_name, prefix: "Tool Name:" },
+          tool_input: { ...nodes.tool_input, prefix: "Tool Input:", isEnd: true, next: [] },
+        },
+      })),
+    };
   }
 }
