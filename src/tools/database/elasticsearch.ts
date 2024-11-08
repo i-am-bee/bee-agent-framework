@@ -48,9 +48,9 @@ export type ElasticSearchToolResult =
 
 export const ElasticSearchAction = {
   ListIndices: "LIST_INDICES",
-  getIndexDetails: "GET_INDEX_DETAILS",
-  search: "SEARCH",
-};
+  GetIndexDetails: "GET_INDEX_DETAILS",
+  Search: "SEARCH",
+} as const;
 
 export class ElasticSearchTool extends Tool<
   JSONToolOutput<ElasticSearchToolResult>,
@@ -61,24 +61,28 @@ export class ElasticSearchTool extends Tool<
 
   description = `Can query data from an ElasticSearch database. IMPORTANT: strictly follow this order of actions:
    1. ${ElasticSearchAction.ListIndices} - retrieve a list of available indices
-   2. ${ElasticSearchAction.getIndexDetails} - get details of index fields
-   3. ${ElasticSearchAction.search} - perform search or aggregation query on a specific index or pass the original user query without modifications if it's a valid JSON ElasticSearch query`;
+   2. ${ElasticSearchAction.GetIndexDetails} - get details of index fields
+   3. ${ElasticSearchAction.Search} - perform search or aggregation query on a specific index or pass the original user query without modifications if it's a valid JSON ElasticSearch query after identifying the index`;
 
   inputSchema() {
     return z.object({
       action: z
         .nativeEnum(ElasticSearchAction)
         .describe(
-          "The action to perform. LIST_INDICES lists all indices, GET_INDEX_DETAILS fetches details for a specified index, and SEARCH executes a search or aggregation query",
+          `The action to perform. ${ElasticSearchAction.ListIndices} lists all indices, ${ElasticSearchAction.GetIndexDetails} fetches details for a specified index, and ${ElasticSearchAction.Search} executes a search or aggregation query`,
         ),
       indexName: z
         .string()
         .optional()
-        .describe("The name of the index to query, required for GET_INDEX_DETAILS and SEARCH"),
+        .describe(
+          `The name of the index to query, required for ${ElasticSearchAction.GetIndexDetails} and ${ElasticSearchAction.Search}`,
+        ),
       query: z
         .string()
         .optional()
-        .describe("Valid ElasticSearch JSON search or aggregation query for SEARCH action"),
+        .describe(
+          `Valid ElasticSearch JSON search or aggregation query for ${ElasticSearchAction.Search} action`,
+        ),
       start: z.coerce
         .number()
         .int()
@@ -104,21 +108,21 @@ export class ElasticSearchTool extends Tool<
     input: unknown,
   ): asserts input is ToolInput<this> {
     super.validateInput(schema, input);
-    if (input.action === ElasticSearchAction.getIndexDetails && !input.indexName) {
+    if (input.action === ElasticSearchAction.GetIndexDetails && !input.indexName) {
       throw new ToolInputValidationError(
-        `Index name is required for ${ElasticSearchAction.getIndexDetails} action.`,
+        `Index name is required for ${ElasticSearchAction.GetIndexDetails} action.`,
       );
     }
-    if (input.action === ElasticSearchAction.search && (!input.indexName || !input.query)) {
+    if (input.action === ElasticSearchAction.Search && (!input.indexName || !input.query)) {
       throw new ToolInputValidationError(
-        `Both index name and query are required for ${ElasticSearchAction.search} action.`,
+        `Both index name and query are required for ${ElasticSearchAction.Search} action.`,
       );
     }
-    if (input.action === ElasticSearchAction.search && input.query) {
+    if (input.action === ElasticSearchAction.Search && input.query) {
       try {
         JSON.parse(input.query);
       } catch (error) {
-        throw new ToolInputValidationError(`Invalid JSON format for query ${error}`);
+        throw new ToolInputValidationError(`Invalid JSON format for query.`, [error]);
       }
     }
   }
@@ -161,10 +165,10 @@ export class ElasticSearchTool extends Tool<
     if (input.action === ElasticSearchAction.ListIndices) {
       const indices = await this.listIndices(run.signal);
       return new JSONToolOutput(indices);
-    } else if (input.action === ElasticSearchAction.getIndexDetails) {
+    } else if (input.action === ElasticSearchAction.GetIndexDetails) {
       const indexDetails = await this.getIndexDetails(input, run.signal);
       return new JSONToolOutput(indexDetails);
-    } else if (input.action === ElasticSearchAction.search) {
+    } else if (input.action === ElasticSearchAction.Search) {
       const response = await this.search(input, run.signal);
       if (response.aggregations) {
         return new JSONToolOutput(response.aggregations);
