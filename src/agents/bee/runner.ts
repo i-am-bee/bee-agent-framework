@@ -270,6 +270,7 @@ export class BeeAgentRunner extends Serializable {
                 data: parser.finalState,
                 update: { key, value: field.raw, parsedValue: value },
                 meta: { success: true, ...meta },
+                memory: this.memory,
               });
             });
             parser.emitter.on("partialUpdate", async ({ key, delta, value }) => {
