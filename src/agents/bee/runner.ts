@@ -48,6 +48,7 @@ import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
 import { Serializable } from "@/internals/serializable.js";
 import { shallowCopy } from "@/serializer/utils.js";
+import { isEmpty } from "remeda";
 
 export class BeeAgentRunnerFatalError extends BeeAgentError {
   isFatal = true;
@@ -172,8 +173,11 @@ export class BeeAgentRunner extends Serializable {
   }
 
   protected createParser(tools: AnyTool[]) {
-    const parserRegex =
-      /Thought:.+\n(?:Final Answer:[\S\s]+|Function Name:.+\nFunction Input: \{.*\}\nFunction Output:)?/;
+    const parserRegex = isEmpty(tools)
+      ? new RegExp(`Thought:.+\\nFinal Answer:[\\s\\S]+`)
+      : new RegExp(
+          `Thought:.+\\n(?:Final Answer:[\\s\\S]+|Function Name:(${tools.map((tool) => tool.name).join("|")})\\nFunction Input: \\{.*\\}\\nFunction Output:)?`,
+        );
 
     const parser = new LinePrefixParser<BeeParserInput>(
       {
