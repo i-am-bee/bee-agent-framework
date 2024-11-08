@@ -17,14 +17,12 @@ const llm = WatsonXChatLLM.fromPreset("ibm/granite-3-8b-instruct", {
     decoding_method: "greedy",
     max_new_tokens: 1024,
   },
-})
+});
 
 const agent = new GraniteBeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
-  tools: [
-    new DuckDuckGoSearchTool({maxResults: 3}),
-  ],
+  tools: [new DuckDuckGoSearchTool({ maxResults: 3 })],
 });
 
 const reader = createConsoleReader();
