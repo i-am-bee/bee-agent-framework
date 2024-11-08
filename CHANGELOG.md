@@ -2,23 +2,22 @@
 
 ## [0.0.37](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.36...v0.0.37) (2024-11-07)
 
-
 ### ⚠ BREAKING CHANGES
 
-* **agent:** remove tool caption from Bee agent (#154)
-* **tool:** remove pagination functionality from GoogleSearch and DuckDuckGo (#152)
-* **tool:** remove pagination from search tools
+- **agent:** remove tool caption from Bee agent (#154)
+- **tool:** remove pagination functionality from GoogleSearch and DuckDuckGo (#152)
+- **tool:** remove pagination from search tools
 
 ### Features
 
-* **agent:** remove tool caption from Bee agent ([#154](https://github.com/i-am-bee/bee-agent-framework/issues/154)) ([d84beeb](https://github.com/i-am-bee/bee-agent-framework/commit/d84beeb05f1eee7b4c62cb222721962f8a4ca6fb)), closes [#153](https://github.com/i-am-bee/bee-agent-framework/issues/153)
-* **llm:** add Granite 3.0 models to WatsonXChatLLM Preset ([1e6aa37](https://github.com/i-am-bee/bee-agent-framework/commit/1e6aa3733afb09a32fade54fcdaf257d98588721))
-* **llm:** set temperature to 0 for OpenAI LLM adapter ([ea84808](https://github.com/i-am-bee/bee-agent-framework/commit/ea8480850f1b1f84e9551e68d9165d1399909c5e))
-* **template:** make validateInput method public ([34156b7](https://github.com/i-am-bee/bee-agent-framework/commit/34156b787d25eeefb146782c6a4e9d9d866bfade))
-* **tool:** add public parse method ([f97f73a](https://github.com/i-am-bee/bee-agent-framework/commit/f97f73a43478d83873464b01ef20701716bee5fd))
-* **tool:** improve wikipedia results filtering ([#143](https://github.com/i-am-bee/bee-agent-framework/issues/143)) ([2529a0c](https://github.com/i-am-bee/bee-agent-framework/commit/2529a0cd2c4fbfbc19113d53e35a37af7807ceed)), closes [#142](https://github.com/i-am-bee/bee-agent-framework/issues/142)
-* **tool:** remove pagination from search tools ([f93d181](https://github.com/i-am-bee/bee-agent-framework/commit/f93d181c3c9f3d535323a438b92a4a8e5a3f437a))
-* **tool:** remove pagination functionality from GoogleSearch and DuckDuckGo ([#152](https://github.com/i-am-bee/bee-agent-framework/issues/152)) ([59424de](https://github.com/i-am-bee/bee-agent-framework/commit/59424de69afc9567d75bc1f82263ccf7f206aa9d)), closes [#151](https://github.com/i-am-bee/bee-agent-framework/issues/151)
+- **agent:** remove tool caption from Bee agent ([#154](https://github.com/i-am-bee/bee-agent-framework/issues/154)) ([d84beeb](https://github.com/i-am-bee/bee-agent-framework/commit/d84beeb05f1eee7b4c62cb222721962f8a4ca6fb)), closes [#153](https://github.com/i-am-bee/bee-agent-framework/issues/153)
+- **llm:** add Granite 3.0 models to WatsonXChatLLM Preset ([1e6aa37](https://github.com/i-am-bee/bee-agent-framework/commit/1e6aa3733afb09a32fade54fcdaf257d98588721))
+- **llm:** set temperature to 0 for OpenAI LLM adapter ([ea84808](https://github.com/i-am-bee/bee-agent-framework/commit/ea8480850f1b1f84e9551e68d9165d1399909c5e))
+- **template:** make validateInput method public ([34156b7](https://github.com/i-am-bee/bee-agent-framework/commit/34156b787d25eeefb146782c6a4e9d9d866bfade))
+- **tool:** add public parse method ([f97f73a](https://github.com/i-am-bee/bee-agent-framework/commit/f97f73a43478d83873464b01ef20701716bee5fd))
+- **tool:** improve wikipedia results filtering ([#143](https://github.com/i-am-bee/bee-agent-framework/issues/143)) ([2529a0c](https://github.com/i-am-bee/bee-agent-framework/commit/2529a0cd2c4fbfbc19113d53e35a37af7807ceed)), closes [#142](https://github.com/i-am-bee/bee-agent-framework/issues/142)
+- **tool:** remove pagination from search tools ([f93d181](https://github.com/i-am-bee/bee-agent-framework/commit/f93d181c3c9f3d535323a438b92a4a8e5a3f437a))
+- **tool:** remove pagination functionality from GoogleSearch and DuckDuckGo ([#152](https://github.com/i-am-bee/bee-agent-framework/issues/152)) ([59424de](https://github.com/i-am-bee/bee-agent-framework/commit/59424de69afc9567d75bc1f82263ccf7f206aa9d)), closes [#151](https://github.com/i-am-bee/bee-agent-framework/issues/151)
 
 ## [0.0.36](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.34...v0.0.36) (2024-11-04)
 
