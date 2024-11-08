@@ -15,10 +15,18 @@
  */
 
 import { NonUndefined } from "@/internals/types.js";
-import type { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
-import type { BeeAgentRunner } from "@/agents/bee/runner.js";
+import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
+import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 
-type Parser = ReturnType<InstanceType<typeof BeeAgentRunner>["createParser"]>["parser"];
-export type BeeIterationResult = LinePrefixParser.inferOutput<Parser>;
-export type BeeIterationResultPartial = LinePrefixParser.inferPartialOutput<Parser>;
+export type BeeParserInput = LinePrefixParser.define<{
+  thought: ZodParserField<string>;
+  tool_name: ZodParserField<string>;
+  tool_input: JSONParserField<Record<string, any>>;
+  tool_output: ZodParserField<string>;
+  final_answer: ZodParserField<string>;
+}>;
+
+type BeeParser = LinePrefixParser<BeeParserInput>;
+export type BeeIterationResult = LinePrefixParser.inferOutput<BeeParser>;
+export type BeeIterationResultPartial = LinePrefixParser.inferPartialOutput<BeeParser>;
 export type BeeIterationToolResult = NonUndefined<BeeIterationResult, "tool_input" | "tool_name">;
