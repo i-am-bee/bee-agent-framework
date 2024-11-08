@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.38](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.37...v0.0.38) (2024-11-08)
+
+### Features
+
+- **agent:** improve Bee extensibility, update events ([705f142](https://github.com/i-am-bee/bee-agent-framework/commit/705f142d37f966a79fce0f43260f908002809aad))
+- **agent:** improve extensibility of Bee parser ([b5f3b7c](https://github.com/i-am-bee/bee-agent-framework/commit/b5f3b7c1e29c606c186c8026b9fd4325a9ef0228))
+- **memory:** add splice and remove method ([3dd1535](https://github.com/i-am-bee/bee-agent-framework/commit/3dd1535be034d63f41dee38e8c0afdf0e2921fca))
+
+### Bug Fixes
+
+- **tool:** handle duckduckgo anomaly detection ([41a1048](https://github.com/i-am-bee/bee-agent-framework/commit/41a10482fd739415a9e92018398a5530ca403972))
+
 ## [0.0.37](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.36...v0.0.37) (2024-11-07)
 
 ### ⚠ BREAKING CHANGES
