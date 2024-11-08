@@ -40,7 +40,7 @@ import {
   BeeUserEmptyPrompt,
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
-import { BeeIterationToolResult } from "@/agents/bee/parser.js";
+import { BeeIterationToolResult, BeeParserInput } from "@/agents/bee/parser.js";
 import { AgentError } from "@/agents/base.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
@@ -175,7 +175,7 @@ export class BeeAgentRunner extends Serializable {
     const parserRegex =
       /Thought:.+\n(?:Final Answer:[\S\s]+|Function Name:.+\nFunction Input: \{.*\}\nFunction Output:)?/;
 
-    const parser = new LinePrefixParser(
+    const parser = new LinePrefixParser<BeeParserInput>(
       {
         thought: {
           prefix: "Thought:",
@@ -216,7 +216,7 @@ export class BeeAgentRunner extends Serializable {
           isEnd: true,
           field: new ZodParserField(z.string().min(1)),
         },
-      } as const,
+      },
       {
         waitForStartNode: true,
         endOnRepeat: true,
@@ -270,6 +270,7 @@ export class BeeAgentRunner extends Serializable {
                 data: parser.finalState,
                 update: { key, value: field.raw, parsedValue: value },
                 meta: { success: true, ...meta },
+                memory: this.memory,
               });
             });
             parser.emitter.on("partialUpdate", async ({ key, delta, value }) => {

@@ -25,6 +25,7 @@ import { BaseMessage } from "@/llms/primitives/message.js";
 import { Callback } from "@/emitter/types.js";
 import { AnyTool, BaseToolRunOptions, Tool, ToolError, ToolOutput } from "@/tools/base.js";
 import {
+  BeeAssistantPrompt,
   BeeSystemPrompt,
   BeeToolErrorPrompt,
   BeeToolInputErrorPrompt,
@@ -89,6 +90,7 @@ export interface BeeCallbacks {
     data: BeeIterationResult;
     update: { key: keyof BeeIterationResult; value: string; parsedValue: unknown };
     meta: BeeUpdateMeta;
+    memory: BaseMemory;
   }>;
   partialUpdate?: Callback<{
     data: BeeIterationResultPartial;
@@ -128,6 +130,7 @@ export interface BeeCallbacks {
 
 export interface BeeAgentTemplates {
   system: typeof BeeSystemPrompt;
+  assistant: typeof BeeAssistantPrompt;
   user: typeof BeeUserPrompt;
   userEmpty: typeof BeeUserEmptyPrompt;
   toolError: typeof BeeToolErrorPrompt;

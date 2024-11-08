@@ -20,8 +20,6 @@ import { BaseMemory } from "@/memory/base.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { AgentMeta } from "@/agents/types.js";
-import { BeeAssistantPrompt } from "@/agents/bee/prompts.js";
-import * as R from "remeda";
 import { Emitter } from "@/emitter/emitter.js";
 import {
   BeeAgentRunIteration,
@@ -37,6 +35,8 @@ import { BeeAgentError } from "@/agents/bee/errors.js";
 import { BeeIterationToolResult } from "@/agents/bee/parser.js";
 import { assign } from "@/internals/helpers/object.js";
 import { BeeAgentRunner } from "@/agents/bee/runner.js";
+import { BeeAssistantPrompt } from "@/agents/bee/prompts.js";
+import * as R from "remeda";
 
 export interface BeeInput {
   llm: ChatLLM<ChatLLMOutput>;
@@ -128,21 +128,10 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
           meta,
         });
 
-        for (const key of ["partialUpdate", "update"] as const) {
-          await emitter.emit(key, {
-            data: {
-              ...iteration.state,
-              tool_output: output,
-            },
-            update: { key: "tool_output", value: output, parsedValue: output },
-            meta: { success, ...meta },
-          });
-        }
-
         await runner.memory.add(
           BaseMessage.of({
             role: Role.ASSISTANT,
-            text: BeeAssistantPrompt.clone().render({
+            text: (this.input.templates?.assistant ?? BeeAssistantPrompt).clone().render({
               toolName: [iteration.state.tool_name].filter(R.isTruthy),
               toolInput: [iteration.state.tool_input]
                 .filter(R.isTruthy)
@@ -154,8 +143,16 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
             meta: { success },
           }),
         );
-
         assign(iteration.state, { tool_output: output });
+
+        for (const key of ["partialUpdate", "update"] as const) {
+          await emitter.emit(key, {
+            data: iteration.state,
+            update: { key: "tool_output", value: output, parsedValue: output },
+            meta: { success, ...meta },
+            memory: runner.memory,
+          });
+        }
       }
       if (iteration.state.final_answer) {
         finalMessage = BaseMessage.of({
@@ -165,13 +162,13 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
             createdAt: new Date(),
           },
         });
+        await runner.memory.add(finalMessage);
         await run.emitter.emit("success", {
           data: finalMessage,
           iterations,
           memory: runner.memory,
           meta,
         });
-        await runner.memory.add(finalMessage);
       }
       iterations.push(iteration);
     }

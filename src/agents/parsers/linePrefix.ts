@@ -31,6 +31,11 @@ export interface ParserNode<T extends string, P extends ParserField<any, any>> {
   field: P;
 }
 
+type Customizer<T extends NonNullable<unknown>, T2 extends NonNullable<unknown> = T> = (
+  nodes: T,
+  options: Options<T>,
+) => { nodes: T2; options: Options<T2> };
+
 type StringKey<T extends NonNullable<unknown>> = Extract<keyof T, string>;
 
 interface Callbacks<T extends Record<string, ParserNode<StringKey<T>, ParserField<any, any>>>> {
@@ -86,9 +91,9 @@ interface Options<T extends NonNullable<unknown>> {
   waitForStartNode?: boolean;
 }
 
-export class LinePrefixParser<
-  T extends Record<string, ParserNode<Extract<keyof T, string>, ParserField<any, any>>>,
-> extends Serializable {
+type Input<K extends string = string> = Record<string, ParserNode<K, ParserField<any, any>>>;
+
+export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializable {
   public readonly emitter = new Emitter<Callbacks<T>>({
     creator: this,
     namespace: ["agent", "parser", "line"],
@@ -137,6 +142,11 @@ export class LinePrefixParser<
     if (!hasEndNode) {
       throw new ValueError(`At least one end node must be provided!`);
     }
+  }
+
+  fork<R extends T = T>(customizer: Customizer<T, R>) {
+    const { nodes, options } = customizer(this.nodes, this.options);
+    return new LinePrefixParser(nodes, options);
   }
 
   async add(chunk: string) {
@@ -380,13 +390,11 @@ export class LinePrefixParser<
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace LinePrefixParser {
-  export type infer<
-    T extends Record<string, ParserNode<Extract<keyof T, string>, ParserField<any, any>>>,
-  > = {
+  export type infer<T extends Record<string, ParserNode<StringKey<T>, ParserField<any, any>>>> = {
     [K in keyof T]: ParserField.inferValue<T[K]["field"]>;
   };
   export type inferPartial<
-    T extends Record<string, ParserNode<Extract<keyof T, string>, ParserField<any, any>>>,
+    T extends Record<string, ParserNode<StringKey<T>, ParserField<any, any>>>,
   > = {
     [K in StringKey<T>]: ParserField.inferPartialValue<T[K]["field"]>;
   };
@@ -399,4 +407,8 @@ export namespace LinePrefixParser {
 
   export type inferPartialOutput<T> =
     T extends LinePrefixParser<infer P> ? LinePrefixParser.inferPartial<P> : never;
+
+  export type define<T extends Record<string, ParserField<any, any>>> = {
+    [K in StringKey<T>]: ParserNode<StringKey<T>, T[K]>;
+  };
 }

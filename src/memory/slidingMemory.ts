@@ -18,8 +18,9 @@ import { BaseMessage } from "@/llms/primitives/message.js";
 import { BaseMemory, MemoryFatalError } from "@/memory/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { filter, forEach, isTruthy, pipe } from "remeda";
-import { castArray } from "@/internals/helpers/array.js";
+import { castArray, removeFromArray } from "@/internals/helpers/array.js";
 import { RequiredNested } from "@/internals/types.js";
+import { ensureRange } from "@/internals/helpers/number.js";
 
 export interface Handlers {
   removalSelector: (messages: BaseMessage[]) => BaseMessage | BaseMessage[];
@@ -50,7 +51,7 @@ export class SlidingMemory extends BaseMemory {
     this.register(aliases);
   }
 
-  async add(message: BaseMessage) {
+  async add(message: BaseMessage, index?: number) {
     const { size, handlers } = this.config;
     const isOverflow = () => this.messages.length + 1 > size;
 
@@ -77,7 +78,13 @@ export class SlidingMemory extends BaseMemory {
         );
       }
     }
-    this.messages.push(message);
+
+    index = ensureRange(index ?? this.messages.length, { min: 0, max: this.messages.length });
+    this.messages.splice(index, 0, message);
+  }
+
+  async delete(message: BaseMessage) {
+    return removeFromArray(this.messages, message);
   }
 
   reset() {

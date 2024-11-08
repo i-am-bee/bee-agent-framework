@@ -65,7 +65,12 @@ export class SummarizeMemory extends BaseMemory {
     ];
   }
 
-  async add(message: BaseMessage) {
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async delete(message: BaseMessage) {
+    return false;
+  }
+
+  async add(message: BaseMessage, _index?: number) {
     const response = await this.llm.generate([
       BaseMessage.of({
         role: Role.SYSTEM,
