@@ -31,13 +31,37 @@ export class MemoryFatalError extends MemoryError {
 
 export abstract class BaseMemory<TState = unknown> extends Serializable<TState> {
   abstract get messages(): readonly BaseMessage[];
-  abstract add(message: BaseMessage): Promise<void>;
+
+  abstract add(message: BaseMessage, index?: number): Promise<void>;
+
+  abstract delete(message: BaseMessage): Promise<boolean>;
   abstract reset(): void;
 
-  async addMany(messages: Iterable<BaseMessage> | AsyncIterable<BaseMessage>) {
+  async addMany(messages: Iterable<BaseMessage> | AsyncIterable<BaseMessage>, start?: number) {
+    let counter = 0;
     for await (const msg of messages) {
-      await this.add(msg);
+      await this.add(msg, start === undefined ? undefined : start + counter);
+      counter += 1;
     }
+  }
+
+  async deleteMany(messages: Iterable<BaseMessage> | AsyncIterable<BaseMessage>) {
+    for await (const msg of messages) {
+      await this.delete(msg);
+    }
+  }
+
+  async splice(start: number, deleteCount: number, ...items: BaseMessage[]) {
+    const total = this.messages.length;
+
+    start = start < 0 ? Math.max(total + start, 0) : start;
+    deleteCount = Math.min(deleteCount, total - start);
+
+    const deletedItems = this.messages.slice(start, start + deleteCount);
+    await this.deleteMany(deletedItems);
+    await this.addMany(items, start);
+
+    return deletedItems;
   }
 
   isEmpty() {
@@ -66,7 +90,12 @@ export class ReadOnlyMemory<T extends BaseMemory = BaseMemory> extends BaseMemor
   }
 
   // eslint-disable-next-line unused-imports/no-unused-vars
-  async add(message: BaseMessage) {}
+  async add(message: BaseMessage, index?: number) {}
+
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async delete(message: BaseMessage) {
+    return false;
+  }
 
   get messages(): readonly BaseMessage[] {
     return this.source.messages;

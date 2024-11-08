@@ -7,7 +7,11 @@ export class MyMemory extends BaseMemory {
     throw new NotImplementedError("Method not implemented.");
   }
 
-  add(message: BaseMessage): Promise<void> {
+  add(message: BaseMessage, index?: number): Promise<void> {
+    throw new NotImplementedError("Method not implemented.");
+  }
+
+  delete(message: BaseMessage): Promise<boolean> {
     throw new NotImplementedError("Method not implemented.");
   }
 
