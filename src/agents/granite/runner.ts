@@ -22,6 +22,7 @@ import * as R from "remeda";
 import { BeeAgentRunner } from "@/agents/bee/runner.js";
 import { PromptTemplate } from "@/template.js";
 import { BeeParserInput } from "@/agents/bee/parser.js";
+import { isEmpty } from "remeda";
 
 const graniteBeeSystemPrompt = new PromptTemplate({
   schema: z.object({
@@ -86,35 +87,21 @@ const AVAILABLE_TOOLS_ROLE = "available_tools";
 
 export class GraniteAgentRunner extends BeeAgentRunner {
   static async create(input: BeeInput, options: BeeRunOptions, prompt: string | null) {
-    const instance = await super.create(input, options, prompt);
-    const messages = instance.memory.messages.slice();
-    instance.memory.reset();
-
-    // Replace existing system prompt with sys prompt + tools message
-    const systemMessages: BaseMessage[] = [
-      BaseMessage.of({
-        role: Role.SYSTEM,
-        text: graniteBeeSystemPrompt.render({
-          tools: await Promise.all(
-            input.tools.map(async (tool) => ({
-              name: tool.name,
-              description: tool.description.replaceAll("\n", ".").replace(/\.$/, "").concat("."),
-              schema: JSON.stringify(
-                await tool.getInputJsonSchema(),
-                (() => {
-                  const ignoredKeys = new Set(["minLength", "maxLength", "$schema"]);
-                  return (key, value) => (ignoredKeys.has(key) ? undefined : value);
-                })(),
-              ),
-            })),
-          ),
-          instructions: undefined,
-        }),
-        meta: {
-          createdAt: new Date(),
+    const instance = await super.create(
+      {
+        ...input,
+        templates: {
+          ...input.templates,
+          system: graniteBeeSystemPrompt,
         },
-      }),
-      (!R.isEmpty(input.tools) &&
+      },
+      options,
+      prompt,
+    );
+
+    if (!isEmpty(input.tools)) {
+      const index = instance.memory.messages.findIndex((msg) => msg.role === Role.SYSTEM) + 1;
+      await instance.memory.add(
         BaseMessage.of({
           role: AVAILABLE_TOOLS_ROLE,
           text: JSON.stringify(
@@ -132,12 +119,11 @@ export class GraniteAgentRunner extends BeeAgentRunner {
             null,
             4,
           ),
-        })) ||
-        undefined,
-    ].filter(R.isNonNullish);
+        }),
+        index,
+      );
+    }
 
-    messages.splice(0, 1, ...systemMessages);
-    await instance.memory.addMany(messages);
     return instance;
   }
 
