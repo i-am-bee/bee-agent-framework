@@ -1,8 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////// RUN THIS EXAMPLE VIA `yarn start:telemetry ./examples/agents/bee_instrumentation.js` ///////////
+/////// RUN THIS EXAMPLE VIA `yarn start:telemetry ./examples/agents/bee_instrumentation.ts` ///////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { FrameworkError } from "bee-agent-framework/errors";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";

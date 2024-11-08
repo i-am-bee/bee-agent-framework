@@ -16,12 +16,10 @@
 
 import { Serializable } from "@/internals/serializable.js";
 import { instrumentationLogger } from "@/instrumentation/logger.js";
+import { getProp } from "@/internals/helpers/object.js";
 
 export function getSerializedObjectSafe(dataObject: any) {
-  const data =
-    dataObject && typeof dataObject === "object" && "data" in dataObject
-      ? dataObject.data
-      : dataObject;
+  const data = getProp(dataObject, ["data"], dataObject);
 
   if (data instanceof Serializable) {
     try {

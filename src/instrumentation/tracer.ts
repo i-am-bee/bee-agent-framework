@@ -15,7 +15,7 @@
  */
 
 import { Version } from "@/version.js";
-import opentelemetry, { SpanStatusCode } from "@opentelemetry/api";
+import opentelemetry, { SpanStatusCode, TimeInput } from "@opentelemetry/api";
 import { FrameworkSpan, GeneratedResponse } from "./types.js";
 
 export const tracer = opentelemetry.trace.getTracer("bee-agent-framework", Version);
@@ -30,8 +30,8 @@ interface ComputeTreeProps {
   traceId: string;
   version: string;
   runErrorSpanKey: string;
-  startTime: Date;
-  endTime: Date;
+  startTime: TimeInput;
+  endTime: TimeInput;
   source: string;
 }
 

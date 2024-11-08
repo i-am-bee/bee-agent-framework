@@ -1,3 +1,4 @@
+import "@opentelemetry/instrumentation/hook.mjs";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { ConsoleSpanExporter } from "@opentelemetry/sdk-trace-node";
 import { Resource } from "@opentelemetry/resources";

@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
-/////// RUN THIS EXAMPLE VIA `yarn start:telemetry ./examples/llms/instrumentation.js` ///////////
+/////// RUN THIS EXAMPLE VIA `yarn start:telemetry ./examples/llms/instrumentation.ts` ///////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
-import "dotenv/config.js";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { Logger } from "bee-agent-framework/logger/logger";

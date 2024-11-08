@@ -18,7 +18,7 @@ import { getSerializedObjectSafe } from "./helpers/get-serialized-object-safe.js
 import { createSpan } from "./helpers/create-span.js";
 import { IdNameManager } from "./helpers/id-name-manager.js";
 import { getErrorSafe } from "./helpers/get-error-safe.js";
-import { isDeepEqual, isEmpty } from "remeda";
+import { findLast, isDeepEqual, isEmpty } from "remeda";
 import type { BeeCallbacks } from "@/agents/bee/types.js";
 import type { InferCallbackValue } from "@/emitter/types.js";
 import type { GenerateCallbacks } from "@/llms/base.js";
@@ -38,7 +38,7 @@ import { instrumentationLogger } from "./logger.js";
 export function createTelemetryMiddleware() {
   return (context: GetRunContext<RunInstance, unknown>) => {
     if (!context.emitter?.trace?.id) {
-      throw new FrameworkError(`Fatal error. Missing traceId`);
+      throw new FrameworkError(`Fatal error. Missing traceId`, [], { context });
     }
 
     const traceId = context.emitter?.trace?.id;
@@ -81,14 +81,9 @@ export function createTelemetryMiddleware() {
 
     const eventsIterationsMap = new Map<string, Map<string, string>>();
 
-    const startTime = new Date();
+    const startTime = performance.now();
     const serializer = traceSerializer({ ignored_keys: INSTRUMENTATION_IGNORED_KEYS });
 
-    /**
-     * delete all sources related to deleted span
-     * @param param0
-     * @returns
-     */
     function cleanSpanSources({ spanId }: { spanId: string }) {
       const parentId = spansMap.get(spanId)?.parent_id;
       if (!parentId) {
@@ -124,13 +119,15 @@ export function createTelemetryMiddleware() {
           instrumentationLogger.debug({ path: meta.path, traceId: traceId }, "run finish event");
 
           if (!prompt && instance.constructor.name === "BeeAgent") {
-            prompt = (instance as BeeAgent).memory.messages
-              .slice()
-              .reverse()
-              .find((message) => message.role === Role.USER)?.text;
+            prompt = findLast(
+              (instance as BeeAgent).memory.messages,
+              (message) => message.role === Role.USER,
+            )?.text;
 
             if (!prompt) {
-              throw new FrameworkError("The prompt must be defined for the Agent's run");
+              throw new FrameworkError("The prompt must be defined for the Agent's run", [], {
+                context,
+              });
             }
           }
 
@@ -144,7 +141,7 @@ export function createTelemetryMiddleware() {
             version: Version,
             runErrorSpanKey: `${basePath}.run.${errorEventName}`,
             startTime,
-            endTime: new Date(),
+            endTime: performance.now(),
             source: activeTracesMap.get(traceId)!,
           });
         } catch (e) {
@@ -167,7 +164,9 @@ export function createTelemetryMiddleware() {
         return;
       }
       if (!meta.trace?.runId) {
-        throw new FrameworkError(`Fatal error. Missing runId for event: ${meta.path}`);
+        throw new FrameworkError(`Fatal error. Missing runId for event: ${meta.path}`, [], {
+          context,
+        });
       }
 
       /**
@@ -227,7 +226,7 @@ export function createTelemetryMiddleware() {
       const lastIterationEventSpanId = eventsIterationsMap.get(lastIteration)?.get(meta.name);
       if (
         lastIterationEventSpanId &&
-        ([partialUpdateEventName] as string[]).includes(meta.name) &&
+        partialUpdateEventName === meta.name &&
         spansMap.has(lastIterationEventSpanId)
       ) {
         const { attributes, context } = spansMap.get(lastIterationEventSpanId)!;
@@ -260,21 +259,17 @@ export function createTelemetryMiddleware() {
       }
     });
 
-    // The generated response and message history are collected from the `success` event
-    emitter.on(
-      successEventName as any,
+    // The generated response and message history are collected from the `success` agent's event
+    emitter.match(
+      (event) => event.name === successEventName && event.creator.constructor.name === "BeeAgent",
       (data: InferCallbackValue<BeeCallbacks[typeof successEventName]>) => {
-        if ("data" in data && "memory" in data) {
-          const { data: dataObject, memory } = data as InferCallbackValue<
-            BeeCallbacks[typeof successEventName]
-          >;
+        const { data: dataObject, memory } = data;
 
-          generatedMessage = {
-            role: dataObject.role,
-            text: dataObject.text,
-          };
-          history = memory.messages.map((msg) => ({ text: msg.text, role: msg.role }));
-        }
+        generatedMessage = {
+          role: dataObject.role,
+          text: dataObject.text,
+        };
+        history = memory.messages.map((msg) => ({ text: msg.text, role: msg.role }));
       },
     );
 

@@ -15,12 +15,12 @@
  */
 
 import { FrameworkError } from "@/errors.js";
+import { getProp } from "@/internals/helpers/object.js";
 
 export function getErrorSafe(data: unknown): string | undefined {
-  const error = data && typeof data === "object" && "error" in data ? data.error : data;
+  const error = getProp(data, ["error"], data);
 
   if (error instanceof FrameworkError) {
     return FrameworkError.ensure(error).explain();
   }
-  return undefined;
 }

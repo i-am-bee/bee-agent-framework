@@ -64,19 +64,13 @@ Ensure your OpenTelemetry setup is properly configured to export trace data to y
 nvm use
 ```
 
-> Build the codebase before you run the instrumented example file!
-
-```
-yarn build
-```
-
 ### Agent instrumentation
 
 Running the Instrumented Application (`examples/agents/bee_instrumentation.js`) file.
 
 ```bash
 ## the telemetry example is run on built js files
-yarn start:telemetry ./examples/agents/bee_instrumentation.js
+yarn start:telemetry ./examples/agents/bee_instrumentation.ts
 ```
 
 ### LLM instrumentation
@@ -86,7 +80,7 @@ Running (`./examples/llms/instrumentation.js`) file.
 ```bash
 ## the telemetry example is run on built js files
 
-yarn start:telemetry ./examples/llms/instrumentation.js
+yarn start:telemetry ./examples/llms/instrumentation.ts
 ```
 
 ### Tool instrumentation
@@ -95,7 +89,7 @@ Running (`./examples/tools/instrumentation.js`) file.
 
 ```bash
 ## the telemetry example is run on built js files
-yarn start:telemetry ./examples/tools/instrumentation.js
+yarn start:telemetry ./examples/tools/instrumentation.ts
 ```
 
 ## Conclusion
