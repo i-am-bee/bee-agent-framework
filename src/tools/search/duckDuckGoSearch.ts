@@ -131,6 +131,11 @@ export class DuckDuckGoSearchTool extends Tool<
             ...this.options?.httpClientOptions,
             ...options?.httpClientOptions,
             signal: run.signal,
+            uri_modifier: (rawUrl) => {
+              const url = new URL(rawUrl);
+              url.searchParams.delete("ss_mkt");
+              return url.toString();
+            },
           },
         );
 
