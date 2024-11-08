@@ -29,13 +29,13 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { RunContext } from "@/context.js";
 import { getProp, setProp } from "@/internals/helpers/object.js";
 
-export interface ResponseFilterOptions {
-  omittedResponseKeys: (keyof OpenMeteoToolResponse)[];
+export interface ResponseFilter {
+  excludedKeys: (keyof OpenMeteoToolResponse)[];
 }
 
 interface ToolOptions extends BaseToolOptions {
   apiKey?: string;
-  responseFilter?: ResponseFilterOptions;
+  responseFilter?: ResponseFilter;
 }
 
 type ToolRunOptions = BaseToolRunOptions;
@@ -111,6 +111,25 @@ export class OpenMeteoTool extends Tool<
     this.register();
   }
 
+  public constructor(options: Partial<ToolOptions> = {}) {
+    super({
+      ...options,
+      responseFilter: options?.responseFilter ?? {
+        excludedKeys: [
+          "latitude",
+          "longitude",
+          "generationtime_ms",
+          "utc_offset_seconds",
+          "timezone",
+          "timezone_abbreviation",
+          "elevation",
+          "hourly",
+          "hourly_units",
+        ],
+      },
+    });
+  }
+
   protected preprocessInput(rawInput: unknown) {
     super.preprocessInput(rawInput);
 
@@ -181,8 +200,8 @@ export class OpenMeteoTool extends Tool<
 
     let data: OpenMeteoToolResponse = await response.json();
 
-    if (this.options?.responseFilter?.omittedResponseKeys) {
-      data = omit(data, this.options.responseFilter.omittedResponseKeys);
+    if (this.options?.responseFilter?.excludedKeys) {
+      data = omit(data, this.options.responseFilter.excludedKeys);
     }
 
     return new JSONToolOutput(data);

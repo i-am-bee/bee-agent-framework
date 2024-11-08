@@ -42,39 +42,37 @@ describe("OpenMeteo", () => {
 
     expect(response.isEmpty()).toBe(false);
     expect(response.result).toMatchObject({
-      timezone: "UTC",
       current: expect.any(Object),
       current_units: expect.any(Object),
-      hourly: expect.any(Object),
-      hourly_units: expect.any(Object),
       daily: expect.any(Object),
       daily_units: expect.any(Object),
     });
   });
 
-  it("Filters", async () => {
+  it("Custom filter", async () => {
     instance = new OpenMeteoTool({
       responseFilter: {
-        omittedResponseKeys: [
+        excludedKeys: [
           "latitude",
           "longitude",
           "timezone_abbreviation",
           "elevation",
           "utc_offset_seconds",
           "generationtime_ms",
-          "timezone",
-          "hourly",
-          "hourly_units",
         ],
       },
     });
 
+    const now = new Date();
+    const dateString = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+      .toISOString()
+      .split("T")[0];
     const response = await instance.run(
       {
         location: {
           name: "Anchorage",
         },
-        start_date: "2024-11-07",
+        start_date: dateString,
         temperature_unit: "fahrenheit",
       },
       {
@@ -84,13 +82,39 @@ describe("OpenMeteo", () => {
     );
 
     expect(response.isEmpty()).toBe(false);
+
     expect(response.result).toMatchObject({
+      timezone: expect.any(String),
       current: expect.any(Object),
       current_units: expect.any(Object),
       daily: expect.any(Object),
       daily_units: expect.any(Object),
+      hourly: expect.any(Object),
+      hourly_units: expect.any(Object),
     });
-    expect(response.result.daily).toHaveProperty("time", ["2024-11-07"]);
+  });
+
+  it("Correct Date", async () => {
+    const now = new Date();
+    const dateString = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+      .toISOString()
+      .split("T")[0];
+    const response = await instance.run(
+      {
+        location: {
+          name: "Reykjavík",
+        },
+        start_date: dateString,
+        temperature_unit: "fahrenheit",
+      },
+      {
+        signal: AbortSignal.timeout(60 * 1000),
+        retryOptions: {},
+      },
+    );
+
+    expect(response.isEmpty()).toBe(false);
+    expect(response.result.daily).toHaveProperty("time", [dateString]);
   });
 
   it("Throws", async () => {
