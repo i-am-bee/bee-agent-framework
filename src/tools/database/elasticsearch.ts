@@ -28,6 +28,7 @@ import { RunContext } from "@/context.js";
 import { z } from "zod";
 import { ValidationError } from "ajv";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
+import { parseBrokenJson } from "@/internals/helpers/schema.js";
 import { Client, ClientOptions } from "@elastic/elasticsearch";
 import {
   CatIndicesResponse,
@@ -118,13 +119,6 @@ export class ElasticSearchTool extends Tool<
         `Both index name and query are required for ${ElasticSearchAction.Search} action.`,
       );
     }
-    if (input.action === ElasticSearchAction.Search && input.query) {
-      try {
-        JSON.parse(input.query);
-      } catch (error) {
-        throw new ToolInputValidationError(`Invalid JSON format for query.`, [error]);
-      }
-    }
   }
 
   static {
@@ -209,7 +203,7 @@ export class ElasticSearchTool extends Tool<
   }
 
   protected async search(input: ToolInput<this>, signal: AbortSignal): Promise<SearchResponse> {
-    const parsedQuery = JSON.parse(input.query!);
+    const parsedQuery = parseBrokenJson(input.query);
     const searchBody: SearchRequest = {
       ...parsedQuery,
       from: parsedQuery.from || input.start,

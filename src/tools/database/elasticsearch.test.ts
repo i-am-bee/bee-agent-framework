@@ -77,16 +77,6 @@ describe("ElasticSearchTool", () => {
     expect(response.result).toEqual([{ field1: "value1" }]);
   });
 
-  it("throws invalid JSON format error", async () => {
-    await expect(async () => {
-      await elasticSearchTool.run({ action: "SEARCH", indexName: "index1", query: "invalid" });
-    }).rejects.toThrowError(
-      expect.objectContaining({
-        message: expect.stringContaining("Invalid JSON format for query"),
-      }),
-    );
-  });
-
   it("throws missing index name error", async () => {
     await expect(elasticSearchTool.run({ action: "GET_INDEX_DETAILS" })).rejects.toThrow(
       "Index name is required for GET_INDEX_DETAILS action.",
