@@ -261,7 +261,7 @@ export abstract class Tool<
           await run.emitter.emit("finish", null);
         }
       },
-    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing);
+    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
   }
 
   protected async _runCached(

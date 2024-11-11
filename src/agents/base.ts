@@ -65,7 +65,7 @@ export abstract class BaseAgent<
           this.isRunning = false;
         }
       },
-    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing);
+    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
   }
 
   protected abstract _run(

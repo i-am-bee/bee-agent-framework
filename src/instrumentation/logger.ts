@@ -16,7 +16,7 @@
 
 import { Logger, LoggerLevel } from "@/logger/logger.js";
 
-export const instrumentationLogger = new Logger({
+export const instrumentationLogger = Logger.root.child({
   name: "instrumentation",
   level: LoggerLevel.WARN,
 });

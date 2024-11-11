@@ -202,7 +202,7 @@ export abstract class BaseLLM<
           await run.emitter.emit("finish", null);
         }
       },
-    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing);
+    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
   }
 
   async *stream(input: TInput, options?: StreamGenerateOptions): AsyncStream<TOutput> {
@@ -220,7 +220,7 @@ export abstract class BaseLLM<
           }
           cacheEntry.resolve(tokens);
         },
-      ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing);
+      ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
     });
   }
 

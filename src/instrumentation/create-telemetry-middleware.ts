@@ -21,7 +21,7 @@ import { getErrorSafe } from "./helpers/get-error-safe.js";
 import { findLast, isDeepEqual, isEmpty } from "remeda";
 import type { BeeCallbacks } from "@/agents/bee/types.js";
 import type { InferCallbackValue } from "@/emitter/types.js";
-import type { GenerateCallbacks } from "@/llms/base.js";
+import { type GenerateCallbacks } from "@/llms/base.js";
 import { FrameworkError } from "@/errors.js";
 import { Version } from "@/version.js";
 import { Role } from "@/llms/primitives/message.js";
@@ -32,8 +32,9 @@ import { traceSerializer } from "./helpers/trace-serializer.js";
 import { INSTRUMENTATION_IGNORED_KEYS } from "./config.js";
 import { createFullPath } from "@/emitter/utils.js";
 import type { BeeAgent } from "@/agents/bee/agent.js";
-import { Serializable } from "@/internals/serializable.js";
 import { instrumentationLogger } from "./logger.js";
+import { BaseAgent } from "@/agents/base.js";
+import { assertLLMWithMessagesToPromptFn } from "./helpers/utils.js";
 
 export function createTelemetryMiddleware() {
   return (context: GetRunContext<RunInstance, unknown>) => {
@@ -58,7 +59,7 @@ export function createTelemetryMiddleware() {
     const basePath = createFullPath(emitter.namespace, "");
 
     let prompt: string | undefined | null = null;
-    if (instance.constructor.name === "BeeAgent") {
+    if (instance instanceof BaseAgent) {
       prompt = (runParams as Parameters<BeeAgent["run"]>)[0].prompt;
     }
 
@@ -99,7 +100,6 @@ export function createTelemetryMiddleware() {
         // increase the span count for the parentId
         parentIdsMap.set(parentId, spanCount - 1);
       } else if (spanCount === 1) {
-        // delete the parentId from the map
         parentIdsMap.delete(parentId);
         // check the `spansToDelete` if the span should be deleted when it has no children's
         if (spansToDeleteMap.has(parentId)) {
@@ -118,9 +118,9 @@ export function createTelemetryMiddleware() {
         try {
           instrumentationLogger.debug({ path: meta.path, traceId: traceId }, "run finish event");
 
-          if (!prompt && instance.constructor.name === "BeeAgent") {
+          if (!prompt && instance instanceof BaseAgent) {
             prompt = findLast(
-              (instance as BeeAgent).memory.messages,
+              instance.memory.messages,
               (message) => message.role === Role.USER,
             )?.text;
 
@@ -261,7 +261,7 @@ export function createTelemetryMiddleware() {
 
     // The generated response and message history are collected from the `success` agent's event
     emitter.match(
-      (event) => event.name === successEventName && event.creator.constructor.name === "BeeAgent",
+      (event) => event.name === successEventName && event.creator instanceof BaseAgent,
       (data: InferCallbackValue<BeeCallbacks[typeof successEventName]>) => {
         const { data: dataObject, memory } = data;
 
@@ -275,14 +275,9 @@ export function createTelemetryMiddleware() {
 
     // Read rawPrompt from llm input only for supported adapters and create the custom event with it
     emitter.match(
-      (event) => "messagesToPrompt" in event.creator && event.name === startEventName,
+      (event) => assertLLMWithMessagesToPromptFn(event.creator) && event.name === startEventName,
       ({ input }: InferCallbackValue<GenerateCallbacks[typeof startEventName]>, meta) => {
-        if (
-          "messagesToPrompt" in meta.creator &&
-          typeof meta.creator.messagesToPrompt === "function" &&
-          meta.creator instanceof Serializable &&
-          meta.trace
-        ) {
+        if (assertLLMWithMessagesToPromptFn(meta.creator) && meta.trace) {
           const rawPrompt = meta.creator.messagesToPrompt(input);
           // create a custom path to prevent event duplication
           const path = `${meta.path}.custom`;

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import { parseEnv } from "@/internals/env.js";
-import { z } from "zod";
+import { BAMChatLLMInputConfig } from "@/adapters/bam/chat.js";
+import { getProp } from "@/internals/helpers/object.js";
+import { BaseLLM } from "@/llms/base.js";
+import { isFunction } from "remeda";
 
-export const INSTRUMENTATION_ENABLED = parseEnv.asBoolean("BEE_FRAMEWORK_INSTRUMENTATION_ENABLED");
-
-export const INSTRUMENTATION_IGNORED_KEYS = parseEnv(
-  "BEE_FRAMEWORK_INSTRUMENTATION_IGNORED_KEYS",
-  z.string(),
-  "",
-)
-  .split(",")
-  .filter(Boolean);
+export function assertLLMWithMessagesToPromptFn(instance: object): instance is BaseLLM<any, any> & {
+  messagesToPrompt: BAMChatLLMInputConfig["messagesToPrompt"];
+} {
+  return isFunction(getProp(instance, ["messagesToPrompt"])) && instance instanceof BaseLLM;
+}
