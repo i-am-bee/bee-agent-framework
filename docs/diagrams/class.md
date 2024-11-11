@@ -49,6 +49,7 @@ classDiagram
         class TokenMemory {
             +maxTokens: number
         }
+        class UnconstrainedMemory
     }
 
     namespace Cache {
@@ -121,6 +122,7 @@ classDiagram
 
     SlidingMemory --|> BaseMemory
     TokenMemory --|> BaseMemory
+    UnconstrainedMemory --|> BaseMemory
 
     BaseTool --|> Serializable
     BaseCache --|> Serializable
@@ -148,7 +150,6 @@ classDiagram
     BaseAgent --> "1" Logger : uses
     BaseTool --> "0..1" BaseCache : uses
     BaseAgent --> "1" Emitter : emits events
-    AgentManager --> "*" BaseAgent : manages
 ```
 
 You can edit this diagram following [mermaid systax](https://mermaid.js.org/intro/syntax-reference.html).
