@@ -43,9 +43,6 @@ When the user sends a message figure out a solution and provide a final answer.
 You have access to a set of available_tools that can be used to retrieve information and perform actions.
 Pay close attention to the tool description to determine if a tool is useful in a partcular context.
 {{/tools.length}}
-{{#datetime}}
-The current date is {{datetime}}.
-{{/datetime}}
 
 # Communication structure: 
 - Line starting 'Message: ' The user's question or instruction. This is provided by the user, the assistant does not produce this.

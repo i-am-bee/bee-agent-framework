@@ -46,7 +46,7 @@ export class GraniteAgentRunner extends BeeAgentRunner {
               })),
             ),
             null,
-            4,
+            2,
           ),
         }),
         index,
