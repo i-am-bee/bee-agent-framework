@@ -8,12 +8,11 @@ import { GraniteBeeAgent } from "bee-agent-framework/agents/granite/agent";
 import { WatsonXChatLLM } from "bee-agent-framework/adapters/watsonx/chat";
 import { z } from "zod";
 import { parseEnv } from "bee-agent-framework/internals/env";
-import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
 // Ensure that you have added your WatsonX credentials in .env
 const llm = WatsonXChatLLM.fromPreset("ibm/granite-3-8b-instruct", {
   apiKey: parseEnv("WATSONX_API_KEY", z.string()),
-  projectId: parseEnv("WATSONX_PROJECT_ID", z.string())
+  projectId: parseEnv("WATSONX_PROJECT_ID", z.string()),
 });
 
 const agent = new GraniteBeeAgent({
