@@ -22,6 +22,25 @@
         2,
         "always",
         "Signed-off-by"
+      ],
+      "scope-enum": [
+        2,
+        "always",
+        [
+          "adapters",
+          "agents",
+          "llms",
+          "tools",
+          "cache",
+          "emitter",
+          "internals",
+          "logger",
+          "memory",
+          "serializer",
+          "infra",
+          "deps",
+          "instrumentation"
+        ]
       ]
     }
   },
