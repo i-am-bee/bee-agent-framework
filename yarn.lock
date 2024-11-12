@@ -327,13 +327,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@elastic/elasticsearch@npm:^8.15.1":
-  version: 8.15.1
-  resolution: "@elastic/elasticsearch@npm:8.15.1"
+"@elastic/elasticsearch@npm:^8.0.0":
+  version: 8.15.2
+  resolution: "@elastic/elasticsearch@npm:8.15.2"
   dependencies:
     "@elastic/transport": "npm:^8.8.1"
     tslib: "npm:^2.4.0"
-  checksum: 10c0/6fed56487e0bd5c2e8a54e794cd1ebe58e0ff40319b4b8d10ef3cb45534a572fd4d6d5aff5ca63707aaf4be7abbc073ba5bf414cea129f86facc5b1c576cb815
+  checksum: 10c0/c37775d17b14c640204c28be5113f8db6361f30b41df05bad997e49a2f3436433d5ca5748ae172cd4c774c7ae182e38790ec735eee2afa607fa1b0449048c2a0
   languageName: node
   linkType: hard
 
@@ -3257,7 +3257,7 @@ __metadata:
     "@commitlint/config-conventional": "npm:^19.5.0"
     "@connectrpc/connect": "npm:^1.6.1"
     "@connectrpc/connect-node": "npm:^1.6.1"
-    "@elastic/elasticsearch": "npm:^8.15.1"
+    "@elastic/elasticsearch": "npm:^8.0.0"
     "@eslint/js": "npm:^9.13.0"
     "@eslint/markdown": "npm:^6.2.1"
     "@googleapis/customsearch": "npm:^3.2.0"
@@ -3347,7 +3347,7 @@ __metadata:
     zod: "npm:^3.23.8"
     zod-to-json-schema: "npm:^3.23.3"
   peerDependencies:
-    "@elastic/elasticsearch": ^8.15.1
+    "@elastic/elasticsearch": ^8.0.0
     "@googleapis/customsearch": ^3.2.0
     "@grpc/grpc-js": ^1.11.3
     "@grpc/proto-loader": ^0.7.13

@@ -4,6 +4,7 @@ import { OpenAIChatLLM } from "bee-agent-framework/adapters/openai/chat";
 import { ElasticSearchTool } from "bee-agent-framework/tools/database/elasticsearch";
 import { FrameworkError } from "bee-agent-framework/errors";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
+import { createConsoleReader } from "../helpers/io.js";
 
 const llm = new OpenAIChatLLM();
 
@@ -22,12 +23,13 @@ const agent = new BeeAgent({
   tools: [elasticSearchTool],
 });
 
-const question = "what is the average ticket price of all flights from Cape Town to Venice";
+const reader = createConsoleReader();
+const prompt = await reader.prompt();
 
 try {
   const response = await agent
     .run(
-      { prompt: `${question}` },
+      { prompt },
       {
         execution: {
           maxRetriesPerStep: 5,

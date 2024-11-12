@@ -30,7 +30,7 @@ import { ValidationError } from "ajv";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
 import { parseBrokenJson } from "@/internals/helpers/schema.js";
 import { Client, ClientOptions } from "@elastic/elasticsearch";
-import {
+import type {
   CatIndicesResponse,
   IndicesGetMappingResponse,
   SearchRequest,
@@ -55,8 +55,7 @@ export const ElasticSearchAction = {
 
 export class ElasticSearchTool extends Tool<
   JSONToolOutput<ElasticSearchToolResult>,
-  ElasticSearchToolOptions,
-  BaseToolRunOptions
+  ElasticSearchToolOptions
 > {
   name = "ElasticSearchTool";
 
@@ -144,7 +143,7 @@ export class ElasticSearchTool extends Tool<
       await client.info();
       return client;
     } catch (error) {
-      throw new ToolError(`Unable to connect to ElasticSearch: ${error}`, [], {
+      throw new ToolError(`Unable to connect to ElasticSearch.`, [error], {
         isRetryable: false,
         isFatal: true,
       });

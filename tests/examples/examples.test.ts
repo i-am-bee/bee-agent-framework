@@ -51,6 +51,7 @@ const exclude: string[] = [
   !hasEnv("COHERE_API_KEY") && ["examples/llms/providers/langchain.ts"],
   !hasEnv("CODE_INTERPRETER_URL") && ["examples/tools/custom/python.ts"],
   ["examples/llms/providers/bam.ts", "examples/llms/providers/bam_verbose.ts"],
+  !hasEnv("ELASTICSEARCH_NODE") && ["examples/agents/elasticsearch.ts"],
 ]
   .filter(isTruthy)
   .flat(); // list of examples that are excluded
