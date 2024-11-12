@@ -21,8 +21,6 @@ import { GraniteAgentRunner } from "./runner.js";
 import { GraniteBeeAssistantPrompt, GraniteBeeSystemPrompt } from "@/agents/granite/prompts.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 
-const TOOL_RESPONSE_ROLE = "tool_response";
-
 export class GraniteBeeAgent extends BeeAgent {
   protected runner: typeof GraniteAgentRunner = GraniteAgentRunner;
 
@@ -48,7 +46,7 @@ export class GraniteBeeAgent extends BeeAgent {
         if (update.key === "tool_output") {
           await memory.add(
             BaseMessage.of({
-              role: TOOL_RESPONSE_ROLE,
+              role: "tool_response",
               text: update.value,
               meta: { success: meta.success },
             }),

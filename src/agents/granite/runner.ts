@@ -22,8 +22,6 @@ import { BeeAgentRunner } from "@/agents/bee/runner.js";
 import { BeeParserInput } from "@/agents/bee/parser.js";
 import { isEmpty } from "remeda";
 
-const AVAILABLE_TOOLS_ROLE = "available_tools";
-
 export class GraniteAgentRunner extends BeeAgentRunner {
   static async create(input: BeeInput, options: BeeRunOptions, prompt: string | null) {
     const instance = await super.create(input, options, prompt);
@@ -32,7 +30,7 @@ export class GraniteAgentRunner extends BeeAgentRunner {
       const index = instance.memory.messages.findIndex((msg) => msg.role === Role.SYSTEM) + 1;
       await instance.memory.add(
         BaseMessage.of({
-          role: AVAILABLE_TOOLS_ROLE,
+          role: "available_tools",
           text: JSON.stringify(
             await Promise.all(
               input.tools.map(async (tool) => ({
