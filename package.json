@@ -173,6 +173,7 @@
     "zod-to-json-schema": "^3.23.3"
   },
   "peerDependencies": {
+    "@elastic/elasticsearch": "^8.0.0",
     "@googleapis/customsearch": "^3.2.0",
     "@grpc/grpc-js": "^1.11.3",
     "@grpc/proto-loader": "^0.7.13",
@@ -188,6 +189,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
+    "@elastic/elasticsearch": "^8.0.0",
     "@eslint/js": "^9.13.0",
     "@eslint/markdown": "^6.2.1",
     "@googleapis/customsearch": "^3.2.0",
