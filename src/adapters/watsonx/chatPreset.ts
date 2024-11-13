@@ -30,6 +30,7 @@ export const WatsonXChatLLMPreset = {
       base: {
         parameters: {
           decoding_method: "greedy",
+          max_new_tokens: 512,
           include_stop_sequence: false,
           stop_sequences: [...parameters.stop_sequence],
         },
