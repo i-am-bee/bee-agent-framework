@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.0.39](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.38...v0.0.39) (2024-11-13)
+
+
+### Features
+
+* **adapters:** load watsonx region from env ([7ab61f0](https://github.com/i-am-bee/bee-agent-framework/commit/7ab61f09936a440430a1878bbd597d9bc0592836))
+* **agents:** granite agent ([#159](https://github.com/i-am-bee/bee-agent-framework/issues/159)) ([102b9be](https://github.com/i-am-bee/bee-agent-framework/commit/102b9beb87e6219a992dd2ade491044eefccc37b)), closes [#145](https://github.com/i-am-bee/bee-agent-framework/issues/145)
+* **agent:** use constraint decoding for tool names in Bee ([#161](https://github.com/i-am-bee/bee-agent-framework/issues/161)) ([ad55531](https://github.com/i-am-bee/bee-agent-framework/commit/ad55531ac81a643536a6da739f92be77e0624f21))
+* **observe:** implement OpenTelemetry instrumentation ([2cc1ef4](https://github.com/i-am-bee/bee-agent-framework/commit/2cc1ef4e6bebd7d3e96f3cdb5332187bc5f301bd))
+* **tool:** add elasticsearch ([#138](https://github.com/i-am-bee/bee-agent-framework/issues/138)) ([31c3559](https://github.com/i-am-bee/bee-agent-framework/commit/31c355983bc24658a30b4686b5c51c6da8e154f5))
+* **tools:** openMeteo optimization ([#155](https://github.com/i-am-bee/bee-agent-framework/issues/155)) ([c228ee2](https://github.com/i-am-bee/bee-agent-framework/commit/c228ee2e916585af147f80b36808662a6339819b)), closes [#110](https://github.com/i-am-bee/bee-agent-framework/issues/110)
+
+
+### Bug Fixes
+
+* **llms:** correctly handles a signal abortion ([1b0d514](https://github.com/i-am-bee/bee-agent-framework/commit/1b0d5143b1b449b1fb7b45e1a20036278322e15e))
+
 ## [0.0.38](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.37...v0.0.38) (2024-11-08)
 
 ### Features
