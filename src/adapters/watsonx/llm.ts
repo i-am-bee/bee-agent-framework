@@ -190,12 +190,14 @@ function createApiClient({
   apiKey,
   baseUrl,
   authBaseUrl = "https://iam.cloud.ibm.com",
-  region = "us-south",
+  region,
   accessToken,
   version = "2023-05-02",
   projectId,
   spaceId,
 }: WatsonXLLMInput) {
+  region = region || getEnv("WATSONX_REGION") || "us-south";
+
   const paths = (() => {
     const pathPrefix = deploymentId ? `/ml/v1/deployments/${deploymentId}` : "/ml/v1";
     const queryParams = createURLParams({

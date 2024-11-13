@@ -6,13 +6,12 @@ import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckG
 import { createConsoleReader } from "examples/helpers/io.js";
 import { GraniteBeeAgent } from "bee-agent-framework/agents/granite/agent";
 import { WatsonXChatLLM } from "bee-agent-framework/adapters/watsonx/chat";
-import { z } from "zod";
-import { parseEnv } from "bee-agent-framework/internals/env";
 
 // Ensure that you have added your WatsonX credentials in .env
 const llm = WatsonXChatLLM.fromPreset("ibm/granite-3-8b-instruct", {
-  apiKey: parseEnv("WATSONX_API_KEY", z.string()),
-  projectId: parseEnv("WATSONX_PROJECT_ID", z.string()),
+  apiKey: process.env.WATSONX_API_KEY,
+  projectId: process.env.WATSONX_PROJECT_ID,
+  region: process.env.WATSONX_REGION, // (optional)
 });
 
 const agent = new GraniteBeeAgent({

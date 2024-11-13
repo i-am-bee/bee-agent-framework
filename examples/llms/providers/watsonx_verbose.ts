@@ -25,6 +25,7 @@ const llm = new WatsonXLLM({
   modelId: "meta-llama/llama-3-1-70b-instruct",
   projectId: process.env.WATSONX_PROJECT_ID,
   apiKey: process.env.WATSONX_API_KEY,
+  region: process.env.WATSONX_REGION, // (optional) default is us-south
   parameters: {
     decoding_method: "greedy",
     max_new_tokens: 50,

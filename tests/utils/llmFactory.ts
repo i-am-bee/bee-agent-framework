@@ -32,6 +32,7 @@ export function createChatLLM(): ChatLLM<ChatLLMOutput> {
   } else if (process.env.WATSONX_API_KEY && process.env.WATSONX_PROJECT_ID) {
     return WatsonXChatLLM.fromPreset("meta-llama/llama-3-70b-instruct", {
       projectId: process.env.WATSONX_PROJECT_ID,
+      region: process.env.WATSONX_REGION,
     });
   } else if (process.env.GROQ_API_KEY) {
     return new GroqChatLLM({
