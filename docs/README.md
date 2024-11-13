@@ -123,16 +123,6 @@ The source directory (`src`) provides numerous modules that one can use.
 
 To see more in-depth explanation see [overview](/docs/overview.md).
 
-## Granite 3.0 Support
-
-IBM Granite 3.0 is the third generation of the Granite series of large language models (LLMs).
-
-This [example](/examples/agents/bee_granite.ts) shows you how to use Granite 3.0 8B Instruct as a Bee Agent via WatsonX.
-
-> [!Tip]
->
-> For best performance Granite 3.0 LLMs should be used with [GraniteBeeAgent](/src/agents/granite/agent.ts).
-
 ## Tutorials
 
 🚧 Coming soon 🚧
