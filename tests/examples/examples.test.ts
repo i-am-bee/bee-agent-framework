@@ -41,6 +41,7 @@ const exclude: string[] = [
     "examples/llms/text.ts",
     "examples/llms/providers/watsonx_verbose.ts",
     "examples/llms/providers/watsonx.ts",
+    "examples/agents/bee_granite.ts",
   ],
   !hasEnv("GROQ_API_KEY") && ["examples/agents/sql.ts", "examples/llms/providers/groq.ts"],
   !hasEnv("OPENAI_API_KEY") && [
