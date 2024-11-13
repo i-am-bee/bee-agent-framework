@@ -90,7 +90,9 @@ describe("BaseLLM", () => {
       options: StreamGenerateOptions | undefined,
     ): AsyncStream<DummyOutput, void> {
       for (const chunk of input.split(",")) {
-        options?.signal?.throwIfAborted();
+        if (options?.signal?.aborted) {
+          break;
+        }
         await setTimeout(100);
         yield new DummyOutput(chunk);
       }

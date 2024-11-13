@@ -163,14 +163,15 @@ export abstract class BaseLLM<
                 },
                 run,
               )) {
+              if (controller.signal.aborted) {
+                continue;
+              }
+
               chunks.push(chunk);
               await tokenEmitter.emit("newToken", {
                 value: chunk,
                 callbacks: { abort: () => controller.abort() },
               });
-              if (controller.signal.aborted) {
-                break;
-              }
             }
 
             const result = this._mergeChunks(chunks);
