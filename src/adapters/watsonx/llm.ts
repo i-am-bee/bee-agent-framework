@@ -325,8 +325,13 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
       }),
     });
 
+    const inputTokenLimit = model?.model_limits?.max_sequence_length ?? Infinity;
+    const outputTokenLimit = model?.model_limits?.max_output_tokens ?? Infinity;
+
     return {
-      tokenLimit: model?.model_limits?.max_sequence_length ?? Infinity,
+      inputTokenLimit,
+      outputTokenLimit,
+      tokenLimit: Math.max(inputTokenLimit, outputTokenLimit),
     };
   }
 

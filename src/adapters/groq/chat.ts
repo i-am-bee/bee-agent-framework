@@ -125,6 +125,7 @@ export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
   }
 
   async meta(): Promise<LLMMeta> {
+    await this.client.models.list();
     if (
       this.modelId.includes("gemma") ||
       this.modelId.includes("llama3") ||

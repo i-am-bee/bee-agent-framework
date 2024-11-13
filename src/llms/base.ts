@@ -115,6 +115,8 @@ export interface ExecutionOptions {
 }
 
 export interface LLMMeta {
+  outputTokenLimit: number;
+  inputTokenLimit: number;
   tokenLimit: number;
 }
 

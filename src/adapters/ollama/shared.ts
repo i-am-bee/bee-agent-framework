@@ -35,6 +35,7 @@ export function registerClient() {
 }
 
 export function extractModelMeta(response: ShowResponse): LLMMeta {
+  console.info(response.model_info);
   const tokenLimit = Object.entries(response.model_info)
     .find(([k]) => k.includes("context_length") || k.includes("max_sequence_length"))
     ?.at(1);

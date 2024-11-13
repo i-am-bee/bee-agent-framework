@@ -192,14 +192,19 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
         id: this.modelId,
       });
 
+      console.info(JSON.stringify(result, null, 2));
+
       const tokenLimit = result.token_limits?.find?.((limit) => {
         if (this.parameters?.beam_width !== undefined) {
           return limit.token_limit !== undefined && limit.beam_width === this.parameters.beam_width;
         }
         return limit.token_limit !== undefined;
       });
+
       return {
         tokenLimit: tokenLimit?.token_limit ?? Infinity,
+        inputTokenLimit: Infinity,
+        outputTokenLimit: Infinity,
       };
     } catch {
       // TODO: remove once retrieval gets fixed on the API
