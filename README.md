@@ -13,7 +13,7 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 
 ## Key Features
 
-- 🤖 **AI agents**: Use our powerful [Bee agent](/docs/agents.md) refined for Llama 3.1 or [build your own](/docs/agents.md).
+- 🤖 **AI agents**: Use our powerful [Bee agent](/docs/agents.md) refined for Llama 3.1, [Granite Agent](/docs/agents.md#granitebeeagent-for-granite-30) for Granite 3.0, or [build your own](/docs/agents.md).
 - 🛠️ **Tools**: Use our [built-in tools](/docs/tools.md) or [create your own](/docs/tools.md) in Javascript/Python.
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
 - 💾 **Memory**: Multiple [strategies](/docs/memory.md) to optimize token spend.
