@@ -205,6 +205,44 @@
     "openai-chat-tokens": "^0.2.8",
     "sequelize": "^6.37.3"
   },
+  "peerDependenciesMeta": {
+    "@elastic/elasticsearch": {
+      "optional": true
+    },
+    "@googleapis/customsearch": {
+      "optional": true
+    },
+    "@grpc/grpc-js": {
+      "optional": true
+    },
+    "@grpc/proto-loader": {
+      "optional": true
+    },
+    "@ibm-generative-ai/node-sdk": {
+      "optional": true
+    },
+    "@langchain/community": {
+      "optional": true
+    },
+    "@langchain/core": {
+      "optional": true
+    },
+    "groq-sdk": {
+      "optional": true
+    },
+    "ollama": {
+      "optional": true
+    },
+    "openai": {
+      "optional": true
+    },
+    "openai-chat-tokens": {
+      "optional": true
+    },
+    "sequelize": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
