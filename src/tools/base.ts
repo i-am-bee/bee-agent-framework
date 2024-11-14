@@ -177,7 +177,7 @@ export abstract class Tool<
   abstract description: string;
 
   public readonly cache: BaseCache<Task<TOutput>>;
-  protected readonly options: TOptions;
+  public readonly options: TOptions;
 
   public readonly emitter = Emitter.root.child<ToolCallbacks<ToolInput<this>, TOutput>>({
     namespace: ["tool"],
@@ -400,10 +400,10 @@ export class DynamicTool<
 
   declare name: string;
   declare description: string;
-  private readonly _inputSchema: AnyToolSchemaLike;
+  private readonly _inputSchema: TInputSchema;
   private readonly handler;
 
-  inputSchema() {
+  inputSchema(): TInputSchema {
     return this._inputSchema;
   }
 
