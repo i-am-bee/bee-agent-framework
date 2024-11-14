@@ -2,22 +2,17 @@ import "dotenv/config.js";
 import { FrameworkError } from "bee-agent-framework/errors";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
-
 import { createConsoleReader } from "examples/helpers/io.js";
 import { GraniteBeeAgent } from "bee-agent-framework/agents/granite/agent";
-import { WatsonXChatLLM } from "bee-agent-framework/adapters/watsonx/chat";
+import { IBMVllmChatLLM } from "bee-agent-framework/adapters/ibm-vllm/chat";
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
-// Ensure that you have added your WatsonX credentials in .env
-const llm = WatsonXChatLLM.fromPreset("ibm/granite-3-8b-instruct", {
-  apiKey: process.env.WATSONX_API_KEY,
-  projectId: process.env.WATSONX_PROJECT_ID,
-  region: process.env.WATSONX_REGION, // (optional)
-});
+const llm = IBMVllmChatLLM.fromPreset("ibm/granite-instruct");
 
 const agent = new GraniteBeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
-  tools: [new DuckDuckGoSearchTool({ maxResults: 3 })],
+  tools: [new DuckDuckGoSearchTool({ maxResults: 5 }), new OpenMeteoTool()],
 });
 
 const reader = createConsoleReader();
