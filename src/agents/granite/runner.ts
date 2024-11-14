@@ -58,13 +58,19 @@ export class GraniteAgentRunner extends BeeAgentRunner {
     const { parser } = super.createParser(tools);
 
     return {
-      parserRegex: /Thought:.+\n(?:Final Answer:[\S\s]+|Tool Name:.+\nTool Input:\{.*\})?/,
+      parserRegex: isEmpty(tools)
+        ? new RegExp(`Thought:.+\\nFinal Answer:[\\s\\S]+`)
+        : new RegExp(
+            `Thought:.+\\n(?:Final Answer:[\\s\\S]+|Tool Name:(${tools.map((tool) => tool.name).join("|")})\\nTool Input: \\{.*\\})?`,
+          ),
       parser: parser.fork<BeeParserInput>((nodes, options) => ({
         options,
         nodes: {
           ...nodes,
+          thought: { ...nodes.thought, prefix: "Thought:" },
           tool_name: { ...nodes.tool_name, prefix: "Tool Name:" },
           tool_input: { ...nodes.tool_input, prefix: "Tool Input:", isEnd: true, next: [] },
+          final_answer: { ...nodes.final_answer, prefix: "Final Answer:" },
         },
       })),
     };
