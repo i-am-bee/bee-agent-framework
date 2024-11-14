@@ -85,7 +85,8 @@
         "yarn build"
       ],
       "before:release": [
-        "yarn docs:build && git add . --update"
+        "yarn docs:build && git add . --update",
+        "yarn lint:fix && yarn format:fix && git add . --update"
       ]
     },
     "github": {
