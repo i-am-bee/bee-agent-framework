@@ -67,6 +67,10 @@ export class CustomChatLLM extends ChatLLM<CustomChatLLMOutput, CustomGenerateOp
     super(input.modelId, input.executionOptions, input.cache);
   }
 
+  static {
+    this.register();
+  }
+
   async meta(): Promise<LLMMeta> {
     // TODO: retrieve data about current model from the given provider API
     return { tokenLimit: Infinity };
@@ -90,9 +94,6 @@ export class CustomChatLLM extends ChatLLM<CustomChatLLMOutput, CustomGenerateOp
     const result = BaseMessage.of({
       role: Role.ASSISTANT,
       text: "TODO: response retrieve from the API",
-      meta: {
-        createdAt: new Date(),
-      },
     });
     return new CustomChatLLMOutput(result);
   }
@@ -109,9 +110,6 @@ export class CustomChatLLM extends ChatLLM<CustomChatLLMOutput, CustomGenerateOp
       const result = BaseMessage.of({
         role: Role.ASSISTANT,
         text: chunk,
-        meta: {
-          createdAt: new Date(),
-        },
       });
       yield new CustomChatLLMOutput(result);
     }
