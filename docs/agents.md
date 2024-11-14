@@ -105,19 +105,19 @@ await agent.run(
 
 The agent uses the following prompt templates.
 
-1. System Prompt
+1. **System Prompt**
 
-2. User Prompt (to reformat the user's prompt)
+2. **User Prompt** (to reformat the user's prompt)
 
-3. User Empty Prompt
+3. **User Empty Prompt**
 
-4. Tool Error
+4. **Tool Error**
 
-5. Tool Input Error (validation error)
+5. **Tool Input Error** (validation error)
 
-6. Tool No Result Error
+6. **Tool No Result Error**
 
-7. Tool Not Found Error
+7. **Tool Not Found Error**
 
 Please refer to the [following example](/examples/agents/bee_advanced.ts) to see how to modify them.
 
