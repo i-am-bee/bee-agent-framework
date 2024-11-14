@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.0.40](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.39...v0.0.40) (2024-11-14)
+
+### Features
+
+- **agents:** improve constraint decoding regex for granite agent ([cc6a32c](https://github.com/i-am-bee/bee-agent-framework/commit/cc6a32cd106733d17c5774775a789ceac7682271))
+
+### Bug Fixes
+
+- **tools:** correctly infer input type for DynamicTool ([90db143](https://github.com/i-am-bee/bee-agent-framework/commit/90db143499c9ddb02873d9484b5cf07805536e57))
+
 ## [0.0.39](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.38...v0.0.39) (2024-11-13)
 
 ### Features
