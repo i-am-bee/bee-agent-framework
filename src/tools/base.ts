@@ -152,6 +152,7 @@ export interface ToolSnapshot<TOutput extends ToolOutput, TOptions extends BaseT
   emitter: Emitter<any>;
 }
 
+export type InferToolOutput<T extends AnyTool> = T extends Tool<infer A, any, any> ? A : never;
 export type ToolInput<T extends AnyTool> = FromSchemaLike<Awaited<ReturnType<T["inputSchema"]>>>;
 export type ToolInputRaw<T extends AnyTool> = FromSchemaLikeRaw<
   Awaited<ReturnType<T["inputSchema"]>>
@@ -382,6 +383,130 @@ export abstract class Tool<
 
   loadSnapshot(snapshot: ToolSnapshot<TOutput, TOptions>): void {
     Object.assign(this, snapshot);
+  }
+
+  fork<S extends AnyTool, TS extends ZodSchema>(
+    this: S,
+    inputSchema: TS,
+    config: {
+      mapper: (
+        input: z.output<TS>,
+        options: TRunOptions | undefined,
+        run: RunContext<DynamicTool<TOutput, TS, TOptions, TRunOptions, z.output<TS>>>,
+      ) => ToolInputRaw<S>;
+    },
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+
+    return () => {
+      return new DynamicTool<TOutput, TS, TOptions, TRunOptions, z.output<TS>>({
+        name: self.name,
+        description: self.description,
+        options: self.options,
+        inputSchema,
+        handler: async (input: z.output<TS>, options, run): Promise<TOutput> => {
+          const wrappedInput = config.mapper(input, options, run);
+          return self.run(wrappedInput, options);
+        },
+      } as const);
+    };
+  }
+
+  wrap<S extends AnyTool, T extends AnyTool>(this: S, tool: T) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+
+    return (config: {
+      toWrappedTool: (
+        input: ToolInputRaw<typeof self>,
+        output: TOutput,
+        options: TRunOptions | undefined,
+        run: RunContext<
+          DynamicTool<
+            TOutput,
+            ZodSchema<ToolInput<typeof self>>,
+            TOptions,
+            TRunOptions,
+            ToolInput<typeof self>
+          >
+        >,
+      ) => ToolInputRaw<typeof tool>;
+      fromWrappedTool: (
+        input: ToolInputRaw<typeof self>,
+        output: InferToolOutput<typeof tool>,
+        selfOutput: TOutput,
+      ) => TOutput;
+    }) => {
+      return new DynamicTool<
+        TOutput,
+        ZodSchema<ToolInput<typeof self>>,
+        TOptions,
+        TRunOptions,
+        ToolInput<typeof self>
+      >({
+        name: self.name,
+        description: self.description,
+        options: self.options,
+        inputSchema: this.inputSchema() as any,
+        handler: async (input: ToolInputRaw<S>, options, run): Promise<TOutput> => {
+          const selfOutput = await self.run(input, options);
+          const wrappedInput = config.toWrappedTool(input, selfOutput, options, run);
+          const wrappedOutput = await tool.run(wrappedInput);
+          return config.fromWrappedTool(input, wrappedOutput, selfOutput);
+        },
+      } as const);
+    };
+  }
+
+  pipe<S extends AnyTool, T extends AnyTool>(
+    this: S,
+    tool: T,
+    mapper: (
+      input: ToolInputRaw<S>,
+      output: TOutput,
+      options: TRunOptions | undefined,
+      run: RunContext<
+        DynamicTool<TOutput, ZodSchema<ToolInput<S>>, TOptions, TRunOptions, ToolInput<S>>
+      >,
+    ) => ToolInputRaw<typeof tool>,
+  ) {
+    return new DynamicTool<TOutput, ZodSchema<ToolInput<S>>, TOptions, TRunOptions, ToolInput<S>>({
+      name: this.name,
+      description: this.description,
+      options: this.options,
+      inputSchema: this.inputSchema() as ZodSchema<ToolInput<S>>,
+      handler: async (input: ToolInputRaw<S>, options, run): Promise<TOutput> => {
+        const selfOutput = await this.run(input, options);
+        const wrappedInput = mapper(input, selfOutput, options, run);
+        return await tool.run(wrappedInput);
+      },
+    } as const);
+  }
+
+  extend<S extends AnyTool, TS extends ZodSchema>(
+    this: S,
+    schema: TS,
+    mapper: (
+      input: z.output<TS>,
+      options: TRunOptions | undefined,
+      run: RunContext<DynamicTool<TOutput, TS, TOptions, TRunOptions, z.output<TS>>>,
+    ) => ToolInputRaw<S>,
+    overrides: {
+      name?: string;
+      description?: string;
+    } = {},
+  ) {
+    return new DynamicTool<TOutput, TS, TOptions, TRunOptions, z.output<TS>>({
+      name: overrides?.name || this.name,
+      description: overrides?.name || this.description,
+      options: shallowCopy(this.options),
+      inputSchema: schema,
+      handler: async (input: ToolInputRaw<S>, options, run): Promise<TOutput> => {
+        const wrappedInput = mapper(input, options, run);
+        return await this.run(wrappedInput, options);
+      },
+    } as const);
   }
 }
 

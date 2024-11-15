@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  BaseToolOptions,
-  BaseToolRunOptions,
-  DynamicTool,
-  JSONToolOutput,
-  Tool,
-  ToolInput,
-  ToolOutput,
-} from "./base.js";
-import { string, z, ZodSchema } from "zod";
+import { BaseToolOptions, BaseToolRunOptions, JSONToolOutput, Tool, ToolInput } from "./base.js";
+import { string, z } from "zod";
 import { RunContext } from "@/context.js";
-import { isTruthy, map, pipe, prop, sortBy, take } from "remeda";
+import { map, pipe, prop, sortBy, take } from "remeda";
 
 const documentSchema = z.object({ text: string() }).passthrough();
 
@@ -74,44 +66,6 @@ export class SimilarityTool<TProviderOptions> extends Tool<
 
   static {
     this.register();
-  }
-
-  wrapTool<
-    TOutput extends ToolOutput,
-    TOptions extends BaseToolOptions,
-    TRunOptions extends BaseToolRunOptions,
-    TSchema extends ZodSchema,
-  >(tool: Tool<TOutput, TOptions, TRunOptions>, inputSchema: TSchema) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-
-    return (config: {
-      toWrappedTool: (
-        input: z.output<TSchema>,
-        options: TRunOptions | undefined,
-        run: RunContext<
-          DynamicTool<SimilarityToolOutput, TSchema, TOptions, TRunOptions>,
-          z.output<TSchema>
-        >,
-      ) => ToolInput<typeof tool>;
-      fromWrappedTool: (input: z.output<TSchema>, output: TOutput) => ToolInput<typeof self>;
-    }) => {
-      return new DynamicTool<SimilarityToolOutput, TSchema, TOptions, TRunOptions>({
-        name: tool.name,
-        description: tool.description,
-        options: tool.options,
-        inputSchema,
-        handler: async (input: TSchema, options, run): Promise<SimilarityToolOutput> => {
-          const toolInput = config.toWrappedTool(input, options, run);
-          const toolOutput = await tool.run(toolInput, {
-            ...options,
-            signal: AbortSignal.any([run.signal, options?.signal].filter(isTruthy)),
-          } as typeof options);
-          const similarityInput = config.fromWrappedTool(input, toolOutput);
-          return await self.run(similarityInput, { signal: run.signal });
-        },
-      });
-    };
   }
 
   protected async _run(
