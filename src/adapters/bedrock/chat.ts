@@ -79,15 +79,15 @@ export class ChatBedrockOutput extends ChatLLMOutput {
     });
   }
 
-  getTextContent(): string {
+  getTextContent() {
     return this.messages.map((msg) => msg.text).join("");
   }
 
-  merge(other: ChatBedrockOutput): void {
+  merge(other: ChatBedrockOutput) {
     this.responses.push(...other.responses);
   }
 
-  toString(): string {
+  toString() {
     return this.getTextContent();
   }
 
@@ -97,7 +97,7 @@ export class ChatBedrockOutput extends ChatLLMOutput {
     };
   }
 
-  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {
+  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
     Object.assign(this, snapshot);
   }
 }
@@ -206,10 +206,10 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
   }
 
   protected convertToConverseMessages(messages: BaseMessage[]): {
-    converseMessages: BedrockMessage[];
-    converseSystem: BedrockSystemContentBlock[];
+    conversation: BedrockMessage[];
+    systemMessage: BedrockSystemContentBlock[];
   } {
-    const converseSystem: BedrockSystemContentBlock[] = messages
+    const systemMessage: BedrockSystemContentBlock[] = messages
       .filter((msg) => msg.role === Role.SYSTEM)
       .map((msg) => {
         return { text: msg.text };
@@ -223,30 +223,33 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
         };
       });
 
-    const combinedConverseMessages = converseMessages.reduce<BedrockMessage[]>((acc, curr) => {
-      const lastMessage = acc[acc.length - 1];
-      if (lastMessage && lastMessage.role === Role.USER) {
-        lastMessage.content = lastMessage.content!.concat(curr.content!);
-      } else {
-        acc.push(curr);
-      }
+    const conversation = converseMessages.reduce<BedrockMessage[]>(
+      (messageList, currentMessage) => {
+        const lastMessage = messageList[messageList.length - 1];
+        if (lastMessage && lastMessage.role === Role.USER) {
+          lastMessage.content = lastMessage.content!.concat(currentMessage.content!);
+        } else {
+          messageList.push(currentMessage);
+        }
 
-      return acc;
-    }, []);
+        return messageList;
+      },
+      [],
+    );
 
-    return { converseMessages: combinedConverseMessages, converseSystem };
+    return { conversation, systemMessage };
   }
 
   protected async _generate(
     input: BaseMessage[],
-    _options: GenerateOptions,
+    _options: GenerateOptions | undefined,
     run: GetRunContext<typeof this>,
   ): Promise<ChatBedrockOutput> {
-    const { converseMessages, converseSystem } = this.convertToConverseMessages(input);
+    const { conversation, systemMessage } = this.convertToConverseMessages(input);
     const command = new ConverseCommand({
       modelId: this.modelId,
-      messages: converseMessages,
-      system: converseSystem,
+      messages: conversation,
+      system: systemMessage,
       ...this.parameters,
     });
     const response = await this.client.send(command, { abortSignal: run.signal });
@@ -255,14 +258,14 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
 
   protected async *_stream(
     input: BaseMessage[],
-    _options: StreamGenerateOptions,
+    _options: StreamGenerateOptions | undefined,
     run: GetRunContext<typeof this>,
   ): AsyncStream<ChatBedrockOutput> {
-    const { converseMessages, converseSystem } = this.convertToConverseMessages(input);
+    const { conversation, systemMessage } = this.convertToConverseMessages(input);
     const command = new ConverseStreamCommand({
       modelId: this.modelId,
-      messages: converseMessages,
-      system: converseSystem,
+      messages: conversation,
+      system: systemMessage,
       ...this.parameters,
     });
     const response = await this.client.send(command, { abortSignal: run.signal });
