@@ -122,4 +122,13 @@ export class MilvusDatabaseTool extends Tool<
     });
   }
 
+  private async listCollections(signal?: AbortSignal): Promise<string[]> {
+    const response = await this.client.listCollections({});
+    return response.data.map((collection) => collection.name);
+  }
+
+  private async getCollectionInfo(collectionName: string, signal?: AbortSignal): Promise<any> {
+    const response = await this.client.describeCollection({ collection_name: collectionName });
+    return response;
+  }
 }
