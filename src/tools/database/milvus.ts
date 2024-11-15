@@ -122,32 +122,117 @@ export class MilvusDatabaseTool extends Tool<
     });
   }
 
+  static {
+    this.register();
+  }
+
+  protected async _run(
+    input: ToolInput<this>,
+    _options: BaseToolRunOptions | undefined,
+    run: RunContext<this>,
+  ): Promise<JSONToolOutput<any>> {
+    switch (input.action) {
+      case MilvusAction.ListCollections:
+        const collections = await this.listCollections(run.signal);
+        return new JSONToolOutput(collections);
+
+      case MilvusAction.GetCollectionInfo:
+        if (!input.collectionName) {
+          throw new ToolError("A collection name is required for Milvus GetCollectionInfo action");
+        }
+        const collectionInfo = await this.getCollectionInfo(input.collectionName, run.signal);
+        return new JSONToolOutput(collectionInfo);
+
+      case MilvusAction.Search:
+        if (!input.collectionName || !input.vector) {
+          throw new ToolError("A collection name and vector are required for Milvus Search action");
+        }
+        const searchResults = await this.search(input, run.signal);
+        return new JSONToolOutput(searchResults);
+
+      case MilvusAction.Insert:
+        if (!input.collectionName || !input.vectors) {
+          throw new ToolError(
+            "A collection name and vectors are required for Milvus Insert action",
+          );
+        }
+        const insertResults = await this.insert(input, run.signal);
+        return new JSONToolOutput(insertResults);
+
+      case MilvusAction.Delete:
+        if (!input.collectionName || !input.ids) {
+          throw new ToolError("Collection name and ids are required for Milvus Delete action");
+        }
+        const deleteResults = await this.delete(input, run.signal);
+        return new JSONToolOutput(deleteResults);
+
+      default:
+        throw new ToolError(`Invalid action specified: ${input.action}`);
+    }
+  }
+
   private async listCollections(signal?: AbortSignal): Promise<string[]> {
-    const response = await this.client.listCollections({});
-    return response.data.map((collection) => collection.name);
+    try {
+      const response = await this.client.listCollections({});
+      return response.data.map((collection) => collection.name);
+    } catch (error) {
+      console.error("Failed to list collections from Milvus:", error);
+      throw new ToolError(`Failed to list collections from Milvus: ${error}`);
+    }
   }
 
   private async getCollectionInfo(collectionName: string, signal?: AbortSignal): Promise<any> {
-    const response = await this.client.describeCollection({ collection_name: collectionName });
-    return response;
+    try {
+      const response = await this.client.describeCollection({ collection_name: collectionName });
+      return response;
+    } catch (error) {
+      console.error("Failed to get info about collections from Milvus:", error);
+      throw new ToolError(`Failed to get info about collections from Milvus: ${error}`);
+    }
   }
 
   private async insert(input: ToolInput<this>, signal?: AbortSignal): Promise<any> {
-    const response = await this.client.insert({
-      collection_name: input.collectionName as string,
-      fields_data: input.vectors.map((vector, index) => ({
-        vector: vector,
-        ...input.metadata?.[index],
-      })),
-    });
-    return response;
+    try {
+      const response = await this.client.insert({
+        collection_name: input.collectionName as string,
+        fields_data: input.vectors.map((vector, index) => ({
+          vector: vector,
+          ...input.metadata?.[index],
+        })),
+      });
+      return response;
+    } catch (error) {
+      console.error("Failed to insert in Milvus:", error);
+      throw new ToolError(`Failed to insert in Milvus: ${error}`);
+    }
+  }
+
+  private async search(input: ToolInput<this>, signal?: AbortSignal): Promise<any> {
+    try {
+      const response = await this.client.search({
+        collection_name: input.collectionName as string,
+        vector: input.vector,
+        limit: input.topK || 10,
+        filter: input.filter,
+        output_fields: input.searchOutput,
+      });
+      return response.results;
+    } catch (error) {
+      console.error("Failed to search in Milvus:", error);
+      throw new ToolError(`Failed to search in Milvus: ${error}`);
+    }
   }
 
   private async delete(input: ToolInput<this>, signal?: AbortSignal): Promise<any> {
-    const response = await this.client.deleteEntities({
-      collection_name: input.collectionName as string,
-      expr: `id in [${input.ids?.join(",")}]`,
-    });
-    return response;
+    try {
+      const response = await this.client.deleteEntities({
+        collection_name: input.collectionName as string,
+        expr: `id in [${input.ids?.join(",")}]`,
+      });
+      return response;
+    } catch (error) {
+      console.error("Failed to delete in Milvus:", error);
+      throw new ToolError(`Failed to delete in Milvus: ${error}`);
+    }
   }
 }
