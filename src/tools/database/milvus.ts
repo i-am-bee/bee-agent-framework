@@ -131,4 +131,23 @@ export class MilvusDatabaseTool extends Tool<
     const response = await this.client.describeCollection({ collection_name: collectionName });
     return response;
   }
+
+  private async insert(input: ToolInput<this>, signal?: AbortSignal): Promise<any> {
+    const response = await this.client.insert({
+      collection_name: input.collectionName as string,
+      fields_data: input.vectors.map((vector, index) => ({
+        vector: vector,
+        ...input.metadata?.[index],
+      })),
+    });
+    return response;
+  }
+
+  private async delete(input: ToolInput<this>, signal?: AbortSignal): Promise<any> {
+    const response = await this.client.deleteEntities({
+      collection_name: input.collectionName as string,
+      expr: `id in [${input.ids?.join(",")}]`,
+    });
+    return response;
+  }
 }
