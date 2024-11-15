@@ -21,10 +21,11 @@ import {
   JSONToolOutput,
   Tool,
   ToolInput,
+  ToolOutput,
 } from "./base.js";
 import { string, z, ZodSchema } from "zod";
 import { RunContext } from "@/context.js";
-import { map, pipe, prop, sortBy, take } from "remeda";
+import { isTruthy, map, pipe, prop, sortBy, take } from "remeda";
 
 const documentSchema = z.object({ text: string() }).passthrough();
 
@@ -75,28 +76,38 @@ export class SimilarityTool<TProviderOptions> extends Tool<
     this.register();
   }
 
-  wrapTool<T extends Tool, S extends ZodSchema>(tool: T, schema: S) {
+  wrapTool<
+    TOutput extends ToolOutput,
+    TOptions extends BaseToolOptions,
+    TRunOptions extends BaseToolRunOptions,
+    TSchema extends ZodSchema,
+  >(tool: Tool<TOutput, TOptions, TRunOptions>, inputSchema: TSchema) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     return (config: {
-      toTool: (input: z.output<S>) => ToolInput<T>;
-      fromTool: (
-        input: z.output<S>,
-        output: T extends Tool<infer A> ? A : never,
-      ) => ToolInput<typeof self>;
+      toWrappedTool: (
+        input: z.output<TSchema>,
+        options: TRunOptions | undefined,
+        run: RunContext<
+          DynamicTool<SimilarityToolOutput, TSchema, TOptions, TRunOptions>,
+          z.output<TSchema>
+        >,
+      ) => ToolInput<typeof tool>;
+      fromWrappedTool: (input: z.output<TSchema>, output: TOutput) => ToolInput<typeof self>;
     }) => {
-      return new DynamicTool<SimilarityToolOutput, S>({
+      return new DynamicTool<SimilarityToolOutput, TSchema, TOptions, TRunOptions>({
         name: tool.name,
         description: tool.description,
         options: tool.options,
-        inputSchema: schema,
-        handler: async (input: S, options, run): Promise<SimilarityToolOutput> => {
-          const toolInput = config.toTool(input);
-          const toolOutput = (await tool.run(toolInput, options)) as T extends Tool<infer A>
-            ? A
-            : never;
-          const similarityInput = config.fromTool(input, toolOutput);
+        inputSchema,
+        handler: async (input: TSchema, options, run): Promise<SimilarityToolOutput> => {
+          const toolInput = config.toWrappedTool(input, options, run);
+          const toolOutput = await tool.run(toolInput, {
+            ...options,
+            signal: AbortSignal.any([run.signal, options?.signal].filter(isTruthy)),
+          } as typeof options);
+          const similarityInput = config.fromWrappedTool(input, toolOutput);
           return await self.run(similarityInput, { signal: run.signal });
         },
       });

@@ -4,6 +4,8 @@ import { splitString } from "bee-agent-framework/internals/helpers/string";
 import { z } from "zod";
 
 {
+  const wikipedia = new WikipediaTool();
+
   const similarity = new SimilarityTool({
     maxResults: 5,
     provider: async (input) =>
@@ -14,8 +16,6 @@ import { z } from "zod";
           .reduce((acc, word) => acc + (input.query.toLowerCase().includes(word) ? 1 : 0), 0),
       })),
   });
-
-  const wikipedia = new WikipediaTool();
   const wikipediaWithSimilarity = similarity.wrapTool(
     wikipedia,
     z.object({
@@ -23,10 +23,10 @@ import { z } from "zod";
       question: z.string().describe("The question you are trying to answer."),
     }),
   )({
-    toTool: (input) => ({
+    toWrappedTool: (input) => ({
       query: input.query,
     }),
-    fromTool: (input, output) => ({
+    fromWrappedTool: (input, output) => ({
       query: input.question,
       documents: output.results.flatMap((document) =>
         Array.from(
