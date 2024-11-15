@@ -1,4 +1,4 @@
-import { LLM } from "bee-agent-framework/llms/llm";
+import { LLM, LLMInput } from "bee-agent-framework/llms/llm";
 import {
   AsyncStream,
   BaseLLMOutput,
@@ -67,12 +67,16 @@ export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
     super(input.modelId, input.executionOptions, input.cache);
   }
 
+  static {
+    this.register();
+  }
+
   async meta(): Promise<LLMMeta> {
     // TODO: retrieve data about current model from the given provider API
     return { tokenLimit: Infinity };
   }
 
-  async tokenize(input: string): Promise<BaseLLMTokenizeOutput> {
+  async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {
     // TODO: retrieve data about current model from the given provider API
     return {
       tokensCount: Math.ceil(input.length / 4),
@@ -80,7 +84,7 @@ export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
   }
 
   protected async _generate(
-    input: string,
+    input: LLMInput,
     options: CustomGenerateOptions,
     run: GetRunContext<this>,
   ): Promise<CustomLLMOutput> {
@@ -95,7 +99,7 @@ export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
   }
 
   protected async *_stream(
-    input: string,
+    input: LLMInput,
     options: CustomGenerateOptions,
     run: GetRunContext<this>,
   ): AsyncStream<CustomLLMOutput, void> {
