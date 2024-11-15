@@ -62,22 +62,6 @@ export const BAMChatLLMPreset = {
       },
     };
   },
-  "qwen/qwen2-72b-instruct": (): BAMChatLLMPreset => {
-    const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("qwen2");
-
-    return {
-      base: {
-        parameters: {
-          decoding_method: "greedy",
-          include_stop_sequence: false,
-          stop_sequences: [...parameters.stop_sequence],
-        },
-      },
-      chat: {
-        messagesToPrompt: messagesToPrompt(template),
-      },
-    };
-  },
 } as const;
 
 export type BAMChatLLMPresetModel = keyof typeof BAMChatLLMPreset;
