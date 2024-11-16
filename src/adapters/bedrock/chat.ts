@@ -211,22 +211,19 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
   } {
     const systemMessage: BedrockSystemContentBlock[] = messages
       .filter((msg) => msg.role === Role.SYSTEM)
-      .map((msg) => {
-        return { text: msg.text };
-      });
+      .map((msg) => ({ text: msg.text }));
+
     const converseMessages: BedrockMessage[] = messages
       .filter((msg) => msg.role !== Role.SYSTEM)
-      .map((msg) => {
-        return {
-          role: msg.role === Role.USER ? Role.USER : Role.ASSISTANT,
-          content: [{ text: msg.text }],
-        };
-      });
+      .map((msg) => ({
+        role: msg.role === Role.USER ? Role.USER : Role.ASSISTANT,
+        content: [{ text: msg.text }],
+      }));
 
     const conversation = converseMessages.reduce<BedrockMessage[]>(
       (messageList, currentMessage) => {
         const lastMessage = messageList[messageList.length - 1];
-        if (lastMessage && lastMessage.role === Role.USER) {
+        if (lastMessage && lastMessage !== currentMessage && lastMessage.role === Role.USER) {
           lastMessage.content = lastMessage.content!.concat(currentMessage.content!);
         } else {
           messageList.push(currentMessage);
@@ -236,7 +233,6 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
       },
       [],
     );
-
     return { conversation, systemMessage };
   }
 
@@ -269,11 +265,9 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
       ...this.parameters,
     });
     const response = await this.client.send(command, { abortSignal: run.signal });
-    if (response.stream) {
-      for await (const chunk of response.stream) {
-        if (chunk.contentBlockDelta) {
-          yield new ChatBedrockOutput(chunk.contentBlockDelta);
-        }
+    for await (const chunk of response?.stream || []) {
+      if (chunk.contentBlockDelta) {
+        yield new ChatBedrockOutput(chunk.contentBlockDelta);
       }
     }
   }
