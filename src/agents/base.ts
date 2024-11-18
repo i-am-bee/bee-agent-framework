@@ -35,7 +35,7 @@ export abstract class BaseAgent<
   TOutput,
   TOptions extends BaseAgentRunOptions = BaseAgentRunOptions,
 > extends Serializable {
-  private isRunning = false;
+  #isRunning = false;
 
   public abstract readonly emitter: Emitter<unknown>;
 
@@ -44,7 +44,7 @@ export abstract class BaseAgent<
       ? [input: TInput, options?: TOptions]
       : [input: TInput, options: TOptions]
   ) {
-    if (this.isRunning) {
+    if (this.#isRunning) {
       throw new AgentError("Agent is already running!");
     }
 
@@ -62,7 +62,7 @@ export abstract class BaseAgent<
             throw new AgentError(`Error has occurred!`, [e]);
           }
         } finally {
-          this.isRunning = false;
+          this.#isRunning = false;
         }
       },
     ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
