@@ -193,6 +193,7 @@
     "zod-to-json-schema": "^3.23.3"
   },
   "peerDependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.687.0",
     "@elastic/elasticsearch": "^8.0.0",
     "@googleapis/customsearch": "^3.2.0",
     "@grpc/grpc-js": "^1.11.3",
@@ -207,6 +208,9 @@
     "sequelize": "^6.37.3"
   },
   "peerDependenciesMeta": {
+    "@aws-sdk/client-bedrock-runtime": {
+      "optional": true
+    },
     "@elastic/elasticsearch": {
       "optional": true
     },
@@ -245,6 +249,7 @@
     }
   },
   "devDependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.687.0",
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
     "@elastic/elasticsearch": "^8.0.0",
