@@ -33,6 +33,7 @@ describe("SQLTool", () => {
 
   it("Returns an error for invalid query", async () => {
     const response = await instance.run({
+      action: "QUERY",
       query: "DELETE FROM users",
     });
 

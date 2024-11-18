@@ -65,6 +65,7 @@ describe("SQLTool", () => {
     vi.spyOn(tool as any, "connection").mockResolvedValue(mockSequelize as unknown as Sequelize);
 
     const result = await tool.run({
+      action: "QUERY",
       query: "SELECT * FROM users;",
     });
 
@@ -84,6 +85,7 @@ describe("SQLTool", () => {
     });
 
     const result = await tool.run({
+      action: "QUERY",
       query: "DELETE FROM users;",
     });
 
@@ -111,6 +113,7 @@ describe("SQLTool", () => {
     vi.spyOn(tool as any, "connection").mockResolvedValue(mockSequelize as unknown as Sequelize);
 
     const result = await tool.run({
+      action: "QUERY",
       query: "SELECT * FROM users;",
     });
 
