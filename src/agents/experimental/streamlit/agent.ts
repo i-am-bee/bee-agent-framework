@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BaseAgent, BaseAgentRunOptions } from "@/agents/base.js";
+import { AgentError, BaseAgent, BaseAgentRunOptions } from "@/agents/base.js";
 import { AgentMeta } from "@/agents/types.js";
 import { GetRunContext } from "@/context.js";
 import { Callback, Emitter } from "@/emitter/emitter.js";
@@ -22,13 +22,13 @@ import { BaseMemory } from "@/memory/base.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import { isTruthy } from "remeda";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
-import { TokenMemory } from "@/memory/tokenMemory.js";
 import {
   StreamlitAgentSystemPrompt,
   StreamlitAgentTemplates,
 } from "@/agents/experimental/streamlit/prompts.js";
-import { findFirstPair } from "@/internals/helpers/string.js";
 import { BaseLLMOutput } from "@/llms/base.js";
+import { TokenMemory } from "@/memory/tokenMemory.js";
+import { findFirstPair } from "@/internals/helpers/string.js";
 
 interface Input {
   llm: ChatLLM<ChatLLMOutput>;
@@ -75,58 +75,6 @@ export class StreamlitAgent extends BaseAgent<RunInput, RunOutput, Options> {
     super();
   }
 
-  protected async _run(
-    input: RunInput,
-    _options: Options | undefined,
-    run: GetRunContext<typeof this>,
-  ): Promise<RunOutput> {
-    const systemMessage = BaseMessage.of({
-      role: Role.SYSTEM,
-      text: (this.input.templates?.system ?? StreamlitAgentSystemPrompt).render({}),
-    });
-
-    const userMessage =
-      input.prompt &&
-      BaseMessage.of({
-        role: Role.USER,
-        text: input.prompt,
-        meta: {
-          createdAt: new Date(),
-        },
-      });
-
-    const runMemory = new TokenMemory({ llm: this.input.llm });
-    await runMemory.addMany(
-      [systemMessage, ...this.input.memory.messages, userMessage].filter(isTruthy),
-    );
-
-    let content = "";
-    for await (const chunk of this.input.llm.stream(runMemory.messages, { signal: run.signal })) {
-      const delta = chunk.getTextContent();
-      content += delta;
-      await run.emitter.emit("newToken", { delta, state: { content }, chunk });
-    }
-
-    const assistantMessage = BaseMessage.of({
-      role: Role.ASSISTANT,
-      text: content,
-    });
-    await this.memory.addMany([userMessage, assistantMessage].filter(isTruthy));
-
-    const match = findFirstPair(content, ["```python-app\n", "```\n"]);
-    return {
-      result: {
-        raw: content,
-        app: match ? match.inner : null,
-        text: match
-          ? `${content.substring(0, match.start)}${content.substring(match.end + 1)}`
-          : content,
-      },
-      message: assistantMessage,
-      memory: runMemory,
-    };
-  }
-
   public get meta(): AgentMeta {
     return {
       name: `Streamlit`,
@@ -137,6 +85,88 @@ export class StreamlitAgent extends BaseAgent<RunInput, RunOutput, Options> {
 
   public get memory() {
     return this.input.memory;
+  }
+
+  protected async _run(
+    input: RunInput,
+    _options: Options | undefined,
+    run: GetRunContext<typeof this>,
+  ): Promise<RunOutput> {
+    const { userMessage, runMemory } = await this.prepare(input);
+
+    let content = "";
+    for await (const chunk of this.input.llm.stream(runMemory.messages, {
+      signal: run.signal,
+    })) {
+      const delta = chunk.getTextContent();
+      content += delta;
+      await run.emitter.emit("newToken", { delta, state: { content }, chunk });
+    }
+    const result = this.parse(content);
+
+    const assistantMessage = BaseMessage.of({
+      role: Role.ASSISTANT,
+      text: content,
+    });
+    await this.memory.addMany([userMessage, assistantMessage].filter(isTruthy));
+
+    return {
+      result,
+      message: assistantMessage,
+      memory: runMemory,
+    };
+  }
+
+  protected async prepare(input: RunInput) {
+    const systemMessage = BaseMessage.of({
+      role: Role.SYSTEM,
+      text: (this.input.templates?.system ?? StreamlitAgentSystemPrompt).render({}),
+    });
+
+    const userMessage = input.prompt
+      ? BaseMessage.of({
+          role: Role.USER,
+          text: input.prompt,
+          meta: {
+            createdAt: new Date(),
+          },
+        })
+      : null;
+
+    const runMemory = new TokenMemory({
+      llm: this.input.llm,
+      capacityThreshold: 0.85,
+      syncThreshold: 0.6,
+      handlers: {
+        removalSelector(msgs) {
+          const msgToRemove =
+            msgs.length > 3 &&
+            (msgs.find((msg) => msg.role === Role.ASSISTANT) ??
+              msgs.find((msg) => msg.role === Role.USER));
+
+          if (!msgToRemove || (msgToRemove.role === Role.USER && msgs.at(-1) === msgToRemove)) {
+            throw new AgentError("Cannot fit the current conversation into the context window!");
+          }
+          return msgToRemove;
+        },
+      },
+    });
+    await runMemory.addMany(
+      [systemMessage, ...this.input.memory.messages, userMessage].filter(isTruthy),
+    );
+
+    return { runMemory, userMessage };
+  }
+
+  protected parse(content: string): Result {
+    const match = findFirstPair(content, ["```python-app\n", "```\n"]);
+    return {
+      raw: content,
+      app: match ? match.inner : null,
+      text: match
+        ? `${content.substring(0, match.start)}${content.substring(match.end + 1)}`
+        : content,
+    };
   }
 
   createSnapshot() {
