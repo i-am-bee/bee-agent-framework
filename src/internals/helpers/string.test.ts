@@ -15,7 +15,8 @@
  */
 
 import { expect } from "vitest";
-import { splitString } from "./string.js";
+import { findFirstPair, splitString } from "./string.js";
+import { ValueError } from "@/errors.js";
 
 describe("String Utilities", () => {
   it("splitString", () => {
@@ -35,5 +36,60 @@ describe("String Utilities", () => {
       "30 31 32 33 34 35 36 37 38 39 ",
       "35 36 37 38 39 ",
     ]);
+  });
+
+  describe("findFirstPair", () => {
+    it.each([
+      [["", ""]],
+      [["", "."]],
+      [[".", ""]],
+      [[null, "XXX"]],
+      [[null, false]],
+      [[undefined, undefined]],
+      [[[]]],
+      [[]],
+    ] as const)("Throws %s", (pair: any) => {
+      expect(() => findFirstPair("Hello world!", pair)).toThrowError(ValueError);
+    });
+
+    it.each([
+      {
+        input: "This ?is?.",
+        pair: ["?", "?"],
+      },
+      {
+        input: 'This is the output {"a":1}.',
+        pair: ["{", "}"],
+      },
+      {
+        input: "[[[0]]]",
+        pair: ["[", "]"],
+      },
+      {
+        pair: ["```python-app", "```"],
+        input: `Here is a simple Streamlit app that displays a header, a subheader, and a button. When the button is clicked, it displays a success message.
+
+\`\`\`
+
+\`\`\`python-app
+import streamlit as st
+
+st.header("My First Streamlit App")
+
+st.subheader("This is a simple app")
+
+if st.button("Click me"):
+    st.success("Button clicked!")
+\`\`\`
+
+\`\`\`
+
+Let me know if you'd like to add any features to this app!`,
+      },
+    ])("Works %#", ({ input, pair }) => {
+      const generated = findFirstPair(input, pair as [string, string])!;
+      expect(generated).toBeTruthy();
+      expect({ inner: generated.inner, outer: generated.outer }).toMatchSnapshot();
+    });
   });
 });

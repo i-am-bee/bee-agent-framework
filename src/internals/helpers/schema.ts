@@ -83,8 +83,8 @@ export function parseBrokenJson(input: string | undefined, options?: ParseBroken
     } catch {
       const pair = options?.pair;
       if (pair) {
-        const [start, end] = findFirstPair(input, pair) ?? [0, input.length - 1];
-        return JSON.parse(jsonrepair(input.substring(start, end + 1)));
+        const { outer } = findFirstPair(input, pair) ?? { outer: input };
+        return JSON.parse(jsonrepair(outer));
       } else {
         return JSON.parse(jsonrepair(input));
       }

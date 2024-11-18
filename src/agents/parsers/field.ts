@@ -132,11 +132,10 @@ export class JSONParserField<T> extends ParserField<T, Partial<T>> {
         const merged = this.raw.concat(chunk);
         const match = findFirstPair(merged, this.input.matchPair);
         if (match) {
-          const end = match[1];
-          if (end < this.raw.length) {
+          if (match.end < this.raw.length) {
             return;
           }
-          chunk = merged.substring(this.raw.length, end + 1);
+          chunk = merged.substring(this.raw.length, match.end);
         }
       }
     }

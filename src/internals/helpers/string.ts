@@ -16,6 +16,7 @@
 
 import { ValueOf } from "@/internals/types.js";
 import * as R from "remeda";
+import { ValueError } from "@/errors.js";
 
 export function* splitString<T extends string>(
   text: T,
@@ -74,23 +75,33 @@ export function halveString(
   }
 }
 
-export function findFirstPair(text: string, pair: [string, string]): [number, number] | null {
-  const [opening, closing] = pair;
+export function findFirstPair(text: string, pair: [string, string]) {
+  const [opening, closing] = pair || [];
+  if (!pair || !opening || !closing) {
+    throw new ValueError(`The "pair" parameter is required and must be non-empty!`);
+  }
 
   let balance = 0;
   let startIndex = -1;
 
+  const isSame = opening === closing;
   for (let index = 0; index < text.length; index++) {
-    if (text[index] === opening) {
+    if (text.substring(index, index + opening.length) === opening && (!isSame || balance === 0)) {
       if (balance === 0) {
         startIndex = index;
       }
       balance++;
-    } else if (text[index] === closing) {
+    } else if (text.substring(index, index + closing.length) === closing) {
       if (balance > 0) {
         balance--;
         if (balance === 0) {
-          return [startIndex, index];
+          return {
+            start: startIndex,
+            end: index + closing.length,
+            pair,
+            inner: text.substring(startIndex + opening.length, index),
+            outer: text.substring(startIndex, index + closing.length),
+          };
         }
       }
     }
