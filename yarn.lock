@@ -4424,6 +4424,8 @@ __metadata:
     openai-chat-tokens: ^0.2.8
     sequelize: ^6.37.3
   peerDependenciesMeta:
+    "@aws-sdk/client-bedrock-runtime":
+      optional: true
     "@elastic/elasticsearch":
       optional: true
     "@googleapis/customsearch":

@@ -205,37 +205,6 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
     return { tokensCount: Math.ceil(contentLength / 4) };
   }
 
-  protected convertToConverseMessages(messages: BaseMessage[]): {
-    conversation: BedrockMessage[];
-    systemMessage: BedrockSystemContentBlock[];
-  } {
-    const systemMessage: BedrockSystemContentBlock[] = messages
-      .filter((msg) => msg.role === Role.SYSTEM)
-      .map((msg) => ({ text: msg.text }));
-
-    const converseMessages: BedrockMessage[] = messages
-      .filter((msg) => msg.role !== Role.SYSTEM)
-      .map((msg) => ({
-        role: msg.role === Role.USER ? Role.USER : Role.ASSISTANT,
-        content: [{ text: msg.text }],
-      }));
-
-    const conversation = converseMessages.reduce<BedrockMessage[]>(
-      (messageList, currentMessage) => {
-        const lastMessage = messageList[messageList.length - 1];
-        if (lastMessage && lastMessage !== currentMessage && lastMessage.role === Role.USER) {
-          lastMessage.content = lastMessage.content!.concat(currentMessage.content!);
-        } else {
-          messageList.push(currentMessage);
-        }
-
-        return messageList;
-      },
-      [],
-    );
-    return { conversation, systemMessage };
-  }
-
   protected async _generate(
     input: BaseMessage[],
     _options: GenerateOptions | undefined,
@@ -279,5 +248,36 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
       modelId: this.modelId,
       parameters: shallowCopy(this.parameters),
     };
+  }
+
+  protected convertToConverseMessages(messages: BaseMessage[]): {
+    conversation: BedrockMessage[];
+    systemMessage: BedrockSystemContentBlock[];
+  } {
+    const systemMessage: BedrockSystemContentBlock[] = messages
+      .filter((msg) => msg.role === Role.SYSTEM)
+      .map((msg) => ({ text: msg.text }));
+
+    const converseMessages: BedrockMessage[] = messages
+      .filter((msg) => msg.role !== Role.SYSTEM)
+      .map((msg) => ({
+        role: msg.role === Role.USER ? Role.USER : Role.ASSISTANT,
+        content: [{ text: msg.text }],
+      }));
+
+    const conversation = converseMessages.reduce<BedrockMessage[]>(
+      (messageList, currentMessage) => {
+        const lastMessage = messageList[messageList.length - 1];
+        if (lastMessage && lastMessage !== currentMessage && lastMessage.role === Role.USER) {
+          lastMessage.content = lastMessage.content!.concat(currentMessage.content!);
+        } else {
+          messageList.push(currentMessage);
+        }
+
+        return messageList;
+      },
+      [],
+    );
+    return { conversation, systemMessage };
   }
 }
