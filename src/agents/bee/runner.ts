@@ -48,7 +48,7 @@ import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
 import { Serializable } from "@/internals/serializable.js";
 import { shallowCopy } from "@/serializer/utils.js";
-import { isEmpty } from "remeda";
+import { isEmpty, last } from "remeda";
 
 export class BeeAgentRunnerFatalError extends BeeAgentError {
   isFatal = true;
@@ -93,6 +93,22 @@ export class BeeAgentRunner extends Serializable {
       return message;
     };
 
+    const inputMemoryTransformed = [
+      ...input.memory.messages,
+      ...(prompt !== null || input.memory.isEmpty()
+        ? [
+            BaseMessage.of({
+              role: Role.USER,
+              text: prompt ?? "",
+              meta: {
+                // TODO: createdAt
+                createdAt: new Date(),
+              },
+            }),
+          ]
+        : []),
+    ].map(transformMessage);
+
     const memory = new TokenMemory({
       llm: input.llm,
       capacityThreshold: 0.85,
@@ -101,9 +117,9 @@ export class BeeAgentRunner extends Serializable {
         removalSelector(curMessages) {
           // First we remove messages from the past conversations
           const prevConversationMessage = curMessages.find((msg) =>
-            input.memory.messages.includes(msg),
+            inputMemoryTransformed.includes(msg),
           );
-          if (prevConversationMessage) {
+          if (prevConversationMessage && prevConversationMessage !== last(inputMemoryTransformed)) {
             return prevConversationMessage;
           }
 
@@ -151,23 +167,8 @@ export class BeeAgentRunner extends Serializable {
           createdAt: new Date(),
         },
       }),
-      ...input.memory.messages.map(transformMessage),
+      ...inputMemoryTransformed,
     ]);
-
-    if (prompt !== null || input.memory.isEmpty()) {
-      await memory.add(
-        transformMessage(
-          BaseMessage.of({
-            role: Role.USER,
-            text: prompt ?? "",
-            meta: {
-              // TODO: createdAt
-              createdAt: new Date(),
-            },
-          }),
-        ),
-      );
-    }
 
     return new this(input, options, memory);
   }
