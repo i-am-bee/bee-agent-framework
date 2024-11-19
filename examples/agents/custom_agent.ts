@@ -103,6 +103,7 @@ IMPORTANT: Every message must be a parsable JSON string without additional outpu
 
   createSnapshot() {
     return {
+      ...super.createSnapshot(),
       driver: this.driver,
       emitter: this.emitter,
       memory: this.memory,
