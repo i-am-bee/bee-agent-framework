@@ -17,16 +17,90 @@
 import { ValueOf } from "@/internals/types.js";
 import * as R from "remeda";
 import { ValueError } from "@/errors.js";
+import { unique } from "remeda";
 
-export function* splitString<T extends string>(
-  text: T,
-  options: { size: number; overlap: number },
+export function* splitString(
+  text: string,
+  options: { size: number; overlap: number; trim?: boolean },
 ) {
+  yield* recursiveSplitString(text, { ...options, trim: options?.trim ?? false, separators: [] });
+}
+
+export function* mergeStrings(
+  chunks: string[],
+  sep: string,
+  options: { size: number; overlap: number; trim?: boolean },
+) {
+  const tmpChunks: string[] = [];
+  let tmpOverlap = 0;
+
+  const toDoc = (parts: string[]) => {
+    const text = parts.join(sep);
+    return options.trim ? text.trim() : text;
+  };
+
+  for (const chunk of chunks) {
+    if (tmpOverlap + chunk.length + tmpChunks.length * sep.length > options.size) {
+      if (tmpChunks.length > 0) {
+        const doc = toDoc(tmpChunks);
+        if (doc) {
+          yield doc;
+        }
+
+        while (
+          tmpOverlap > options.overlap ||
+          (tmpOverlap + chunk.length + tmpChunks.length * sep.length > options.size &&
+            tmpOverlap > 0)
+        ) {
+          const tmp = tmpChunks.shift()!;
+          tmpOverlap -= tmp.length;
+        }
+      }
+    }
+    tmpChunks.push(chunk);
+    tmpOverlap += chunk.length;
+  }
+
+  const doc = toDoc(tmpChunks);
+  if (doc) {
+    yield doc;
+  }
+}
+
+export function* recursiveSplitString(
+  text: string,
+  options: { size: number; overlap: number; separators: string[]; trim?: boolean },
+): Generator<string> {
+  if (options.size <= 0 || options.overlap < 0) {
+    throw new Error("size must be positive and overlap must be non-negative");
+  }
   if (options.overlap >= options.size) {
     throw new Error("overlap must be less than size");
   }
-  for (let i = 0; i < text.length; i += options.size - options.overlap) {
-    yield text.slice(i, i + options.size);
+
+  const goodSplits: string[] = [];
+  const [separator, ...remainingSeparators] = unique([...(options.separators ?? []), ""]);
+
+  for (const chunk of text.split(separator).filter(Boolean)) {
+    if (chunk.length < options.size) {
+      goodSplits.push(chunk);
+      continue;
+    }
+
+    if (goodSplits.length > 0) {
+      yield* mergeStrings(goodSplits, separator, options);
+      goodSplits.length = 0;
+    }
+
+    if (remainingSeparators.length === 0) {
+      yield chunk;
+    } else {
+      yield* recursiveSplitString(chunk, { ...options, separators: remainingSeparators });
+    }
+  }
+
+  if (goodSplits.length > 0) {
+    yield* mergeStrings(goodSplits, separator, options);
   }
 }
 
