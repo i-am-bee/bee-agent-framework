@@ -40,7 +40,7 @@ import {
   BeeUserEmptyPrompt,
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
-import { BeeIterationToolResult } from "@/agents/bee/parser.js";
+import { BeeIterationToolResult, BeeParserInput } from "@/agents/bee/parser.js";
 import { AgentError } from "@/agents/base.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
@@ -48,6 +48,7 @@ import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
 import { Serializable } from "@/internals/serializable.js";
 import { shallowCopy } from "@/serializer/utils.js";
+import { isEmpty } from "remeda";
 
 export class BeeAgentRunnerFatalError extends BeeAgentError {
   isFatal = true;
@@ -172,10 +173,13 @@ export class BeeAgentRunner extends Serializable {
   }
 
   protected createParser(tools: AnyTool[]) {
-    const parserRegex =
-      /Thought:.+\n(?:Final Answer:[\S\s]+|Function Name:.+\nFunction Input: \{.*\}\nFunction Caption:.+\nFunction Output:)?/;
+    const parserRegex = isEmpty(tools)
+      ? new RegExp(`Thought:.+\\nFinal Answer:[\\s\\S]+`)
+      : new RegExp(
+          `Thought:.+\\n(?:Final Answer:[\\s\\S]+|Function Name:(${tools.map((tool) => tool.name).join("|")})\\nFunction Input: \\{.*\\}\\nFunction Output:)?`,
+        );
 
-    const parser = new LinePrefixParser(
+    const parser = new LinePrefixParser<BeeParserInput>(
       {
         thought: {
           prefix: "Thought:",
@@ -195,19 +199,13 @@ export class BeeAgentRunner extends Serializable {
         },
         tool_input: {
           prefix: "Function Input:",
-          next: ["tool_caption", "tool_output"],
+          next: ["tool_output"],
           isEnd: true,
           field: new JSONParserField({
             schema: z.object({}).passthrough(),
             base: {},
             matchPair: ["{", "}"],
           }),
-        },
-        tool_caption: {
-          prefix: "Function Caption:",
-          next: ["tool_output"],
-          isEnd: true,
-          field: new ZodParserField(z.string()),
         },
         tool_output: {
           prefix: "Function Output:",
@@ -222,7 +220,7 @@ export class BeeAgentRunner extends Serializable {
           isEnd: true,
           field: new ZodParserField(z.string().min(1)),
         },
-      } as const,
+      },
       {
         waitForStartNode: true,
         endOnRepeat: true,
@@ -276,6 +274,7 @@ export class BeeAgentRunner extends Serializable {
                 data: parser.finalState,
                 update: { key, value: field.raw, parsedValue: value },
                 meta: { success: true, ...meta },
+                memory: this.memory,
               });
             });
             parser.emitter.on("partialUpdate", async ({ key, delta, value }) => {

@@ -47,6 +47,8 @@ jobs:
         env:
           GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
+          GOOGLE_CSE_ID: ${{ secrets.GOOGLE_SEARCH_CSE_ID }}
           # TODO: enable WatsonX later
           # WATSONX_API_KEY: ${{ secrets.WATSONX_API_KEY }}
           # WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}

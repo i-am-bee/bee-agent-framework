@@ -24,12 +24,20 @@ import {
 } from "@/tools/base.js";
 import { z } from "zod";
 import { createURLParams } from "@/internals/fetcher.js";
-import { isNullish, pick, pickBy } from "remeda";
+import { isNullish, omit, pick, pickBy } from "remeda";
 import { Cache } from "@/cache/decoratorCache.js";
 import { RunContext } from "@/context.js";
 import { getProp, setProp } from "@/internals/helpers/object.js";
 
-type ToolOptions = { apiKey?: string } & BaseToolOptions;
+export interface ResponseFilter {
+  excludedKeys: (keyof OpenMeteoToolResponse)[];
+}
+
+interface ToolOptions extends BaseToolOptions {
+  apiKey?: string;
+  responseFilter?: ResponseFilter;
+}
+
 type ToolRunOptions = BaseToolRunOptions;
 
 interface Location {
@@ -44,19 +52,19 @@ interface LocationSearch {
 }
 
 export interface OpenMeteoToolResponse {
-  latitude: number;
-  longitude: number;
-  generationtime_ms: number;
-  utc_offset_seconds: number;
-  timezone: string;
-  timezone_abbreviation: string;
-  elevation: number;
-  current_units: Record<string, string>;
-  current: Record<string, any[]>;
-  hourly_units: Record<string, string>;
-  hourly: Record<string, any[]>;
-  daily_units: Record<string, string>;
-  daily: Record<string, any[]>;
+  latitude?: number;
+  longitude?: number;
+  generationtime_ms?: number;
+  utc_offset_seconds?: number;
+  timezone?: string;
+  timezone_abbreviation?: string;
+  elevation?: number;
+  current_units?: Record<string, string>;
+  current?: Record<string, string>;
+  hourly_units?: Record<string, string>;
+  hourly?: Record<string, any[]>;
+  daily_units?: Record<string, string>;
+  daily?: Record<string, any[]>;
 }
 
 export class OpenMeteoTool extends Tool<
@@ -103,6 +111,25 @@ export class OpenMeteoTool extends Tool<
     this.register();
   }
 
+  public constructor(options: Partial<ToolOptions> = {}) {
+    super({
+      ...options,
+      responseFilter: options?.responseFilter ?? {
+        excludedKeys: [
+          "latitude",
+          "longitude",
+          "generationtime_ms",
+          "utc_offset_seconds",
+          "timezone",
+          "timezone_abbreviation",
+          "elevation",
+          "hourly",
+          "hourly_units",
+        ],
+      },
+    });
+  }
+
   protected preprocessInput(rawInput: unknown) {
     super.preprocessInput(rawInput);
 
@@ -133,13 +160,13 @@ export class OpenMeteoTool extends Tool<
         return location;
       };
 
-      const start = startDate ? new Date(startDate) : new Date();
-      start.setHours(0, 0, 0, 0);
-      start.setTime(start.getTime() - start.getTimezoneOffset() * 60_000);
-
-      const end = endDate ? new Date(endDate) : new Date();
-      end.setHours(0, 0, 0, 0);
-      end.setTime(end.getTime() - end.getTimezoneOffset() * 60_000);
+      const now = new Date();
+      const start = startDate
+        ? new Date(startDate)
+        : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+      const end = endDate
+        ? new Date(endDate)
+        : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
 
       const toDateString = (date: Date) => date.toISOString().split("T")[0];
 
@@ -148,9 +175,9 @@ export class OpenMeteoTool extends Tool<
         ...(await extractLocation()),
         start_date: toDateString(start),
         end_date: toDateString(end),
-        current: ["temperature_2m", "rain", "apparent_temperature"],
-        daily: ["apparent_temperature_max", "apparent_temperature_min", "sunrise", "sunset"],
-        hourly: ["temperature_2m", "relative_humidity_2m", "apparent_temperature"],
+        current: ["temperature_2m", "rain", "relative_humidity_2m", "wind_speed_10m"],
+        daily: ["temperature_2m_max", "temperature_2m_min", "rain_sum"],
+        hourly: ["temperature_2m", "relative_humidity_2m", "rain"],
         timezone: "UTC",
       });
     };
@@ -171,7 +198,12 @@ export class OpenMeteoTool extends Tool<
       ]);
     }
 
-    const data: OpenMeteoToolResponse = await response.json();
+    let data: OpenMeteoToolResponse = await response.json();
+
+    if (this.options?.responseFilter?.excludedKeys) {
+      data = omit(data, this.options.responseFilter.excludedKeys);
+    }
+
     return new JSONToolOutput(data);
   }
 

@@ -76,10 +76,10 @@ _Source: [examples/cache/unconstrainedCacheFunction.ts](/examples/cache/unconstr
 <!-- embedme examples/cache/toolCache.ts -->
 
 ```ts
-import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { SlidingCache } from "bee-agent-framework/cache/slidingCache";
+import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 
-const ddg = new DuckDuckGoSearchTool({
+const ddg = new WikipediaTool({
   cache: new SlidingCache({
     size: 100, // max 100 entries
     ttl: 5 * 60 * 1000, // 5 minutes lifespan
@@ -87,7 +87,7 @@ const ddg = new DuckDuckGoSearchTool({
 });
 
 const response = await ddg.run({
-  query: "the time of the fastest marathon run",
+  query: "United States",
 });
 // upcoming requests with the EXACTLY same input will be retrieved from the cache
 ```

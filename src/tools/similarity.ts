@@ -16,17 +16,26 @@
 
 import { BaseToolOptions, BaseToolRunOptions, JSONToolOutput, Tool, ToolInput } from "./base.js";
 import { string, z } from "zod";
-import * as R from "remeda";
+import { RunContext } from "@/context.js";
+import { map, pipe, prop, sortBy, take } from "remeda";
 
 const documentSchema = z.object({ text: string() }).passthrough();
 
 type Document = z.infer<typeof documentSchema>;
 
+interface ProviderInput {
+  query: string;
+  documents: Document[];
+}
+
+type Provider<TProviderOptions> = (
+  input: ProviderInput,
+  options: TProviderOptions | undefined,
+  run: RunContext<SimilarityTool<TProviderOptions>>,
+) => Promise<{ score: number }[]>;
+
 export interface SimilarityToolOptions<TProviderOptions = unknown> extends BaseToolOptions {
-  provider: (
-    input: { query: string; documents: Document[] },
-    options?: TProviderOptions,
-  ) => Promise<{ score: number }[]>;
+  provider: Provider<TProviderOptions>;
   maxResults?: number;
 }
 
@@ -60,38 +69,33 @@ export class SimilarityTool<TProviderOptions> extends Tool<
   }
 
   protected async _run(
-    input: ToolInput<this>,
-    options?: SimilarityToolRunOptions<TProviderOptions>,
+    { query, documents }: ToolInput<this>,
+    options: SimilarityToolRunOptions<TProviderOptions> | undefined,
+    run: RunContext<this>,
   ) {
-    const { query, documents } = input;
-
-    const results = await this.options.provider(
-      {
-        query,
-        documents,
-      },
-      options?.provider,
-    );
-
-    const resultsWithDocumentIndices = results.map(({ score }, idx) => ({
-      documentIndex: idx,
-      score,
-    }));
-    const sortedResultsWithDocumentIndices = R.sortBy(resultsWithDocumentIndices, [
-      ({ score }) => score,
-      "desc",
-    ]);
-    const filteredResultsWithDocumentIndices = sortedResultsWithDocumentIndices.slice(
-      0,
-      options?.maxResults ?? this.options.maxResults,
-    );
-
-    return new SimilarityToolOutput(
-      filteredResultsWithDocumentIndices.map(({ documentIndex, score }) => ({
-        document: documents[documentIndex],
-        index: documentIndex,
+    return pipe(
+      await this.options.provider(
+        {
+          query,
+          documents,
+        },
+        options?.provider,
+        run,
+      ),
+      map(({ score }, idx) => ({
+        documentIndex: idx,
         score,
       })),
+      sortBy([prop("score"), "desc"]),
+      take(options?.maxResults ?? this.options.maxResults ?? Infinity),
+      (data) =>
+        new SimilarityToolOutput(
+          data.map(({ documentIndex, score }) => ({
+            document: documents[documentIndex],
+            index: documentIndex,
+            score,
+          })),
+        ),
     );
   }
 }

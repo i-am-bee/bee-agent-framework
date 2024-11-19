@@ -1,5 +1,61 @@
 # Changelog
 
+## [0.0.40](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.39...v0.0.40) (2024-11-14)
+
+### Features
+
+- **agents:** improve constraint decoding regex for granite agent ([cc6a32c](https://github.com/i-am-bee/bee-agent-framework/commit/cc6a32cd106733d17c5774775a789ceac7682271))
+
+### Bug Fixes
+
+- **tools:** correctly infer input type for DynamicTool ([90db143](https://github.com/i-am-bee/bee-agent-framework/commit/90db143499c9ddb02873d9484b5cf07805536e57))
+
+## [0.0.39](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.38...v0.0.39) (2024-11-13)
+
+### Features
+
+- **adapters:** load watsonx region from env ([7ab61f0](https://github.com/i-am-bee/bee-agent-framework/commit/7ab61f09936a440430a1878bbd597d9bc0592836))
+- **agents:** granite agent ([#159](https://github.com/i-am-bee/bee-agent-framework/issues/159)) ([102b9be](https://github.com/i-am-bee/bee-agent-framework/commit/102b9beb87e6219a992dd2ade491044eefccc37b)), closes [#145](https://github.com/i-am-bee/bee-agent-framework/issues/145)
+- **agent:** use constraint decoding for tool names in Bee ([#161](https://github.com/i-am-bee/bee-agent-framework/issues/161)) ([ad55531](https://github.com/i-am-bee/bee-agent-framework/commit/ad55531ac81a643536a6da739f92be77e0624f21))
+- **observe:** implement OpenTelemetry instrumentation ([2cc1ef4](https://github.com/i-am-bee/bee-agent-framework/commit/2cc1ef4e6bebd7d3e96f3cdb5332187bc5f301bd))
+- **tool:** add elasticsearch ([#138](https://github.com/i-am-bee/bee-agent-framework/issues/138)) ([31c3559](https://github.com/i-am-bee/bee-agent-framework/commit/31c355983bc24658a30b4686b5c51c6da8e154f5))
+- **tools:** openMeteo optimization ([#155](https://github.com/i-am-bee/bee-agent-framework/issues/155)) ([c228ee2](https://github.com/i-am-bee/bee-agent-framework/commit/c228ee2e916585af147f80b36808662a6339819b)), closes [#110](https://github.com/i-am-bee/bee-agent-framework/issues/110)
+
+### Bug Fixes
+
+- **llms:** correctly handles a signal abortion ([1b0d514](https://github.com/i-am-bee/bee-agent-framework/commit/1b0d5143b1b449b1fb7b45e1a20036278322e15e))
+
+## [0.0.38](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.37...v0.0.38) (2024-11-08)
+
+### Features
+
+- **agent:** improve Bee extensibility, update events ([705f142](https://github.com/i-am-bee/bee-agent-framework/commit/705f142d37f966a79fce0f43260f908002809aad))
+- **agent:** improve extensibility of Bee parser ([b5f3b7c](https://github.com/i-am-bee/bee-agent-framework/commit/b5f3b7c1e29c606c186c8026b9fd4325a9ef0228))
+- **memory:** add splice and remove method ([3dd1535](https://github.com/i-am-bee/bee-agent-framework/commit/3dd1535be034d63f41dee38e8c0afdf0e2921fca))
+
+### Bug Fixes
+
+- **tool:** handle duckduckgo anomaly detection ([41a1048](https://github.com/i-am-bee/bee-agent-framework/commit/41a10482fd739415a9e92018398a5530ca403972))
+
+## [0.0.37](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.36...v0.0.37) (2024-11-07)
+
+### ⚠ BREAKING CHANGES
+
+- **agent:** remove tool caption from Bee agent (#154)
+- **tool:** remove pagination functionality from GoogleSearch and DuckDuckGo (#152)
+- **tool:** remove pagination from search tools
+
+### Features
+
+- **agent:** remove tool caption from Bee agent ([#154](https://github.com/i-am-bee/bee-agent-framework/issues/154)) ([d84beeb](https://github.com/i-am-bee/bee-agent-framework/commit/d84beeb05f1eee7b4c62cb222721962f8a4ca6fb)), closes [#153](https://github.com/i-am-bee/bee-agent-framework/issues/153)
+- **llm:** add Granite 3.0 models to WatsonXChatLLM Preset ([1e6aa37](https://github.com/i-am-bee/bee-agent-framework/commit/1e6aa3733afb09a32fade54fcdaf257d98588721))
+- **llm:** set temperature to 0 for OpenAI LLM adapter ([ea84808](https://github.com/i-am-bee/bee-agent-framework/commit/ea8480850f1b1f84e9551e68d9165d1399909c5e))
+- **template:** make validateInput method public ([34156b7](https://github.com/i-am-bee/bee-agent-framework/commit/34156b787d25eeefb146782c6a4e9d9d866bfade))
+- **tool:** add public parse method ([f97f73a](https://github.com/i-am-bee/bee-agent-framework/commit/f97f73a43478d83873464b01ef20701716bee5fd))
+- **tool:** improve wikipedia results filtering ([#143](https://github.com/i-am-bee/bee-agent-framework/issues/143)) ([2529a0c](https://github.com/i-am-bee/bee-agent-framework/commit/2529a0cd2c4fbfbc19113d53e35a37af7807ceed)), closes [#142](https://github.com/i-am-bee/bee-agent-framework/issues/142)
+- **tool:** remove pagination from search tools ([f93d181](https://github.com/i-am-bee/bee-agent-framework/commit/f93d181c3c9f3d535323a438b92a4a8e5a3f437a))
+- **tool:** remove pagination functionality from GoogleSearch and DuckDuckGo ([#152](https://github.com/i-am-bee/bee-agent-framework/issues/152)) ([59424de](https://github.com/i-am-bee/bee-agent-framework/commit/59424de69afc9567d75bc1f82263ccf7f206aa9d)), closes [#151](https://github.com/i-am-bee/bee-agent-framework/issues/151)
+
 ## [0.0.36](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.34...v0.0.36) (2024-11-04)
 
 ### Features

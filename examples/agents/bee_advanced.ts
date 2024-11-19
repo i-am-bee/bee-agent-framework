@@ -63,7 +63,7 @@ Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
   },
   tools: [
     new DuckDuckGoSearchTool({
-      maxResultsPerPage: 10,
+      maxResults: 10,
       search: {
         safeSearch: DuckDuckGoSearchToolSearchType.STRICT,
       },

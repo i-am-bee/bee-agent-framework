@@ -114,24 +114,6 @@ const llama3: LLMChatTemplate = {
   },
 };
 
-const qwen2: LLMChatTemplate = {
-  template: new PromptTemplate({
-    schema: templateSchemaFactory(["system", "user", "assistant"] as const),
-    template: `{{#messages}}{{#system}}<|im_start|>system
-{{system}}<|im_end|>
-{{ end }}{{/system}}{{#user}}<|im_start|>user
-{{user}}<|im_end|>
-{{ end }}{{/user}}{{#assistant}}<|im_start|>assistant
-{{assistant}}<|im_end|>
-{{ end }}{{/assistant}}{{/messages}}<|im_start|>assistant
-`,
-  }),
-  messagesToPrompt: messagesToPromptFactory(),
-  parameters: {
-    stop_sequence: ["<|im_end|>"],
-  },
-};
-
 const granite3Instruct: LLMChatTemplate = {
   template: new PromptTemplate({
     schema: templateSchemaFactory([
@@ -171,7 +153,6 @@ export class LLMChatTemplates {
   protected static readonly registry = {
     "llama3.1": llama31,
     "llama3": llama3,
-    "qwen2": qwen2,
     "granite3Instruct": granite3Instruct,
   };
 

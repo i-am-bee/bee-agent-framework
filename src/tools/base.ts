@@ -37,6 +37,9 @@ import { Emitter } from "@/emitter/emitter.js";
 import { Callback } from "@/emitter/types.js";
 import { GetRunContext, RunContext } from "@/context.js";
 import { shallowCopy } from "@/serializer/utils.js";
+import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
+import { createTelemetryMiddleware } from "@/instrumentation/create-telemetry-middleware.js";
+import { doNothing } from "remeda";
 
 export class ToolError extends FrameworkError {}
 
@@ -149,6 +152,7 @@ export interface ToolSnapshot<TOutput extends ToolOutput, TOptions extends BaseT
   emitter: Emitter<any>;
 }
 
+export type InferToolOutput<T extends AnyTool> = T extends Tool<infer A, any, any> ? A : never;
 export type ToolInput<T extends AnyTool> = FromSchemaLike<Awaited<ReturnType<T["inputSchema"]>>>;
 export type ToolInputRaw<T extends AnyTool> = FromSchemaLikeRaw<
   Awaited<ReturnType<T["inputSchema"]>>
@@ -174,7 +178,7 @@ export abstract class Tool<
   abstract description: string;
 
   public readonly cache: BaseCache<Task<TOutput>>;
-  protected readonly options: TOptions;
+  public readonly options: TOptions;
 
   public readonly emitter = Emitter.root.child<ToolCallbacks<ToolInput<this>, TOutput>>({
     namespace: ["tool"],
@@ -213,8 +217,7 @@ export abstract class Tool<
         let errorPropagated = false;
 
         try {
-          this.preprocessInput(input);
-          await this.assertInput(input);
+          input = Object.assign({ ref: input }, { ref: await this.parse(input) }).ref;
 
           const output = await new Retryable({
             executor: async () => {
@@ -259,7 +262,7 @@ export abstract class Tool<
           await run.emitter.emit("finish", null);
         }
       },
-    );
+    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
   }
 
   protected async _runCached(
@@ -326,7 +329,7 @@ export abstract class Tool<
     ) as RetryableConfig;
   }
 
-  protected async assertInput(input: unknown) {
+  async parse(input: unknown | ToolInputRaw<this> | ToolInput<this>): Promise<ToolInput<this>> {
     const schema = await this.inputSchema();
     if (schema) {
       validateSchema(schema, {
@@ -340,7 +343,10 @@ export abstract class Tool<
       });
     }
 
-    this.validateInput(schema, input);
+    const copy = shallowCopy(input);
+    this.preprocessInput(copy);
+    this.validateInput(schema, copy);
+    return copy;
   }
 
   // eslint-disable-next-line unused-imports/no-unused-vars
@@ -378,6 +384,56 @@ export abstract class Tool<
   loadSnapshot(snapshot: ToolSnapshot<TOutput, TOptions>): void {
     Object.assign(this, snapshot);
   }
+
+  pipe<S extends AnyTool, T extends AnyTool>(
+    this: S,
+    tool: T,
+    mapper: (
+      input: ToolInputRaw<S>,
+      output: TOutput,
+      options: TRunOptions | undefined,
+      run: RunContext<
+        DynamicTool<TOutput, ZodSchema<ToolInput<S>>, TOptions, TRunOptions, ToolInput<S>>
+      >,
+    ) => ToolInputRaw<typeof tool>,
+  ) {
+    return new DynamicTool<TOutput, ZodSchema<ToolInput<S>>, TOptions, TRunOptions, ToolInput<S>>({
+      name: this.name,
+      description: this.description,
+      options: this.options,
+      inputSchema: this.inputSchema() as ZodSchema<ToolInput<S>>,
+      handler: async (input: ToolInputRaw<S>, options, run): Promise<TOutput> => {
+        const selfOutput = await this.run(input, options);
+        const wrappedInput = mapper(input, selfOutput, options, run);
+        return await tool.run(wrappedInput);
+      },
+    } as const);
+  }
+
+  extend<S extends AnyTool, TS extends ZodSchema>(
+    this: S,
+    schema: TS,
+    mapper: (
+      input: z.output<TS>,
+      options: TRunOptions | undefined,
+      run: RunContext<DynamicTool<TOutput, TS, TOptions, TRunOptions, z.output<TS>>>,
+    ) => ToolInputRaw<S>,
+    overrides: {
+      name?: string;
+      description?: string;
+    } = {},
+  ) {
+    return new DynamicTool<TOutput, TS, TOptions, TRunOptions, z.output<TS>>({
+      name: overrides?.name || this.name,
+      description: overrides?.name || this.description,
+      options: shallowCopy(this.options),
+      inputSchema: schema,
+      handler: async (input: ToolInputRaw<S>, options, run): Promise<TOutput> => {
+        const wrappedInput = mapper(input, options, run);
+        return await this.run(wrappedInput, options);
+      },
+    } as const);
+  }
 }
 
 export type AnyTool = Tool<any, any, any>;
@@ -395,10 +451,10 @@ export class DynamicTool<
 
   declare name: string;
   declare description: string;
-  private readonly _inputSchema: AnyToolSchemaLike;
+  private readonly _inputSchema: TInputSchema;
   private readonly handler;
 
-  inputSchema() {
+  inputSchema(): TInputSchema {
     return this._inputSchema;
   }
 

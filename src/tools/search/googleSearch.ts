@@ -25,14 +25,15 @@ import { Tool, ToolInput } from "@/tools/base.js";
 import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
 import { ValueError } from "@/errors.js";
-import { ValidationError } from "ajv";
 import { parseEnv } from "@/internals/env.js";
 import { RunContext } from "@/context.js";
+import { paginate } from "@/internals/helpers/paginate.js";
+import { ValidationError } from "ajv";
 
 export interface GoogleSearchToolOptions extends SearchToolOptions {
   apiKey?: string;
   cseId?: string;
-  maxResultsPerPage: number;
+  maxResults: number;
 }
 
 type GoogleSearchToolRunOptions = SearchToolRunOptions;
@@ -77,7 +78,7 @@ export class GoogleSearchTool extends Tool<
   protected apiKey: string;
   protected cseId: string;
 
-  public constructor(options: GoogleSearchToolOptions = { maxResultsPerPage: 10 }) {
+  public constructor(options: GoogleSearchToolOptions = { maxResults: 10 }) {
     super(options);
 
     this.apiKey = options.apiKey || parseEnv("GOOGLE_API_KEY", z.string());
@@ -92,11 +93,11 @@ export class GoogleSearchTool extends Tool<
       );
     }
 
-    if (options.maxResultsPerPage < 1 || options.maxResultsPerPage > 10) {
+    if (options.maxResults < 1 || options.maxResults > 100) {
       throw new ValidationError([
         {
-          message: "Property range must be between 1 and 10",
-          propertyName: "options.maxResultsPerPage",
+          message: "Property 'maxResults' must be between 1 and 100",
+          propertyName: "options.maxResults",
         },
       ]);
     }
@@ -118,19 +119,32 @@ export class GoogleSearchTool extends Tool<
     _options: GoogleSearchToolRunOptions | undefined,
     run: RunContext<this>,
   ) {
-    const response = await this.client.cse.list(
-      {
-        cx: this.cseId,
-        q: input,
-        num: this.options.maxResultsPerPage,
-        safe: "active",
-      },
-      {
-        signal: run.signal,
-      },
-    );
+    const results = await paginate({
+      size: this.options.maxResults,
+      handler: async ({ offset, limit }) => {
+        const maxChunkSize = 10;
 
-    const results = response.data.items || [];
+        const {
+          data: { items = [] },
+        } = await this.client.cse.list(
+          {
+            cx: this.cseId,
+            q: input,
+            start: offset,
+            num: Math.min(limit, maxChunkSize),
+            safe: "active",
+          },
+          {
+            signal: run.signal,
+          },
+        );
+
+        return {
+          data: items,
+          done: items.length < maxChunkSize,
+        };
+      },
+    });
 
     return new GoogleSearchToolOutput(
       results.map((result) => ({

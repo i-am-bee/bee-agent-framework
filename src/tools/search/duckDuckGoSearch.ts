@@ -28,6 +28,8 @@ import { HeaderGenerator } from "header-generator";
 import type { NeedleOptions } from "needle";
 import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
+import { RunContext } from "@/context.js";
+import { paginate } from "@/internals/helpers/paginate.js";
 
 export { SafeSearchType as DuckDuckGoSearchToolSearchType };
 
@@ -35,7 +37,7 @@ export interface DuckDuckGoSearchToolOptions extends SearchToolOptions {
   search?: SearchOptions;
   throttle?: ThrottleOptions | false;
   httpClientOptions?: NeedleOptions;
-  maxResultsPerPage: number;
+  maxResults: number;
 }
 
 export interface DuckDuckGoSearchToolRunOptions extends SearchToolRunOptions {
@@ -84,7 +86,7 @@ export class DuckDuckGoSearchTool extends Tool<
   }
 
   public constructor(options: Partial<DuckDuckGoSearchToolOptions> = {}) {
-    super({ ...options, maxResultsPerPage: options?.maxResultsPerPage ?? 15 });
+    super({ ...options, maxResults: options?.maxResults ?? 15 });
 
     this.client = this._createClient();
   }
@@ -107,28 +109,42 @@ export class DuckDuckGoSearchTool extends Tool<
 
   protected async _run(
     { query: input }: ToolInput<this>,
-    options?: DuckDuckGoSearchToolRunOptions,
+    options: DuckDuckGoSearchToolRunOptions | undefined,
+    run: RunContext<this>,
   ) {
     const headers = new HeaderGenerator().getHeaders();
 
-    const { results } = await this.client(
-      input,
-      {
-        safeSearch: SafeSearchType.MODERATE,
-        ...this.options.search,
-        ...options?.search,
-      },
-      {
-        headers,
-        user_agent: headers["user-agent"],
-        ...this.options?.httpClientOptions,
-        ...options?.httpClientOptions,
-      },
-    );
+    const results = await paginate({
+      size: this.options.maxResults,
+      handler: async ({ offset }) => {
+        const { results: data, noResults: done } = await this.client(
+          input,
+          {
+            safeSearch: SafeSearchType.MODERATE,
+            ...this.options.search,
+            ...options?.search,
+            offset,
+          },
+          {
+            headers,
+            user_agent: headers["user-agent"],
+            ...this.options?.httpClientOptions,
+            ...options?.httpClientOptions,
+            signal: run.signal,
+            uri_modifier: (rawUrl) => {
+              const url = new URL(rawUrl);
+              url.searchParams.delete("ss_mkt");
+              return url.toString();
+            },
+          },
+        );
 
-    if (results.length > this.options.maxResultsPerPage) {
-      results.length = this.options.maxResultsPerPage;
-    }
+        return {
+          data,
+          done,
+        };
+      },
+    });
 
     return new DuckDuckGoSearchToolOutput(
       results.map((result) => ({

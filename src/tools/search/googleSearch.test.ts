@@ -35,7 +35,7 @@ describe("GoogleCustomSearch Tool", () => {
     googleSearchTool = new GoogleSearchTool({
       apiKey: "test-api-key",
       cseId: "test-cse-id",
-      maxResultsPerPage: 10,
+      maxResults: 10,
     });
 
     Object.defineProperty(googleSearchTool, "client", {
@@ -77,6 +77,7 @@ describe("GoogleCustomSearch Tool", () => {
       {
         cx: "test-cse-id",
         q: query,
+        start: 0,
         num: 10,
         safe: "active",
       },
@@ -86,13 +87,13 @@ describe("GoogleCustomSearch Tool", () => {
     );
   });
 
-  it("validates maxResultsPerPage range", () => {
+  it("validates maxResults range", () => {
     expect(
       () =>
         new GoogleSearchTool({
           apiKey: "test-api-key",
           cseId: "test-cse-id",
-          maxResultsPerPage: 0,
+          maxResults: 0,
         }),
     ).toThrowError("validation failed");
     expect(
@@ -100,7 +101,7 @@ describe("GoogleCustomSearch Tool", () => {
         new GoogleSearchTool({
           apiKey: "test-api-key",
           cseId: "test-cse-id",
-          maxResultsPerPage: 11,
+          maxResults: 111,
         }),
     ).toThrowError("validation failed");
   });
@@ -109,7 +110,7 @@ describe("GoogleCustomSearch Tool", () => {
     const tool = new GoogleSearchTool({
       apiKey: "test-api-key",
       cseId: "test-cse-id",
-      maxResultsPerPage: 1,
+      maxResults: 1,
       cache: new SlidingCache({
         size: 10,
         ttl: 1000,

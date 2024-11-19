@@ -27,8 +27,10 @@ import { emitterToGenerator } from "@/internals/helpers/promise.js";
 import { BaseCache } from "@/cache/base.js";
 import { NullCache } from "@/cache/nullCache.js";
 import { ObjectHashKeyFn } from "@/cache/decoratorCache.js";
-import { omit } from "remeda";
+import { doNothing, omit } from "remeda";
 import { Task } from "promise-based-task";
+import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
+import { createTelemetryMiddleware } from "@/instrumentation/create-telemetry-middleware.js";
 
 export interface GenerateCallbacks {
   newToken?: Callback<{ value: BaseLLMOutput; callbacks: { abort: () => void } }>;
@@ -161,14 +163,15 @@ export abstract class BaseLLM<
                 },
                 run,
               )) {
+              if (controller.signal.aborted) {
+                continue;
+              }
+
               chunks.push(chunk);
               await tokenEmitter.emit("newToken", {
                 value: chunk,
                 callbacks: { abort: () => controller.abort() },
               });
-              if (controller.signal.aborted) {
-                break;
-              }
             }
 
             const result = this._mergeChunks(chunks);
@@ -200,7 +203,7 @@ export abstract class BaseLLM<
           await run.emitter.emit("finish", null);
         }
       },
-    );
+    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
   }
 
   async *stream(input: TInput, options?: StreamGenerateOptions): AsyncStream<TOutput> {
@@ -218,7 +221,7 @@ export abstract class BaseLLM<
           }
           cacheEntry.resolve(tokens);
         },
-      );
+      ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
     });
   }
 

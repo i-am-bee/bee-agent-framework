@@ -20,6 +20,7 @@ To unify differences between various APIs, the framework defines a common interf
 | `OpenAI`                                                                  | ❌                         | ✅                                            | ⚠️ (JSON schema only)                    |
 | `LangChain`                                                               | ⚠️ (depends on a provider) | ⚠️ (depends on a provider)                    | ❌                                       |
 | `Groq`                                                                    | ❌                         | ✅                                            | ⚠️ (JSON object only)                    |
+| `AWS Bedrock`                                                             | ❌                         | ✅                                            | ⚠️ (JSON only) - model specific          |
 | `BAM (Internal)`                                                          | ✅                         | ⚠️ (model specific template must be provided) | ✅                                       |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                            |                                               |                                          |
 
@@ -42,6 +43,7 @@ const llm = new WatsonXLLM({
   modelId: "google/flan-ul2",
   projectId: process.env.WATSONX_PROJECT_ID,
   apiKey: process.env.WATSONX_API_KEY,
+  region: process.env.WATSONX_REGION, // (optional) default is us-south
   parameters: {
     decoding_method: "greedy",
     max_new_tokens: 50,

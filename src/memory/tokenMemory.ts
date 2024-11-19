@@ -21,6 +21,7 @@ import * as R from "remeda";
 import { shallowCopy } from "@/serializer/utils.js";
 import { removeFromArray } from "@/internals/helpers/array.js";
 import { sum } from "remeda";
+import { ensureRange } from "@/internals/helpers/number.js";
 
 export interface Handlers {
   estimate: (messages: BaseMessage) => number;
@@ -79,7 +80,7 @@ export class TokenMemory extends BaseMemory {
     return this.messages.some((msg) => this.tokensByMessage.get(msg)?.dirty !== false);
   }
 
-  async add(message: BaseMessage) {
+  async add(message: BaseMessage, index?: number) {
     if (this.maxTokens === null) {
       const meta = await this.llm.meta();
       this.maxTokens = Math.ceil((meta.tokenLimit ?? Infinity) * this.threshold);
@@ -97,7 +98,7 @@ export class TokenMemory extends BaseMemory {
 
     while (this.tokensUsed > this.maxTokens - meta.tokensCount) {
       const messageToDelete = this.handlers.removalSelector(this.messages);
-      const exists = removeFromArray(this.messages, messageToDelete);
+      const exists = await this.delete(messageToDelete);
 
       if (!messageToDelete || !exists) {
         throw new MemoryFatalError('The "removalSelector" handler must return a valid message!');
@@ -105,11 +106,17 @@ export class TokenMemory extends BaseMemory {
     }
 
     this.tokensByMessage.set(message, meta);
-    this.messages.push(message);
+
+    index = ensureRange(index ?? this.messages.length, { min: 0, max: this.messages.length });
+    this.messages.splice(index, 0, message);
 
     if (this.isDirty && this.tokensUsed / this.maxTokens >= this.syncThreshold) {
       await this.sync();
     }
+  }
+
+  async delete(message: BaseMessage) {
+    return removeFromArray(this.messages, message);
   }
 
   async sync() {

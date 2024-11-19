@@ -61,7 +61,7 @@ export class Emitter<T = Record<keyof any, Callback<unknown>>> extends Serializa
   public readonly namespace: string[];
   public readonly creator?: object;
   public readonly context: object;
-  protected readonly trace?: EventTrace;
+  public readonly trace?: EventTrace;
 
   constructor(input: EmitterInput = {}) {
     super();

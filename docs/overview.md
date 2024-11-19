@@ -18,11 +18,16 @@ The source directory (`src`) provides numerous modules that one can use.
 | [**serializer**](./serialization.md)         | Core component for the ability to serialize/deserialize modules into the serialized format. |
 | [**version**](./version.md)                  | Constants representing the framework (e.g., the latest version)                             |
 | [**emitter**](./emitter.md)                  | Bringing visibility to the system by emitting events.                                       |
+| [**instrumentation**](./instrumentation.md)  | Integrate monitoring tools into your application.                                           |
 | **internals**                                | Modules used by other modules within the framework.                                         |
 
 ### Emitter
 
 Moved to a [standalone page](emitter.md).
+
+### Instrumentation
+
+Moved to a [standalone page](instrumentation.md).
 
 ### LLMs
 

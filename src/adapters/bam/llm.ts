@@ -203,10 +203,7 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
       };
     } catch {
       // TODO: remove once retrieval gets fixed on the API
-      if (
-        this.modelId === "qwen/qwen2-72b-instruct" ||
-        this.modelId === "meta-llama/llama-3-1-70b-instruct"
-      ) {
+      if (this.modelId === "meta-llama/llama-3-1-70b-instruct") {
         return {
           tokenLimit: 131_072,
         };
