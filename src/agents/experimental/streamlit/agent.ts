@@ -30,13 +30,13 @@ import { BaseLLMOutput } from "@/llms/base.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { findFirstPair } from "@/internals/helpers/string.js";
 
-interface Input {
+export interface StreamlitAgentInput {
   llm: ChatLLM<ChatLLMOutput>;
   memory: BaseMemory;
   templates?: Partial<StreamlitAgentTemplates>;
 }
 
-interface RunInput {
+export interface StreamlitRunInput {
   prompt: string | null;
 }
 
@@ -49,13 +49,13 @@ interface Result {
   text: string;
 }
 
-interface RunOutput {
+export interface StreamlitRunOutput {
   result: Result;
   message: BaseMessage;
   memory: BaseMemory;
 }
 
-interface Events {
+export interface StreamlitEvents {
   newToken: Callback<{
     delta: string;
     state: Readonly<{
@@ -65,13 +65,13 @@ interface Events {
   }>;
 }
 
-export class StreamlitAgent extends BaseAgent<RunInput, RunOutput, Options> {
-  public emitter = new Emitter<Events>({
+export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOutput, Options> {
+  public emitter = new Emitter<StreamlitEvents>({
     namespace: ["agent", "experimental", "streamlit"],
     creator: this,
   });
 
-  constructor(protected readonly input: Input) {
+  constructor(protected readonly input: StreamlitAgentInput) {
     super();
   }
 
@@ -88,10 +88,10 @@ export class StreamlitAgent extends BaseAgent<RunInput, RunOutput, Options> {
   }
 
   protected async _run(
-    input: RunInput,
+    input: StreamlitRunInput,
     _options: Options | undefined,
     run: GetRunContext<typeof this>,
-  ): Promise<RunOutput> {
+  ): Promise<StreamlitRunOutput> {
     const { userMessage, runMemory } = await this.prepare(input);
 
     let content = "";
@@ -117,7 +117,7 @@ export class StreamlitAgent extends BaseAgent<RunInput, RunOutput, Options> {
     };
   }
 
-  protected async prepare(input: RunInput) {
+  protected async prepare(input: StreamlitRunInput) {
     const systemMessage = BaseMessage.of({
       role: Role.SYSTEM,
       text: (this.input.templates?.system ?? StreamlitAgentSystemPrompt).render({}),
@@ -171,6 +171,7 @@ export class StreamlitAgent extends BaseAgent<RunInput, RunOutput, Options> {
 
   createSnapshot() {
     return {
+      ...super.createSnapshot(),
       input: this.input,
     };
   }
