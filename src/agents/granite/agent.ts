@@ -29,8 +29,8 @@ export class GraniteBeeAgent extends BeeAgent {
       ...input,
       templates: {
         ...input.templates,
-        system: GraniteBeeSystemPrompt,
-        assistant: GraniteBeeAssistantPrompt,
+        system: input.templates?.system ?? GraniteBeeSystemPrompt,
+        assistant: input.templates?.assistant ?? GraniteBeeAssistantPrompt,
       },
     });
   }
