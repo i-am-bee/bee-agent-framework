@@ -15,12 +15,19 @@
  */
 
 import { Version } from "@/version.js";
-import opentelemetry, { SpanStatusCode, TimeInput } from "@opentelemetry/api";
+import { api } from "@opentelemetry/sdk-node";
 import { FrameworkSpan, GeneratedResponse } from "./types.js";
+import { BaseAgent } from "@/agents/base.js";
+import { Tool } from "@/tools/base.js";
+import { BaseLLM } from "@/llms/base.js";
+import os from "os";
 
-export const tracer = opentelemetry.trace.getTracer("bee-agent-framework", Version);
+const name = "bee-agent-framework";
 
-export const activeTracesMap = new Map<string, string>();
+export const meter = api.metrics.getMeter(name, Version);
+export const tracer = api.trace.getTracer(name, Version);
+
+const moduleUsageCounter = meter.createCounter("module_usage");
 
 interface ComputeTreeProps {
   prompt?: string | null;
@@ -30,8 +37,8 @@ interface ComputeTreeProps {
   traceId: string;
   version: string;
   runErrorSpanKey: string;
-  startTime: TimeInput;
-  endTime: TimeInput;
+  startTime: api.TimeInput;
+  endTime: api.TimeInput;
   source: string;
 }
 
@@ -39,6 +46,9 @@ interface BuildSpansForParentProps {
   spans: FrameworkSpan[];
   traceId: string;
   parentId: string | undefined;
+}
+interface BuildModuleUsageMetricProps {
+  instance: object;
 }
 
 function buildSpansForParent({ spans, parentId, traceId }: BuildSpansForParentProps) {
@@ -105,7 +115,7 @@ export function buildTraceTree({
       if (runErrorSpan) {
         activeSpan.setStatus(runErrorSpan.status);
       } else {
-        activeSpan.setStatus({ code: SpanStatusCode.OK });
+        activeSpan.setStatus({ code: api.SpanStatusCode.OK });
       }
 
       // set nested spans
@@ -115,4 +125,22 @@ export function buildTraceTree({
       activeSpan.end(endTime);
     },
   );
+}
+
+export function isMeasurementedInstance(instance: any) {
+  return Boolean(
+    instance &&
+      (instance instanceof BaseAgent || instance instanceof Tool || instance instanceof BaseLLM),
+  );
+}
+
+export function buildModuleUsageMetric({ instance }: BuildModuleUsageMetricProps) {
+  moduleUsageCounter.add(1, {
+    source: instance.constructor.name,
+    type: instance instanceof BaseAgent ? "agent" : instance instanceof Tool ? "tool" : "llm",
+    framework_version: Version,
+    os_type: os.type(),
+    os_release: os.release(),
+    os_arch: os.arch(),
+  });
 }

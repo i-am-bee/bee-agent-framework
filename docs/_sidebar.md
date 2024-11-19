@@ -24,3 +24,5 @@
 - Others
 
   - [Integrations](integrations.md)
+  - [Instrumentation](instrumentation.md)
+  - [Native Telemetry](native-telemetry.md)

@@ -34,9 +34,9 @@ You can manually create spans during the `run` process to track specific parts o
 Example of creating a span:
 
 ```ts
-import { trace } from "@opentelemetry/api";
+import { api } from "@opentelemetry/sdk-node";
 
-const tracer = trace.getTracer("bee-agent-framework");
+const tracer = api.trace.getTracer("bee-agent-framework");
 
 function exampleFunction() {
   const span = tracer.startSpan("example-function-span");
