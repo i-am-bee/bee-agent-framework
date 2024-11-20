@@ -66,11 +66,19 @@ describe("Streamlit Agent", () => {
 
     expect(response.memory).toBeInstanceOf(BaseMemory);
     expect(response.message).toBeInstanceOf(BaseMessage);
-    expect(response.result).toMatchObject({
-      raw: expect.stringContaining("```python-app"),
-      app: expect.stringContaining('st.title("Hello World")'),
-      text: expect.any(String),
-    });
+
+    expect(response.result.raw).toBeTypeOf("string");
+    expect(response.result.blocks.length).toEqual(3);
+    const [textStartBlock, appBlock, textEndBlock] = response.result.blocks;
+    expect(textStartBlock.start).toBe(0);
+    expect(textStartBlock.name).toBe("text");
+    expect(textStartBlock.content).toBeTruthy();
+    expect(appBlock.start).toBe(textStartBlock.end);
+    expect(appBlock.name).toBe("app");
+    expect(appBlock.content).toBeTruthy();
+    expect(textEndBlock.start).toBe(appBlock.end);
+    expect(textEndBlock.name).toBe("text");
+    expect(textEndBlock.content).toBeTruthy();
 
     callbacks.verify();
   });

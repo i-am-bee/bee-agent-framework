@@ -22,9 +22,8 @@ try {
       });
     });
 
-    reader.write(`Agent (text) 🤖 : `, response.result.text);
-    if (response.result.app) {
-      reader.write(`Agent (app) 🤖 : `, response.result.app);
+    for (const block of response.result.blocks) {
+      reader.write(`Agent (${block.name}) 🤖 : `, block.content);
     }
   }
 } catch (error) {

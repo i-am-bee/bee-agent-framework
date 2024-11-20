@@ -42,11 +42,16 @@ export interface StreamlitRunInput {
 
 interface Options extends BaseAgentRunOptions {}
 
+interface Block {
+  name: "text" | "app";
+  content: string;
+  start: number;
+  end: number;
+}
+
 interface Result {
   raw: string;
-
-  app: string | null;
-  text: string;
+  blocks: Block[];
 }
 
 export interface StreamlitRunOutput {
@@ -158,14 +163,38 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
     return { runMemory, userMessage };
   }
 
-  protected parse(content: string): Result {
-    const match = findFirstPair(content, ["```python-app\n", "```\n"]);
+  protected parse(raw: string): Result {
+    const blocks: Block[] = [];
+
+    for (let i = 0; i < raw.length; ) {
+      const text = raw.substring(i);
+
+      const code = findFirstPair(text, ["```python-app\n", "```\n"]);
+      if (!code) {
+        blocks.push({ start: i, end: i + text.length, content: text, name: "text" });
+        break;
+      }
+
+      if (code.start > 0) {
+        blocks.push({
+          name: "text",
+          start: i,
+          end: i + code.start,
+          content: text.substring(0, code.start),
+        });
+      }
+      blocks.push({
+        name: "app",
+        content: code.inner,
+        start: i + code.start,
+        end: i + code.end,
+      });
+      i += code.end;
+    }
+
     return {
-      raw: content,
-      app: match ? match.inner : null,
-      text: match
-        ? `${content.substring(0, match.start)}${content.substring(match.end + 1)}`
-        : content,
+      raw,
+      blocks,
     };
   }
 
