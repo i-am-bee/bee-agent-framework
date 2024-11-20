@@ -45,7 +45,7 @@ export type MilvusSearchToolResult =
   | DescribeCollectionResponse
   | SearchRes;
 
-enum MilvusAction {
+export enum MilvusAction {
   ListCollections = "ListCollections",
   GetCollectionInfo = "GetCollectionInfo",
   Search = "Search",
@@ -84,7 +84,8 @@ export class MilvusDatabaseTool extends Tool<
         .optional()
         .describe(`The vector to search for or insert, required for ${MilvusAction.Search}`),
       vectors: z
-        .array(z.array(z.number()).optional())
+        .array(z.array(z.number()))
+        .optional()
         .describe(`The vectors to insert, required for ${MilvusAction.Insert}`),
       topK: z.coerce
         .number()
@@ -219,7 +220,6 @@ export class MilvusDatabaseTool extends Tool<
       const response = await client.listCollections({});
       return response.data.map((collection) => collection.name);
     } catch (error) {
-      console.error("Failed to list collections from Milvus:", error);
       throw new ToolError(`Failed to list collections from Milvus: ${error}`);
     }
   }
@@ -230,7 +230,6 @@ export class MilvusDatabaseTool extends Tool<
       const response = client.describeCollection({ collection_name: collectionName });
       return response;
     } catch (error) {
-      console.error("Failed to get info about collections from Milvus:", error);
       throw new ToolError(`Failed to get info about collections from Milvus: ${error}`);
     }
   }
@@ -240,14 +239,13 @@ export class MilvusDatabaseTool extends Tool<
       const client = await this.client();
       const response = client.insert({
         collection_name: input.collectionName as string,
-        fields_data: input.vectors.map((vector, index) => ({
+        fields_data: input!.vectors!.map((vector, index) => ({
           vector: vector,
           ...input.metadata?.[index],
         })),
       });
       return response;
     } catch (error) {
-      console.error("Failed to insert in Milvus:", error);
       throw new ToolError(`Failed to insert in Milvus: ${error}`);
     }
   }
@@ -264,7 +262,6 @@ export class MilvusDatabaseTool extends Tool<
       });
       return response.results;
     } catch (error) {
-      console.error("Failed to search in Milvus:", error);
       throw new ToolError(`Failed to search in Milvus: ${error}`);
     }
   }
@@ -278,7 +275,6 @@ export class MilvusDatabaseTool extends Tool<
       });
       return response;
     } catch (error) {
-      console.error("Failed to delete in Milvus:", error);
       throw new ToolError(`Failed to delete in Milvus: ${error}`);
     }
   }
