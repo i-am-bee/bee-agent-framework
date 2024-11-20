@@ -26,7 +26,6 @@ import {
 import { Cache } from "@/cache/decoratorCache.js";
 import { ValidationError } from "ajv";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
-import { RunContext } from "@/context.js";
 import {
   ClientConfig,
   MilvusClient,
@@ -172,59 +171,69 @@ export class MilvusDatabaseTool extends Tool<
   protected async _run(
     input: ToolInput<this>,
     _options: BaseToolRunOptions | undefined,
-    run: RunContext<this>,
   ): Promise<JSONToolOutput<any>> {
     switch (input.action) {
-      case MilvusAction.ListCollections:
-        const collections = await this.listCollections(run.signal);
+      case MilvusAction.ListCollections: {
+        const collections = await this.listCollections();
         return new JSONToolOutput(collections);
+      }
 
-      case MilvusAction.GetCollectionInfo:
+      case MilvusAction.GetCollectionInfo: {
         if (!input.collectionName) {
           throw new ToolError("A collection name is required for Milvus GetCollectionInfo action");
         }
-        const collectionInfo = await this.getCollectionInfo(input.collectionName, run.signal);
+        const collectionInfo = await this.getCollectionInfo(input.collectionName);
         return new JSONToolOutput(collectionInfo);
+      }
 
-      case MilvusAction.Search:
+      case MilvusAction.Search: {
         if (!input.collectionName || !input.vector) {
           throw new ToolError("A collection name and vector are required for Milvus Search action");
         }
-        const searchResults = await this.search(input, run.signal);
+        const searchResults = await this.search(input);
         return new JSONToolOutput(searchResults);
+      }
 
-      case MilvusAction.Insert:
+      case MilvusAction.Insert: {
         if (!input.collectionName || !input.vectors) {
           throw new ToolError(
             "A collection name and vectors are required for Milvus Insert action",
           );
         }
-        const insertResults = await this.insert(input, run.signal);
+        const insertResults = await this.insert(input);
         return new JSONToolOutput(insertResults);
+      }
 
-      case MilvusAction.Delete:
+      case MilvusAction.Delete: {
         if (!input.collectionName || !input.ids) {
           throw new ToolError("Collection name and ids are required for Milvus Delete action");
         }
-        const deleteResults = await this.delete(input, run.signal);
+        const deleteResults = await this.delete(input);
         return new JSONToolOutput(deleteResults);
+      }
 
-      default:
+      default: {
         throw new ToolError(`Invalid action specified: ${input.action}`);
+      }
     }
   }
 
-  private async listCollections(signal?: AbortSignal): Promise<string[]> {
+  private async listCollections(): Promise<string[]> {
     try {
       const client = await this.client();
       const response = await client.listCollections({});
-      return response.data.map((collection) => collection.name);
+
+      if (response && response.data && Array.isArray(response.data)) {
+        return response.data.map((collection) => collection.name);
+      } else {
+        return [];
+      }
     } catch (error) {
       throw new ToolError(`Failed to list collections from Milvus: ${error}`);
     }
   }
 
-  private async getCollectionInfo(collectionName: string, signal?: AbortSignal): Promise<any> {
+  private async getCollectionInfo(collectionName: string): Promise<any> {
     try {
       const client = await this.client();
       const response = client.describeCollection({ collection_name: collectionName });
@@ -234,7 +243,7 @@ export class MilvusDatabaseTool extends Tool<
     }
   }
 
-  private async insert(input: ToolInput<this>, signal?: AbortSignal): Promise<any> {
+  private async insert(input: ToolInput<this>): Promise<any> {
     try {
       const client = await this.client();
       const response = client.insert({
@@ -250,7 +259,7 @@ export class MilvusDatabaseTool extends Tool<
     }
   }
 
-  private async search(input: ToolInput<this>, signal?: AbortSignal): Promise<any> {
+  private async search(input: ToolInput<this>): Promise<any> {
     try {
       const client = await this.client();
       const response = await client.search({
@@ -266,12 +275,12 @@ export class MilvusDatabaseTool extends Tool<
     }
   }
 
-  private async delete(input: ToolInput<this>, signal?: AbortSignal): Promise<any> {
+  private async delete(input: ToolInput<this>): Promise<any> {
     try {
       const client = await this.client();
-      const response = client.deleteEntities({
+      const response = client.delete({
         collection_name: input.collectionName as string,
-        expr: `id in [${input.ids?.join(",")}]`,
+        filter: `id in [${input.ids?.join(",")}]`,
       });
       return response;
     } catch (error) {
