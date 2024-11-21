@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.0.42](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.41...v0.0.42) (2024-11-21)
+
+### Features
+
+- **agents:** add experimental Streamlit agent ([#180](https://github.com/i-am-bee/bee-agent-framework/issues/180)) ([e8e76b8](https://github.com/i-am-bee/bee-agent-framework/commit/e8e76b8b4efdf1fa18b70c1c6fb45c62f5329542))
+
+### Bug Fixes
+
+- **agents:** allow override granite bee prompts ([#186](https://github.com/i-am-bee/bee-agent-framework/issues/186)) ([d7c4060](https://github.com/i-am-bee/bee-agent-framework/commit/d7c4060c27f407ec98a7edd3b354c541739a3381))
+
 ## [0.0.41](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.40...v0.0.41) (2024-11-19)
 
 ### Features
