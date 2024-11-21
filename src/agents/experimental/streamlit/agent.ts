@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { AgentError, BaseAgent, BaseAgentRunOptions } from "@/agents/base.js";
+import { BaseAgent, BaseAgentRunOptions } from "@/agents/base.js";
 import { AgentMeta } from "@/agents/types.js";
 import { GetRunContext } from "@/context.js";
 import { Callback, Emitter } from "@/emitter/emitter.js";
 import { BaseMemory } from "@/memory/base.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
-import { isTruthy } from "remeda";
+import { isTruthy, last } from "remeda";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import {
   StreamlitAgentSystemPrompt,
@@ -29,6 +29,7 @@ import {
 import { BaseLLMOutput } from "@/llms/base.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { findFirstPair } from "@/internals/helpers/string.js";
+import { BeeAgentRunnerFatalError } from "@/agents/bee/runner.js";
 
 export interface StreamlitAgentInput {
   llm: ChatLLM<ChatLLMOutput>;
@@ -128,15 +129,18 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
       text: (this.input.templates?.system ?? StreamlitAgentSystemPrompt).render({}),
     });
 
-    const userMessage = input.prompt
-      ? BaseMessage.of({
-          role: Role.USER,
-          text: input.prompt,
-          meta: {
-            createdAt: new Date(),
-          },
-        })
-      : null;
+    const userMessage =
+      input.prompt !== null || this.memory.isEmpty()
+        ? BaseMessage.of({
+            role: Role.USER,
+            text: input.prompt ?? "No message.",
+            meta: {
+              createdAt: new Date(),
+            },
+          })
+        : null;
+
+    const inputMessages = [...this.memory.messages, userMessage].filter(isTruthy);
 
     const runMemory = new TokenMemory({
       llm: this.input.llm,
@@ -144,21 +148,23 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
       syncThreshold: 0.6,
       handlers: {
         removalSelector(msgs) {
-          const msgToRemove =
-            msgs.length > 3 &&
-            (msgs.find((msg) => msg.role === Role.ASSISTANT) ??
-              msgs.find((msg) => msg.role === Role.USER));
-
-          if (!msgToRemove || (msgToRemove.role === Role.USER && msgs.at(-1) === msgToRemove)) {
-            throw new AgentError("Cannot fit the current conversation into the context window!");
+          // First we remove messages from the past conversations
+          const prevConversationMsg = msgs.find((msg) => inputMessages.includes(msg));
+          if (prevConversationMsg && prevConversationMsg !== last(inputMessages)) {
+            return prevConversationMsg;
           }
-          return msgToRemove;
+
+          const lastMsg = msgs.length > 3 && msgs.find((m) => m.role === Role.ASSISTANT);
+          if (!lastMsg) {
+            throw new BeeAgentRunnerFatalError(
+              "Cannot fit the current conversation into the context window!",
+            );
+          }
+          return lastMsg;
         },
       },
     });
-    await runMemory.addMany(
-      [systemMessage, ...this.input.memory.messages, userMessage].filter(isTruthy),
-    );
+    await runMemory.addMany([systemMessage, ...inputMessages].filter(isTruthy));
 
     return { runMemory, userMessage };
   }
