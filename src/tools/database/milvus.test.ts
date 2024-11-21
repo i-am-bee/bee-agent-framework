@@ -16,16 +16,12 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { MilvusDatabaseTool, MilvusToolOptions, MilvusAction } from "@/tools/database/milvus.js";
-import { verifyDeserialization } from "@tests/e2e/utils.js";
-import { JSONToolOutput } from "@/tools/base.js";
-import { SlidingCache } from "@/cache/slidingCache.js";
-import { Task } from "promise-based-task";
 
 const mockClient = {
   listCollections: vi.fn(),
   describeCollection: vi.fn(),
-  search: vi.fn(),
   insert: vi.fn(),
+  search: vi.fn(),
   delete: vi.fn(),
 };
 
@@ -46,25 +42,19 @@ describe("MilvusDatabaseTool", () => {
   it("throws a missing collection name error", async () => {
     await expect(
       milvusDatabaseTool.run({ action: MilvusAction.GetCollectionInfo }),
-    ).rejects.toThrow("Collection name is required for Milvus GetCollectionInfo action.");
+    ).rejects.toThrow(
+      "Collection name is required for GetCollectionInfo, Search, Insert, and Delete actions.",
+    );
   });
 
   it("throws missing collection name and vector error", async () => {
     await expect(milvusDatabaseTool.run({ action: MilvusAction.Search })).rejects.toThrow(
-      "Both collection name and vector are required for SEARCH action.",
+      "Both collection name and vector are required for Search action.",
     );
   });
 
-  it("lists collections correctly", async () => {
-    const mockCollections = { data: ["collection1", "collection2"] };
-    mockClient.listCollections.mockResolvedValueOnce(mockCollections);
-
-    const response = await milvusDatabaseTool.run({ action: MilvusAction.ListCollections });
-    expect(response.result).toEqual(["collection1", "collection2"]);
-  });
-
-  it("gets collection info", async () => {
-    const collectionName = "collection1";
+  it("should get appropriate collection info", async () => {
+    const collectionName = "test_collection";
     const mockCollectionInfo = {
       schema: { fields: [{ name: "vector", type: "FLOAT_VECTOR", params: { dim: 128 } }] },
     };
@@ -75,5 +65,51 @@ describe("MilvusDatabaseTool", () => {
       collectionName,
     });
     expect(response.result).toEqual(mockCollectionInfo);
+  });
+
+  it("performs a search on the collection", async () => {
+    const collectionName = "dummy_collection";
+    const vector = [0.1, 0.2, 0.3];
+    const mockSearchResponse = { results: [{ id: 123, distance: 0.5 }] };
+    mockClient.search.mockResolvedValueOnce(mockSearchResponse);
+
+    const response = await milvusDatabaseTool.run({
+      action: MilvusAction.Search,
+      collectionName,
+      vector,
+      topK: 1,
+    });
+    expect(response.result).toEqual([{ id: 123, distance: 0.5 }]);
+  });
+
+  it("should delete from a collection correctly", async () => {
+    const collectionName = "foobar_collection";
+    const ids = [1, 2, 3];
+
+    mockClient.delete.mockResolvedValueOnce({ deletedCount: 3 });
+
+    const response = await milvusDatabaseTool.run({
+      action: MilvusAction.Delete,
+      collectionName,
+      ids,
+    });
+
+    expect(mockClient.delete).toHaveBeenCalledWith({
+      collection_name: collectionName,
+      filter: `id in [${ids.join(",")}]`,
+    });
+
+    expect(response.result).toEqual({ deletedCount: 3 });
+  });
+
+  it("should handle empty collection list", async () => {
+    const mockCollections = { data: [] };
+
+    mockClient.listCollections.mockResolvedValueOnce(mockCollections);
+
+    const response = await milvusDatabaseTool.run({ action: MilvusAction.ListCollections });
+
+    expect(mockClient.listCollections).toHaveBeenCalledWith({});
+    expect(response.result).toEqual([]);
   });
 });

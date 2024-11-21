@@ -246,16 +246,16 @@ export class MilvusDatabaseTool extends Tool<
   private async insert(input: ToolInput<this>): Promise<any> {
     try {
       const client = await this.client();
-      const response = client.insert({
+      const response = await client.insert({
         collection_name: input.collectionName as string,
-        fields_data: input!.vectors!.map((vector, index) => ({
+        fields_data: input.vectors!.map((vector, index) => ({
           vector: vector,
           ...input.metadata?.[index],
         })),
       });
       return response;
     } catch (error) {
-      throw new ToolError(`Failed to insert in Milvus: ${error}`);
+      throw new ToolError(`Failed to insert in Milvus: ${error.message || error}`);
     }
   }
 
