@@ -14,44 +14,71 @@
  * limitations under the License.
  */
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
-import { BeeRunOptions } from "@/agents/bee/types.js";
 import { AnyTool } from "@/tools/base.js";
-import { BeeInput } from "@/agents/bee/agent.js";
-import * as R from "remeda";
-import { BeeAgentRunner } from "@/agents/bee/runner.js";
-import { BeeParserInput } from "@/agents/bee/parser.js";
 import { isEmpty } from "remeda";
+import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
+import { BaseMemory } from "@/memory/base.js";
+import { BeeParserInput, BeeRunInput, BeeRunOptions } from "@/agents/bee/types.js";
+import { BeeAgent, BeeInput } from "@/agents/bee/agent.js";
+import { GetRunContext } from "@/context.js";
+import {
+  GraniteBeeAssistantPrompt,
+  GraniteBeeSystemPrompt,
+} from "@/agents/bee/runners/granite/prompts.js";
 
-export class GraniteAgentRunner extends BeeAgentRunner {
-  static async create(input: BeeInput, options: BeeRunOptions, prompt: string | null) {
-    const instance = await super.create(input, options, prompt);
+export class GraniteRunner extends DefaultRunner {
+  static {
+    this.register();
+  }
 
-    if (!isEmpty(input.tools)) {
-      const index = instance.memory.messages.findIndex((msg) => msg.role === Role.SYSTEM) + 1;
-      await instance.memory.add(
+  constructor(input: BeeInput, options: BeeRunOptions, run: GetRunContext<BeeAgent>) {
+    super(
+      {
+        ...input,
+        templates: {
+          ...input.templates,
+          system: input.templates?.system ?? GraniteBeeSystemPrompt,
+          assistant: input.templates?.assistant ?? GraniteBeeAssistantPrompt,
+        },
+      },
+      options,
+      run,
+    );
+
+    run.emitter.on(
+      "update",
+      async ({ update, meta, memory }) => {
+        if (update.key === "tool_output") {
+          await memory.add(
+            BaseMessage.of({
+              role: "tool_response",
+              text: update.value,
+              meta: { success: meta.success },
+            }),
+          );
+        }
+      },
+      {
+        isBlocking: true,
+      },
+    );
+  }
+
+  protected async initMemory(input: BeeRunInput): Promise<BaseMemory> {
+    const memory = await super.initMemory(input);
+
+    if (!isEmpty(this.input.tools)) {
+      const index = memory.messages.findIndex((msg) => msg.role === Role.SYSTEM) + 1;
+      await memory.add(
         BaseMessage.of({
           role: "available_tools",
-          text: JSON.stringify(
-            await Promise.all(
-              input.tools.map(async (tool) => ({
-                name: tool.name,
-                description: tool.description.replaceAll("\n", ".").replace(/\.$/, "").concat("."),
-                parameters: R.omit(await tool.getInputJsonSchema(), [
-                  "minLength",
-                  "maxLength",
-                  "$schema",
-                ]),
-              })),
-            ),
-            null,
-            2,
-          ),
+          text: JSON.stringify(await this.renderers.system.variables.tools()),
         }),
         index,
       );
     }
 
-    return instance;
+    return memory;
   }
 
   protected createParser(tools: AnyTool[]) {

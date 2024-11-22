@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-import { BeeAgentRunner } from "@/agents/bee/runner.js";
+import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { BaseMemory } from "@/memory/base.js";
 import { BeeUserPrompt } from "@/agents/bee/prompts.js";
 import { zip } from "remeda";
+import { RunContext } from "@/context.js";
+import { BeeAgent } from "@/agents/bee/agent.js";
 
 vi.mock("@/memory/tokenMemory.js", async () => {
   const { UnconstrainedMemory } = await import("@/memory/unconstrainedMemory.js");
   class TokenMemory extends UnconstrainedMemory {}
   return { TokenMemory };
 });
+
+vi.mock("@/context.js");
 
 describe("Bee Agent Runner", () => {
   beforeEach(() => {
@@ -52,7 +56,7 @@ describe("Bee Agent Runner", () => {
     };
 
     const createInstance = async (memory: BaseMemory, prompt: string | null) => {
-      return await BeeAgentRunner.create(
+      const instance = new DefaultRunner(
         {
           llm: expect.any(Function),
           memory,
@@ -60,8 +64,10 @@ describe("Bee Agent Runner", () => {
           templates: {},
         },
         {},
-        prompt,
+        new RunContext<BeeAgent, any>({} as any, {} as any),
       );
+      await instance.init({ prompt });
+      return instance;
     };
 
     const memory = await createMemory();
@@ -106,7 +112,7 @@ describe("Bee Agent Runner", () => {
     ]);
 
     const prompt = "What can you do for me?";
-    const instance = await BeeAgentRunner.create(
+    const instance = new DefaultRunner(
       {
         llm: expect.any(Function),
         memory,
@@ -116,8 +122,9 @@ describe("Bee Agent Runner", () => {
         },
       },
       {},
-      prompt,
+      new RunContext<BeeAgent, any>({} as any, {} as any),
     );
+    await instance.init({ prompt });
 
     for (const [a, b] of zip(
       [

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BaseAgent } from "@/agents/base.js";
+import { AgentError, BaseAgent } from "@/agents/base.js";
 import { AnyTool } from "@/tools/base.js";
 import { BaseMemory } from "@/memory/base.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
@@ -22,21 +22,19 @@ import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { AgentMeta } from "@/agents/types.js";
 import { Emitter } from "@/emitter/emitter.js";
 import {
-  BeeAgentRunIteration,
   BeeAgentTemplates,
   BeeCallbacks,
-  BeeMeta,
   BeeRunInput,
   BeeRunOptions,
   BeeRunOutput,
 } from "@/agents/bee/types.js";
 import { GetRunContext } from "@/context.js";
-import { BeeAgentError } from "@/agents/bee/errors.js";
-import { BeeIterationToolResult } from "@/agents/bee/parser.js";
 import { assign } from "@/internals/helpers/object.js";
-import { BeeAgentRunner } from "@/agents/bee/runner.js";
 import { BeeAssistantPrompt } from "@/agents/bee/prompts.js";
 import * as R from "remeda";
+import { BaseRunner } from "@/agents/bee/runners/base.js";
+import { GraniteRunner } from "@/agents/bee/runners/granite/runner.js";
+import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 
 export interface BeeInput {
   llm: ChatLLM<ChatLLMOutput>;
@@ -46,13 +44,15 @@ export interface BeeInput {
   templates?: Partial<BeeAgentTemplates>;
 }
 
+export class BeeAgentError extends AgentError {}
+
 export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions> {
   public readonly emitter = Emitter.root.child<BeeCallbacks>({
     namespace: ["agent", "bee"],
     creator: this,
   });
 
-  protected runner: typeof BeeAgentRunner = BeeAgentRunner;
+  protected runner: new (...args: ConstructorParameters<typeof BaseRunner>) => BaseRunner;
 
   constructor(protected readonly input: BeeInput) {
     super();
@@ -65,6 +65,8 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
         `Agent's tools must all have different names. Conflicting tool: ${duplicate.name}.`,
       );
     }
+
+    this.runner = this.input.llm.modelId.includes("ibm/granite") ? GraniteRunner : DefaultRunner;
   }
 
   static {
@@ -101,76 +103,60 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
     options: BeeRunOptions = {},
     run: GetRunContext<typeof this>,
   ): Promise<BeeRunOutput> {
-    const iterations: BeeAgentRunIteration[] = [];
-    const maxIterations = options?.execution?.maxIterations ?? Infinity;
-
-    const runner = await this.runner.create(this.input, options, input.prompt);
+    const runner = new this.runner(this.input, options, run);
+    await runner.init(input);
 
     let finalMessage: BaseMessage | undefined;
     while (!finalMessage) {
-      const meta: BeeMeta = { iteration: iterations.length + 1 };
-      if (meta.iteration > maxIterations) {
-        throw new BeeAgentError(
-          `Agent was not able to resolve the task in ${maxIterations} iterations.`,
-          [],
-          { isFatal: true },
-        );
-      }
+      const { state, meta, emitter, signal } = await runner.createIteration();
 
-      const emitter = run.emitter.child({ groupId: `iteration-${meta.iteration}` });
-      const iteration = await runner.llm({ emitter, signal: run.signal, meta });
-
-      if (iteration.state.tool_name || iteration.state.tool_input) {
+      if (state.tool_name && state.tool_input) {
         const { output, success } = await runner.tool({
-          iteration: iteration.state as BeeIterationToolResult,
-          signal: run.signal,
+          state,
           emitter,
           meta,
+          signal,
         });
-
         await runner.memory.add(
           BaseMessage.of({
             role: Role.ASSISTANT,
-            text: (this.input.templates?.assistant ?? BeeAssistantPrompt).clone().render({
-              toolName: [iteration.state.tool_name].filter(R.isTruthy),
-              toolInput: [iteration.state.tool_input]
-                .filter(R.isTruthy)
-                .map((call) => JSON.stringify(call)),
-              thought: [iteration.state.thought].filter(R.isTruthy),
-              finalAnswer: [iteration.state.final_answer].filter(R.isTruthy),
+            text: (this.input.templates?.assistant ?? BeeAssistantPrompt).render({
+              thought: [state.thought].filter(R.isTruthy),
+              toolName: [state.tool_name].filter(R.isTruthy),
+              toolInput: [state.tool_input].filter(R.isTruthy).map((call) => JSON.stringify(call)),
               toolOutput: [output],
+              finalAnswer: [state.final_answer].filter(R.isTruthy),
             }),
             meta: { success },
           }),
         );
-        assign(iteration.state, { tool_output: output });
+        assign(state, { tool_output: output });
 
         for (const key of ["partialUpdate", "update"] as const) {
           await emitter.emit(key, {
-            data: iteration.state,
+            data: state,
             update: { key: "tool_output", value: output, parsedValue: output },
             meta: { success, ...meta },
             memory: runner.memory,
           });
         }
       }
-      if (iteration.state.final_answer) {
+      if (state.final_answer) {
         finalMessage = BaseMessage.of({
           role: Role.ASSISTANT,
-          text: iteration.state.final_answer,
+          text: state.final_answer,
           meta: {
             createdAt: new Date(),
           },
         });
         await runner.memory.add(finalMessage);
-        await run.emitter.emit("success", {
+        await emitter.emit("success", {
           data: finalMessage,
-          iterations,
+          iterations: runner.iterations,
           memory: runner.memory,
           meta,
         });
       }
-      iterations.push(iteration);
     }
 
     if (input.prompt !== null) {
@@ -184,9 +170,9 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
         }),
       );
     }
-    await this.input.memory.add(finalMessage);
 
-    return { result: finalMessage, iterations, memory: runner.memory };
+    await this.input.memory.add(finalMessage);
+    return { result: finalMessage, iterations: runner.iterations, memory: runner.memory };
   }
 
   createSnapshot() {
