@@ -26,6 +26,7 @@ import * as process from "node:process";
 import { createChatLLM } from "@tests/utils/llmFactory.js";
 import { BeeMeta } from "@/agents/bee/types.js";
 import { GoogleSearchTool } from "@/tools/search/googleSearch.js";
+import { HumanTool } from "@/tools/human.js";
 
 const googleSearchApiKey = process.env.GOOGLE_API_KEY;
 const googleSearchCseId = process.env.GOOGLE_CSE_ID;
@@ -41,6 +42,7 @@ describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", ()
           cseId: googleSearchCseId,
           maxResults: 10,
         }),
+        new HumanTool(),
       ],
     });
   };
@@ -133,5 +135,22 @@ describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", ()
         expect(extra).toHaveLength(0);
       }
     });
+  });
+
+  it("Handles HumanTool correctly", async () => {
+    const agent = createAgent();
+    const prompt = "I need human intervention.";
+    const response = await agent.run(
+      { prompt },
+      {
+        execution: {
+          maxIterations: 5,
+          totalMaxRetries: 5,
+        },
+      },
+    );
+
+    expect(response.result).toBeDefined();
+    expect(response.result.text).toContain("HumanTool");
   });
 });

@@ -24,6 +24,8 @@ export type BeeParserInput = LinePrefixParser.define<{
   tool_input: JSONParserField<Record<string, any>>;
   tool_output: ZodParserField<string>;
   final_answer: ZodParserField<string>;
+  human_tool_input: ZodParserField<string>; // Added field for HumanTool input
+  human_tool_output: ZodParserField<string>; // Added field for HumanTool output
 }>;
 
 type BeeParser = LinePrefixParser<BeeParserInput>;

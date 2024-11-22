@@ -2,7 +2,7 @@
  * Copyright 2024 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -20,6 +20,10 @@ import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { BaseMemory } from "@/memory/base.js";
 import { BeeUserPrompt } from "@/agents/bee/prompts.js";
 import { zip } from "remeda";
+import { HumanTool } from "@/tools/human.js";
+import { Emitter } from "@/emitter/emitter.js";
+import { BeeIterationToolResult } from "@/agents/bee/parser.js";
+import { BeeCallbacks } from "@/agents/bee/types.js";
 
 vi.mock("@/memory/tokenMemory.js", async () => {
   const { UnconstrainedMemory } = await import("@/memory/unconstrainedMemory.js");
@@ -128,5 +132,44 @@ describe("Bee Agent Runner", () => {
     )) {
       expect(template.render({ input: a.text, meta: undefined })).toStrictEqual(b.text);
     }
+  });
+
+  it("Handles HumanTool correctly", async () => {
+    const memory = new UnconstrainedMemory();
+    const prompt = "I need human intervention.";
+    const instance = await BeeAgentRunner.create(
+      {
+        llm: expect.any(Function),
+        memory,
+        tools: [new HumanTool()],
+        templates: {},
+      },
+      {},
+      prompt,
+    );
+
+    // Create a full iteration object with required properties
+    const iteration: BeeIterationToolResult = {
+      tool_name: "HumanTool",
+      tool_input: { message: "Please provide input." },
+      thought: "I need to ask the human for input.",
+      tool_output: "",
+      final_answer: "",
+      human_tool_input: "",
+      human_tool_output: "",
+    };
+
+    // Instantiate an actual Emitter<BeeCallbacks>
+    const emitter = new Emitter<BeeCallbacks>();
+
+    const result = await instance.tool({
+      iteration: iteration,
+      signal: new AbortController().signal,
+      emitter: emitter,
+      meta: { iteration: 1 },
+    });
+
+    expect(result.output).toBeDefined();
+    expect(result.success).toBe(true);
   });
 });

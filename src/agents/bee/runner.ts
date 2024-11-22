@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -48,7 +48,7 @@ import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
 import { Serializable } from "@/internals/serializable.js";
 import { shallowCopy } from "@/serializer/utils.js";
-import { isEmpty } from "remeda";
+import { isEmpty, last } from "remeda";
 
 export class BeeAgentRunnerFatalError extends BeeAgentError {
   isFatal = true;
@@ -93,6 +93,22 @@ export class BeeAgentRunner extends Serializable {
       return message;
     };
 
+    const inputMemoryTransformed = [
+      ...input.memory.messages,
+      ...(prompt !== null || input.memory.isEmpty()
+        ? [
+            BaseMessage.of({
+              role: Role.USER,
+              text: prompt ?? "",
+              meta: {
+                // TODO: createdAt
+                createdAt: new Date(),
+              },
+            }),
+          ]
+        : []),
+    ].map(transformMessage);
+
     const memory = new TokenMemory({
       llm: input.llm,
       capacityThreshold: 0.85,
@@ -101,9 +117,9 @@ export class BeeAgentRunner extends Serializable {
         removalSelector(curMessages) {
           // First we remove messages from the past conversations
           const prevConversationMessage = curMessages.find((msg) =>
-            input.memory.messages.includes(msg),
+            inputMemoryTransformed.includes(msg),
           );
-          if (prevConversationMessage) {
+          if (prevConversationMessage && prevConversationMessage !== last(inputMemoryTransformed)) {
             return prevConversationMessage;
           }
 
@@ -151,23 +167,8 @@ export class BeeAgentRunner extends Serializable {
           createdAt: new Date(),
         },
       }),
-      ...input.memory.messages.map(transformMessage),
+      ...inputMemoryTransformed,
     ]);
-
-    if (prompt !== null || input.memory.isEmpty()) {
-      await memory.add(
-        transformMessage(
-          BaseMessage.of({
-            role: Role.USER,
-            text: prompt ?? "",
-            meta: {
-              // TODO: createdAt
-              createdAt: new Date(),
-            },
-          }),
-        ),
-      );
-    }
 
     return new this(input, options, memory);
   }
@@ -176,7 +177,9 @@ export class BeeAgentRunner extends Serializable {
     const parserRegex = isEmpty(tools)
       ? new RegExp(`Thought:.+\\nFinal Answer:[\\s\\S]+`)
       : new RegExp(
-          `Thought:.+\\n(?:Final Answer:[\\s\\S]+|Function Name:(${tools.map((tool) => tool.name).join("|")})\\nFunction Input: \\{.*\\}\\nFunction Output:)?`,
+          `Thought:.+\\n(?:Final Answer:[\\s\\S]+|Function Name:(${tools
+            .map((tool) => tool.name)
+            .join("|")}|HumanTool)\\nFunction Input: \\{.*\\}\\nFunction Output:)?`,
         );
 
     const parser = new LinePrefixParser<BeeParserInput>(
@@ -324,6 +327,95 @@ export class BeeAgentRunner extends Serializable {
       (tool) => tool.name.trim().toUpperCase() == iteration.tool_name?.toUpperCase(),
     );
     if (!tool) {
+      if (iteration.tool_name === "HumanTool") {
+        const humanTool = new (await import("@/tools/human.js")).HumanTool();
+        const options = { signal };
+
+        const humanToolInput = {
+          message:
+            typeof iteration.tool_input === "string"
+              ? iteration.tool_input
+              : (iteration.tool_input as Record<string, any>).message ||
+                JSON.stringify(iteration.tool_input),
+        };
+
+        return new Retryable({
+          config: {
+            signal,
+            maxRetries: this.options.execution?.maxRetriesPerStep,
+          },
+          onError: async (error) => {
+            await emitter.emit("toolError", {
+              data: {
+                tool: humanTool,
+                input: humanToolInput,
+                options,
+                error: FrameworkError.ensure(error),
+                iteration,
+              },
+              meta,
+            });
+
+            if (error instanceof ToolInputValidationError) {
+              this.failedAttemptsCounter.use(error);
+
+              const template = this.input.templates?.toolInputError ?? BeeToolInputErrorPrompt;
+              throw new Error(
+                template.render({
+                  reason: error.toString(),
+                }),
+              );
+            }
+
+            if (error instanceof ToolError) {
+              this.failedAttemptsCounter.use(error);
+
+              const template = this.input.templates?.toolError ?? BeeToolErrorPrompt;
+              throw new Error(
+                template.render({
+                  reason: error.explain(),
+                }),
+              );
+            }
+
+            throw error;
+          },
+          executor: async () => {
+            await emitter.emit("toolStart", {
+              data: {
+                tool: humanTool,
+                input: humanToolInput,
+                options,
+                iteration,
+              },
+              meta,
+            });
+
+            const toolOutput: ToolOutput = await humanTool.run(humanToolInput, options);
+            await emitter.emit("toolSuccess", {
+              data: {
+                tool: humanTool,
+                input: humanToolInput,
+                options,
+                result: toolOutput,
+                iteration,
+              },
+              meta,
+            });
+
+            if (toolOutput.isEmpty()) {
+              const template = this.input.templates?.toolNoResultError ?? BeeToolNoResultsPrompt;
+              return { output: template.render({}), success: true };
+            }
+
+            return {
+              success: true,
+              output: toolOutput.getTextContent(),
+            };
+          },
+        }).get();
+      }
+
       this.failedAttemptsCounter.use(
         new AgentError(`Agent was trying to use non-existing tool "${iteration.tool_name}"`, [], {
           context: { iteration, meta },
@@ -406,7 +498,7 @@ export class BeeAgentRunner extends Serializable {
               tool,
               input: iteration.tool_input,
               options,
-              error,
+              error: FrameworkError.ensure(error),
               iteration,
             },
             meta,
@@ -416,24 +508,22 @@ export class BeeAgentRunner extends Serializable {
             this.failedAttemptsCounter.use(error);
 
             const template = this.input.templates?.toolInputError ?? BeeToolInputErrorPrompt;
-            return {
-              success: false,
-              output: template.render({
+            throw new Error(
+              template.render({
                 reason: error.toString(),
               }),
-            };
+            );
           }
 
           if (error instanceof ToolError) {
             this.failedAttemptsCounter.use(error);
 
             const template = this.input.templates?.toolError ?? BeeToolErrorPrompt;
-            return {
-              success: false,
-              output: template.render({
+            throw new Error(
+              template.render({
                 reason: error.explain(),
               }),
-            };
+            );
           }
 
           throw error;

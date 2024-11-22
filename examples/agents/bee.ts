@@ -9,15 +9,31 @@ import { LocalPythonStorage } from "bee-agent-framework/tools/python/storage";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
+import { HumanTool } from "@/tools/human.js";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+//import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OpenAIChatLLM } from "bee-agent-framework/adapters/openai/chat";
+
+import {
+  BeeSystemPrompt,
+  BeeAssistantPrompt,
+  BeeUserPrompt,
+  BeeUserEmptyPrompt,
+  BeeToolErrorPrompt,
+  BeeToolInputErrorPrompt,
+  BeeToolNoResultsPrompt,
+  BeeToolNotFoundPrompt,
+} from "@/agents/bee/prompts.js";
 
 Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
-const llm = new OllamaChatLLM({
-  modelId: "llama3.1", // llama3.1:70b for better performance
+//const llm = new OllamaChatLLM({
+//  modelId: "llama3.1", // llama3.1:70b for better performance
+//});
+const llm = new OpenAIChatLLM({
+  modelId: "gpt-4o", // gpt-4o
 });
 
 const codeInterpreterUrl = process.env.CODE_INTERPRETER_URL;
@@ -35,6 +51,7 @@ const agent = new BeeAgent({
     // new WebCrawlerTool(), // HTML web page crawler
     new WikipediaTool(),
     new OpenMeteoTool(), // weather tool
+    new HumanTool(), //human tool
     // new ArXivTool(), // research papers
     // new DynamicTool() // custom python tool
     ...(codeInterpreterUrl
@@ -49,6 +66,16 @@ const agent = new BeeAgent({
         ]
       : []),
   ],
+  templates: {
+    system: BeeSystemPrompt,
+    assistant: BeeAssistantPrompt,
+    user: BeeUserPrompt,
+    userEmpty: BeeUserEmptyPrompt,
+    toolError: BeeToolErrorPrompt,
+    toolInputError: BeeToolInputErrorPrompt,
+    toolNoResultError: BeeToolNoResultsPrompt,
+    toolNotFoundError: BeeToolNotFoundPrompt,
+  },
 });
 
 const reader = createConsoleReader();
