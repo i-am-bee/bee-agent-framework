@@ -7,7 +7,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * unless required by applicable law or agreed to in writing, software
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -18,6 +18,7 @@ import { PromptTemplate } from "@/template.js";
 import { BaseMessageMeta } from "@/llms/primitives/message.js";
 import { z } from "zod";
 
+// Original BeeSystemPrompt
 export const BeeSystemPrompt = new PromptTemplate({
   schema: z.object({
     instructions: z.string().default("You are a helpful assistant."),
@@ -70,14 +71,6 @@ Message: Can you translate "How are you" into French?
 Thought: The user wants to translate a text into French. I can do that.
 Final Answer: Comment vas-tu?
 
-Message: I need advice.
-Thought: The user's request is too general. I need to ask for more specifics.
-Function Name: HumanTool
-Function Input: { "message": "Could you please specify what you need advice on?" }
-Function Output: // Waits for user input
-Thought: The user has provided more details. I can now assist them.
-Final Answer: [Provide the advice based on user's input]
-
 # Instructions
 User can only see the Final Answer, all answers must be provided there.
 {{^tools.length}}
@@ -85,9 +78,6 @@ You must always use the communication structure and instructions defined above. 
 {{/tools.length}}
 {{#tools.length}}
 You must always use the communication structure and instructions defined above. Do not forget that Thought must be immediately followed by either Function Name or Final Answer.
-
-When the message is unclear or you need more information from the user, you **must** use the "HumanTool" function to ask for clarification and **should not** ask for more information directly in the Final Answer.
-
 Functions must be used to retrieve factual or historical information to answer the message.
 {{/tools.length}}
 If the user suggests using a function that is not available, answer that the function is not available. You can suggest alternatives if appropriate.
@@ -108,12 +98,35 @@ Prefer to use these capabilities over functions.
   - When using search engines, you try different formulations of the query, possibly even in a different language.
 - You cannot do complex calculations, computations, or data manipulations without using functions.
 
-When the message is unclear or you need more information from the user, you must use the "HumanTool" to ask for clarification.
-
 # Role
 {{instructions}}`,
 });
 
+// Extended BeeSystemPrompt with HumanTool support
+export const BeeSystemPromptWithHumanTool = BeeSystemPrompt.fork((config) => {
+  return {
+    ...config,
+    template: config.template.replace(
+      "## Examples",
+      `## Examples
+Message: I need advice.
+Thought: The user's request is too general. I need to ask for more specifics.
+Function Name: HumanTool
+Function Input: { "message": "Could you please specify what you need advice on?" }
+Function Output: // Waits for user input
+Thought: The user has provided more details. I can now assist them.
+Final Answer: [Provide the advice based on user's input]
+
+## Examples`
+    ).replace(
+      "# Instructions",
+      `# Instructions
+When the message is unclear or you need more information from the user, you must use the "HumanTool" function to ask for clarification.`
+    ),
+  };
+});
+
+// Other prompts remain unchanged
 export const BeeAssistantPrompt = new PromptTemplate({
   schema: z
     .object({
@@ -199,3 +212,4 @@ export const BeeToolNotFoundPrompt = new PromptTemplate({
 Use one of the following functions: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
 {{/tools.length}}`,
 });
+
