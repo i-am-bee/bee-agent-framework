@@ -117,11 +117,19 @@ Function Output: // Waits for user input
 Thought: The user has provided more details. I can now assist them.
 Final Answer: [Provide the advice based on user's input]
 
+Message: How is the weather?
+Thought: The user's question is unclear as it lacks a location. I need to ask for clarification.
+Function Name: HumanTool
+Function Input: { "message": "Could you please specify the location for which you would like to know the weather?" }
+Function Output: // Waits for user input
+Thought: The user has provided the location. I can now retrieve the weather information.
+Final Answer: [Provide the weather information based on user's input]
+
 ## Examples`
     ).replace(
       "# Instructions",
       `# Instructions
-When the message is unclear or you need more information from the user, you must use the "HumanTool" function to ask for clarification.`
+When the message is unclear, incomplete, or lacks context, you must use the "HumanTool" function to ask for clarification. Always avoid guessing or providing incomplete answers without the user's input.`
     ),
   };
 });
@@ -212,4 +220,3 @@ export const BeeToolNotFoundPrompt = new PromptTemplate({
 Use one of the following functions: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
 {{/tools.length}}`,
 });
-
