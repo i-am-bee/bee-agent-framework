@@ -1,6 +1,6 @@
 {
   "name": "bee-agent-framework",
-  "version": "0.0.40",
+  "version": "0.0.42",
   "license": "Apache-2.0",
   "description": "Bee - LLM Agent Framework",
   "author": "IBM Corp.",
@@ -193,13 +193,16 @@
     "zod-to-json-schema": "^3.23.3"
   },
   "peerDependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.687.0",
     "@elastic/elasticsearch": "^8.0.0",
+    "@google-cloud/vertexai": "*",
     "@googleapis/customsearch": "^3.2.0",
     "@grpc/grpc-js": "^1.11.3",
     "@grpc/proto-loader": "^0.7.13",
     "@ibm-generative-ai/node-sdk": "~3.2.4",
     "@langchain/community": ">=0.2.28",
     "@langchain/core": ">=0.2.27",
+    "google-auth-library": "*",
     "groq-sdk": "^0.7.0",
     "ollama": "^0.5.8",
     "openai": "^4.67.3",
@@ -207,7 +210,13 @@
     "sequelize": "^6.37.3"
   },
   "peerDependenciesMeta": {
+    "@aws-sdk/client-bedrock-runtime": {
+      "optional": true
+    },
     "@elastic/elasticsearch": {
+      "optional": true
+    },
+    "@google-cloud/vertexai": {
       "optional": true
     },
     "@googleapis/customsearch": {
@@ -228,6 +237,9 @@
     "@langchain/core": {
       "optional": true
     },
+    "google-auth-library": {
+      "optional": true
+    },
     "groq-sdk": {
       "optional": true
     },
@@ -245,11 +257,13 @@
     }
   },
   "devDependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.687.0",
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
     "@elastic/elasticsearch": "^8.0.0",
     "@eslint/js": "^9.13.0",
     "@eslint/markdown": "^6.2.1",
+    "@google-cloud/vertexai": "^1.9.0",
     "@googleapis/customsearch": "^3.2.0",
     "@grpc/grpc-js": "^1.12.2",
     "@grpc/proto-loader": "^0.7.13",

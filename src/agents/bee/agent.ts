@@ -191,6 +191,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
 
   createSnapshot() {
     return {
+      ...super.createSnapshot(),
       input: this.input,
       emitter: this.emitter,
       runner: this.runner,
