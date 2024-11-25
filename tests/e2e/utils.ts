@@ -33,6 +33,7 @@ import { customsearch_v1 } from "@googleapis/customsearch";
 import { LangChainTool } from "@/adapters/langchain/tools.js";
 import { Client as esClient } from "@elastic/elasticsearch";
 import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
+import { VertexAI } from "@google-cloud/vertexai";
 
 interface CallbackOptions<T> {
   required?: boolean;
@@ -131,6 +132,7 @@ verifyDeserialization.ignoredClasses = [
   Emitter,
   esClient,
   BedrockRuntimeClient,
+  VertexAI,
 ] as ClassConstructor[];
 verifyDeserialization.isIgnored = (key: string, value: unknown, parent?: any) => {
   if (verifyDeserialization.ignoredKeys.has(key)) {

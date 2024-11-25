@@ -1313,6 +1313,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@google-cloud/vertexai@npm:^1.9.0":
+  version: 1.9.0
+  resolution: "@google-cloud/vertexai@npm:1.9.0"
+  dependencies:
+    google-auth-library: "npm:^9.1.0"
+  checksum: 10c0/6568fa105a180b4d27be31be92e6c71b9f8d018bb432631d63e0bb37cc299811895dbf237b9c560a1558de4f87b18882bdbb8e976ce43bf75bf80d998f395d76
+  languageName: node
+  linkType: hard
+
 "@googleapis/customsearch@npm:^3.2.0":
   version: 3.2.0
   resolution: "@googleapis/customsearch@npm:3.2.0"
@@ -4323,6 +4332,7 @@ __metadata:
     "@elastic/elasticsearch": "npm:^8.0.0"
     "@eslint/js": "npm:^9.13.0"
     "@eslint/markdown": "npm:^6.2.1"
+    "@google-cloud/vertexai": "npm:^1.9.0"
     "@googleapis/customsearch": "npm:^3.2.0"
     "@grpc/grpc-js": "npm:^1.12.2"
     "@grpc/proto-loader": "npm:^0.7.13"
@@ -4412,12 +4422,14 @@ __metadata:
   peerDependencies:
     "@aws-sdk/client-bedrock-runtime": ^3.687.0
     "@elastic/elasticsearch": ^8.0.0
+    "@google-cloud/vertexai": "*"
     "@googleapis/customsearch": ^3.2.0
     "@grpc/grpc-js": ^1.11.3
     "@grpc/proto-loader": ^0.7.13
     "@ibm-generative-ai/node-sdk": ~3.2.4
     "@langchain/community": ">=0.2.28"
     "@langchain/core": ">=0.2.27"
+    google-auth-library: "*"
     groq-sdk: ^0.7.0
     ollama: ^0.5.8
     openai: ^4.67.3
@@ -4427,6 +4439,8 @@ __metadata:
     "@aws-sdk/client-bedrock-runtime":
       optional: true
     "@elastic/elasticsearch":
+      optional: true
+    "@google-cloud/vertexai":
       optional: true
     "@googleapis/customsearch":
       optional: true
@@ -4439,6 +4453,8 @@ __metadata:
     "@langchain/community":
       optional: true
     "@langchain/core":
+      optional: true
+    google-auth-library:
       optional: true
     groq-sdk:
       optional: true
@@ -7280,6 +7296,20 @@ __metadata:
   version: 0.1.2
   resolution: "globrex@npm:0.1.2"
   checksum: 10c0/a54c029520cf58bda1d8884f72bd49b4cd74e977883268d931fd83bcbd1a9eb96d57c7dbd4ad80148fb9247467ebfb9b215630b2ed7563b2a8de02e1ff7f89d1
+  languageName: node
+  linkType: hard
+
+"google-auth-library@npm:^9.1.0":
+  version: 9.15.0
+  resolution: "google-auth-library@npm:9.15.0"
+  dependencies:
+    base64-js: "npm:^1.3.0"
+    ecdsa-sig-formatter: "npm:^1.0.11"
+    gaxios: "npm:^6.1.1"
+    gcp-metadata: "npm:^6.1.0"
+    gtoken: "npm:^7.0.0"
+    jws: "npm:^4.0.0"
+  checksum: 10c0/f5a9a46e939147b181bac9b254f11dd8c2d05c15a65c9d3f2180252bef21c12af37d9893bc3caacafd226d6531a960535dbb5222ef869143f393c6a97639cc06
   languageName: node
   linkType: hard
 
