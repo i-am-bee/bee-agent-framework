@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
-import { AnyTool } from "@/tools/base.js";
+import type { AnyTool } from "@/tools/base.js";
 import { isEmpty } from "remeda";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import { BaseMemory } from "@/memory/base.js";
-import { BeeParserInput, BeeRunInput, BeeRunOptions } from "@/agents/bee/types.js";
+import type { BeeParserInput, BeeRunInput, BeeRunOptions } from "@/agents/bee/types.js";
 import { BeeAgent, BeeInput } from "@/agents/bee/agent.js";
-import { GetRunContext } from "@/context.js";
+import type { GetRunContext } from "@/context.js";
 import {
   GraniteBeeAssistantPrompt,
   GraniteBeeSystemPrompt,
@@ -72,7 +72,7 @@ export class GraniteRunner extends DefaultRunner {
       await memory.add(
         BaseMessage.of({
           role: "available_tools",
-          text: JSON.stringify(await this.renderers.system.variables.tools()),
+          text: JSON.stringify(await this.renderers.system.variables.tools(), null, 4),
         }),
         index,
       );

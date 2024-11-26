@@ -1,3 +1,19 @@
+/**
+ * Copyright 2024 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { Serializable } from "@/internals/serializable.js";
 import {
   BeeAgentRunIteration,
@@ -7,7 +23,7 @@ import {
   BeeRunInput,
   BeeRunOptions,
 } from "@/agents/bee/types.js";
-import { BeeAgent, BeeAgentError, BeeInput } from "@/agents/bee/agent.js";
+import type { BeeAgent, BeeInput } from "@/agents/bee/agent.js";
 import { RetryCounter } from "@/internals/helpers/counter.js";
 import { AgentError } from "@/agents/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
@@ -47,7 +63,7 @@ export abstract class BaseRunner extends Serializable {
     const maxIterations = this.options?.execution?.maxIterations ?? Infinity;
 
     if (meta.iteration > maxIterations) {
-      throw new BeeAgentError(
+      throw new AgentError(
         `Agent was not able to resolve the task in ${maxIterations} iterations.`,
         [],
         { isFatal: true },

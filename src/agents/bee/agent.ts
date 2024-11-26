@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AgentError, BaseAgent } from "@/agents/base.js";
+import { BaseAgent } from "@/agents/base.js";
 import { AnyTool } from "@/tools/base.js";
 import { BaseMemory } from "@/memory/base.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
@@ -35,6 +35,7 @@ import * as R from "remeda";
 import { BaseRunner } from "@/agents/bee/runners/base.js";
 import { GraniteRunner } from "@/agents/bee/runners/granite/runner.js";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
+import { ValueError } from "@/errors.js";
 
 export interface BeeInput {
   llm: ChatLLM<ChatLLMOutput>;
@@ -43,8 +44,6 @@ export interface BeeInput {
   meta?: Omit<AgentMeta, "tools">;
   templates?: Partial<BeeAgentTemplates>;
 }
-
-export class BeeAgentError extends AgentError {}
 
 export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions> {
   public readonly emitter = Emitter.root.child<BeeCallbacks>({
@@ -61,7 +60,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       arr.find((b, j) => i !== j && a.name.toUpperCase() === b.name.toUpperCase()),
     );
     if (duplicate) {
-      throw new BeeAgentError(
+      throw new ValueError(
         `Agent's tools must all have different names. Conflicting tool: ${duplicate.name}.`,
       );
     }
