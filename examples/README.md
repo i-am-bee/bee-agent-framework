@@ -23,8 +23,6 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 - [`custom_agent.ts`](agents/custom_agent.ts): Example of creating a custom agent
 - [`simple.ts`](agents/simple.ts): Simple agent implementation
 - [`sql.ts`](agents/sql.ts): Agent for SQL-related tasks
-- [`granite/single_turn.ts`](agents/granite/single_turn.ts): GraniteBeeAgent with WatsonX
-- [`granite/chat.ts`](agents/granite/chat.ts): GraniteBeeAgent for chat with IBMvLLM
 
 ## Cache
 

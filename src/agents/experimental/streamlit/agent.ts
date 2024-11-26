@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BaseAgent, BaseAgentRunOptions } from "@/agents/base.js";
+import { AgentError, BaseAgent, BaseAgentRunOptions } from "@/agents/base.js";
 import { AgentMeta } from "@/agents/types.js";
 import { GetRunContext } from "@/context.js";
 import { Callback, Emitter } from "@/emitter/emitter.js";
@@ -29,7 +29,6 @@ import {
 import { BaseLLMOutput } from "@/llms/base.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { findFirstPair } from "@/internals/helpers/string.js";
-import { BeeAgentRunnerFatalError } from "@/agents/bee/runner.js";
 
 export interface StreamlitAgentInput {
   llm: ChatLLM<ChatLLMOutput>;
@@ -156,9 +155,7 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
 
           const lastMsg = msgs.length > 3 && msgs.find((m) => m.role === Role.ASSISTANT);
           if (!lastMsg) {
-            throw new BeeAgentRunnerFatalError(
-              "Cannot fit the current conversation into the context window!",
-            );
+            throw new AgentError("Cannot fit the current conversation into the context window!");
           }
           return lastMsg;
         },
