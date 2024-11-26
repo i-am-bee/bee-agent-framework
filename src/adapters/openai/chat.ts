@@ -164,17 +164,20 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
     input: BaseMessage[],
     options?: GenerateOptions,
   ): Client.Chat.ChatCompletionCreateParams {
+    type OpenAIMessage =
+      | Client.Chat.ChatCompletionSystemMessageParam
+      | Client.Chat.ChatCompletionUserMessageParam
+      | Client.Chat.ChatCompletionAssistantMessageParam;
+
     return {
       ...this.parameters,
       model: this.modelId,
       stream: false,
       messages: input.map(
-        (message) =>
-          ({
-            role: message.role,
-            content: message.text,
-            response_metadata: message.meta,
-          }) as Client.Chat.ChatCompletionMessageParam,
+        (message): OpenAIMessage => ({
+          role: message.role as OpenAIMessage["role"],
+          content: message.text,
+        }),
       ),
       response_format: (() => {
         if (options?.guided?.json) {
