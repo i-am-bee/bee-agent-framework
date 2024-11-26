@@ -24,7 +24,6 @@ import {
   ToolInputValidationError,
 } from "@/tools/base.js";
 import { Cache } from "@/cache/decoratorCache.js";
-import { ValidationError } from "ajv";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
 import {
   ClientConfig,
@@ -141,16 +140,8 @@ export class MilvusDatabaseTool extends Tool<
     this.register();
   }
 
-  public constructor(options: MilvusToolOptions) {
+  constructor(options: MilvusToolOptions) {
     super(options);
-    if (!options.connection.address) {
-      throw new ValidationError([
-        {
-          message: `The address must be provide in the "host:port" format`,
-          propertyName: "connection.address",
-        },
-      ]);
-    }
   }
 
   @Cache()
@@ -234,57 +225,41 @@ export class MilvusDatabaseTool extends Tool<
   }
 
   private async getCollectionInfo(collectionName: string): Promise<any> {
-    try {
-      const client = await this.client();
-      const response = client.describeCollection({ collection_name: collectionName });
-      return response;
-    } catch (error) {
-      throw new ToolError(`Failed to get info about collections from Milvus: ${error}`);
-    }
+    const client = await this.client();
+    const response = client.describeCollection({ collection_name: collectionName });
+    return response;
   }
 
   private async insert(input: ToolInput<this>): Promise<any> {
-    try {
-      const client = await this.client();
-      const response = await client.insert({
-        collection_name: input.collectionName as string,
-        fields_data: input.vectors!.map((vector, index) => ({
-          vector: vector,
-          ...input.metadata?.[index],
-        })),
-      });
-      return response;
-    } catch (error) {
-      throw new ToolError(`Failed to insert in Milvus: ${error.message || error}`);
-    }
+    const client = await this.client();
+    const response = await client.insert({
+      collection_name: input.collectionName as string,
+      fields_data: input.vectors!.map((vector, index) => ({
+        vector: vector,
+        ...input.metadata?.[index],
+      })),
+    });
+    return response;
   }
 
   private async search(input: ToolInput<this>): Promise<any> {
-    try {
-      const client = await this.client();
-      const response = await client.search({
-        collection_name: input.collectionName as string,
-        vector: input.vector,
-        limit: input.topK || 10,
-        filter: input.filter,
-        output_fields: input.searchOutput,
-      });
-      return response.results;
-    } catch (error) {
-      throw new ToolError(`Failed to search in Milvus: ${error}`);
-    }
+    const client = await this.client();
+    const response = await client.search({
+      collection_name: input.collectionName as string,
+      vector: input.vector,
+      limit: input.topK || 10,
+      filter: input.filter,
+      output_fields: input.searchOutput,
+    });
+    return response.results;
   }
 
   private async delete(input: ToolInput<this>): Promise<any> {
-    try {
-      const client = await this.client();
-      const response = client.delete({
-        collection_name: input.collectionName as string,
-        filter: `id in [${input.ids?.join(",")}]`,
-      });
-      return response;
-    } catch (error) {
-      throw new ToolError(`Failed to delete in Milvus: ${error}`);
-    }
+    const client = await this.client();
+    const response = client.delete({
+      collection_name: input.collectionName as string,
+      filter: `id in [${input.ids?.join(",")}]`,
+    });
+    return response;
   }
 }

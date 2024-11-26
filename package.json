@@ -166,7 +166,6 @@
     "@connectrpc/connect-node": "^1.6.1",
     "@opentelemetry/api": "^1.9.0",
     "@streamparser/json": "^0.0.21",
-    "@zilliz/milvus2-sdk-node": "^2.4.9",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "bee-proto": "0.0.2",
@@ -208,7 +207,8 @@
     "ollama": "^0.5.8",
     "openai": "^4.67.3",
     "openai-chat-tokens": "^0.2.8",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "@zilliz/milvus2-sdk-node": "^2.4.9"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/client-bedrock-runtime": {
@@ -289,6 +289,7 @@
     "@types/node": "^20.16.13",
     "@types/object-hash": "^3.0.6",
     "@types/turndown": "^5.0.5",
+    "@zilliz/milvus2-sdk-node": "^2.4.9",
     "docsify-cli": "^4.4.4",
     "dotenv": "^16.4.5",
     "embedme": "^1.22.1",
