@@ -24,8 +24,8 @@ These tools extend the agent's abilities, allowing it to interact with external 
 | `ArXivTool`                                                               | Retrieve research articles published on arXiv.                           |
 | `WebCrawlerTool`                                                          | Retrieve content of an arbitrary website.                                |
 | `OpenMeteoTool`                                                           | Retrieve current, previous, or upcoming weather for a given destination. |
+| `MilvusDatabaseTool`                                                       | Perform retrieval queries (search, insert, delete, manage collections) against a MilvusDatabaseTool database. |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                          |
-| `MilvusDatabaseTool`                                                       | Perform retrieval queries (search, insert, delete) against a MilvusDatabaseTool database. |
 
 All examples can be found [here](/examples/tools).
 
