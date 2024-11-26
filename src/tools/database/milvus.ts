@@ -140,6 +140,7 @@ export class MilvusDatabaseTool extends Tool<
     this.register();
   }
 
+  /* eslint-disable @typescript-eslint/no-useless-constructor */
   constructor(options: MilvusToolOptions) {
     super(options);
   }
