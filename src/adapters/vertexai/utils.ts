@@ -16,7 +16,12 @@
 
 import { isString } from "remeda";
 import { Serializer } from "@/serializer/serializer.js";
-import { VertexAI, GenerativeModel, ModelParams } from "@google-cloud/vertexai";
+import {
+  VertexAI,
+  GenerativeModel,
+  ModelParams,
+  BaseModelParams as Params,
+} from "@google-cloud/vertexai";
 import { getPropStrict } from "@/internals/helpers/object.js";
 import { GenerateContentResponse } from "@google-cloud/vertexai";
 
@@ -50,12 +55,16 @@ export function createModel(
   client: VertexAI,
   modelId: string,
   schema?: string | Record<string, any>,
+  params?: Params,
 ): GenerativeModel {
-  const modelParams: ModelParams = { model: modelId };
+  const modelParams: ModelParams = { model: modelId, ...params };
   if (schema) {
     const schemaJson = isString(schema) ? JSON.parse(schema) : schema;
-    const generationConfig = { responseSchema: schemaJson, responseMimeType: "application/json" };
-    modelParams.generationConfig = generationConfig;
+    modelParams.generationConfig = {
+      ...modelParams.generationConfig,
+      responseSchema: schemaJson,
+      responseMimeType: "application/json",
+    };
   }
   return client.getGenerativeModel(modelParams);
 }
