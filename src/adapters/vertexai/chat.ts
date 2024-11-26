@@ -26,7 +26,7 @@ import {
 import { shallowCopy } from "@/serializer/utils.js";
 import type { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { VertexAI } from "@google-cloud/vertexai";
+import { VertexAI, BaseModelParams as Params } from "@google-cloud/vertexai";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { signalRace } from "@/internals/helpers/promise.js";
@@ -72,7 +72,7 @@ export interface VertexAIChatLLMInput {
   client?: VertexAI;
   executionOptions?: ExecutionOptions;
   cache?: LLMCache<VertexAIChatLLMOutput>;
-  parameters?: Record<string, any>;
+  parameters?: Params;
 }
 
 export class VertexAIChatLLM extends ChatLLM<VertexAIChatLLMOutput> {
@@ -82,9 +82,11 @@ export class VertexAIChatLLM extends ChatLLM<VertexAIChatLLMOutput> {
   });
 
   protected client: VertexAI;
+  protected parameters?: Params;
 
   constructor(protected readonly input: VertexAIChatLLMInput) {
     super(input.modelId, input.executionOptions, input.cache);
+    this.parameters = input.parameters;
     this.client = new VertexAI({ project: input.project, location: input.location });
   }
 
@@ -112,7 +114,12 @@ export class VertexAIChatLLM extends ChatLLM<VertexAIChatLLMOutput> {
     options: GenerateOptions,
     run: GetRunContext<this>,
   ): Promise<VertexAIChatLLMOutput> {
-    const generativeModel = createModel(this.client, this.modelId, options.guided?.json);
+    const generativeModel = createModel(
+      this.client,
+      this.modelId,
+      options.guided?.json,
+      this.parameters,
+    );
     const response = await signalRace(
       () =>
         generativeModel.generateContent({
@@ -132,10 +139,15 @@ export class VertexAIChatLLM extends ChatLLM<VertexAIChatLLMOutput> {
     options: GenerateOptions | undefined,
     run: GetRunContext<this>,
   ): AsyncStream<VertexAIChatLLMOutput, void> {
-    const generativeModel = createModel(this.client, this.modelId, options?.guided?.json);
+    const generativeModel = createModel(
+      this.client,
+      this.modelId,
+      options?.guided?.json,
+      this.parameters,
+    );
     const chat = generativeModel.startChat();
     const response = await chat.sendMessageStream(input.map((msg) => msg.text));
-    for await (const chunk of await response.stream) {
+    for await (const chunk of response.stream) {
       if (options?.signal?.aborted) {
         break;
       }
@@ -153,6 +165,7 @@ export class VertexAIChatLLM extends ChatLLM<VertexAIChatLLMOutput> {
       ...super.createSnapshot(),
       input: shallowCopy(this.input),
       client: this.client,
+      parameters: this.parameters,
     };
   }
 }

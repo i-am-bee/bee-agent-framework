@@ -28,7 +28,7 @@ import {
 import { shallowCopy } from "@/serializer/utils.js";
 import type { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { VertexAI } from "@google-cloud/vertexai";
+import { VertexAI, BaseModelParams as Params } from "@google-cloud/vertexai";
 import { Role } from "@/llms/primitives/message.js";
 import { signalRace } from "@/internals/helpers/promise.js";
 import { processContentResponse, getTokenCount, registerVertexAI, createModel } from "./utils.js";
@@ -74,7 +74,7 @@ export interface VertexAILLMInput {
   client?: VertexAI;
   executionOptions?: ExecutionOptions;
   cache?: LLMCache<VertexAILLMOutput>;
-  parameters?: Record<string, any>;
+  parameters?: Params;
 }
 
 export class VertexAILLM extends LLM<VertexAILLMOutput, GenerateOptions> {
@@ -84,9 +84,11 @@ export class VertexAILLM extends LLM<VertexAILLMOutput, GenerateOptions> {
   });
 
   protected client: VertexAI;
+  protected parameters?: Params;
 
   constructor(protected readonly input: VertexAILLMInput) {
     super(input.modelId, input.executionOptions, input.cache);
+    this.parameters = input.parameters;
     this.client =
       input.client ?? new VertexAI({ project: input.project, location: input.location });
   }
@@ -115,7 +117,12 @@ export class VertexAILLM extends LLM<VertexAILLMOutput, GenerateOptions> {
     options: GenerateOptions,
     run: GetRunContext<this>,
   ): Promise<VertexAILLMOutput> {
-    const generativeModel = createModel(this.client, this.modelId, options.guided?.json);
+    const generativeModel = createModel(
+      this.client,
+      this.modelId,
+      options.guided?.json,
+      this.parameters,
+    );
     const responses = await signalRace(() => generativeModel.generateContent(input), run.signal);
     const result: VertexAILLMChunk = {
       text: processContentResponse(responses.response),
@@ -129,9 +136,14 @@ export class VertexAILLM extends LLM<VertexAILLMOutput, GenerateOptions> {
     options: GenerateOptions | undefined,
     run: GetRunContext<this>,
   ): AsyncStream<VertexAILLMOutput, void> {
-    const generativeModel = createModel(this.client, this.modelId, options?.guided?.json);
+    const generativeModel = createModel(
+      this.client,
+      this.modelId,
+      options?.guided?.json,
+      this.parameters,
+    );
     const response = await generativeModel.generateContentStream(input);
-    for await (const chunk of await response.stream) {
+    for await (const chunk of response.stream) {
       if (options?.signal?.aborted) {
         break;
       }
@@ -149,6 +161,7 @@ export class VertexAILLM extends LLM<VertexAILLMOutput, GenerateOptions> {
       ...super.createSnapshot(),
       input: shallowCopy(this.input),
       client: this.client,
+      parameters: this.parameters,
     };
   }
 
