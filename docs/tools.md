@@ -25,6 +25,7 @@ These tools extend the agent's abilities, allowing it to interact with external 
 | `WebCrawlerTool`                                                          | Retrieve content of an arbitrary website.                                |
 | `OpenMeteoTool`                                                           | Retrieve current, previous, or upcoming weather for a given destination. |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                          |
+| `MilvusDatabaseTool`                                                       | Perform retrieval queries (search, insert, delete) against a MilvusDatabaseTool database. |
 
 All examples can be found [here](/examples/tools).
 
