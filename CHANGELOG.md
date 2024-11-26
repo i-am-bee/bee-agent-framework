@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.43](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.42...v0.0.43) (2024-11-26)
+
+### Features
+
+- **adapters:** add GCP VertexAI LLM adapter ([#164](https://github.com/i-am-bee/bee-agent-framework/issues/164)) ([d2eb5b3](https://github.com/i-am-bee/bee-agent-framework/commit/d2eb5b31a992c3216873656e6756734e68cb1fb1))
+- **agents:** generalize BeeAgent ([#193](https://github.com/i-am-bee/bee-agent-framework/issues/193)) ([f6fb4d8](https://github.com/i-am-bee/bee-agent-framework/commit/f6fb4d8e8912d28499474d2bfbf1d1bfad528d4d)), closes [#178](https://github.com/i-am-bee/bee-agent-framework/issues/178)
+
+### Bug Fixes
+
+- **adapters:** correctly format messages in OpenAI adapter ([6728ef6](https://github.com/i-am-bee/bee-agent-framework/commit/6728ef696d9c69e23c28c54fda24a82dbed241ef))
+- **tools:** run's method return type ([623dbe1](https://github.com/i-am-bee/bee-agent-framework/commit/623dbe1ec2915902cfe45d1b94892dfa81cea11a))
+
 ## [0.0.42](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.41...v0.0.42) (2024-11-21)
 
 ### Features
