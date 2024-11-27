@@ -121,26 +121,6 @@ The agent uses the following prompt templates.
 
 Please refer to the [following example](/examples/agents/bee_advanced.ts) to see how to modify them.
 
-## GraniteBeeAgent for Granite 3.0
-
-IBM [Granite 3.0](https://www.ibm.com/granite?adoper=255252_0_LS1) is the third generation of the Granite series of large language models (LLMs).
-
-To provide the best experience Granite 3.0 LLMs are supported with their own [GraniteBeeAgent](/src/agents/granite/agent.ts).
-
-This [example](/examples/agents/granite/single_turn.ts) shows you how to use Granite 3.0 8B Instruct via WatsonX as a single-turn agent.
-
-This [example](/examples/agents/granite/chat.ts) shows you how to use Granite 3.0 8B Instruct via IBMvLLM as a chat agent.
-
-> [!Tip]
->
-> Granite 3.0 8b Instruct has a 4096 token sequence length. As such we currently recommend using it for single turn interactions with simple tools.
-
-> [!Tip]
->
-> For multi turn (chat) applications we recommend using GraniteBeeAgent with a constrained decoding backend such as IBMvLLM.
-
-We are actively working to improve our support for Granite 3.0 agents.
-
 ## Creating your own agent
 
 To create your own agent, you must implement the agent's base class (`BaseAgent`).

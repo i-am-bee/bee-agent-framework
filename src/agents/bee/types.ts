@@ -15,15 +15,10 @@
  */
 
 import { ChatLLMOutput } from "@/llms/chat.js";
-import {
-  BeeIterationResult,
-  BeeIterationResultPartial,
-  BeeIterationToolResult,
-} from "@/agents/bee/parser.js";
 import { BaseMemory } from "@/memory/base.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { Callback } from "@/emitter/types.js";
-import { AnyTool, BaseToolRunOptions, Tool, ToolError, ToolOutput } from "@/tools/base.js";
+import { AnyTool, BaseToolRunOptions, ToolError, ToolOutput } from "@/tools/base.js";
 import {
   BeeAssistantPrompt,
   BeeSystemPrompt,
@@ -34,6 +29,9 @@ import {
   BeeUserEmptyPrompt,
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
+import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
+import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
+import { NonUndefined } from "@/internals/types.js";
 
 export interface BeeRunInput {
   prompt: string | null;
@@ -59,13 +57,6 @@ export interface BeeAgentExecutionConfig {
 export interface BeeRunOptions {
   signal?: AbortSignal;
   execution?: BeeAgentExecutionConfig;
-  modifiers?: {
-    getToolRunOptions?: <A extends ToolOutput>(execution: {
-      tool: Tool<A>;
-      input: unknown;
-      baseOptions: BaseToolRunOptions;
-    }) => BaseToolRunOptions | Promise<BaseToolRunOptions>;
-  };
 }
 
 export interface BeeMeta {
@@ -138,3 +129,16 @@ export interface BeeAgentTemplates {
   toolNoResultError: typeof BeeToolNoResultsPrompt;
   toolNotFoundError: typeof BeeToolNotFoundPrompt;
 }
+
+export type BeeParserInput = LinePrefixParser.define<{
+  thought: ZodParserField<string>;
+  tool_name: ZodParserField<string>;
+  tool_input: JSONParserField<Record<string, any>>;
+  tool_output: ZodParserField<string>;
+  final_answer: ZodParserField<string>;
+}>;
+
+type BeeParser = LinePrefixParser<BeeParserInput>;
+export type BeeIterationResult = LinePrefixParser.inferOutput<BeeParser>;
+export type BeeIterationResultPartial = LinePrefixParser.inferPartialOutput<BeeParser>;
+export type BeeIterationToolResult = NonUndefined<BeeIterationResult, "tool_input" | "tool_name">;

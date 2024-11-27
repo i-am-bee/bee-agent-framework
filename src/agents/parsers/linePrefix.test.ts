@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
+import { LinePrefixParser, LinePrefixParserError } from "@/agents/parsers/linePrefix.js";
 import { z } from "zod";
 import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { splitString } from "@/internals/helpers/string.js";
@@ -267,6 +267,40 @@ But I can use GoogleSearch to find out.`,
       await parser.end();
       expect(deltas.join("")).toStrictEqual("4\n\nFinal Detail");
       expect(deltas.length).toBe(3);
+    });
+
+    it.each([true, false])("Correctly interprets new lines", async (shouldThrow) => {
+      const input = `Thought: Summarize the discussion. Final Answer: The discussion thread is about ...`;
+      const parser = new LinePrefixParser({
+        thought: {
+          prefix: "Thought:",
+          next: ["final_answer"],
+          isEnd: !shouldThrow,
+          isStart: true,
+          field: new ZodParserField(z.string().min(1)),
+        },
+        final_answer: {
+          prefix: "Final Answer:",
+          next: [],
+          isStart: true,
+          isEnd: true,
+          field: new ZodParserField(z.string().min(1)),
+        },
+      } as const);
+
+      const chunks = splitString(input, { size: 25, overlap: 0 });
+      for (const chunk of chunks) {
+        await parser.add(chunk);
+      }
+
+      if (shouldThrow) {
+        await expect(parser.end()).rejects.toThrowError(LinePrefixParserError);
+      } else {
+        await parser.end();
+        expect(parser.finalState).toMatchObject({
+          thought: `Summarize the discussion. Final Answer: The discussion thread is about ...`,
+        });
+      }
     });
 
     it("Ignores unrelated text and non-starting nodes", async () => {

@@ -58,6 +58,7 @@ const exclude: string[] = [
   ["examples/llms/providers/bam.ts", "examples/llms/providers/bam_verbose.ts"],
   !hasEnv("ELASTICSEARCH_NODE") && ["examples/agents/elasticsearch.ts"],
   !hasEnv("AWS_REGION") && ["examples/llms/providers/bedrock.ts"],
+  !hasEnv("GOOGLE_APPLICATION_CREDENTIALS") && ["examples/llms/providers/vertexai.ts"],
 ]
   .filter(isTruthy)
   .flat(); // list of examples that are excluded
