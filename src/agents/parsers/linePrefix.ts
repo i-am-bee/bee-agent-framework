@@ -177,7 +177,9 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
         ? Boolean(lastNode.isEnd && lastNode.next.length === 0)
         : false;
 
-      const parsedLine = isTerminationNode ? null : this.extractLine(line.value);
+      const parsedLine =
+        isTerminationNode || (lastNode && !line.newLine) ? null : this.extractLine(line.value);
+
       if (isLastLine && (parsedLine?.partial || !line.value)) {
         break;
       }
