@@ -86,9 +86,9 @@ export class GraniteRunner extends DefaultRunner {
 
     return {
       parserRegex: isEmpty(tools)
-        ? new RegExp(`Thought:.+\\nFinal Answer:[\\s\\S]+`)
+        ? new RegExp(`Thought: [\\s\\S]+\\nFinal Answer: [\\s\\S]+`)
         : new RegExp(
-            `Thought:.+\\n(?:Final Answer:[\\s\\S]+|Tool Name:(${tools.map((tool) => tool.name).join("|")})\\nTool Input: \\{.*\\})?`,
+            `Thought: [\\s\\S]+\\n(?:Final Answer: [\\s\\S]+|Tool Name: (${tools.map((tool) => tool.name).join("|")})\\nTool Input: \\{.*\\})?`,
           ),
       parser: parser.fork<BeeParserInput>((nodes, options) => ({
         options,
