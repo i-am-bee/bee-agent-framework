@@ -21,6 +21,7 @@ To unify differences between various APIs, the framework defines a common interf
 | `LangChain`                                                               | ⚠️ (depends on a provider) | ⚠️ (depends on a provider)                    | ❌                                       |
 | `Groq`                                                                    | ❌                         | ✅                                            | ⚠️ (JSON object only)                    |
 | `AWS Bedrock`                                                             | ❌                         | ✅                                            | ⚠️ (JSON only) - model specific          |
+| `VertexAI`                                                                | ✅                         | ✅                                            | ⚠️ (JSON only)                           |
 | `BAM (Internal)`                                                          | ✅                         | ⚠️ (model specific template must be provided) | ✅                                       |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                            |                                               |                                          |
 

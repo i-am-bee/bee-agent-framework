@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
-import { AgentError } from "@/agents/base.js";
+import { verifyDeserialization } from "@tests/e2e/utils.js";
+import { VertexAILLM } from "@/adapters/vertexai/llm.js";
 
-export class BeeAgentError extends AgentError {}
+describe("VertexAI LLM", () => {
+  const getInstance = () => {
+    return new VertexAILLM({
+      modelId: "gemini-1.5-flash-001",
+      location: "us-central1",
+      project: "systemInstruction",
+    });
+  };
+
+  it("Serializes", async () => {
+    const instance = getInstance();
+    const serialized = instance.serialize();
+    const deserialized = VertexAILLM.fromSerialized(serialized);
+    verifyDeserialization(instance, deserialized);
+  });
+});

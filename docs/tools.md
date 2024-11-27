@@ -144,7 +144,7 @@ export class RiddleTool extends Tool<StringToolOutput> {
         .number()
         .int()
         .min(0)
-        .max(RiddleTool.length - 1)
+        .max(RiddleTool.data.length - 1)
         .optional(),
     });
   }

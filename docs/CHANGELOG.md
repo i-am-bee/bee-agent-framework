@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.0.43](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.42...v0.0.43) (2024-11-26)
+
+### Features
+
+- **adapters:** add GCP VertexAI LLM adapter ([#164](https://github.com/i-am-bee/bee-agent-framework/issues/164)) ([d2eb5b3](https://github.com/i-am-bee/bee-agent-framework/commit/d2eb5b31a992c3216873656e6756734e68cb1fb1))
+- **agents:** generalize BeeAgent ([#193](https://github.com/i-am-bee/bee-agent-framework/issues/193)) ([f6fb4d8](https://github.com/i-am-bee/bee-agent-framework/commit/f6fb4d8e8912d28499474d2bfbf1d1bfad528d4d)), closes [#178](https://github.com/i-am-bee/bee-agent-framework/issues/178)
+
+### Bug Fixes
+
+- **adapters:** correctly format messages in OpenAI adapter ([6728ef6](https://github.com/i-am-bee/bee-agent-framework/commit/6728ef696d9c69e23c28c54fda24a82dbed241ef))
+- **tools:** run's method return type ([623dbe1](https://github.com/i-am-bee/bee-agent-framework/commit/623dbe1ec2915902cfe45d1b94892dfa81cea11a))
+
+## [0.0.42](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.41...v0.0.42) (2024-11-21)
+
+### Features
+
+- **agents:** add experimental Streamlit agent ([#180](https://github.com/i-am-bee/bee-agent-framework/issues/180)) ([e8e76b8](https://github.com/i-am-bee/bee-agent-framework/commit/e8e76b8b4efdf1fa18b70c1c6fb45c62f5329542))
+
+### Bug Fixes
+
+- **agents:** allow override granite bee prompts ([#186](https://github.com/i-am-bee/bee-agent-framework/issues/186)) ([d7c4060](https://github.com/i-am-bee/bee-agent-framework/commit/d7c4060c27f407ec98a7edd3b354c541739a3381))
+
+## [0.0.41](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.40...v0.0.41) (2024-11-19)
+
+### Features
+
+- **adapters:** add AWS Bedrock LLM provider ([#168](https://github.com/i-am-bee/bee-agent-framework/issues/168)) ([23656bd](https://github.com/i-am-bee/bee-agent-framework/commit/23656bd724ff97b7ad9f60afe81bf0ac9f893fb1)), closes [#122](https://github.com/i-am-bee/bee-agent-framework/issues/122)
+- **adapters:** add llama-3-1-8b to vllm, remove qwen2 templates ([#172](https://github.com/i-am-bee/bee-agent-framework/issues/172)) ([b333594](https://github.com/i-am-bee/bee-agent-framework/commit/b3335948e3280b56fdb4dc9fb06fefe0836b052e))
+- **agents:** serialize isRunning state ([f5b7abe](https://github.com/i-am-bee/bee-agent-framework/commit/f5b7abe4b762d33515d0d1302734acdd0f2f858d))
+- **internals:** add recursiveSplitString and mergeStrings utility functions ([d82be6e](https://github.com/i-am-bee/bee-agent-framework/commit/d82be6e32f55f3ae5e324cbae85e10863dedbbbf))
+- **internals:** make findFirstPair handles longer sequences ([c00efbe](https://github.com/i-am-bee/bee-agent-framework/commit/c00efbe1ad0b969e4859031650ff9bf13e9805c3))
+- **tools:** make tools composable ([#169](https://github.com/i-am-bee/bee-agent-framework/issues/169)) ([33f1db5](https://github.com/i-am-bee/bee-agent-framework/commit/33f1db5971d269935878a4a83a484a44371c3cdd)), closes [#166](https://github.com/i-am-bee/bee-agent-framework/issues/166)
+- **tools:** reduce number of iterations needed for SQLTool ([#174](https://github.com/i-am-bee/bee-agent-framework/issues/174)) ([cc221a3](https://github.com/i-am-bee/bee-agent-framework/commit/cc221a3ab7c11b7fa2ec2b16cd1d0d6a62c801ec))
+
+### Bug Fixes
+
+- **agents:** remove user messages in bee runner memory ([#183](https://github.com/i-am-bee/bee-agent-framework/issues/183)) ([a1a3d0e](https://github.com/i-am-bee/bee-agent-framework/commit/a1a3d0edfe76b5c76f8805839527b1af6a361a63))
+
 ## [0.0.40](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.39...v0.0.40) (2024-11-14)
 
 ### Features
