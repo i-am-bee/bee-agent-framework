@@ -1,6 +1,6 @@
 import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { createConsoleReader } from "../helpers/io.js";
+import { createConsoleReader } from "../../helpers/io.js";
 import { FrameworkError } from "bee-agent-framework/errors";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { Logger } from "bee-agent-framework/logger/logger";
@@ -9,18 +9,32 @@ import { LocalPythonStorage } from "bee-agent-framework/tools/python/storage";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
+import { HumanTool } from "@/tools/human.js";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OpenAIChatLLM } from "bee-agent-framework/adapters/openai/chat";
 
-Logger.root.level = "silent"; // disable internal logs
+import {
+  BeeSystemPrompt,
+  BeeSystemPromptWithHumanTool,
+  BeeAssistantPrompt,
+  BeeUserPrompt,
+  BeeUserEmptyPrompt,
+  BeeToolErrorPrompt,
+  BeeToolInputErrorPrompt,
+  BeeToolNoResultsPrompt,
+  BeeToolNotFoundPrompt,
+} from "@/agents/bee/prompts.js";
+
+Logger.root.level = "silent"; // Disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
-const llm = new OllamaChatLLM({
-  modelId: "llama3.1", // llama3.1:70b for better performance
+const llm = new OpenAIChatLLM({
+  modelId: "gpt-4o", // gpt-4o
 });
 
 const codeInterpreterUrl = process.env.CODE_INTERPRETER_URL;
+const useHumanTool = process.env.USE_HUMAN_TOOL === "true"; // Toggle HumanTool support
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const codeInterpreterTmpdir =
@@ -34,9 +48,10 @@ const agent = new BeeAgent({
     new DuckDuckGoSearchTool(),
     // new WebCrawlerTool(), // HTML web page crawler
     new WikipediaTool(),
-    new OpenMeteoTool(), // weather tool
-    // new ArXivTool(), // research papers
-    // new DynamicTool() // custom python tool
+    new OpenMeteoTool(), // Weather tool
+    ...(useHumanTool ? [new HumanTool()] : []), // Conditionally include HumanTool
+    // new ArXivTool(), // Research papers tool
+    // new DynamicTool(), // Custom Python tool
     ...(codeInterpreterUrl
       ? [
           new PythonTool({
@@ -49,6 +64,16 @@ const agent = new BeeAgent({
         ]
       : []),
   ],
+  templates: {
+    system: useHumanTool ? BeeSystemPromptWithHumanTool : BeeSystemPrompt,
+    assistant: BeeAssistantPrompt,
+    user: BeeUserPrompt,
+    userEmpty: BeeUserEmptyPrompt,
+    toolError: BeeToolErrorPrompt,
+    toolInputError: BeeToolInputErrorPrompt,
+    toolNoResultError: BeeToolNoResultsPrompt,
+    toolNotFoundError: BeeToolNotFoundPrompt,
+  },
 });
 
 const reader = createConsoleReader();
@@ -73,6 +98,7 @@ try {
         },
       )
       .observe((emitter) => {
+        // Uncomment this to log when a new iteration starts
         // emitter.on("start", () => {
         //   reader.write(`Agent 🤖 : `, "starting new iteration");
         // });
@@ -83,23 +109,23 @@ try {
           reader.write(`Agent 🤖 : `, "retrying the action...");
         });
         emitter.on("update", async ({ data, update, meta }) => {
-          // log 'data' to see the whole state
-          // to log only valid runs (no errors), check if meta.success === true
+          // Log 'data' to see the whole state
+          // To log only valid runs (no errors), check if meta.success === true
           reader.write(`Agent (${update.key}) 🤖 : `, update.value);
         });
         emitter.on("partialUpdate", ({ data, update, meta }) => {
-          // ideal for streaming (line by line)
-          // log 'data' to see the whole state
-          // to log only valid runs (no errors), check if meta.success === true
+          // Ideal for streaming (line by line)
+          // Log 'data' to see the whole state
+          // To log only valid runs (no errors), check if meta.success === true
           // reader.write(`Agent (partial ${update.key}) 🤖 : `, update.value);
         });
 
-        // To observe all events (uncomment following block)
+        // To observe all events
         // emitter.match("*.*", async (data: unknown, event) => {
         //   logger.trace(event, `Received event "${event.path}"`);
         // });
 
-        // To get raw LLM input (uncomment following block)
+        // To get raw LLM input
         // emitter.match(
         //   (event) => event.creator === llm && event.name === "start",
         //   async (data: InferCallbackValue<GenerateCallbacks["start"]>, event) => {
@@ -107,7 +133,7 @@ try {
         //       event,
         //       [
         //         `Received LLM event "${event.path}"`,
-        //         JSON.stringify(data.input), // array of messages
+        //         JSON.stringify(data.input), // Array of messages
         //       ].join("\n"),
         //     );
         //   },
