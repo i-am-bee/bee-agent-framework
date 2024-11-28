@@ -10,11 +10,28 @@ interface ReadFromConsoleInput {
   allowEmpty?: boolean;
 }
 
+// Define the type of the console reader object
+interface ConsoleReader {
+  write: (role: string, data: string) => void;
+  prompt: () => Promise<string>;
+  close: () => void;
+  [Symbol.asyncIterator]: () => AsyncGenerator<{ prompt: string; iteration: number }, void, unknown>;
+}
+
+let sharedReaderInstance: ConsoleReader | null = null; // Singleton instance
+
+export function sharedConsoleReader(): ConsoleReader {
+  if (!sharedReaderInstance) {
+    sharedReaderInstance = createConsoleReader(); // Assign properly typed instance
+  }
+  return sharedReaderInstance;
+}
+
 export function createConsoleReader({
   fallback,
   input = "User 👤 : ",
   allowEmpty = false,
-}: ReadFromConsoleInput = {}) {
+}: ReadFromConsoleInput = {}): ConsoleReader {
   const rl = readline.createInterface({ input: stdin, output: stdout, terminal: true, prompt: "" });
   let isActive = true;
 
@@ -28,13 +45,23 @@ export function createConsoleReader({
       );
     },
     async prompt(): Promise<string> {
-      for await (const { prompt } of this) {
-        return prompt;
+      try {
+        const userInput = await rl.question(
+          `${R.piped(picocolors.cyan, picocolors.bold)(input)}`
+        );
+        return stripAnsi(userInput.trim());
+      } catch (error) {
+        if (error.code === "ERR_USE_AFTER_CLOSE") {
+          console.error("Attempted to prompt after the reader was closed.");
+        }
+        return fallback ?? "";
       }
-      process.exit(0);
     },
     close() {
-      stdin.pause(); // Pause stdin without fully closing the reader
+      if (isActive) {
+        stdin.pause(); // Pause stdin without fully terminating the reader
+        isActive = false;
+      }
     },
     async *[Symbol.asyncIterator]() {
       if (!isActive) {
@@ -43,34 +70,40 @@ export function createConsoleReader({
 
       try {
         rl.write(
-          `${picocolors.dim(`Interactive session has started. To escape, input 'q' and submit.\n`)}`,
+          `${picocolors.dim(`Interactive session has started. To escape, input 'q' and submit.\n`)}`
         );
 
-        for (let iteration = 1, prompt = ""; isActive; iteration++) {
-          prompt = await rl.question(R.piped(picocolors.cyan, picocolors.bold)(input));
-          prompt = stripAnsi(prompt);
+        for (let iteration = 1, userInput = ""; isActive; iteration++) {
+          userInput = await rl.question(
+            `${R.piped(picocolors.cyan, picocolors.bold)(input)}`
+          );
+          userInput = stripAnsi(userInput.trim());
 
-          if (prompt === "q") {
-            break;
+          if (userInput.toLowerCase() === "q") {
+            break; // Gracefully exit on 'q'
           }
-          if (!prompt.trim() || prompt === "\n") {
-            prompt = fallback ?? "";
+
+          if (!userInput.trim() && fallback) {
+            userInput = fallback; // Use fallback if input is empty
           }
-          if (allowEmpty !== false && !prompt.trim()) {
-            rl.write("Error: Empty prompt is not allowed. Please try again.\n");
+
+          if (!allowEmpty && !userInput.trim()) {
+            rl.write("Error: Empty input is not allowed. Please try again.\n");
             iteration -= 1;
             continue;
           }
-          yield { prompt, iteration };
+
+          yield { prompt: userInput, iteration };
         }
-      } catch (e) {
-        if (e.code === "ERR_USE_AFTER_CLOSE") {
-          return;
+      } catch (error) {
+        if (error.code === "ERR_USE_AFTER_CLOSE") {
+          console.error("Error: Attempted to use the reader after it was closed.");
         }
       } finally {
         isActive = false;
-        rl.close();
+        rl.close(); // Ensure the reader is closed only once
       }
     },
   };
 }
+

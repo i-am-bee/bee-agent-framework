@@ -1,5 +1,5 @@
 import { Tool, ToolOutput, BaseToolRunOptions, StringToolOutput } from "@/tools/base.js";
-import { createConsoleReader } from "@/helpers/io.js";
+import { sharedConsoleReader } from "@/helpers/io.js"; // Shared reader
 import { z } from "zod";
 
 export class HumanTool extends Tool<StringToolOutput> {
@@ -15,17 +15,12 @@ export class HumanTool extends Tool<StringToolOutput> {
     input: z.infer<ReturnType<typeof this.inputSchema>>,
     options: BaseToolRunOptions
   ): Promise<StringToolOutput> {
-    const reader = createConsoleReader({
-      input: "Please provide the required information: ",
-      allowEmpty: false,
-    });
+    const reader = sharedConsoleReader(); // Use shared reader instance
 
     reader.write("HumanTool", input.message);
 
-    const userInput = await reader.prompt();
-    reader.close();
+    const userInput = await reader.prompt(); // Wait for user input
 
-    return new StringToolOutput(userInput);
+    return new StringToolOutput(userInput); // Return the user's input
   }
-  
 }

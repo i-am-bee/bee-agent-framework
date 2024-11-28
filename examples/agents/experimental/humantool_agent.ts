@@ -1,6 +1,6 @@
 import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { createConsoleReader } from "../../helpers/io.js";
+import { sharedConsoleReader } from "../../../src/helpers/io.js"; // Use the shared reader
 import { FrameworkError } from "bee-agent-framework/errors";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { Logger } from "bee-agent-framework/logger/logger";
@@ -26,32 +26,34 @@ import {
   BeeToolNotFoundPrompt,
 } from "@/agents/bee/prompts.js";
 
+// Set up logger
 Logger.root.level = "silent"; // Disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
+// Initialize LLM
 const llm = new OpenAIChatLLM({
-  modelId: "gpt-4o", // gpt-4o
+  modelId: "gpt-4o", // Model ID
 });
 
+// Configurations
 const codeInterpreterUrl = process.env.CODE_INTERPRETER_URL;
 const useHumanTool = process.env.USE_HUMAN_TOOL === "true"; // Toggle HumanTool support
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// Directories for temporary storage
 const codeInterpreterTmpdir =
   process.env.CODE_INTEPRETER_TMPDIR ?? "./examples/tmp/code_interpreter";
 const localTmpdir = process.env.LOCAL_TMPDIR ?? "./examples/tmp/local";
 
+// Initialize BeeAgent
 const agent = new BeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
   tools: [
     new DuckDuckGoSearchTool(),
-    // new WebCrawlerTool(), // HTML web page crawler
     new WikipediaTool(),
-    new OpenMeteoTool(), // Weather tool
+    new OpenMeteoTool(),
     ...(useHumanTool ? [new HumanTool()] : []), // Conditionally include HumanTool
-    // new ArXivTool(), // Research papers tool
-    // new DynamicTool(), // Custom Python tool
     ...(codeInterpreterUrl
       ? [
           new PythonTool({
@@ -73,10 +75,12 @@ const agent = new BeeAgent({
     toolInputError: BeeToolInputErrorPrompt,
     toolNoResultError: BeeToolNoResultsPrompt,
     toolNotFoundError: BeeToolNotFoundPrompt,
-  }
+  },
 });
 
-const reader = createConsoleReader();
+// Shared console reader
+const reader = sharedConsoleReader();
+
 if (codeInterpreterUrl) {
   reader.write(
     "🛠️ System",
@@ -84,8 +88,10 @@ if (codeInterpreterUrl) {
   );
 }
 
+// Main loop
 try {
   for await (const { prompt } of reader) {
+    // Run the agent and observe events
     const response = await agent
       .run(
         { prompt },
@@ -98,52 +104,37 @@ try {
         },
       )
       .observe((emitter) => {
-        // Uncomment this to log when a new iteration starts
-        // emitter.on("start", () => {
-        //   reader.write(`Agent 🤖 : `, "starting new iteration");
-        // });
+        // Show only final answers
+        emitter.on("update", async ({ update }) => {
+          if (update.key === "final_answer") {
+            reader.write(`Agent 🤖 : `, update.value);
+          }
+        });
+
+        // Log errors
         emitter.on("error", ({ error }) => {
           reader.write(`Agent 🤖 : `, FrameworkError.ensure(error).dump());
         });
+
+        // Retry notifications
         emitter.on("retry", () => {
-          reader.write(`Agent 🤖 : `, "retrying the action...");
+          reader.write(`Agent 🤖 : `, "Retrying the action...");
         });
-        emitter.on("update", async ({ data, update, meta }) => {
-          // Log 'data' to see the whole state
-          // To log only valid runs (no errors), check if meta.success === true
-          reader.write(`Agent (${update.key}) 🤖 : `, update.value);
-        });
-        emitter.on("partialUpdate", ({ data, update, meta }) => {
-          // Ideal for streaming (line by line)
-          // Log 'data' to see the whole state
-          // To log only valid runs (no errors), check if meta.success === true
-          // reader.write(`Agent (partial ${update.key}) 🤖 : `, update.value);
-        });
-
-        // To observe all events
-        // emitter.match("*.*", async (data: unknown, event) => {
-        //   logger.trace(event, `Received event "${event.path}"`);
-        // });
-
-        // To get raw LLM input
-        // emitter.match(
-        //   (event) => event.creator === llm && event.name === "start",
-        //   async (data: InferCallbackValue<GenerateCallbacks["start"]>, event) => {
-        //     logger.trace(
-        //       event,
-        //       [
-        //         `Received LLM event "${event.path}"`,
-        //         JSON.stringify(data.input), // Array of messages
-        //       ].join("\n"),
-        //     );
-        //   },
-        // );
       });
 
-    reader.write(`Agent 🤖 : `, response.result.text);
+    // Print the final response
+    if (response.result?.text) {
+      reader.write(`Agent 🤖 : `, response.result.text);
+    } else {
+      reader.write(
+        "Agent 🤖 : ",
+        "No result was returned. Ensure your input is valid or check tool configurations.",
+      );
+    }
   }
 } catch (error) {
   logger.error(FrameworkError.ensure(error).dump());
 } finally {
+  // Gracefully close the reader when exiting the app
   reader.close();
 }
