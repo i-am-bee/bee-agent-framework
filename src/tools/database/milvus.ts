@@ -140,11 +140,6 @@ export class MilvusDatabaseTool extends Tool<
     this.register();
   }
 
-  /* eslint-disable @typescript-eslint/no-useless-constructor */
-  constructor(options: MilvusToolOptions) {
-    super(options);
-  }
-
   @Cache()
   protected async client(): Promise<MilvusClient> {
     try {
@@ -210,7 +205,7 @@ export class MilvusDatabaseTool extends Tool<
     }
   }
 
-  private async listCollections(): Promise<string[]> {
+  protected async listCollections(): Promise<string[]> {
     try {
       const client = await this.client();
       const response = await client.listCollections({});
@@ -225,13 +220,13 @@ export class MilvusDatabaseTool extends Tool<
     }
   }
 
-  private async getCollectionInfo(collectionName: string): Promise<any> {
+  protected async getCollectionInfo(collectionName: string): Promise<any> {
     const client = await this.client();
     const response = client.describeCollection({ collection_name: collectionName });
     return response;
   }
 
-  private async insert(input: ToolInput<this>): Promise<any> {
+  protected async insert(input: ToolInput<this>): Promise<any> {
     const client = await this.client();
     const response = await client.insert({
       collection_name: input.collectionName as string,
@@ -243,7 +238,7 @@ export class MilvusDatabaseTool extends Tool<
     return response;
   }
 
-  private async search(input: ToolInput<this>): Promise<any> {
+  protected async search(input: ToolInput<this>): Promise<any> {
     const client = await this.client();
     const response = await client.search({
       collection_name: input.collectionName as string,
@@ -255,7 +250,7 @@ export class MilvusDatabaseTool extends Tool<
     return response.results;
   }
 
-  private async delete(input: ToolInput<this>): Promise<any> {
+  protected async delete(input: ToolInput<this>): Promise<any> {
     const client = await this.client();
     const response = client.delete({
       collection_name: input.collectionName as string,
