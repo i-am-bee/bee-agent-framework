@@ -73,7 +73,7 @@ const agent = new BeeAgent({
     toolInputError: BeeToolInputErrorPrompt,
     toolNoResultError: BeeToolNoResultsPrompt,
     toolNotFoundError: BeeToolNotFoundPrompt,
-  },
+  }
 });
 
 const reader = createConsoleReader();

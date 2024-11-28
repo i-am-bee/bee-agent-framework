@@ -6,11 +6,15 @@ export class HumanTool extends Tool<StringToolOutput> {
   name = "HumanTool";
   description = "A tool for human intervention during an agent's workflow.";
 
-  inputSchema = () => z.object({
-    message: z.string().min(1, "Message cannot be empty"),
-  });
+  inputSchema = () =>
+    z.object({
+      message: z.string().min(1, "Message cannot be empty"),
+    });
 
-  async _run(input: z.infer<ReturnType<typeof this.inputSchema>>, options: BaseToolRunOptions): Promise<StringToolOutput> {
+  async _run(
+    input: z.infer<ReturnType<typeof this.inputSchema>>,
+    options: BaseToolRunOptions
+  ): Promise<StringToolOutput> {
     const reader = createConsoleReader({
       input: "Please provide the required information: ",
       allowEmpty: false,
@@ -23,4 +27,5 @@ export class HumanTool extends Tool<StringToolOutput> {
 
     return new StringToolOutput(userInput);
   }
+  
 }

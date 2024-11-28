@@ -34,8 +34,7 @@ export function createConsoleReader({
       process.exit(0);
     },
     close() {
-      stdin.pause();
-      rl.close();
+      stdin.pause(); // Pause stdin without fully closing the reader
     },
     async *[Symbol.asyncIterator]() {
       if (!isActive) {
