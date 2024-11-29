@@ -238,6 +238,9 @@
     "@langchain/core": {
       "optional": true
     },
+    "@zilliz/milvus2-sdk-node": {
+      "optional": true
+    },
     "google-auth-library": {
       "optional": true
     },
@@ -254,9 +257,6 @@
       "optional": true
     },
     "sequelize": {
-      "optional": true
-    },
-    "@zilliz/milvus2-sdk-node": {
       "optional": true
     }
   },

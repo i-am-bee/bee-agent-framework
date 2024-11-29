@@ -4511,6 +4511,8 @@ __metadata:
       optional: true
     "@langchain/core":
       optional: true
+    "@zilliz/milvus2-sdk-node":
+      optional: true
     google-auth-library:
       optional: true
     groq-sdk:
