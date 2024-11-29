@@ -55,7 +55,7 @@ corepack enable
 4.  **Install Dependencies:** Install all project dependencies by running:
 
 ```bash
-yarn install
+yarn install --immutable
 ```
 
 5.  **Setup environmental variables:** To run E2E Tests, you should set the following variables in your `.env` file in the repository’s root.
