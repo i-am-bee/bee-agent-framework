@@ -74,10 +74,10 @@ Final Answer: Comment vas-tu?
 # Instructions
 User can only see the Final Answer, all answers must be provided there.
 {{^tools.length}}
-You must always use the communication structure and instructions defined above. Do not forget that Thought must be immediately followed by Final Answer.
+You must always use the communication structure and instructions defined above. Do not forget that Thought must be a single-line immediately followed by Final Answer.
 {{/tools.length}}
 {{#tools.length}}
-You must always use the communication structure and instructions defined above. Do not forget that Thought must be immediately followed by either Function Name or Final Answer.
+You must always use the communication structure and instructions defined above. Do not forget that Thought must be a single-line immediately followed by either Function Name or Final Answer.
 Functions must be used to retrieve factual or historical information to answer the message.
 {{/tools.length}}
 If the user suggests using a function that is not available, answer that the function is not available. You can suggest alternatives if appropriate.

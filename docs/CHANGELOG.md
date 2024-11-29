@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.44](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.43...v0.0.44) (2024-11-29)
+
+### Features
+
+- **agents:** secure thought single-line format via system prompt ([#198](https://github.com/i-am-bee/bee-agent-framework/issues/198)) ([e67dabe](https://github.com/i-am-bee/bee-agent-framework/commit/e67dabe390203667efc0160a46dd31f33ba4a6d4))
+- **agents:** update constraint decoding for Bee ([41ea34f](https://github.com/i-am-bee/bee-agent-framework/commit/41ea34f3af4cfbfe19b535f0659d41142a68d1a2))
+- **tools:** add tool for Milvus (Vector DB) ([#188](https://github.com/i-am-bee/bee-agent-framework/issues/188)) ([bf07a46](https://github.com/i-am-bee/bee-agent-framework/commit/bf07a46370c3362bfa6abecf3768e883b3c55ec9))
+
+### Bug Fixes
+
+- **adapters:** gcp vertexai llm adapter parameters ([#194](https://github.com/i-am-bee/bee-agent-framework/issues/194)) ([54819bf](https://github.com/i-am-bee/bee-agent-framework/commit/54819bfb77e1b2ee931273031e9ebedfc998bd78))
+- **agents:** handle nodes without newlines in PrefixParser ([bb5e3df](https://github.com/i-am-bee/bee-agent-framework/commit/bb5e3dfef335f1ad3826194a50b9d956cf37624b))
+- **tools:** update ES Tool typings to work with newer versions ([cf19ba0](https://github.com/i-am-bee/bee-agent-framework/commit/cf19ba041174f83efe91a51b05c5fe90ada2e3d4))
+
 ## [0.0.43](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.42...v0.0.43) (2024-11-26)
 
 ### Features

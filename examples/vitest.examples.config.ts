@@ -1,6 +1,6 @@
 import { defineConfig } from "vitest/config";
 import tsConfigPaths from "vite-tsconfig-paths";
-import packageJson from "../package.json";
+import packageJson from "../package.json" assert { type: "json" };
 
 export default defineConfig({
   test: {
