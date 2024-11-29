@@ -27,7 +27,7 @@ import {
 import { AnyFn } from "@/internals/types.js";
 import { setTimeout } from "node:timers/promises";
 import { beforeEach, expect, vi } from "vitest";
-import { z, ZodType } from "zod";
+import { z } from "zod";
 
 import { SlidingCache } from "@/cache/slidingCache.js";
 import { Serializer } from "@/serializer/serializer.js";
@@ -345,12 +345,12 @@ describe("Base Tool", () => {
     });
 
     it("Error if description is not defined", async () => {
-      let description: string;
       expect(
         () =>
           new DynamicTool({
             name: "missing-desc-tool",
-            description,
+            // @ts-expect-error intended
+            description: undefined,
             inputSchema: z.string(),
             async handler(input) {
               return new StringToolOutput(input);
@@ -360,26 +360,24 @@ describe("Base Tool", () => {
     });
 
     it("Error if schema is undefined", async () => {
-      let inputSchema: ZodType;
       expect(
         () =>
           new DynamicTool({
             name: "missing-schema-tool",
-            inputSchema,
+            // @ts-expect-error intended
+            inputSchema: undefined,
             description: "some description",
-            async handler(input) {
-              return new StringToolOutput(input);
-            },
+            handler: vi.fn(),
           }),
       ).toThrowError(/Tool must have a schema/);
     });
 
     it("Error if name is missing", async () => {
-      let name: string;
       expect(
         () =>
           new DynamicTool({
-            name,
+            // @ts-expect-error intended
+            name: undefined,
             inputSchema: z.string(),
             description: "some description",
             async handler(input) {

@@ -1,9 +1,9 @@
 import { defineConfig } from "tsup";
-import packageJson from "./package.json";
+import packageJson from "./package.json" assert { type: "json" };
 import swc, { JscConfig } from "@swc/core";
 import path from "node:path";
 
-import tsConfig from "./tsconfig.json";
+import tsConfig from "./tsconfig.json" assert { type: "json" };
 import { JscTarget } from "@swc/types";
 
 export default defineConfig({
