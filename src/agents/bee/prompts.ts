@@ -18,6 +18,7 @@ import { PromptTemplate } from "@/template.js";
 import { BaseMessageMeta } from "@/llms/primitives/message.js";
 import { z } from "zod";
 
+// Original BeeSystemPrompt
 export const BeeSystemPrompt = new PromptTemplate({
   schema: z.object({
     instructions: z.string().default("You are a helpful assistant."),
@@ -101,6 +102,39 @@ Prefer to use these capabilities over functions.
 {{instructions}}`,
 });
 
+// Extended BeeSystemPrompt with HumanTool support
+export const BeeSystemPromptWithHumanTool = BeeSystemPrompt.fork((config) => {
+  return {
+    ...config,
+    template: config.template.replace(
+      "## Examples",
+      `## Examples
+Message: I need advice.
+Thought: The user's request is too general. I need to ask for more specifics.
+Function Name: HumanTool
+Function Input: { "message": "Could you please specify what you need advice on?" }
+Function Output: // Waits for user input
+Thought: The user has provided more details. I can now assist them.
+Final Answer: [Provide the advice based on user's input]
+
+Message: How is the weather?
+Thought: The user's question is unclear as it lacks a location. I need to ask for clarification.
+Function Name: HumanTool
+Function Input: { "message": "Could you please specify the location for which you would like to know the weather?" }
+Function Output: // Waits for user input
+Thought: The user has provided the location. I can now retrieve the weather information.
+Final Answer: [Provide the weather information based on user's input]
+
+## Examples`
+    ).replace(
+      "# Instructions",
+      `# Instructions
+When the message is unclear, incomplete, or lacks context, you must use the "HumanTool" function to ask for clarification. Always avoid guessing or providing incomplete answers without the user's input.`
+    ),
+  };
+});
+
+// Other prompts remain unchanged
 export const BeeAssistantPrompt = new PromptTemplate({
   schema: z
     .object({
