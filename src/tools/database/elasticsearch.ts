@@ -29,23 +29,16 @@ import { z } from "zod";
 import { ValidationError } from "ajv";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
 import { parseBrokenJson } from "@/internals/helpers/schema.js";
-import { Client, ClientOptions } from "@elastic/elasticsearch";
-import type {
-  CatIndicesResponse,
-  IndicesGetMappingResponse,
-  SearchRequest,
-  SearchResponse,
-  SearchHit,
-} from "@elastic/elasticsearch/lib/api/types.js";
+import { Client, ClientOptions, estypes as ESTypes } from "@elastic/elasticsearch";
 
 export interface ElasticSearchToolOptions extends BaseToolOptions {
   connection: ClientOptions;
 }
 
 export type ElasticSearchToolResult =
-  | CatIndicesResponse
-  | IndicesGetMappingResponse
-  | SearchResponse;
+  | ESTypes.CatIndicesResponse
+  | ESTypes.IndicesGetMappingResponse
+  | ESTypes.SearchResponse;
 
 export const ElasticSearchAction = {
   ListIndices: "LIST_INDICES",
@@ -166,14 +159,14 @@ export class ElasticSearchTool extends Tool<
       if (response.aggregations) {
         return new JSONToolOutput(response.aggregations);
       } else {
-        return new JSONToolOutput(response.hits.hits.map((hit: SearchHit) => hit._source));
+        return new JSONToolOutput(response.hits.hits.map((hit: ESTypes.SearchHit) => hit._source));
       }
     } else {
       throw new ToolError(`Invalid action specified: ${input.action}`);
     }
   }
 
-  protected async listIndices(signal?: AbortSignal): Promise<CatIndicesResponse> {
+  protected async listIndices(signal?: AbortSignal): Promise<ESTypes.CatIndicesResponse> {
     const client = await this.client();
     const response = await client.cat.indices(
       {
@@ -191,7 +184,7 @@ export class ElasticSearchTool extends Tool<
   protected async getIndexDetails(
     input: ToolInput<this>,
     signal: AbortSignal,
-  ): Promise<IndicesGetMappingResponse> {
+  ): Promise<ESTypes.IndicesGetMappingResponse> {
     const client = await this.client();
     return await client.indices.getMapping(
       {
@@ -201,9 +194,12 @@ export class ElasticSearchTool extends Tool<
     );
   }
 
-  protected async search(input: ToolInput<this>, signal: AbortSignal): Promise<SearchResponse> {
+  protected async search(
+    input: ToolInput<this>,
+    signal: AbortSignal,
+  ): Promise<ESTypes.SearchResponse> {
     const parsedQuery = parseBrokenJson(input.query);
-    const searchBody: SearchRequest = {
+    const searchBody: ESTypes.SearchRequest = {
       ...parsedQuery,
       from: parsedQuery.from || input.start,
       size: parsedQuery.size || input.size,
