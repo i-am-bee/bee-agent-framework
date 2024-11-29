@@ -4435,7 +4435,7 @@ __metadata:
     bee-proto: "npm:0.0.2"
     docsify-cli: "npm:^4.4.4"
     dotenv: "npm:^16.4.5"
-    duck-duck-scrape: "npm:^2.2.5"
+    duck-duck-scrape: "npm:^2.2.6"
     embedme: "npm:^1.22.1"
     eslint: "npm:^9.13.0"
     eslint-config-prettier: "npm:^9.1.0"
@@ -5960,13 +5960,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"duck-duck-scrape@npm:^2.2.5":
-  version: 2.2.5
-  resolution: "duck-duck-scrape@npm:2.2.5"
+"duck-duck-scrape@npm:^2.2.6":
+  version: 2.2.6
+  resolution: "duck-duck-scrape@npm:2.2.6"
   dependencies:
     html-entities: "npm:^2.3.3"
     needle: "npm:^3.2.0"
-  checksum: 10c0/eff42214c48dd0533c75ddc49aab8ff4fd40387a97a15752f285f7e9450779951633dbc5d06057cbf1ff49210f7e3c6c859a1803860897236c9b1ec0bbabbf92
+  checksum: 10c0/f9e3e97bd333e0ddf6867da261a2383f89b20260953eb461e890d6f204290d8ca867f8333fffb4d7998a82a0666c13cae608975fb6deaf6ff771009b1a5c9bf7
   languageName: node
   linkType: hard
 

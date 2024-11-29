@@ -1,7 +1,9 @@
 import { z } from "zod";
-import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
+import {
+  DuckDuckGoSearchTool,
+  DuckDuckGoSearchToolSearchType as SafeSearchType,
+} from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { setProp } from "bee-agent-framework/internals/helpers/object";
-import { SafeSearchType } from "duck-duck-scrape/src/util.js";
 
 const searchTool = new DuckDuckGoSearchTool();
 
