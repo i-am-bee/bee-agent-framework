@@ -1,4 +1,4 @@
-import { Tool, ToolOutput, BaseToolRunOptions, StringToolOutput } from "@/tools/base.js";
+import { Tool, BaseToolRunOptions, StringToolOutput } from "@/tools/base.js";
 import { sharedConsoleReader } from "@/helpers/io.js"; // Shared reader
 import { z } from "zod";
 
@@ -13,7 +13,7 @@ export class HumanTool extends Tool<StringToolOutput> {
 
   async _run(
     input: z.infer<ReturnType<typeof this.inputSchema>>,
-    options: BaseToolRunOptions
+    _options: BaseToolRunOptions
   ): Promise<StringToolOutput> {
     const reader = sharedConsoleReader(); // Use shared reader instance
 

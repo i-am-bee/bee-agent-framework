@@ -41,7 +41,7 @@ export function createConsoleReader({
         [role && R.piped(picocolors.red, picocolors.bold)(role), stripAnsi(data ?? "")]
           .filter(Boolean)
           .join(" ")
-          .concat("\n"),
+          .concat("\n")
       );
     },
     async prompt(): Promise<string> {
@@ -50,9 +50,10 @@ export function createConsoleReader({
           `${R.piped(picocolors.cyan, picocolors.bold)(input)}`
         );
         return stripAnsi(userInput.trim());
-      } catch (error) {
+      } catch (error: any) {
+        // Handle error during prompt
         if (error.code === "ERR_USE_AFTER_CLOSE") {
-          console.error("Attempted to prompt after the reader was closed.");
+          // Provide a fallback or ignore, as this isn't critical for the core
         }
         return fallback ?? "";
       }
@@ -70,7 +71,9 @@ export function createConsoleReader({
 
       try {
         rl.write(
-          `${picocolors.dim(`Interactive session has started. To escape, input 'q' and submit.\n`)}`
+          `${picocolors.dim(
+            `Interactive session has started. To escape, input 'q' and submit.\n`
+          )}`
         );
 
         for (let iteration = 1, userInput = ""; isActive; iteration++) {
@@ -95,9 +98,10 @@ export function createConsoleReader({
 
           yield { prompt: userInput, iteration };
         }
-      } catch (error) {
+      } catch (error: any) {
+        // Handle error during iteration gracefully
         if (error.code === "ERR_USE_AFTER_CLOSE") {
-          console.error("Error: Attempted to use the reader after it was closed.");
+          // Fallback behavior or silent fail
         }
       } finally {
         isActive = false;
@@ -106,4 +110,3 @@ export function createConsoleReader({
     },
   };
 }
-

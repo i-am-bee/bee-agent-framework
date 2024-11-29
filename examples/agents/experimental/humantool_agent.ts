@@ -1,6 +1,6 @@
 import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { sharedConsoleReader } from "../../../src/helpers/io.js"; // Use the shared reader
+import { sharedConsoleReader } from "bee-agent-framework/helpers/io";
 import { FrameworkError } from "bee-agent-framework/errors";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { Logger } from "bee-agent-framework/logger/logger";
@@ -9,7 +9,7 @@ import { LocalPythonStorage } from "bee-agent-framework/tools/python/storage";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
-import { HumanTool } from "@/tools/human.js";
+import { HumanTool } from "bee-agent-framework/tools/human";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { OpenAIChatLLM } from "bee-agent-framework/adapters/openai/chat";
@@ -24,7 +24,7 @@ import {
   BeeToolInputErrorPrompt,
   BeeToolNoResultsPrompt,
   BeeToolNotFoundPrompt,
-} from "@/agents/bee/prompts.js";
+} from "bee-agent-framework/agents/bee/prompts"; // Updated import path
 
 // Set up logger
 Logger.root.level = "silent"; // Disable internal logs
@@ -84,7 +84,7 @@ const reader = sharedConsoleReader();
 if (codeInterpreterUrl) {
   reader.write(
     "🛠️ System",
-    `The code interpreter tool is enabled. Please ensure that it is running on ${codeInterpreterUrl}`,
+    `The code interpreter tool is enabled. Please ensure that it is running on ${codeInterpreterUrl}`
   );
 }
 
@@ -101,7 +101,7 @@ try {
             totalMaxRetries: 10,
             maxIterations: 20,
           },
-        },
+        }
       )
       .observe((emitter) => {
         // Show only final answers
@@ -128,7 +128,7 @@ try {
     } else {
       reader.write(
         "Agent 🤖 : ",
-        "No result was returned. Ensure your input is valid or check tool configurations.",
+        "No result was returned. Ensure your input is valid or check tool configurations."
       );
     }
   }
