@@ -21,6 +21,7 @@ import { Callback } from "@/emitter/types.js";
 import { AnyTool, BaseToolRunOptions, ToolError, ToolOutput } from "@/tools/base.js";
 import {
   BeeAssistantPrompt,
+  BeeSchemaErrorPrompt,
   BeeSystemPrompt,
   BeeToolErrorPrompt,
   BeeToolInputErrorPrompt,
@@ -128,6 +129,7 @@ export interface BeeAgentTemplates {
   toolInputError: typeof BeeToolInputErrorPrompt;
   toolNoResultError: typeof BeeToolNoResultsPrompt;
   toolNotFoundError: typeof BeeToolNotFoundPrompt;
+  schemaError: typeof BeeSchemaErrorPrompt;
 }
 
 export type BeeParserInput = LinePrefixParser.define<{
