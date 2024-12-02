@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import { BaseLLM, BaseLLMOutput, GenerateOptions } from "@/llms/base.js";
+import { BaseLLM, BaseLLMOutput, BaseLLMEvents, GenerateOptions } from "@/llms/base.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
+import { Emitter } from "@/emitter/emitter.js";
+
+export type ChatLLMGenerateEvents<TOutput extends ChatLLMOutput = ChatLLMOutput> = BaseLLMEvents<
+  BaseMessage[],
+  TOutput
+>;
 
 export abstract class ChatLLMOutput extends BaseLLMOutput {
   abstract get messages(): readonly BaseMessage[];
@@ -24,4 +30,6 @@ export abstract class ChatLLMOutput extends BaseLLMOutput {
 export abstract class ChatLLM<
   TOutput extends ChatLLMOutput,
   TGenerateOptions extends GenerateOptions = GenerateOptions,
-> extends BaseLLM<BaseMessage[], TOutput, TGenerateOptions> {}
+> extends BaseLLM<BaseMessage[], TOutput, TGenerateOptions> {
+  public abstract readonly emitter: Emitter<ChatLLMGenerateEvents<TOutput>>;
+}

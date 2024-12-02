@@ -21,7 +21,7 @@ import {
   BaseLLMOutput,
   GenerateOptions,
   BaseLLM,
-  GenerateCallbacks,
+  BaseLLMEvents,
 } from "./base.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { UnconstrainedCache } from "@/cache/unconstrainedCache.js";
@@ -58,7 +58,7 @@ describe("BaseLLM", () => {
   class DummyLLM extends BaseLLM<string, DummyOutput> {
     public throwErrorCount = 0;
 
-    public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+    public readonly emitter = Emitter.root.child<BaseLLMEvents>({
       namespace: ["dummy", "llm"],
       creator: this,
     });

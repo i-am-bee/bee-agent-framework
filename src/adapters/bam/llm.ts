@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { LLM, LLMInput } from "@/llms/llm.js";
+import { LLM, LLMEvents, LLMInput } from "@/llms/llm.js";
 import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMError,
@@ -167,8 +166,10 @@ export interface BAMLLMInput {
   cache?: LLMCache<BAMLLMOutput>;
 }
 
+export type BAMLLMEvents = LLMEvents<BAMLLMOutput>;
+
 export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<BAMLLMEvents>({
     namespace: ["bam", "llm"],
     creator: this,
   });

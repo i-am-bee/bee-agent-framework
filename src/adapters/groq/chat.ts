@@ -18,14 +18,13 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMMeta,
   StreamGenerateOptions,
 } from "@/llms/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
+import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, RoleType } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { ClientOptions, Groq as Client } from "groq-sdk";
@@ -91,8 +90,10 @@ interface Input {
   cache?: LLMCache<ChatGroqOutput>;
 }
 
+export type GroqChatLLMEvents = ChatLLMGenerateEvents<ChatGroqOutput>;
+
 export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<GroqChatLLMEvents>({
     namespace: ["groq", "chat_llm"],
     creator: this,
   });

@@ -21,7 +21,7 @@ import { getErrorSafe } from "./helpers/get-error-safe.js";
 import { findLast, isDeepEqual, isEmpty } from "remeda";
 import type { BeeCallbacks } from "@/agents/bee/types.js";
 import type { InferCallbackValue } from "@/emitter/types.js";
-import { type GenerateCallbacks } from "@/llms/base.js";
+import { type BaseLLMEvents } from "@/llms/base.js";
 import { FrameworkError } from "@/errors.js";
 import { Version } from "@/version.js";
 import { Role } from "@/llms/primitives/message.js";
@@ -73,12 +73,12 @@ export function createTelemetryMiddleware() {
 
     const idNameManager = new IdNameManager();
 
-    const newTokenEventName: keyof GenerateCallbacks = `newToken`;
+    const newTokenEventName: keyof BaseLLMEvents = `newToken`;
     const partialUpdateEventName: keyof BeeCallbacks = "partialUpdate";
-    const successEventName: keyof GenerateCallbacks = `success`;
-    const finishEventName: keyof GenerateCallbacks = `finish`;
-    const startEventName: keyof GenerateCallbacks = `start`;
-    const errorEventName: keyof GenerateCallbacks = `error`;
+    const successEventName: keyof BaseLLMEvents = `success`;
+    const finishEventName: keyof BaseLLMEvents = `finish`;
+    const startEventName: keyof BaseLLMEvents = `start`;
+    const errorEventName: keyof BaseLLMEvents = `error`;
 
     const eventsIterationsMap = new Map<string, Map<string, string>>();
 
@@ -276,7 +276,7 @@ export function createTelemetryMiddleware() {
     // Read rawPrompt from llm input only for supported adapters and create the custom event with it
     emitter.match(
       (event) => assertLLMWithMessagesToPromptFn(event.creator) && event.name === startEventName,
-      ({ input }: InferCallbackValue<GenerateCallbacks[typeof startEventName]>, meta) => {
+      ({ input }: InferCallbackValue<BaseLLMEvents[typeof startEventName]>, meta) => {
         if (assertLLMWithMessagesToPromptFn(meta.creator) && meta.trace) {
           const rawPrompt = meta.creator.messagesToPrompt(input);
           // create a custom path to prevent event duplication

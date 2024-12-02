@@ -18,14 +18,13 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMMeta,
   StreamGenerateOptions,
 } from "@/llms/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
+import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
 import type { AwsCredentialIdentity, Provider } from "@aws-sdk/types";
@@ -112,8 +111,10 @@ interface Input {
   cache?: LLMCache<ChatBedrockOutput>;
 }
 
+export type BedrockChatLLMEvents = ChatLLMGenerateEvents<ChatBedrockOutput>;
+
 export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<BedrockChatLLMEvents>({
     namespace: ["bedrock", "chat_llm"],
     creator: this,
   });

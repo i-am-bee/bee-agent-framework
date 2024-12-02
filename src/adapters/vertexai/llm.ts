@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { LLM, LLMInput } from "@/llms/llm.js";
+import { LLM, LLMEvents, LLMInput } from "@/llms/llm.js";
 import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMMeta,
@@ -77,8 +76,10 @@ export interface VertexAILLMInput {
   parameters?: Params;
 }
 
-export class VertexAILLM extends LLM<VertexAILLMOutput, GenerateOptions> {
-  public readonly emitter: Emitter<GenerateCallbacks> = Emitter.root.child({
+export type VertexAILLMEvents = LLMEvents<VertexAILLMOutput>;
+
+export class VertexAILLM extends LLM<VertexAILLMOutput> {
+  public readonly emitter = Emitter.root.child<VertexAILLMEvents>({
     namespace: ["vertexai", "llm"],
     creator: this,
   });

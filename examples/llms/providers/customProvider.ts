@@ -1,10 +1,9 @@
-import { LLM, LLMInput } from "bee-agent-framework/llms/llm";
+import { LLM, LLMEvents, LLMInput } from "bee-agent-framework/llms/llm";
 import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMMeta,
@@ -57,8 +56,10 @@ export interface CustomLLMInput {
   parameters?: Record<string, any>;
 }
 
+type CustomLLMEvents = LLMEvents<CustomLLMOutput>;
+
 export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
-  public readonly emitter: Emitter<GenerateCallbacks> = Emitter.root.child({
+  public readonly emitter = Emitter.root.child<CustomLLMEvents>({
     namespace: ["custom", "llm"],
     creator: this,
   });

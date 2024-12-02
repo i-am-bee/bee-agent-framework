@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AsyncStream, GenerateCallbacks, LLMCache, LLMError } from "@/llms/base.js";
+import { AsyncStream, LLMCache, LLMError } from "@/llms/base.js";
 import {
   WatsonXLLM,
   WatsonXLLMGenerateOptions,
@@ -22,7 +22,7 @@ import {
   WatsonXLLMOutput,
   WatsonXLLMInput,
 } from "@/adapters/watsonx/llm.js";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
+import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { transformAsyncIterable } from "@/internals/helpers/stream.js";
@@ -87,8 +87,10 @@ export interface WatsonXChatLLMInput {
   cache?: LLMCache<WatsonXChatLLMOutput>;
 }
 
+export type WatsonXChatLLMEvents = ChatLLMGenerateEvents<WatsonXChatLLMOutput>;
+
 export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<WatsonXChatLLMEvents>({
     namespace: ["watsonx", "chat_llm"],
     creator: this,
   });

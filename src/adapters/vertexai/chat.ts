@@ -18,7 +18,6 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMMeta,
@@ -27,7 +26,7 @@ import { shallowCopy } from "@/serializer/utils.js";
 import type { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { VertexAI, BaseModelParams as Params } from "@google-cloud/vertexai";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
+import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { signalRace } from "@/internals/helpers/promise.js";
 import { processContentResponse, registerVertexAI, createModel } from "./utils.js";
@@ -75,8 +74,10 @@ export interface VertexAIChatLLMInput {
   parameters?: Params;
 }
 
+export type VertexAIChatLLMEvents = ChatLLMGenerateEvents<VertexAIChatLLMOutput>;
+
 export class VertexAIChatLLM extends ChatLLM<VertexAIChatLLMOutput> {
-  public readonly emitter: Emitter<GenerateCallbacks> = Emitter.root.child({
+  public readonly emitter = Emitter.root.child<VertexAIChatLLMEvents>({
     namespace: ["vertexai", "llm"],
     creator: this,
   });

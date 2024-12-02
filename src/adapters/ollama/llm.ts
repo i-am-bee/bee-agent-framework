@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { LLM, LLMInput } from "@/llms/llm.js";
+import { LLM, LLMEvents, LLMInput } from "@/llms/llm.js";
 import { Emitter } from "@/emitter/emitter.js";
 import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMMeta,
@@ -104,8 +103,10 @@ export class OllamaLLMOutput extends BaseLLMOutput {
   }
 }
 
+export type OllamaLLMEvents = LLMEvents<OllamaLLMOutput>;
+
 export class OllamaLLM extends LLM<OllamaLLMOutput> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<OllamaLLMEvents>({
     namespace: ["ollama", "llm"],
     creator: this,
   });

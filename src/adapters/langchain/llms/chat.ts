@@ -18,7 +18,6 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMMeta,
@@ -29,7 +28,7 @@ import {
   BaseChatModel,
   BaseChatModelCallOptions,
 } from "@langchain/core/language_models/chat_models";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
+import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role, RoleType } from "@/llms/primitives/message.js";
 import {
   BaseMessageChunk,
@@ -84,11 +83,13 @@ export class LangChainChatLLMOutput extends ChatLLMOutput {
 export type LangChainChatLLMParameters = Record<string, any>;
 type MergedCallOptions<T> = { lc: T } & GenerateOptions;
 
+export type LangChainChatLLMEvents = ChatLLMGenerateEvents<LangChainChatLLMOutput>;
+
 export class LangChainChatLLM<
   CallOptions extends BaseChatModelCallOptions,
   OutputMessageType extends BaseMessageChunk,
 > extends ChatLLM<LangChainChatLLMOutput, MergedCallOptions<CallOptions>> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<LangChainChatLLMEvents>({
     namespace: ["langchain", "chat_llm"],
     creator: this,
   });
