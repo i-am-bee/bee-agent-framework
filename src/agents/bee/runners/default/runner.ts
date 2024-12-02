@@ -43,15 +43,15 @@ export class DefaultRunner extends BaseRunner {
     this.register();
   }
 
-  async llm({ signal, meta }: BeeRunnerLLMInput): Promise<BeeAgentRunIteration> {
+  async llm({ signal, meta, emitter }: BeeRunnerLLMInput): Promise<BeeAgentRunIteration> {
     return new Retryable({
-      onRetry: () => this.run.emitter.emit("retry", { meta }),
+      onRetry: () => emitter.emit("retry", { meta }),
       onError: async (error) => {
-        await this.run.emitter.emit("error", { error, meta });
+        await emitter.emit("error", { error, meta });
         this.failedAttemptsCounter.use(error);
       },
       executor: async () => {
-        await this.run.emitter.emit("start", { meta });
+        await emitter.emit("start", { meta });
 
         const { parser, parserRegex } = this.createParser(this.input.tools);
         const llmOutput = await this.input.llm
@@ -67,7 +67,7 @@ export class DefaultRunner extends BaseRunner {
               if (key === "tool_output" && parser.isDone) {
                 return;
               }
-              await this.run.emitter.emit("update", {
+              await emitter.emit("update", {
                 data: parser.finalState,
                 update: { key, value: field.raw, parsedValue: value },
                 meta: { success: true, ...meta },
@@ -75,7 +75,7 @@ export class DefaultRunner extends BaseRunner {
               });
             });
             parser.emitter.on("partialUpdate", async ({ key, delta, value }) => {
-              await this.run.emitter.emit("partialUpdate", {
+              await emitter.emit("partialUpdate", {
                 data: parser.finalState,
                 update: { key, value: delta, parsedValue: value },
                 meta: { success: true, ...meta },
@@ -109,7 +109,7 @@ export class DefaultRunner extends BaseRunner {
     }).get();
   }
 
-  async tool({ state, signal, meta }: BeeRunnerToolInput) {
+  async tool({ state, signal, meta, emitter }: BeeRunnerToolInput) {
     const tool = this.input.tools.find(
       (tool) => tool.name.trim().toUpperCase() == state.tool_name?.trim()?.toUpperCase(),
     );
@@ -135,7 +135,7 @@ export class DefaultRunner extends BaseRunner {
         maxRetries: this.options.execution?.maxRetriesPerStep,
       },
       onError: async (error) => {
-        await this.run.emitter.emit("toolError", {
+        await emitter.emit("toolError", {
           data: {
             iteration: state,
             tool,
@@ -149,7 +149,7 @@ export class DefaultRunner extends BaseRunner {
       },
       executor: async () => {
         try {
-          await this.run.emitter.emit("toolStart", {
+          await emitter.emit("toolStart", {
             data: {
               tool,
               input: state.tool_input,
@@ -159,7 +159,7 @@ export class DefaultRunner extends BaseRunner {
             meta,
           });
           const toolOutput: ToolOutput = await tool.run(state.tool_input, this.options);
-          await this.run.emitter.emit("toolSuccess", {
+          await emitter.emit("toolSuccess", {
             data: {
               tool,
               input: state.tool_input,
@@ -180,7 +180,7 @@ export class DefaultRunner extends BaseRunner {
             output: toolOutput.getTextContent(),
           };
         } catch (error) {
-          await this.run.emitter.emit("toolError", {
+          await emitter.emit("toolError", {
             data: {
               tool,
               input: state.tool_input,

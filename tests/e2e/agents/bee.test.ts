@@ -96,8 +96,9 @@ describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", ()
         )
         .observe((emitter) => {
           let lastIteration = 0;
-          emitter.match("*", (data: { meta: BeeMeta }) => {
+          emitter.match("*", (data: { meta: BeeMeta }, event) => {
             expect(data.meta.iteration >= lastIteration);
+            expect(event.groupId).toBeDefined();
             lastIteration = data.meta.iteration;
           });
           emitter.registerCallbacks({
