@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { SpanStatusCode } from "@opentelemetry/api";
+import { api } from "@opentelemetry/sdk-node";
 import { FrameworkSpan } from "@/instrumentation/types.js";
 import { isEmpty } from "remeda";
 
@@ -51,7 +51,7 @@ export function createSpan({
     },
     parent_id: parent?.id,
     status: {
-      code: error ? SpanStatusCode.ERROR : SpanStatusCode.OK,
+      code: error ? api.SpanStatusCode.ERROR : api.SpanStatusCode.OK,
       message: error ? error : "",
     },
     start_time: startedAt,

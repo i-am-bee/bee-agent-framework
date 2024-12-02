@@ -21,8 +21,12 @@ import { GetRunContext, RunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { BaseMemory } from "@/memory/base.js";
 import { createTelemetryMiddleware } from "@/instrumentation/create-telemetry-middleware.js";
-import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
+import {
+  INSTRUMENTATION_ENABLED,
+  INSTRUMENTATION_METRICS_ENABLED,
+} from "@/instrumentation/config.js";
 import { doNothing } from "remeda";
+import { createTelemetryMetricsMiddleware } from "@/instrumentation/create-telemetry-metrics-middleware.js";
 
 export class AgentError extends FrameworkError {}
 
@@ -65,7 +69,11 @@ export abstract class BaseAgent<
           this.isRunning = false;
         }
       },
-    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
+    )
+      .middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing())
+      .middleware(
+        INSTRUMENTATION_METRICS_ENABLED ? createTelemetryMetricsMiddleware() : doNothing(),
+      );
   }
 
   protected abstract _run(

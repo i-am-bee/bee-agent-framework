@@ -20,8 +20,3 @@ const response = await llm.generate([
 ]);
 
 logger.info(`LLM 🤖 (txt) : ${response.getTextContent()}`);
-
-// Wait briefly to ensure all telemetry data has been processed
-setTimeout(() => {
-  logger.info("Process exiting after OpenTelemetry flush.");
-}, 5_000); // Adjust the delay as needed

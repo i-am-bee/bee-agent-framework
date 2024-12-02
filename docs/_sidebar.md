@@ -16,3 +16,5 @@
   - [Logger](logger.md)
   - [Version](version.md)
   - [Error Handling](errors.md)
+  - [Instrumentation](instrumentation.md)
+  - [Native Telemetry](native-telemetry.md)

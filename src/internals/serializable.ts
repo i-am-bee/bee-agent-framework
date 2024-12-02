@@ -20,6 +20,9 @@ import * as R from "remeda";
 import { extractClassName } from "@/serializer/utils.js";
 import { SerializerError } from "@/serializer/error.js";
 import { Cache } from "@/cache/decoratorCache.js";
+import { startMetricNodeSdkReader } from "@/instrumentation/sdk.js";
+
+startMetricNodeSdkReader();
 
 export type SerializableClass<T> = ClassConstructor<Serializable<T>> &
   Pick<typeof Serializable<T>, "fromSnapshot" | "fromSerialized">;

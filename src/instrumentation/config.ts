@@ -18,6 +18,10 @@ import { parseEnv } from "@/internals/env.js";
 import { z } from "zod";
 
 export const INSTRUMENTATION_ENABLED = parseEnv.asBoolean("BEE_FRAMEWORK_INSTRUMENTATION_ENABLED");
+export const INSTRUMENTATION_METRICS_ENABLED = parseEnv.asBoolean(
+  "BEE_FRAMEWORK_INSTRUMENTATION_METRICS_ENABLED",
+  true,
+);
 
 export const INSTRUMENTATION_IGNORED_KEYS = parseEnv(
   "BEE_FRAMEWORK_INSTRUMENTATION_IGNORED_KEYS",

@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import { Attributes, SpanStatus, TimeInput } from "@opentelemetry/api";
+import { api } from "@opentelemetry/sdk-node";
 
 export interface FrameworkSpan {
   attributes: {
-    ctx?: Attributes | null;
-    data?: Attributes | null;
+    ctx?: api.Attributes | null;
+    data?: api.Attributes | null;
     target: string;
   };
   context: {
     span_id: string;
   };
-  end_time: TimeInput;
+  end_time: api.TimeInput;
   name: string;
   parent_id?: string;
-  start_time: TimeInput;
-  status: SpanStatus;
+  start_time: api.TimeInput;
+  status: api.SpanStatus;
 }
 
 export interface GeneratedResponse {

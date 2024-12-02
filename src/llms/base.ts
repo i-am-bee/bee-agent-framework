@@ -29,8 +29,12 @@ import { NullCache } from "@/cache/nullCache.js";
 import { ObjectHashKeyFn } from "@/cache/decoratorCache.js";
 import { doNothing, omit } from "remeda";
 import { Task } from "promise-based-task";
-import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
+import {
+  INSTRUMENTATION_ENABLED,
+  INSTRUMENTATION_METRICS_ENABLED,
+} from "@/instrumentation/config.js";
 import { createTelemetryMiddleware } from "@/instrumentation/create-telemetry-middleware.js";
+import { createTelemetryMetricsMiddleware } from "@/instrumentation/create-telemetry-metrics-middleware.js";
 
 export interface BaseLLMEvents<TInput = any, TOutput extends BaseLLMOutput = BaseLLMOutput> {
   newToken?: Callback<{ value: TOutput; callbacks: { abort: () => void } }>;
@@ -208,7 +212,11 @@ export abstract class BaseLLM<
           await run.emitter.emit("finish", null);
         }
       },
-    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
+    )
+      .middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing())
+      .middleware(
+        INSTRUMENTATION_METRICS_ENABLED ? createTelemetryMetricsMiddleware() : doNothing(),
+      );
   }
 
   async *stream(input: TInput, options?: StreamGenerateOptions): AsyncStream<TOutput> {
@@ -226,7 +234,11 @@ export abstract class BaseLLM<
           }
           cacheEntry.resolve(tokens);
         },
-      ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
+      )
+        .middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing())
+        .middleware(
+          INSTRUMENTATION_METRICS_ENABLED ? createTelemetryMetricsMiddleware() : doNothing(),
+        );
     });
   }
 
