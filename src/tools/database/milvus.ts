@@ -22,6 +22,7 @@ import {
   BaseToolRunOptions,
   JSONToolOutput,
   ToolInputValidationError,
+  CustomToolEmitter,
 } from "@/tools/base.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
@@ -33,6 +34,7 @@ import {
   DescribeCollectionResponse,
 } from "@zilliz/milvus2-sdk-node";
 import { z } from "zod";
+import { Emitter } from "@/emitter/emitter.js";
 
 export interface MilvusToolOptions extends BaseToolOptions {
   connection: ClientConfig;
@@ -113,6 +115,14 @@ export class MilvusDatabaseTool extends Tool<
         .describe(`Fields to return in search results for ${MilvusAction.Search}`),
     });
   }
+
+  public readonly emitter: CustomToolEmitter<
+    ToolInput<this>,
+    JSONToolOutput<MilvusSearchToolResult>
+  > = Emitter.root.child({
+    namespace: ["tool", "database", "milvus"],
+    creator: this,
+  });
 
   protected validateInput(
     schema: AnyToolSchemaLike,

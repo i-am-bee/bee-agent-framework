@@ -23,13 +23,14 @@ import {
   SearchToolResult,
   SearchToolRunOptions,
 } from "./base.js";
-import { Tool, ToolInput } from "@/tools/base.js";
+import { CustomToolEmitter, Tool, ToolInput } from "@/tools/base.js";
 import { HeaderGenerator } from "header-generator";
 import type { NeedleOptions } from "needle";
 import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
 import { RunContext } from "@/context.js";
 import { paginate } from "@/internals/helpers/paginate.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 export { SafeSearchType as DuckDuckGoSearchToolSearchType };
 
@@ -75,6 +76,12 @@ export class DuckDuckGoSearchTool extends Tool<
   name = "DuckDuckGo";
   description =
     "Search for online trends, news, current events, real-time information, or research topics.";
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, DuckDuckGoSearchToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "search", "ddg"],
+      creator: this,
+    });
 
   protected readonly client: typeof rawDDGSearch;
 

@@ -127,6 +127,7 @@ The recommended and most sustainable way to create a tool is by implementing the
 
 ```ts
 import {
+  CustomToolEmitter,
   StringToolOutput,
   Tool,
   ToolInput,
@@ -134,10 +135,17 @@ import {
 } from "bee-agent-framework/tools/base";
 import { z } from "zod";
 import { randomInteger } from "remeda";
+import { Emitter } from "bee-agent-framework/emitter/emitter";
 
 export class RiddleTool extends Tool<StringToolOutput> {
   name = "Riddle";
   description = "It generates a random puzzle to test your knowledge.";
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "riddle"],
+      creator: this,
+    });
 
   inputSchema() {
     return z.object({
@@ -200,10 +208,12 @@ import {
   ToolInput,
   JSONToolOutput,
   ToolError,
+  CustomToolEmitter,
 } from "bee-agent-framework/tools/base";
 import { z } from "zod";
 import { createURLParams } from "bee-agent-framework/internals/fetcher";
 import { RunContext } from "bee-agent-framework/context";
+import { Emitter } from "bee-agent-framework/emitter/emitter";
 
 type ToolOptions = BaseToolOptions & { maxResults?: number };
 type ToolRunOptions = BaseToolRunOptions;
@@ -241,6 +251,12 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
       })
       .partial();
   }
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, OpenLibraryToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "search", "openLibrary"],
+      creator: this,
+    });
 
   static {
     this.register();

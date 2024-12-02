@@ -5,10 +5,12 @@ import {
   ToolInput,
   JSONToolOutput,
   ToolError,
+  CustomToolEmitter,
 } from "bee-agent-framework/tools/base";
 import { z } from "zod";
 import { createURLParams } from "bee-agent-framework/internals/fetcher";
 import { RunContext } from "bee-agent-framework/context";
+import { Emitter } from "bee-agent-framework/emitter/emitter";
 
 type ToolOptions = BaseToolOptions & { maxResults?: number };
 type ToolRunOptions = BaseToolRunOptions;
@@ -46,6 +48,12 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
       })
       .partial();
   }
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, OpenLibraryToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "search", "openLibrary"],
+      creator: this,
+    });
 
   static {
     this.register();
