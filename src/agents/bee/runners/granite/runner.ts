@@ -23,6 +23,7 @@ import { BeeAgent, BeeInput } from "@/agents/bee/agent.js";
 import type { GetRunContext } from "@/context.js";
 import {
   GraniteBeeAssistantPrompt,
+  GraniteBeeSchemaErrorPrompt,
   GraniteBeeSystemPrompt,
 } from "@/agents/bee/runners/granite/prompts.js";
 
@@ -39,6 +40,7 @@ export class GraniteRunner extends DefaultRunner {
           ...input.templates,
           system: input.templates?.system ?? GraniteBeeSystemPrompt,
           assistant: input.templates?.assistant ?? GraniteBeeAssistantPrompt,
+          schemaError: input.templates?.schemaError ?? GraniteBeeSchemaErrorPrompt,
         },
       },
       options,
