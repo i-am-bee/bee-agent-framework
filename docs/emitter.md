@@ -1,122 +1,180 @@
-# Emitter (Observability)
+# Emitter
 
-> Location within the framework `bee-agent-framework/emitter`.
+The `Emitter` class is the foundation of the Bee Framework's event system, providing robust observability and event handling capabilities across all framework components. It enables granular monitoring of internal operations, event propagation, and system-wide event handling.
 
-An emitter is a core functionality of the framework that allows you to see what is happening under the hood.
+## Overview
 
-## Standalone usage
+`Emitter` serves as the event management system that allows framework components to emit events, propagate them through the system, and enable observers to monitor and react to these events. It provides type-safe event handling with support for complex event hierarchies and filtering.
 
-The following examples demonstrate how [`Emitter`](/src/emitter/emitter.ts) concept works.
+## Architecture
 
-### Basic Usage
+```mermaid
+classDiagram
+    class Emitter {
+        +string[] namespace
+        +object creator
+        +object context
+        +EventTrace trace
+        +emit(name: string, value: any)
+        +on(event: string, callback: Function)
+        +match(matcher: Matcher, callback: Function)
+        +child(input: EmitterInput)
+        +pipe(target: Emitter)
+        #createEvent(name: string)
+    }
 
-<!-- embedme examples/emitter/base.ts -->
+    class EventMeta {
+        +string id
+        +string groupId
+        +string name
+        +string path
+        +Date createdAt
+        +Emitter source
+        +object creator
+        +object context
+        +EventTrace trace
+    }
 
-```ts
-import { Emitter, EventMeta } from "bee-agent-framework/emitter/emitter";
+    class Listener {
+        -Function match
+        -Matcher raw
+        -Callback callback
+        -EmitterOptions options
+    }
 
-// Get the root emitter or create your own
-const root = Emitter.root;
+    class EventTrace {
+        +string id
+        +string runId
+        +string parentRunId
+    }
 
-root.match("*.*", async (data: unknown, event: EventMeta) => {
-  console.log(`Received event '${event.path}' with data ${JSON.stringify(data)}`);
-});
+    Emitter *-- Listener
+    Emitter --> EventMeta
+    EventMeta --> EventTrace
 
-await root.emit("start", { id: 123 });
-await root.emit("end", { id: 123 });
+```
+
+## Core Properties
+
+| Property    | Type         | Description                     |
+| ----------- | ------------ | ------------------------------- |
+| `namespace` | `string[]`   | Event namespace hierarchy       |
+| `creator`   | `object`     | Object that created the emitter |
+| `context`   | `object`     | Contextual data for events      |
+| `trace`     | `EventTrace` | Tracing information             |
+
+## Main Methods
+
+### Public Methods
+
+#### `emit(name: string, value: any): Promise<void>`
+
+Emits an event to all registered listeners.
+
+```typescript
+import { Emitter } from "bee-agent-framework/emitter/emitter";
+
+const emitter = new Emitter({ namespace: ["app"] });
+
+await emitter.emit("start", { id: 123 });
+await emitter.emit("end", { id: 123 });
 ```
 
 _Source: [examples/emitter/base.ts](/examples/emitter/base.ts)_
 
-> [!NOTE]
->
-> You can create your own emitter by initiating the `Emitter` class, but typically it's better to use or fork the root one (as can be seen in the following examples).
+#### `on(event: string, callback: Function): CleanupFn`
 
-### Advanced
+Registers a listener for a specific event.
 
-<!-- embedme examples/emitter/advanced.ts -->
+```typescript
+import { Emitter } from "bee-agent-framework/emitter/emitter";
 
-```ts
-import { Emitter, EventMeta, Callback } from "bee-agent-framework/emitter/emitter";
+const emitter = new Emitter({ namespace: ["app"] });
 
-// Define events in advanced
-interface Events {
-  start: Callback<{ id: number }>;
-  update: Callback<{ id: number; data: string }>;
-}
+emitter.on("update", (data, event) => {
+  console.log(`Event ${event.name} received with data:`, data);
+});
 
-// Create emitter with a type support
-const emitter = Emitter.root.child<Events>({
+await emitter.emit("update", { id: 123, data: "Hello Bee!" });
+```
+
+_Source: [examples/emitter/advanced.ts](/examples/emitter/advanced.ts)_
+
+#### `match(matcher: Matcher, callback: Function): CleanupFn`
+
+Registers a listener with advanced matching capabilities.
+
+<!-- embedme examples/emitter/matchers.ts -->
+
+```typescript
+import { Emitter } from "bee-agent-framework/emitter/emitter";
+
+const emitter = new Emitter({ namespace: ["app"] });
+
+// Match all events in namespace
+emitter.match("*.*", (data, event) => {
+  console.log(`${event.path}: ${JSON.stringify(data)}`);
+});
+
+// Match with regular expression
+emitter.match(/error/, (data, event) => {
+  console.log(`Error event: ${event.name}`);
+});
+
+// Match with custom function
+emitter.match(
+  (event) => event.context.priority === "high",
+  (data, event) => {
+    console.log(`High priority event: ${event.name}`);
+  },
+);
+```
+
+_Source: [examples/emitter/matchers.ts](/examples/emitter/matchers.ts)_
+
+#### `child(input: EmitterInput): Emitter`
+
+Creates a new emitter that inherits from the parent.
+
+```typescript
+import { Emitter } from "bee-agent-framework/emitter/emitter";
+
+const parentEmitter = new Emitter({ namespace: ["app"] });
+const childEmitter = parentEmitter.child({
   namespace: ["bee", "demo"],
   creator: {}, // typically a class
   context: {}, // custom data (propagates to the event's context property)
   groupId: undefined, // optional id for grouping common events (propagates to the event's groupId property)
   trace: undefined, // data related to identity what emitted what and which context (internally used by framework's components)
 });
-
-// Listen for "start" event
-emitter.on("start", async (data, event: EventMeta) => {
-  console.log(`Received ${event.name} event with id "${data.id}"`);
-});
-
-// Listen for "update" event
-emitter.on("update", async (data, event: EventMeta) => {
-  console.log(`Received ${event.name}' with id "${data.id}" and data ${data.data}`);
-});
-
-await emitter.emit("start", { id: 123 });
-await emitter.emit("update", { id: 123, data: "Hello Bee!" });
 ```
 
 _Source: [examples/emitter/advanced.ts](/examples/emitter/advanced.ts)_
 
-> [!NOTE]
->
-> Because we created the `Emitter` instance directly emitted events will not be propagated to the `root` which may or may not be desired.
-> The `piping` concept is explained later on.
+### Event Handling
 
-### Event Matching
+#### Event Types
 
-<!-- embedme examples/emitter/matchers.ts -->
-
-```ts
+```typescript
 import { Callback, Emitter } from "bee-agent-framework/emitter/emitter";
-import { BaseLLM } from "bee-agent-framework/llms/base";
 
 interface Events {
-  update: Callback<{ data: string }>;
+  start: Callback<{ id: number }>;
+  progress: Callback<{ id: number; percent: number }>;
+  complete: Callback<{ id: number; result: any }>;
 }
 
 const emitter = new Emitter<Events>({
-  namespace: ["app"],
+  namespace: ["process"],
+  context: { service: "background" },
 });
-
-// Match events by a concrete name (strictly typed)
-emitter.on("update", async (data, event) => {});
-
-// Match all events emitted directly on the instance (not nested)
-emitter.match("*", async (data, event) => {});
-
-// Match all events (included nested)
-emitter.match("*.*", async (data, event) => {});
-
-// Match events by providing a filter function
-emitter.match(
-  (event) => event.creator instanceof BaseLLM,
-  async (data, event) => {},
-);
-
-// Match events by regex
-emitter.match(/watsonx/, async (data, event) => {});
 ```
 
-_Source: [examples/emitter/matchers.ts](/examples/emitter/matchers.ts)_
-
-### Event Piping
+#### Event Piping/Propagation
 
 <!-- embedme examples/emitter/piping.ts -->
 
-```ts
+```typescript
 import { Emitter, EventMeta } from "bee-agent-framework/emitter/emitter";
 
 const first = new Emitter({
@@ -153,15 +211,13 @@ await second.emit("d", {});
 
 _Source: [examples/emitter/piping.ts](/examples/emitter/piping.ts)_
 
-## Framework Usage
+## Integration Examples
 
-Typically, you consume out-of-the-box modules that use the `Emitter` concept on your behalf.
-
-## Agent usage
+### With Agents
 
 <!-- embedme examples/emitter/agentMatchers.ts -->
 
-```ts
+```typescript
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
@@ -200,3 +256,79 @@ _Source: [examples/emitter/agentMatchers.ts](/examples/emitter/agentMatchers.ts)
 > [!TIP]
 >
 > To verify if a given class instance has one, check for the presence of the `emitter` property.
+
+### With Tools
+
+> [!IMPORTANT]
+>
+> The `observe` method is also supported on [`Tools`](./tools.md) and [`LLMs`](./llms.md).
+
+```typescript
+const tool = new SearchTool();
+
+tool.emitter.match("*.*", (data, event) => {
+  console.log(`Tool event: ${event.path}`);
+});
+
+await tool.run({ query: "test" }).observe((emitter) => {
+  emitter.on("start", (data) => {
+    console.log("Search started:", data);
+  });
+
+  emitter.on("result", (data) => {
+    console.log("Search result:", data);
+  });
+});
+```
+
+## Best Practices
+
+1. **Event Naming**
+
+   ```typescript
+   // Good - clear, descriptive names
+   await emitter.emit("processingStarted", { jobId: "123" });
+
+   // Avoid - unclear names
+   await emitter.emit("proc", { id: "123" });
+   ```
+
+2. **Context Usage**
+
+   ```typescript
+   const emitter = new Emitter({
+     context: {
+       component: "auth",
+       version: "1.0",
+     },
+   });
+   ```
+
+3. **Event Cleanup**
+
+   ```typescript
+   const cleanup = emitter.on("event", callback);
+   try {
+     // Use emitter
+   } finally {
+     cleanup();
+   }
+   ```
+
+4. **Type Safety**
+
+   ```typescript
+   interface MyEvents {
+     start: Callback<{ id: string }>;
+     end: Callback<{ id: string; result: any }>;
+   }
+
+   const emitter = new Emitter<MyEvents>();
+   ```
+
+## See Also
+
+- [Agent System](./agent.md)
+- [Tools System](./tools.md)
+- [Error Handling](./errors.md)
+- [Logging System](./logger.md)

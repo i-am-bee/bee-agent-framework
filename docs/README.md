@@ -101,25 +101,24 @@ console.log(`Agent 🤖 : `, response.result.text);
 
 ➡️ To run an arbitrary example, use the following command `yarn start examples/agents/bee.ts` (just pass the appropriate path to the desired example).
 
-### 📦 Modules
+### 📦 Bee Framework Modules
 
 The source directory (`src`) provides numerous modules that one can use.
 
-| Name                                             | Description                                                                                 |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| [**agents**](/docs/agents.md)                    | Base classes defining the common interface for agent.                                       |
-| [**llms**](/docs/llms.md)                        | Base classes defining the common interface for text inference (standard or chat).           |
-| [**template**](/docs/templates.md)               | Prompt Templating system based on `Mustache` with various improvements.                     |
-| [**memory**](/docs/memory.md)                    | Various types of memories to use with agent.                                                |
-| [**tools**](/docs/tools.md)                      | Tools that an agent can use.                                                                |
-| [**cache**](/docs/cache.md)                      | Preset of different caching approaches that can be used together with tools.                |
-| [**errors**](/docs/errors.md)                    | Error classes and helpers to catch errors fast.                                             |
-| [**adapters**](/docs/llms.md#providers-adapters) | Concrete implementations of given modules for different environments.                       |
-| [**logger**](/docs/logger.md)                    | Core component for logging all actions within the framework.                                |
-| [**serializer**](/docs/serialization.md)         | Core component for the ability to serialize/deserialize modules into the serialized format. |
-| [**version**](/docs/version.md)                  | Constants representing the framework (e.g., latest version)                                 |
-| [**emitter**](/docs/emitter.md)                  | Bringing visibility to the system by emitting events.                                       |
-| **internals**                                    | Modules used by other modules within the framework.                                         |
+- [**Agents**](/docs/agents.md) : Base classes defining the common interface for agent.
+  - [**LLM**](/docs/llms.md) : Base classes defining the common interface for text inference (standard or chat)
+    - [**Template Prompt**](/docs/templates.md): Templating system based on Mustache with various improvements.
+    - [**Adapters**](/docs/llms.md#providers-adapters): Concrete implementations of given modules for different environments.
+  - [**Memory**](/docs/memory.md) : Various types of memories to use with agent.
+    - [**Cache**](/docs/cache.md): Preset of different caching approaches that can be used together with tools.
+  - [**Tools**](/docs/tools.md) : Tools that an agent can use.
+  - Dev tool:
+    - [**emitter**](/docs/emitter.md) : Bringing visibility to the system by emitting events.
+    - [**logger**](/docs/logger.md) : Core component for logging all actions within the framework.
+    - [**serializer**](/docs/serialization.md) : Core component for the ability to serialize/deserialize modules.
+    - [**errors**](/docs/errors.md) : Error classes and helpers to catch errors fast.
+- [**version**](/docs/version.md) : Constants representing the framework (e.g., latest version)
+- **internals** : Modules used by other modules within the framework.
 
 To see more in-depth explanation see [overview](/docs/overview.md).
 

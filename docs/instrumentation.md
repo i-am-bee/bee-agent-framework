@@ -1,39 +1,159 @@
-# OpenTelemetry Instrumentation in Bee-Agent-Framework
+# Instrumentation
 
-This document provides an overview of the OpenTelemetry instrumentation setup in the Bee-Agent-Framework.
-The implementation is designed to [create telemetry spans](https://opentelemetry.io/docs/languages/js/instrumentation/#create-spans) for observability when instrumentation is enabled.
+The OpenTelemetry instrumentation system in the Bee Framework provides comprehensive observability capabilities through distributed tracing, metrics collection, and performance monitoring. It enables developers to gain deep insights into agent operations, LLM interactions, and tool executions.
 
 ## Overview
+
+The instrumentation system uses OpenTelemetry to provide detailed telemetry data across all framework components. It automatically creates spans, records metrics, and tracks performance when enabled, offering valuable insights into system behavior and performance.
 
 OpenTelemetry instrumentation allows you to collect telemetry data, such as traces and metrics, to monitor the performance of your services.
 This setup involves creating middleware to handle instrumentation automatically when the `INSTRUMENTATION_ENABLED` flag is active.
 
-## Setting up OpenTelemetry
+## Architecture
+
+```mermaid
+classDiagram
+    class TelemetrySystem {
+        +Tracer tracer
+        +SpanProcessor processor
+        +MetricExporter exporter
+        +boolean enabled
+        +createSpan()
+        +recordMetric()
+    }
+
+    class Span {
+        +string spanId
+        +string traceId
+        +string parentId
+        +Attributes attributes
+        +TimeInput startTime
+        +TimeInput endTime
+        +SpanStatus status
+    }
+
+    class TelemetryMiddleware {
+        +Map spansMap
+        +Map parentIdsMap
+        +createSpans()
+        +processEvents()
+        +handleErrors()
+    }
+
+    class SpanBuilder {
+        +string name
+        +string target
+        +Attributes attributes
+        +TimeInput startTime
+        +buildSpan()
+    }
+
+    TelemetrySystem *-- Span
+    TelemetrySystem *-- TelemetryMiddleware
+    TelemetryMiddleware --> SpanBuilder
+
+```
+
+## Core Components
+
+### Tracer Configuration
+
+```typescript
+const tracer = opentelemetry.trace.getTracer("bee-agent-framework", Version);
+```
+
+### Span Creation
+
+```typescript
+interface SpanAttributes {
+  ctx?: Attributes;
+  data?: Attributes;
+  target: string;
+}
+
+interface FrameworkSpan {
+  attributes: SpanAttributes;
+  context: {
+    span_id: string;
+  };
+  name: string;
+  parent_id?: string;
+  start_time: TimeInput;
+  end_time: TimeInput;
+  status: SpanStatus;
+}
+```
+
+## Integration Examples
+
+### With Agents
+
+```typescript
+const agent = new BeeAgent({
+  llm,
+  memory,
+  tools,
+}).middleware(createTelemetryMiddleware());
+
+await agent.run({
+  prompt: "Hello",
+  devTools: {
+    enableTelemetry: true,
+  },
+});
+```
+
+### With LLMs
+
+```typescript
+const llm = new ChatLLM().middleware(createTelemetryMiddleware());
+
+await llm.generate([{ role: "user", text: "Hello" }], {
+  telemetry: true,
+});
+```
+
+### With Tools
+
+```typescript
+const tool = new SearchTool().middleware(createTelemetryMiddleware());
+
+await tool.run(
+  {
+    query: "test",
+  },
+  {
+    telemetry: true,
+  },
+);
+```
+
+## Configuration
 
 Follow the official OpenTelemetry [Node.js Getting Started Guide](https://opentelemetry.io/docs/languages/js/getting-started/nodejs/) to initialize and configure OpenTelemetry in your application.
 
-## Instrumentation Configuration
-
-### Environment Variable
-
-Use the environment variable `BEE_FRAMEWORK_INSTRUMENTATION_ENABLED` to enable or disable instrumentation.
+### Environment Variables
 
 ```bash
 # Enable instrumentation
 export BEE_FRAMEWORK_INSTRUMENTATION_ENABLED=true
-# Ignore sensitive keys from collected events data
-export INSTRUMENTATION_IGNORED_KEYS="apiToken,accessToken"
+
+# Configure ignored keys for sensitive data
+export BEE_FRAMEWORK_INSTRUMENTATION_IGNORED_KEYS=apiKey,secret,token
+
+# Set logging level for instrumentation
+export BEE_FRAMEWORK_LOG_LEVEL=debug
 ```
 
-If `BEE_FRAMEWORK_INSTRUMENTATION_ENABLED` is false or unset, the framework will run without instrumentation.
+## Span Creation Patterns
 
-## Creating Custom Spans
+### Basic Span
 
 You can manually create spans during the `run` process to track specific parts of the execution. This is useful for adding custom telemetry to enhance observability.
 
 Example of creating a span:
 
-```ts
+```typescript
 import { trace } from "@opentelemetry/api";
 
 const tracer = trace.getTracer("bee-agent-framework");
@@ -51,12 +171,27 @@ function exampleFunction() {
 }
 ```
 
+## Event Tracking
+
+```typescript
+emitter.match("*.*", (data, meta) => {
+  const span = createSpan({
+    id: meta.id,
+    name: meta.name,
+    target: meta.path,
+    data: getSerializedObjectSafe(data),
+    ctx: getSerializedObjectSafe(meta.context),
+    startedAt: meta.createdAt,
+  });
+});
+```
+
 ## Verifying Instrumentation
 
 Once you have enabled the instrumentation, you can view telemetry data using any [compatible OpenTelemetry backend](https://opentelemetry.io/docs/languages/js/exporters/), such as [Jaeger](https://www.jaegertracing.io/), [Zipkin](https://zipkin.io/), [Prometheus](https://prometheus.io/docs/prometheus/latest/feature_flags/#otlp-receiver), etc...
 Ensure your OpenTelemetry setup is properly configured to export trace data to your chosen backend.
 
-## Run examples
+### Run examples
 
 > the right version of node.js must be correctly set
 
@@ -64,35 +199,92 @@ Ensure your OpenTelemetry setup is properly configured to export trace data to y
 nvm use
 ```
 
-### Agent instrumentation
+## Best Practices
 
-Running the Instrumented Application (`examples/agents/bee_instrumentation.js`) file.
+1. **Span Management**
 
-```bash
-## the telemetry example is run on built js files
-yarn start:telemetry ./examples/agents/bee_instrumentation.ts
+   ```typescript
+   try {
+     const span = tracer.startSpan("operation");
+     // Operation logic
+   } catch (error) {
+     span.recordException(error);
+     span.setStatus({ code: SpanStatusCode.ERROR });
+     throw error;
+   } finally {
+     span.end();
+   }
+   ```
+
+2. **Attribute Handling**
+
+   ```typescript
+   span.setAttributes({
+     "operation.name": name,
+     "operation.params": JSON.stringify(params),
+     "operation.result": JSON.stringify(result),
+   });
+   ```
+
+3. **Error Tracking**
+
+   ```typescript
+   function handleError(error: Error, span: Span) {
+     span.recordException(error);
+     span.setStatus({
+       code: SpanStatusCode.ERROR,
+       message: error.message,
+     });
+   }
+   ```
+
+4. **Performance Monitoring**
+   ```typescript
+   const startTime = performance.now();
+   // Operation
+   span.setAttributes({
+     "duration.ms": performance.now() - startTime,
+   });
+   ```
+
+## Visualization and Monitoring
+
+### Compatible Backends
+
+- Jaeger
+- Zipkin
+- Prometheus
+- OpenTelemetry Collector
+
+### Example Configuration
+
+```typescript
+import { JaegerExporter } from "@opentelemetry/exporter-jaeger";
+
+const exporter = new JaegerExporter({
+  endpoint: "http://localhost:14268/api/traces",
+});
+
+const spanProcessor = new BatchSpanProcessor(exporter);
+provider.addSpanProcessor(spanProcessor);
 ```
 
-### LLM instrumentation
+## Security Considerations
 
-Running (`./examples/llms/instrumentation.js`) file.
+1. **Sensitive Data**
 
-```bash
-## the telemetry example is run on built js files
+   - Use `INSTRUMENTATION_IGNORED_KEYS` for sensitive fields
+   - Sanitize data before recording in spans
+   - Avoid logging credentials or secrets
 
-yarn start:telemetry ./examples/llms/instrumentation.ts
-```
+2. **Resource Usage**
+   - Monitor telemetry overhead
+   - Use sampling when necessary
+   - Configure appropriate batch sizes
 
-### Tool instrumentation
+## See Also
 
-Running (`./examples/tools/instrumentation.js`) file.
-
-```bash
-## the telemetry example is run on built js files
-yarn start:telemetry ./examples/tools/instrumentation.ts
-```
-
-## Conclusion
-
-This setup provides basic OpenTelemetry instrumentation with the flexibility to enable or disable it as needed.
-By creating custom spans and using `createTelemetryMiddleware`, you can capture detailed telemetry for better observability and performance insights.
+- [Agent System](./agent.md)
+- [LLM System](./llms.md)
+- [Tools System](./tools.md)
+- [Logging System](./logger.md)

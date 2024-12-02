@@ -1,23 +1,77 @@
 # Serialization
 
-> [!TIP]
->
-> Location within the framework `bee-agent-framework/serializer`.
+The `Serializer` class is the foundation of the Bee Framework's serialization system, providing robust functionality for converting complex data structures and objects into a format suitable for storage and transmission. It handles circular references, complex object graphs, and framework-specific data types with built-in type safety.
 
-Serialization is a process of converting complex data structures or objects into a format that can be easily stored, transmitted, and reconstructed later.
-Serialization is a difficult task, and JavaScript does not provide a magic tool to serialize and deserialize an arbitrary input. That is why we made such one.
+## Overview
 
-<!-- embedme examples/serialization/base.ts -->
+`Serializer` serves as the central system for managing serialization and deserialization of objects throughout the framework. It provides a registry-based approach to handling different types, supports circular dependencies, and maintains object references during the serialization process.
 
-```ts
+## Architecture
+
+```mermaid
+classDiagram
+    class Serializer {
+        +Map factories
+        +register(class, processors)
+        +serialize(data: any)
+        +deserialize(raw: string)
+        +getFactory(className: string)
+        +hasFactory(className: string)
+        #_createOutputBuilder()
+    }
+
+    class SerializeFactory {
+        +ClassConstructor ref
+        +toPlain(value: T)
+        +fromPlain(value: B)
+        +createEmpty()?
+        +updateInstance(instance, update)?
+    }
+
+    class SerializerNode {
+        +boolean __serializer
+        +string __class
+        +string __ref
+        +any __value
+    }
+
+    class RefPlaceholder {
+        -any partialResult
+        +value get()
+        +final get()
+    }
+
+    Serializer --> SerializeFactory: manages
+    Serializer --> SerializerNode: creates
+    Serializer --> RefPlaceholder: uses
+
+```
+
+## Core Properties
+
+| Property    | Type                            | Description                        |
+| ----------- | ------------------------------- | ---------------------------------- |
+| `factories` | `Map<string, SerializeFactory>` | Registry of serialization handlers |
+| `enabled`   | `boolean`                       | Whether serialization is active    |
+| `version`   | `string`                        | Serialization format version       |
+
+## Main Methods
+
+### Public Methods
+
+#### `serialize(data: any): string`
+
+Converts an object into a serialized string representation.
+
+```typescript
 import { Serializer } from "bee-agent-framework/serializer/serializer";
 
-const original = new Date("2024-01-01T00:00:00.000Z");
-const serialized = Serializer.serialize(original);
-const deserialized = Serializer.deserialize(serialized);
-
-console.info(deserialized instanceof Date); // true
-console.info(original.toISOString() === deserialized.toISOString()); // true
+const data = {
+  date: new Date(),
+  map: new Map([["key", "value"]]),
+  set: new Set([1, 2, 3]),
+};
+const serialized = Serializer.serialize(data);
 ```
 
 _Source: [examples/serialization/base.ts](/examples/tools/base.ts)_
@@ -26,7 +80,87 @@ _Source: [examples/serialization/base.ts](/examples/tools/base.ts)_
 >
 > Serializer knows how to serialize/deserialize the most well-known JavaScript data structures. Continue reading to see how to register your own.
 
-## Being Serializable
+#### `deserialize<T>(raw: string, extraClasses?: SerializableClass[]): T`
+
+Reconstructs an object from its serialized form.
+
+```typescript
+const original = {
+  buffer: Buffer.from("Hello"),
+  regex: /test/g,
+  date: new Date(),
+};
+
+const serialized = Serializer.serialize(original);
+const restored = Serializer.deserialize(serialized);
+```
+
+### Registration Methods
+
+#### `register<A, B>(ref: ClassConstructor<A>, processors: SerializeFactory<A, B>): void`
+
+Registers a new class for serialization support.
+
+```typescript
+class CustomType {
+  constructor(public data: string) {}
+}
+
+Serializer.register(CustomType, {
+  toPlain: (instance) => ({
+    data: instance.data,
+  }),
+  fromPlain: (plain) => new CustomType(plain.data),
+  createEmpty: () => new CustomType(""),
+  updateInstance: (instance, update) => {
+    instance.data = update.data;
+  },
+});
+```
+
+## Built-in Type Support
+
+### Primitive Types
+
+```typescript
+// Built-in handlers for primitive types
+Serializer.register(Number, {
+  toPlain: (value) => value.toString(),
+  fromPlain: (value) => Number(value),
+});
+
+Serializer.register(String, {
+  toPlain: (value) => String(value),
+  fromPlain: (value) => String(value),
+});
+
+Serializer.register(Boolean, {
+  toPlain: (value) => Boolean(value),
+  fromPlain: (value) => Boolean(value),
+});
+```
+
+### Complex Types
+
+```typescript
+// Built-in handlers for complex types
+Serializer.register(Map, {
+  toPlain: (value) => Array.from(value.entries()),
+  fromPlain: (value) => new Map(value),
+});
+
+Serializer.register(Set, {
+  toPlain: (value) => Array.from(value.values()),
+  fromPlain: (value) => new Set(value),
+});
+
+Serializer.register(Date, {
+  toPlain: (value) => value.toISOString(),
+  fromPlain: (value) => new Date(value),
+});
+```
+
+## Implementation Examples
 
 Most parts of the framework implement the internal [`Serializable`](/src/internals/serializable.ts) class, which exposes the following methods.
 
@@ -36,11 +170,11 @@ Most parts of the framework implement the internal [`Serializable`](/src/interna
 - `fromSerialized` (static, creates the new instance from the given serialized input)
 - `fromSnapshot` (static, creates the new instance from the given snapshot)
 
-See the direct usage on the following memory example.
+### With tools
 
 <!-- embedme examples/serialization/memory.ts -->
 
-```ts
+```typescript
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
@@ -66,6 +200,54 @@ await deserialized.add(
 ```
 
 _Source: [examples/serialization/memory.ts](/examples/serialization/memory.ts)_
+
+### Custom Class Registration
+
+```typescript
+class UserProfile {
+  constructor(
+    public name: string,
+    public createdAt: Date,
+  ) {}
+}
+
+Serializer.register(UserProfile, {
+  toPlain: (instance) => ({
+    name: instance.name,
+    createdAt: instance.createdAt,
+  }),
+  fromPlain: (data) => new UserProfile(data.name, new Date(data.createdAt)),
+  // For circular references
+  createEmpty: () => new UserProfile("", new Date()),
+  updateInstance: (instance, update) => {
+    Object.assign(instance, update);
+  },
+});
+```
+
+### Handling Circular References
+
+```typescript
+class Node {
+  constructor(
+    public value: string,
+    public next?: Node,
+  ) {}
+}
+
+Serializer.register(Node, {
+  toPlain: (instance) => ({
+    value: instance.value,
+    next: instance.next,
+  }),
+  fromPlain: (data) => new Node(data.value, data.next),
+  createEmpty: () => new Node(""),
+  updateInstance: (instance, update) => {
+    instance.value = update.value;
+    instance.next = update.next;
+  },
+});
+```
 
 ### Serializing unknowns
 
@@ -171,3 +353,62 @@ _Source: [examples/serialization/context.ts](/examples/serialization/context.ts)
 >
 > Ensuring that all classes are registered in advance can be annoying, but there's a good reason for that.
 > If we imported all the classes for you, that would significantly increase your application's size and bootstrapping time + you would have to install all peer dependencies that you may not even need.
+
+## Best Practices
+
+1. **Type Registration**
+
+   ```typescript
+   // Register types before using them
+   Serializer.register(CustomType, {
+     toPlain: (value) => ({
+       /* ... */
+     }),
+     fromPlain: (data) => new CustomType(/* ... */),
+     createEmpty: () => new CustomType(),
+     updateInstance: (instance, update) => {
+       // Update logic
+     },
+   });
+   ```
+
+2. **Error Handling**
+
+   ```typescript
+   try {
+     const serialized = Serializer.serialize(data);
+   } catch (error) {
+     if (error instanceof SerializerError) {
+       // Handle serialization errors
+     }
+   }
+   ```
+
+3. **Circular Reference Management**
+
+   ```typescript
+   // Always implement createEmpty and updateInstance
+   // for classes that might have circular references
+   createEmpty: () => new CustomType(),
+   updateInstance: (instance, update) => {
+     Object.assign(instance, update);
+   }
+   ```
+
+4. **Performance Optimization**
+   ```typescript
+   // Cache serialization results when appropriate
+   class SerializableCache {
+     @Cache()
+     serializeData(data: any) {
+       return Serializer.serialize(data);
+     }
+   }
+   ```
+
+## See Also
+
+- [Memory System](./memory.md)
+- [Cache System](./cache.md)
+- [Agent System](./agent.md)
+- [Tools System](./tools.md)

@@ -1,81 +1,159 @@
 # Cache
 
-> [!TIP]
->
-> Location within the framework `bee-agent-framework/cache`.
+The `BaseCache` class is the foundation of the Bee Framework's caching system, providing the core interface and functionality for storing and retrieving computation results and data. It enables performance optimization through temporary storage of expensive operations' results and state management across framework components.
 
-Caching is a process used to temporarily store copies of data or computations in a cache (a storage location) to facilitate faster access upon future requests. The primary purpose of caching is to improve the efficiency and performance of systems by reducing the need to repeatedly fetch or compute the same data from a slower or more resource-intensive source.
+## Overview
 
-## Usage
+`BaseCache` serves as the abstract base class that defines the standard interface for all cache implementations in the framework. It provides consistent methods for data storage, retrieval, and cache management while supporting different caching strategies and persistence mechanisms.
 
-### Capabilities showcase
+## Architecture
 
-<!-- embedme examples/cache/unconstrainedCache.ts -->
+```mermaid
+classDiagram
+    class BaseCache {
+        +boolean enabled
+        +size()
+        +set(key: string, value: T)
+        +get(key: string)
+        +has(key: string)
+        +delete(key: string)
+        +clear()
+    }
 
-```ts
-import { UnconstrainedCache } from "bee-agent-framework/cache/unconstrainedCache";
+    class UnconstrainedCache {
+        -Map storage
+    }
 
-const cache = new UnconstrainedCache();
+    class SlidingCache {
+        -number maxSize
+        -number ttl
+        -SlidingTaskMap provider
+    }
 
-// Save
-await cache.set("a", 1);
-await cache.set("b", 2);
+    class FileCache {
+        -string fullPath
+        -BaseCache provider
+        +get source()
+        +reload()
+    }
 
-// Read
-const result = await cache.get("a");
-console.log(result); // 1
+    class CacheDecorator {
+        +CacheKeyFn cacheKey
+        +number ttl
+        +boolean enabled
+        +get(key: string)
+        +clear()
+    }
 
-// Meta
-console.log(cache.enabled); // true
-console.log(await cache.has("a")); // true
-console.log(await cache.has("b")); // true
-console.log(await cache.has("c")); // false
-console.log(await cache.size()); // 2
+    BaseCache <|-- UnconstrainedCache
+    BaseCache <|-- SlidingCache
+    BaseCache <|-- FileCache
+    BaseCache <-- CacheDecorator
 
-// Delete
-await cache.delete("a");
-console.log(await cache.has("a")); // false
-
-// Clear
-await cache.clear();
-console.log(await cache.size()); // 0
 ```
 
-_Source: [examples/cache/unconstrainedCache.ts](/examples/cache/unconstrainedCache.ts)_
+## Core Properties
 
-### Caching function output + intermediate steps
+| Property  | Type          | Description                        |
+| --------- | ------------- | ---------------------------------- |
+| `enabled` | `boolean`     | Whether caching is active          |
+| `storage` | `Map/TaskMap` | Internal storage mechanism         |
+| `ttl`     | `number`      | Time-to-live for cache entries     |
+| `maxSize` | `number`      | Maximum cache size (if applicable) |
 
-<!-- embedme examples/cache/unconstrainedCacheFunction.ts -->
+## Cache Implementations
 
-```ts
+### UnconstrainedCache
+
+Provides unlimited storage capacity with no automatic eviction.
+
+```typescript
 import { UnconstrainedCache } from "bee-agent-framework/cache/unconstrainedCache";
 
 const cache = new UnconstrainedCache<number>();
 
-async function fibonacci(n: number): Promise<number> {
-  const cacheKey = n.toString();
-  const cached = await cache.get(cacheKey);
-  if (cached !== undefined) {
-    return cached;
-  }
-
-  const result = n < 1 ? 0 : n <= 2 ? 1 : (await fibonacci(n - 1)) + (await fibonacci(n - 2));
-  await cache.set(cacheKey, result);
-  return result;
-}
-
-console.info(await fibonacci(10)); // 55
-console.info(await fibonacci(9)); // 34 (retrieved from cache)
-console.info(`Cache size ${await cache.size()}`); // 10
+await cache.set("key1", 100);
+const value = await cache.get("key1"); // 100
+console.log(await cache.size()); // 1
 ```
 
-_Source: [examples/cache/unconstrainedCacheFunction.ts](/examples/cache/unconstrainedCacheFunction.ts)_
+_Source: [examples/cache/unconstrainedCache.ts](/examples/cache/unconstrainedCache.ts)_
 
-### Usage with tools
+### SlidingCache
 
-<!-- embedme examples/cache/toolCache.ts -->
+Maintains a fixed-size cache with TTL support and LRU eviction.
 
-```ts
+```typescript
+import { SlidingCache } from "bee-agent-framework/cache/slidingCache";
+
+const cache = new SlidingCache<string>({
+  size: 1000, // Maximum entries
+  ttl: 60 * 1000, // 1 minute TTL
+});
+
+await cache.set("user:123", userData);
+// Oldest entries are removed when time limit is reached
+```
+
+_Source: [examples/cache/toolCache.ts](/examples/cache/toolCache.ts)_
+
+### FileCache
+
+Persists cache data to the filesystem.
+
+<!-- embedme examples/cache/fileCache.ts -->
+
+```typescript
+import { FileCache } from "bee-agent-framework/cache/fileCache";
+
+const cache = new FileCache<UserData>({
+  fullPath: "/path/to/cache.json",
+});
+
+await cache.set("user:123", userData);
+// Data is automatically persisted to disk
+```
+
+_Source: [examples/cache/fileCache.ts](/examples/cache/fileCache.ts)_
+
+> [!NOTE]
+>
+> Provided location (`fullPath`) doesn't have to exist. It gets automatically created when needed.
+
+> [!NOTE]
+>
+> Every modification to the cache (adding, deleting, clearing) immediately updates the target file.
+
+### Cache Decorator
+
+Method-level caching using TypeScript decorators.
+
+<!-- embedme examples/cache/decoratorCache.ts -->
+
+```typescript
+import { Cache } from "bee-agent-framework/cache/decoratorCache";
+
+class Generator {
+  @Cache()
+  get(seed: number) {
+    return (Math.random() * 1000) / Math.max(seed, 1);
+  }
+}
+
+const generator = new Generator();
+const a = generator.get(5);
+const b = generator.get(5);
+console.info(a === b); // true
+console.info(a === generator.get(6)); // false
+```
+
+_Source: [examples/cache/decoratorCache.ts](/examples/cache/decoratorCache.ts)_
+
+## Integration Examples
+
+### With Tools
+
+```typescript
 import { SlidingCache } from "bee-agent-framework/cache/slidingCache";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 
@@ -86,23 +164,22 @@ const ddg = new WikipediaTool({
   }),
 });
 
+// Results are cached automatically
 const response = await ddg.run({
   query: "United States",
 });
-// upcoming requests with the EXACTLY same input will be retrieved from the cache
+const response2 = await ddg.run({
+  query: "United States",
+}); // From cache
 ```
 
 _Source: [examples/cache/toolCache.ts](/examples/cache/toolCache.ts)_
 
-> [!IMPORTANT]
->
-> Cache key is created by serializing function parameters (the order of keys in the object does not matter).
-
-### Usage with LLMs
+### With LLMs
 
 <!-- embedme examples/cache/llmCache.ts -->
 
-```ts
+```typescript
 import { SlidingCache } from "bee-agent-framework/cache/slidingCache";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
@@ -132,207 +209,48 @@ _Source: [examples/cache/llmCache.ts](/examples/cache/llmCache.ts)_
 >
 > Caching for non-chat LLMs works exactly the same way.
 
-## Cache types
+## Cache Key Generation
 
-The framework provides multiple out-of-the-box cache implementations.
+### Built-in Key Generators
 
-### UnconstrainedCache
+```typescript
+// Object-based hashing
+const objectKey = ObjectHashKeyFn(input);
 
-Unlimited in size.
+// Singleton key (same key always)
+const singleKey = SingletonCacheKeyFn(input);
 
-```ts
-import { UnconstrainedCache } from "bee-agent-framework/cache/unconstrainedCache";
-const cache = new UnconstrainedCache();
+// WeakRef-based key generation
+const weakKey = WeakRefKeyFn(input);
 
-await cache.set("a", 1);
-console.log(await cache.has("a")); // true
-console.log(await cache.size()); // 1
+// JSON stringification
+const jsonKey = JSONCacheKeyFn(input);
 ```
 
-### SlidingCache
+### Custom Key Generation
 
-Keeps last `k` entries in the memory. The oldest ones are deleted.
+```typescript
+const customKeyFn: CacheKeyFn = (...args: any[]) => {
+  return args.map(arg =>
+    typeof arg === 'object'
+      ? JSON.stringify(arg)
+      : String(arg)
+  ).join(':');
+};
 
-<!-- embedme examples/cache/slidingCache.ts -->
-
-```ts
-import { SlidingCache } from "bee-agent-framework/cache/slidingCache";
-
-const cache = new SlidingCache<number>({
-  size: 3, // (required) number of items that can be live in the cache at a single moment
-  ttl: 1000, // (optional, default is Infinity) Time in milliseconds after the element is removed from a cache
-});
-
-await cache.set("a", 1);
-await cache.set("b", 2);
-await cache.set("c", 3);
-
-await cache.set("d", 4); // overflow - cache internally removes the oldest entry (key "a")
-console.log(await cache.has("a")); // false
-console.log(await cache.size()); // 3
+@Cache({
+  cacheKey: customKeyFn
+})
+method() { }
 ```
 
-_Source: [examples/cache/slidingCache.ts](/examples/cache/slidingCache.ts)_
-
-### FileCache
-
-One may want to persist data to a file so that the data can be later loaded. In that case the `FileCache` is ideal candidate.
-You have to provide a location where the cache is persisted.
-
-<!-- embedme examples/cache/fileCache.ts -->
-
-```ts
-import { FileCache } from "bee-agent-framework/cache/fileCache";
-import * as os from "node:os";
-
-const cache = new FileCache({
-  fullPath: `${os.tmpdir()}/bee_file_cache_${Date.now()}.json`,
-});
-console.log(`Saving cache to "${cache.source}"`);
-await cache.set("abc", { firstName: "John", lastName: "Doe" });
-```
-
-_Source: [examples/cache/fileCache.ts](/examples/cache/fileCache.ts)_
-
-> [!NOTE]
->
-> Provided location (`fullPath`) doesn't have to exist. It gets automatically created when needed.
-
-> [!NOTE]
->
-> Every modification to the cache (adding, deleting, clearing) immediately updates the target file.
-
-#### Using a custom provider
-
-<!-- embedme examples/cache/fileCacheCustomProvider.ts -->
-
-```ts
-import { FileCache } from "bee-agent-framework/cache/fileCache";
-import { UnconstrainedCache } from "bee-agent-framework/cache/unconstrainedCache";
-import os from "node:os";
-
-const memoryCache = new UnconstrainedCache<number>();
-await memoryCache.set("a", 1);
-
-const fileCache = await FileCache.fromProvider(memoryCache, {
-  fullPath: `${os.tmpdir()}/bee_file_cache.json`,
-});
-console.log(`Saving cache to "${fileCache.source}"`);
-console.log(await fileCache.get("a")); // 1
-```
-
-_Source: [examples/cache/fileCacheCustomProvider.ts](/examples/cache/fileCacheCustomProvider.ts)_
-
-### NullCache
-
-The special type of cache is `NullCache` which implements the `BaseCache` interface but does nothing.
-
-The reason for implementing is to enable [Null object pattern](https://en.wikipedia.org/wiki/Null_object_pattern).
-
-### @Cache (decorator cache)
-
-<!-- embedme examples/cache/decoratorCache.ts -->
-
-```ts
-import { Cache } from "bee-agent-framework/cache/decoratorCache";
-
-class Generator {
-  @Cache()
-  get(seed: number) {
-    return (Math.random() * 1000) / Math.max(seed, 1);
-  }
-}
-
-const generator = new Generator();
-const a = generator.get(5);
-const b = generator.get(5);
-console.info(a === b); // true
-console.info(a === generator.get(6)); // false
-```
-
-_Source: [examples/cache/decoratorCache.ts](/examples/cache/decoratorCache.ts)_
-
-**Complex example**
-
-<!-- embedme examples/cache/decoratorCacheComplex.ts -->
-
-```ts
-import { Cache, SingletonCacheKeyFn } from "bee-agent-framework/cache/decoratorCache";
-
-class MyService {
-  @Cache({
-    cacheKey: SingletonCacheKeyFn,
-    ttl: 3600,
-    enumerable: true,
-    enabled: true,
-  })
-  get id() {
-    return Math.floor(Math.random() * 1000);
-  }
-
-  reset() {
-    Cache.getInstance(this, "id").clear();
-  }
-}
-
-const service = new MyService();
-const a = service.id;
-console.info(a === service.id); // true
-service.reset();
-console.info(a === service.id); // false
-```
-
-_Source: [examples/cache/decoratorCacheComplex.ts](/examples/cache/decoratorCacheComplex.ts)_
-
-> [!NOTE]
->
-> Default `cacheKey` function is `ObjectHashKeyFn`
-
-> [!CAUTION]
->
-> Calling an annotated method with the `@Cache` decorator with different parameters (despite the fact you are not using them) yields in cache bypass (different arguments = different cache key) generated.
-> Be aware of that. If you want your method always to return the same response, use `SingletonCacheKeyFn`.
-
-### CacheFn
-
-Because previously mentioned `CacheDecorator` can be applied only to class methods/getter the framework
-provides a way how to do caching on a function level.
-
-<!-- embedme examples/cache/cacheFn.ts -->
-
-```ts
-import { CacheFn } from "bee-agent-framework/cache/decoratorCache";
-import { setTimeout } from "node:timers/promises";
-
-const getSecret = CacheFn.create(
-  async () => {
-    // instead of mocking response you would do a real fetch request
-    const response = await Promise.resolve({ secret: Math.random(), expiresIn: 100 });
-    getSecret.updateTTL(response.expiresIn);
-    return response.secret;
-  },
-  {}, // options object
-);
-
-const token = await getSecret();
-console.info(token === (await getSecret())); // true
-await setTimeout(150);
-console.info(token === (await getSecret())); // false
-```
-
-_Source: [examples/cache/cacheFn.ts](/examples/cache/cacheFn.ts)_
-
-> [!NOTE]
->
-> Internally, the function is wrapped as a class; therefore, the same rules apply here as if it were a method annotated with the `@Cache` decorator.
-
-## Creating a custom cache provider
+## Custom cache provider implementation
 
 To create your cache implementation, you must implement the `BaseCache` class.
 
 <!-- embedme examples/cache/custom.ts -->
 
-```ts
+```typescript
 import { BaseCache } from "bee-agent-framework/cache/base";
 import { NotImplementedError } from "bee-agent-framework/errors";
 
@@ -373,4 +291,60 @@ export class CustomCache<T> extends BaseCache<T> {
 
 _Source: [examples/cache/custom.ts](/examples/cache/custom.ts)_
 
-The simplest implementation is `UnconstrainedCache`, which can be found [here](/src/cache/unconstrainedCache.ts).
+## Best Practices
+
+1. **Cache Strategy Selection**
+
+   ```typescript
+   // For memory-sensitive applications
+   const cache = new SlidingCache({
+     size: 1000,
+     ttl: 3600 * 1000,
+   });
+
+   // For persistent storage needs
+   const cache = new FileCache({
+     fullPath: "/path/to/cache.json",
+   });
+   ```
+
+2. **TTL Management**
+
+   ```typescript
+   // Set appropriate TTL for data freshness
+   @Cache({
+     ttl: 5 * 60 * 1000, // 5 minutes
+     enabled: true
+   })
+   getData() { }
+   ```
+
+3. **Cache Invalidation**
+
+   ```typescript
+   // Clear specific entries
+   await cache.delete("key");
+
+   // Clear entire cache
+   await cache.clear();
+
+   // Selective clearing with decorators
+   Cache.getInstance(this, "methodName").clear();
+   ```
+
+4. **Resource Management**
+
+   ```typescript
+   // Monitor cache size
+   const size = await cache.size();
+
+   // Enable/disable as needed
+   cache.enabled = false;
+   ```
+
+## See Also
+
+- [Agent System](./agent.md)
+- [Tools System](./tools.md)
+- [LLM Integration](./llms.md)
+- [Serialization](./serialization.md)

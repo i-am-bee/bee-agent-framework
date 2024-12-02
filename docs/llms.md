@@ -1,4 +1,59 @@
-# LLMs (inference)
+# LLM
+
+The `BaseLLM` class is the foundation of the Bee Framework's language model integration system, providing the core interface and functionality for interacting with various LLM providers. It serves as the abstract base class that all LLM implementations must extend.
+
+## Overview
+
+`BaseLLM` defines the standard interface and basic functionality for LLM interactions in the framework. It handles text generation, chat completions, token management, and provides a consistent interface for different LLM implementations like chat-based, completion-based, and specialized LLM types.
+
+## Architecture
+
+```mermaid
+classDiagram
+    class BaseLLM {
+        +string modelId
+        +ExecutionOptions executionOptions
+        +LLMCache cache
+        +generate(input: TInput, options?: TGenerateOptions)
+        +stream(input: TInput, options?: StreamGenerateOptions)
+        +tokenize(input: TInput)
+        +meta()
+        #_generate(input, options, run)*
+        #_stream(input, options, run)*
+        #_mergeChunks(chunks: TOutput[])
+    }
+
+    class LLM {
+        +LLMInput input
+    }
+
+    class ChatLLM {
+        +BaseMessage[] input
+    }
+
+    class BaseLLMOutput {
+        +merge(other: BaseLLMOutput)
+        +getTextContent()
+        +toString()
+        +mergeImmutable(other)
+    }
+
+    class ChatLLMOutput {
+        +BaseMessage[] messages
+    }
+
+    BaseLLM <|-- LLM
+    BaseLLM <|-- ChatLLM
+    BaseLLMOutput <|-- ChatLLMOutput
+
+    class BaseMessage {
+        +string role
+        +string text
+        +BaseMessageMeta meta
+    }
+
+    ChatLLM o-- BaseMessage
+```
 
 > [!TIP]
 >
@@ -6,238 +61,199 @@
 >
 > Location for base abstraction within the framework `bee-agent-framework/llms`.
 
-A Large Language Model (LLM) is an AI designed to understand and generate human-like text.
-Trained on extensive text data, LLMs learn language patterns, grammar, context, and basic reasoning to perform tasks like text completion, translation, summarization, and answering questions.
+## Core Properties
 
-To unify differences between various APIs, the framework defines a common interface—a set of actions that can be performed with it.
+| Property           | Type               | Description                                   |
+| ------------------ | ------------------ | --------------------------------------------- |
+| `modelId`          | `string`           | Identifier for the LLM model                  |
+| `executionOptions` | `ExecutionOptions` | Configuration for execution behavior          |
+| `cache`            | `LLMCache`         | Cache system for LLM responses                |
+| `emitter`          | `Emitter`          | Event emitter for monitoring LLM interactions |
 
-## Providers (adapters)
+## Main Methods
 
-| Name                                                                      | LLM                        | Chat LLM                                      | Structured output (constrained decoding) |
-| ------------------------------------------------------------------------- | -------------------------- | --------------------------------------------- | ---------------------------------------- |
-| `WatsonX`                                                                 | ✅                         | ⚠️ (model specific template must be provided) | ❌                                       |
-| `Ollama`                                                                  | ✅                         | ✅                                            | ⚠️ (JSON only)                           |
-| `OpenAI`                                                                  | ❌                         | ✅                                            | ⚠️ (JSON schema only)                    |
-| `LangChain`                                                               | ⚠️ (depends on a provider) | ⚠️ (depends on a provider)                    | ❌                                       |
-| `Groq`                                                                    | ❌                         | ✅                                            | ⚠️ (JSON object only)                    |
-| `AWS Bedrock`                                                             | ❌                         | ✅                                            | ⚠️ (JSON only) - model specific          |
-| `VertexAI`                                                                | ✅                         | ✅                                            | ⚠️ (JSON only)                           |
-| `BAM (Internal)`                                                          | ✅                         | ⚠️ (model specific template must be provided) | ✅                                       |
-| ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                            |                                               |                                          |
+### Public Methods
 
-All providers' examples can be found in [examples/llms/providers](/examples/llms/providers).
+#### `generate(input: TInput, options?: TGenerateOptions): Promise<TOutput>`
 
-Are you interested in creating your own adapter? Jump to the [adding a new provider](#adding-a-new-provider-adapter) section.
+Generates a response from the LLM based on the provided input.
 
-## Usage
-
-### Plain text generation
-
-<!-- embedme examples/llms/text.ts -->
-
-```ts
-import "dotenv/config.js";
-import { createConsoleReader } from "examples/helpers/io.js";
-import { WatsonXLLM } from "bee-agent-framework/adapters/watsonx/llm";
-
-const llm = new WatsonXLLM({
-  modelId: "google/flan-ul2",
-  projectId: process.env.WATSONX_PROJECT_ID,
-  apiKey: process.env.WATSONX_API_KEY,
-  region: process.env.WATSONX_REGION, // (optional) default is us-south
-  parameters: {
-    decoding_method: "greedy",
-    max_new_tokens: 50,
-  },
+```typescript
+// Text LLM
+const llm = new TextLLM({ modelId: "model-name" });
+const response = await llm.generate("What is the capital of France?", {
+  stream: false,
+  signal: AbortSignal.timeout(30000),
 });
 
-const reader = createConsoleReader();
-const prompt = await reader.prompt();
-const response = await llm.generate(prompt);
-reader.write(`LLM 🤖 (text) : `, response.getTextContent());
-reader.close();
+// Chat LLM
+const chatLlm = new ChatLLM({ modelId: "chat-model" });
+const messages = [
+  BaseMessage.of({
+    role: "user",
+    text: "Who won the 2024 Super Bowl?",
+  }),
+];
+const chatResponse = await chatLlm.generate(messages);
 ```
 
-_Source: [examples/llms/text.ts](/examples/llms/text.ts)_
+#### `stream(input: TInput, options?: StreamGenerateOptions): AsyncGenerator<TOutput>`
 
-> [!NOTE]
->
-> The `generate` method returns a class that extends the base [`BaseLLMOutput`](/src/llms/base.ts) class.
-> This class allows you to retrieve the response as text using the `getTextContent` method and other useful metadata.
+Streams the LLM's response as it's being generated.
 
-> [!TIP]
->
-> You can enable streaming communication (internally) by passing `{ stream: true }` as a second parameter to the `generate` method.
-
-### Chat text generation
-
-<!-- embedme examples/llms/chat.ts -->
-
-```ts
-import "dotenv/config.js";
-import { createConsoleReader } from "examples/helpers/io.js";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
-
-const llm = new OllamaChatLLM();
-
-const reader = createConsoleReader();
-
-for await (const { prompt } of reader) {
-  const response = await llm.generate([
-    BaseMessage.of({
-      role: Role.USER,
-      text: prompt,
-    }),
-  ]);
-  reader.write(`LLM 🤖 (txt) : `, response.getTextContent());
-  reader.write(`LLM 🤖 (raw) : `, JSON.stringify(response.finalResult));
+```typescript
+const llm = new ChatLLM({ modelId: "streaming-model" });
+for await (const chunk of llm.stream(messages, {
+  signal: AbortSignal.timeout(30000),
+})) {
+  console.log(chunk.getTextContent());
 }
 ```
 
-_Source: [examples/llms/chat.ts](/examples/llms/chat.ts)_
+#### `tokenize(input: TInput): Promise<BaseLLMTokenizeOutput>`
 
-> [!NOTE]
->
-> The `generate` method returns a class that extends the base [`ChatLLMOutput`](/src/llms/chat.ts) class.
-> This class allows you to retrieve the response as text using the `getTextContent` method and other useful metadata.
-> To retrieve all messages (chunks) access the `messages` property (getter).
+Returns token information for the provided input.
 
-> [!TIP]
->
-> You can enable streaming communication (internally) by passing `{ stream: true }` as a second parameter to the `generate` method.
+```typescript
+const tokenInfo = await llm.tokenize("Hello, world!");
+console.log(tokenInfo.tokensCount); // Number of tokens
+console.log(tokenInfo.tokens); // Array of token strings if available
+```
 
-#### Streaming
+## Supported Providers
 
-<!-- embedme examples/llms/chatStream.ts -->
+| Provider    | Text Generation | Chat | Structured Output |
+| ----------- | --------------- | ---- | ----------------- |
+| WatsonX     | ✅              | ⚠️   | ❌                |
+| Ollama      | ✅              | ✅   | ⚠️                |
+| OpenAI      | ❌              | ✅   | ⚠️                |
+| LangChain   | ⚠️              | ⚠️   | ❌                |
+| Groq        | ❌              | ✅   | ⚠️                |
+| AWS Bedrock | ❌              | ✅   | ⚠️                |
+| VertexAI    | ✅              | ✅   | ⚠️                |
 
-```ts
-import "dotenv/config.js";
-import { createConsoleReader } from "examples/helpers/io.js";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+✅ Full support
+⚠️ Partial support/limitations
+❌ Not supported
 
-const llm = new OllamaChatLLM();
+## Implementation Example
 
-const reader = createConsoleReader();
+Here's an example of implementing a custom LLM provider:
 
-for await (const { prompt } of reader) {
-  for await (const chunk of llm.stream([
-    BaseMessage.of({
-      role: Role.USER,
-      text: prompt,
-    }),
-  ])) {
-    reader.write(`LLM 🤖 (txt) : `, chunk.getTextContent());
-    reader.write(`LLM 🤖 (raw) : `, JSON.stringify(chunk.finalResult));
+```typescript
+class CustomLLMOutput extends BaseLLMOutput {
+  constructor(
+    private content: string,
+    private metadata: Record<string, any> = {},
+  ) {
+    super();
+  }
+
+  merge(other: CustomLLMOutput): void {
+    this.content += other.content;
+    Object.assign(this.metadata, other.metadata);
+  }
+
+  getTextContent(): string {
+    return this.content;
+  }
+
+  toString(): string {
+    return this.content;
+  }
+}
+
+class CustomLLM extends LLM<CustomLLMOutput> {
+  public readonly emitter = new Emitter<GenerateCallbacks>();
+
+  async meta(): Promise<LLMMeta> {
+    return {
+      tokenLimit: 4096,
+    };
+  }
+
+  async tokenize(input: string): Promise<BaseLLMTokenizeOutput> {
+    return {
+      tokensCount: Math.ceil(input.length / 4),
+    };
+  }
+
+  protected async _generate(
+    input: string,
+    options: GenerateOptions,
+    run: RunContext,
+  ): Promise<CustomLLMOutput> {
+    // Implementation for one-shot generation
+    const response = await this.callApi(input);
+    return new CustomLLMOutput(response.text, response.meta);
+  }
+
+  protected async *_stream(
+    input: string,
+    options: StreamGenerateOptions,
+    run: RunContext,
+  ): AsyncGenerator<CustomLLMOutput> {
+    // Implementation for streaming generation
+    for await (const chunk of this.streamApi(input)) {
+      yield new CustomLLMOutput(chunk);
+    }
   }
 }
 ```
 
-_Source: [examples/llms/chatStream.ts](/examples/llms/chatStream.ts)_
+## Best Practices
 
-#### Callback (Emitter)
+1. **Error Handling**
 
-<!-- embedme examples/llms/chatCallback.ts -->
+   ```typescript
+   try {
+     const response = await llm.generate(input);
+   } catch (error) {
+     if (error instanceof LLMFatalError) {
+       // Handle unrecoverable errors
+     } else if (error instanceof LLMError) {
+       // Handle recoverable errors
+     }
+   }
+   ```
 
-```ts
-import "dotenv/config.js";
-import { createConsoleReader } from "examples/helpers/io.js";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+2. **Stream Management**
 
-const llm = new OllamaChatLLM();
+   ```typescript
+   const controller = new AbortController();
+   setTimeout(() => controller.abort(), 30000);
 
-const reader = createConsoleReader();
+   for await (const chunk of llm.stream(input, {
+     signal: controller.signal,
+   })) {
+     // Process chunks
+   }
+   ```
 
-for await (const { prompt } of reader) {
-  const response = await llm
-    .generate(
-      [
-        BaseMessage.of({
-          role: Role.USER,
-          text: prompt,
-        }),
-      ],
-      {},
-    )
-    .observe((emitter) =>
-      emitter.match("*", (data, event) => {
-        reader.write(`LLM 🤖 (event: ${event.name})`, JSON.stringify(data));
+3. **Event Handling**
 
-        // if you want to close the stream prematurely, just uncomment the following line
-        // callbacks.abort()
-      }),
-    );
+   ```typescript
+   const response = await llm.generate(input).observe((emitter) => {
+     emitter.on("newToken", ({ data }) => {
+       console.log("New token:", data.value.getTextContent());
+     });
+     emitter.on("error", ({ data }) => {
+       console.error("Error:", data.error);
+     });
+   });
+   ```
 
-  reader.write(`LLM 🤖 (txt) : `, response.getTextContent());
-  reader.write(`LLM 🤖 (raw) : `, JSON.stringify(response.finalResult));
-}
-```
+4. **Cache Usage**
+   ```typescript
+   const llm = new CustomLLM({
+     modelId: "model-name",
+     cache: new CustomCache(),
+   });
+   ```
 
-_Source: [examples/llms/chatCallback.ts](/examples/llms/chatCallback.ts)_
+## See Also
 
-### Structured generation
-
-<!-- embedme examples/llms/structured.ts -->
-
-```ts
-import "dotenv/config.js";
-import { z } from "zod";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
-import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
-
-const llm = new OllamaChatLLM();
-const driver = new JsonDriver(llm);
-const response = await driver.generate(
-  z.union([
-    z.object({
-      firstName: z.string().min(1),
-      lastName: z.string().min(1),
-      address: z.string(),
-      age: z.number().int().min(1),
-      hobby: z.string(),
-    }),
-    z.object({
-      error: z.string(),
-    }),
-  ]),
-  [
-    BaseMessage.of({
-      role: Role.USER,
-      text: "Generate a profile of a citizen of Europe.",
-    }),
-  ],
-);
-console.info(response);
-```
-
-_Source: [examples/llms/structured.ts](/examples/llms/structured.ts)_
-
-## Adding a new provider (adapter)
-
-To use an inference provider that is not mentioned in our providers list feel free to [create a request](https://github.com/i-am-bee/bee-agent-framework/discussions).
-
-If approved and you want to create it on your own, you must do the following things. Let's assume the name of your provider is `Custom.`
-
-- Base location within the framework: `bee-agent-framework/adapters/custom`
-  - Text LLM (filename): `llm.ts` ([example implementation](/examples/llms/providers/customProvider.ts))
-  - Chat LLM (filename): `chat.ts` ([example implementation](/examples/llms/providers/customChatProvider.ts))
-
-> [!IMPORTANT]
->
-> If the target provider provides an SDK, use it.
-
-> [!IMPORTANT]
->
-> All provider-related dependencies (if any) must be included in `devDependencies` and `peerDependencies` in the [`package.json`](/package.json).
-
-> [!TIP]
->
-> To simplify work with the target RestAPI feel free to use the helper [`RestfulClient`](/src/internals/fetcher.ts) class.
-> The client usage can be seen in the WatsonX LLM Adapter [here](/src/adapters/watsonx/llm.ts).
-
-> [!TIP]
->
-> Parsing environment variables should be done via helper functions (`parseEnv` / `hasEnv` / `getEnv`) that can be found [here](/src/internals/env.ts).
+- [Memory System](./memory.md)
+- [Agent System](./agent.md)
+- [Providers Guide](./providers.md)
+- [Event System](./events.md)

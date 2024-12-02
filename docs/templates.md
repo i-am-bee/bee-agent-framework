@@ -1,47 +1,89 @@
-# Templates (Prompt Templates)
+# Template
 
-> [!TIP]
->
-> Location within the framework `bee-agent-framework/template`.
+The `PromptTemplate` class is the foundation of the Bee Framework's templating system, providing robust functionality for creating, validating, and rendering structured prompts. Built on top of Mustache.js, it adds type safety, schema validation, and advanced template manipulation capabilities.
 
-**Template** is a predefined structure or format used to create consistent documents or outputs. It often includes placeholders for specific information that can be filled in later.
+## Overview
 
-**Prompt template**, on the other hand, is a specific type of template used in the context of language models or AI applications.
-It consists of a structured prompt that guides the model in generating a response or output. The prompt often includes variables or placeholders for user input, which helps to elicit more relevant or targeted responses.
+`PromptTemplate` serves as the core system for managing prompt templates throughout the framework. It enables the creation of type-safe, validated templates with support for complex data structures, custom functions, and advanced rendering capabilities.
 
-The Framework exposes such functionality via the [`PromptTemplate`](/src/template.ts) class, which is based on the well-known [`Mustache.js`](https://github.com/janl/mustache.js) template system, which is supported almost in every programming language.
-In addition, the framework provides type safety and validation against appropriate [`code](https://zod.dev/) schema, as you can see in the following examples.
+## Architecture
 
-> [!TIP]
->
-> The Prompt Template concept is used anywhere - especially in our agents.
+```mermaid
+classDiagram
+    class PromptTemplate {
+        +string template
+        +ZodSchema schema
+        +Object defaults
+        +Object functions
+        +render(input: Input)
+        +fork(customizer: Function)
+        +validateInput(input: unknown)
+        #config: TemplateConfig
+    }
 
-## Usage
+    class TemplateConfig {
+        +string template
+        +SchemaObject schema
+        +Object defaults
+        +Object functions
+        +boolean escape
+        +Array customTags
+    }
 
-### Primitives
+    class TemplateError {
+        +PromptTemplate template
+        +string message
+        +Object context
+    }
 
-<!-- embedme examples/templates/primitives.ts -->
+    class ValidationError {
+        +PromptTemplate template
+        +ValidatorErrors errors
+    }
 
-```ts
+    PromptTemplate *-- TemplateConfig
+    PromptTemplate --> TemplateError
+    TemplateError <|-- ValidationError
+```
+
+## Core Properties
+
+| Property    | Type        | Description                           |
+| ----------- | ----------- | ------------------------------------- |
+| `template`  | `string`    | Template string with placeholders     |
+| `schema`    | `ZodSchema` | Validation schema for inputs          |
+| `defaults`  | `Object`    | Default values for template variables |
+| `functions` | `Object`    | Custom rendering functions            |
+
+## Main Methods
+
+### Public Methods
+
+#### `render(input: TemplateInput): string`
+
+Renders the template with provided input data.
+
+```typescript
 import { PromptTemplate } from "bee-agent-framework/template";
 import { z } from "zod";
 
-const greetTemplate = new PromptTemplate({
-  template: `Hello {{name}}`,
+const greetingTemplate = new PromptTemplate({
+  template: "Hello {{name}}!",
   schema: z.object({
     name: z.string(),
   }),
 });
 
-const output = greetTemplate.render({
-  name: "Alex",
+const output = greetingTemplate.render({
+  name: "Alice",
 });
-console.log(output); // Hello Alex!
+
+console.log(output); // Hello Alice!
 ```
 
 _Source: [examples/templates/primitives.ts](/examples/templates/primitives.ts)_
 
-### Arrays
+#### Arrays
 
 <!-- embedme examples/templates/arrays.ts -->
 
@@ -64,7 +106,7 @@ console.log(output); // Colors: Green,Yellow
 
 _Source: [examples/templates/arrays.ts](/examples/templates/arrays.ts)_
 
-### Objects
+#### Objects
 
 <!-- embedme examples/templates/objects.ts -->
 
@@ -92,11 +134,11 @@ console.log(output); // Expected Duration: 5ms; Retrieved: 3ms 5ms 6ms
 
 _Source: [examples/templates/objects.ts](/examples/templates/objects.ts)_
 
-### Forking
+#### `fork(customizer: Function): PromptTemplate`
 
-<!-- embedme examples/templates/forking.ts -->
+Creates a new template by modifying an existing one.
 
-```ts
+```typescript
 import { PromptTemplate } from "bee-agent-framework/template";
 import { z } from "zod";
 
@@ -110,7 +152,7 @@ const original = new PromptTemplate({
 
 const modified = original.fork((config) => ({
   ...config,
-  template: `${config.template} Your answers must be concise.`,
+  template: `${config.template} Your answers must be concise`,
   defaults: {
     name: "Bee",
   },
@@ -125,59 +167,171 @@ console.log(output); // You are a helpful assistant called Bee. Your objective i
 
 _Source: [examples/templates/forking.ts](/examples/templates/forking.ts)_
 
-### Functions
+## Template Features
 
-<!-- embedme examples/templates/functions.ts -->
+### Schema Validation
 
-```ts
-import { PromptTemplate } from "bee-agent-framework/template";
-import { z } from "zod";
-
-const messageTemplate = new PromptTemplate({
-  schema: z
-    .object({
-      text: z.string(),
-      author: z.string().optional(),
-      createdAt: z.string().datetime().optional(),
-    })
-    .passthrough(),
-  functions: {
-    formatMeta: function () {
-      if (!this.author && !this.createdAt) {
-        return "";
-      }
-
-      const author = this.author || "anonymous";
-      const createdAt = this.createdAt || new Date().toISOString();
-
-      return `\nThis message was created at ${createdAt} by ${author}.`;
-    },
-  },
-  template: `Message: {{text}}{{formatMeta}}`,
+```typescript
+const userTemplate = new PromptTemplate({
+  template: "User: {{name}}, Age: {{age}}",
+  schema: z.object({
+    name: z.string().min(1),
+    age: z.number().min(0).max(150),
+  }),
 });
 
-// Message: Hello from 2024!
-// This message was created at 2024-01-01T00:00:00.000Z by John.
-console.log(
-  messageTemplate.render({
-    text: "Hello from 2024!",
-    author: "John",
-    createdAt: new Date("2024-01-01").toISOString(),
-  }),
-);
-
-// Message: Hello from the present!
-console.log(
-  messageTemplate.render({
-    text: "Hello from the present!",
-  }),
-);
+// Throws ValidationPromptTemplateError if invalid
+userTemplate.render({
+  name: "John",
+  age: 30,
+});
 ```
 
-_Source: [examples/templates/functions.ts](/examples/templates/functions.ts)_
+### Default Values
 
-## Agents
+```typescript
+const configTemplate = new PromptTemplate({
+  template: "Server: {{host}}:{{port}}",
+  schema: z.object({
+    host: z.string(),
+    port: z.number(),
+  }),
+  defaults: {
+    host: "localhost",
+    port: 8080,
+  },
+});
+```
 
-The Bee Agent internally uses multiple prompt templates, and because now you know how to work with them, you can alter the agent’s behavior.
+### Custom Functions
 
-The internal prompt templates can be modified [here](/examples/agents/bee_advanced.ts).
+```typescript
+const messageTemplate = new PromptTemplate({
+  schema: z.object({
+    text: z.string(),
+    timestamp: z.date(),
+  }),
+  functions: {
+    formatDate() {
+      return new Date(this.timestamp).toLocaleString();
+    },
+  },
+  template: "{{text}} (Sent: {{formatDate}})",
+});
+```
+
+## Implementation Examples
+
+### Basic Template
+
+```typescript
+const simpleTemplate = new PromptTemplate({
+  template: "{{#trim}}{{#items}}{{.}},{{/items}}{{/trim}}",
+  schema: z.object({
+    items: z.array(z.string()),
+  }),
+});
+
+console.log(
+  simpleTemplate.render({
+    items: ["one", "two", "three"],
+  }),
+); // "one,two,three"
+```
+
+### Complex Template
+
+```typescript
+const profileTemplate = new PromptTemplate({
+  template: `
+    Name: {{name}}
+    Age: {{age}}
+    {{#hasHobbies}}
+    Hobbies:
+    {{#hobbies}}
+    - {{name}} ({{years}} years)
+    {{/hobbies}}
+    {{/hasHobbies}}
+  `,
+  schema: z.object({
+    name: z.string(),
+    age: z.number(),
+    hobbies: z.array(
+      z.object({
+        name: z.string(),
+        years: z.number(),
+      }),
+    ),
+  }),
+  functions: {
+    hasHobbies() {
+      return this.hobbies.length > 0;
+    },
+  },
+});
+```
+
+## Best Practices
+
+1. **Schema Definition**
+
+   ```typescript
+   // Define clear, specific schemas
+   const schema = z.object({
+     required: z.string(),
+     optional: z.number().optional(),
+     defaulted: z.string().default("value"),
+   });
+   ```
+
+2. **Error Handling**
+
+   ```typescript
+   try {
+     template.render(input);
+   } catch (error) {
+     if (error instanceof ValidationPromptTemplateError) {
+       console.error("Invalid input:", error.errors);
+     }
+   }
+   ```
+
+3. **Template Organization**
+
+   ```typescript
+   // Create base templates for reuse
+   const baseTemplate = new PromptTemplate({
+     template: "{{content}}",
+     schema: z.object({
+       content: z.string(),
+     }),
+   });
+
+   // Extend for specific uses
+   const specializedTemplate = baseTemplate.fork((config) => ({
+     ...config,
+     template: `Special: ${config.template}`,
+   }));
+   ```
+
+4. **Function Helpers**
+   ```typescript
+   const template = new PromptTemplate({
+     schema: messageSchema,
+     functions: {
+       formatDate() {
+         return new Date(this.date).toLocaleString();
+       },
+       truncate(text: string) {
+         return text.length > 100 ? `${text.slice(0, 97)}...` : text;
+       },
+     },
+   });
+   ```
+
+## See Also
+
+- [Agent System](./agent.md)
+- [LLM System](./llms.md)
+- [Error Handling](./errors.md)
+- [Validation](./validation.md)
