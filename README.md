@@ -52,7 +52,7 @@ yarn add bee-agent-framework
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
-import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
+import { BeeSystemPrompt } from "bee-agent-framework/agents/bee/prompts";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
 const llm = new OllamaChatLLM(); // default is llama3.1 (8B), it is recommended to use 70B model
@@ -60,7 +60,16 @@ const llm = new OllamaChatLLM(); // default is llama3.1 (8B), it is recommended 
 const agent = new BeeAgent({
   llm, // for more explore 'bee-agent-framework/adapters'
   memory: new TokenMemory({ llm }), // for more explore 'bee-agent-framework/memory'
-  tools: [new DuckDuckGoSearchTool(), new OpenMeteoTool()], // for more explore 'bee-agent-framework/tools'
+  tools: [new OpenMeteoTool()], // for more explore 'bee-agent-framework/tools'
+  templates: {
+    system: BeeSystemPrompt.fork((old) => ({
+      ...old,
+      defaults: {
+        instructions:
+          "You are a helpful assistant that uses tools to answer weather-related questions.",
+      },
+    })),
+  },
 });
 
 const response = await agent
@@ -74,9 +83,15 @@ const response = await agent
 console.log(`Agent 🤖 : `, response.result.text);
 ```
 
-➡️ See a more [advanced example](/examples/agents/bee.ts).
+> [!TIP]
+>
+> Providing a bee with specific `instructions` on what their role should be will improve performance and is recommended.
 
-➡️ you can run this example after local installation, using the command `yarn start examples/agents/simple.ts`
+> [!TIP]
+>
+> Bees work best when using a smaller number of `tools`, so it is recommended to only enable the minimum required tools.
+
+➡️ you can run this example after local installation, using the command `yarn run quickstart`
 
 > [!TIP]
 >
@@ -85,6 +100,8 @@ console.log(`Agent 🤖 : `, response.result.text);
 > [!TIP]
 >
 > Documentation is available at https://i-am-bee.github.io/bee-agent-framework/
+
+➡️ See a more [advanced example](/examples/agents/bee.ts)
 
 ### Local Installation
 

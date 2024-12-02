@@ -1,7 +1,7 @@
 import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
+import { BeeSystemPrompt } from "bee-agent-framework/agents/bee/prompts";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
-import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
@@ -9,7 +9,16 @@ const llm = new OllamaChatLLM();
 const agent = new BeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
-  tools: [new DuckDuckGoSearchTool(), new OpenMeteoTool()],
+  tools: [new OpenMeteoTool()],
+  templates: {
+    system: BeeSystemPrompt.fork((old) => ({
+      ...old,
+      defaults: {
+        instructions:
+          "You are a helpful assistant that uses tools to answer weather-related questions.",
+      },
+    })),
+  },
 });
 
 const response = await agent
