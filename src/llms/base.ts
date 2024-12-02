@@ -119,6 +119,10 @@ export interface ExecutionOptions {
   maxRetries?: number;
 }
 
+export interface EmbeddingOptions {
+  signal?: AbortSignal;
+}
+
 export interface LLMMeta {
   tokenLimit: number;
 }
@@ -141,6 +145,17 @@ export abstract class BaseLLM<
   }
 
   abstract meta(): Promise<LLMMeta>;
+
+  async embed(text: string, options?: EmbeddingOptions): Promise<number[]> {
+    const result = await this.embedMany([text], options);
+    const embedding = result.at(0);
+    if (!embedding) {
+      throw new Error("Missing embedding");
+    }
+    return embedding;
+  }
+
+  abstract embedMany(texts: string[], options?: EmbeddingOptions): Promise<number[][]>;
 
   abstract tokenize(input: TInput): Promise<BaseLLMTokenizeOutput>;
 

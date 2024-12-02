@@ -18,6 +18,7 @@ import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -123,6 +124,10 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
     return {
       tokenLimit: response.max_sequence_length,
     };
+  }
+
+  async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+    throw new Error("Method not implemented.");
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {

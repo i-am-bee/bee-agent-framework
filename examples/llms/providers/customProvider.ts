@@ -3,6 +3,7 @@ import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -75,6 +76,10 @@ export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
   async meta(): Promise<LLMMeta> {
     // TODO: retrieve data about current model from the given provider API
     return { tokenLimit: Infinity };
+  }
+
+  async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+    throw new Error("Method not implemented.");
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {

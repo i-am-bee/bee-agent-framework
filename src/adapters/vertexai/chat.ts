@@ -17,6 +17,7 @@
 import {
   AsyncStream,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -98,6 +99,10 @@ export class VertexAIChatLLM extends ChatLLM<VertexAIChatLLMOutput> {
 
   async meta(): Promise<LLMMeta> {
     return { tokenLimit: Infinity };
+  }
+
+  async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+    throw new Error("Method not implemented.");
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {

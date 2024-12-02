@@ -17,6 +17,7 @@
 import {
   AsyncStream,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -151,6 +152,11 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     });
 
     return extractModelMeta(model);
+  }
+
+  async embedMany(texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+    const response = await this.client.embed({ model: this.modelId, input: texts });
+    return response.embeddings;
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {

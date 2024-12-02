@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AsyncStream, LLMCache, LLMError } from "@/llms/base.js";
+import { AsyncStream, EmbeddingOptions, LLMCache, LLMError } from "@/llms/base.js";
 import {
   WatsonXLLM,
   WatsonXLLMGenerateOptions,
@@ -112,6 +112,10 @@ export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput> {
 
   async meta() {
     return this.llm.meta();
+  }
+
+  async embedMany(texts: string[], options?: EmbeddingOptions): Promise<number[][]> {
+    return this.llm.embedMany(texts, options);
   }
 
   createSnapshot() {

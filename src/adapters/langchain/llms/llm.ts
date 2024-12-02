@@ -20,6 +20,7 @@ import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -100,6 +101,10 @@ export class LangChainLLM extends LLM<LangChainLLMOutput> {
     return {
       tokenLimit: Infinity,
     };
+  }
+
+  async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+    throw new Error("Method not implemented.");
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {

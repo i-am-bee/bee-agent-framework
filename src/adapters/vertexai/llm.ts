@@ -19,6 +19,7 @@ import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -101,6 +102,10 @@ export class VertexAILLM extends LLM<VertexAILLMOutput> {
 
   async meta(): Promise<LLMMeta> {
     return { tokenLimit: Infinity };
+  }
+
+  async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+    throw new Error("Method not implemented.");
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {

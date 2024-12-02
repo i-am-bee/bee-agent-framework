@@ -19,6 +19,7 @@ import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -42,9 +43,11 @@ import { transformAsyncIterable } from "@/internals/helpers/stream.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { safeSum } from "@/internals/helpers/number.js";
 import { customMerge, omitUndefined } from "@/internals/helpers/object.js";
-import { isEmpty, isString } from "remeda";
+import { chunk, isEmpty, isString } from "remeda";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
+
+import pLimit from "p-limit";
 
 export type BAMLLMOutputMeta = Omit<ExcludeNonStringIndex<TextGenerationCreateOutput>, "results">;
 
@@ -61,6 +64,8 @@ export interface BAMLLMOutputConstructor {
   results: BAMLLMOutputResult[];
   moderations?: BAMLLMOutputModeration | BAMLLMOutputModeration[];
 }
+
+const MAX_EMBEDDING_INPUTS = 20;
 
 export class BAMLLMOutput extends BaseLLMOutput {
   public readonly meta: BAMLLMOutputMeta;
@@ -187,6 +192,8 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
     this.register();
   }
 
+  protected static limit = pLimit(5);
+
   async meta(): Promise<LLMMeta> {
     try {
       const { result } = await this.client.model.retrieve({
@@ -218,6 +225,30 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
         tokenLimit: Infinity,
       };
     }
+  }
+
+  async embedMany(texts: string[], options?: EmbeddingOptions): Promise<number[][]> {
+    const results = await Promise.all(
+      chunk(texts, MAX_EMBEDDING_INPUTS).map((texts) =>
+        BAMLLM.limit(async () => {
+          const response = await this.client.text.embedding.create(
+            {
+              model_id: this.modelId,
+              input: texts,
+              parameters: {
+                truncate_input_tokens: true,
+              },
+            },
+            { signal: options?.signal },
+          );
+          if (response.results?.length !== texts.length) {
+            throw new Error("Missing embedding");
+          }
+          return response.results.map((result) => result.embedding);
+        }),
+      ),
+    );
+    return results.flat();
   }
 
   createSnapshot() {

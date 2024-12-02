@@ -22,6 +22,7 @@ import {
   GenerateOptions,
   BaseLLM,
   BaseLLMEvents,
+  EmbeddingOptions,
 } from "./base.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { UnconstrainedCache } from "@/cache/unconstrainedCache.js";
@@ -65,6 +66,10 @@ describe("BaseLLM", () => {
 
     async meta() {
       return { tokenLimit: 4096 };
+    }
+
+    async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+      throw new Error("Method not implemented.");
     }
 
     // eslint-disable-next-line unused-imports/no-unused-vars

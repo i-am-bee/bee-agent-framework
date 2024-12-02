@@ -22,7 +22,14 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
-import { AsyncStream, BaseLLMTokenizeOutput, LLMCache, LLMError, LLMMeta } from "@/llms/base.js";
+import {
+  AsyncStream,
+  BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  LLMCache,
+  LLMError,
+  LLMMeta,
+} from "@/llms/base.js";
 import { transformAsyncIterable } from "@/internals/helpers/stream.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { IBMVllmChatLLMPreset, IBMVllmChatLLMPresetModel } from "@/adapters/ibm-vllm/chatPreset.js";
@@ -107,6 +114,10 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
 
   async meta(): Promise<LLMMeta> {
     return this.llm.meta();
+  }
+
+  async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+    throw new Error("Method not implemented.");
   }
 
   createSnapshot() {
