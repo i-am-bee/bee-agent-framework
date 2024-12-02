@@ -384,18 +384,7 @@ _Source: [examples/serialization/context.ts](/examples/serialization/context.ts)
    }
    ```
 
-3. **Circular Reference Management**
-
-   ```typescript
-   // Always implement createEmpty and updateInstance
-   // for classes that might have circular references
-   createEmpty: () => new CustomType(),
-   updateInstance: (instance, update) => {
-     Object.assign(instance, update);
-   }
-   ```
-
-4. **Performance Optimization**
+3. **Performance Optimization**
    ```typescript
    // Cache serialization results when appropriate
    class SerializableCache {

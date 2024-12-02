@@ -269,20 +269,7 @@ _Source: [examples/tools/custom/python.ts](/examples/tools/custom/python.ts)_
 
 ## Best Practices
 
-1. **Input Validation**
-
-   ```typescript
-   inputSchema() {
-     return z.object({
-       query: z.string()
-         .min(1, "Query cannot be empty")
-         .max(1000, "Query too long")
-         .describe("Search query to execute")
-     });
-   }
-   ```
-
-2. **Error Handling**
+1. **Error Handling**
 
    ```typescript
    try {
@@ -296,7 +283,7 @@ _Source: [examples/tools/custom/python.ts](/examples/tools/custom/python.ts)_
    }
    ```
 
-3. **Caching Strategy**
+2. **Caching Strategy**
 
    ```typescript
    const tool = new SearchTool({
@@ -308,7 +295,7 @@ _Source: [examples/tools/custom/python.ts](/examples/tools/custom/python.ts)_
    });
    ```
 
-4. **Event Monitoring**
+3. **Event Monitoring**
 
    ```typescript
    tool.emitter.on("start", ({ input }) => {

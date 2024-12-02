@@ -231,17 +231,15 @@ const jsonKey = JSONCacheKeyFn(input);
 
 ```typescript
 const customKeyFn: CacheKeyFn = (...args: any[]) => {
-  return args.map(arg =>
-    typeof arg === 'object'
-      ? JSON.stringify(arg)
-      : String(arg)
-  ).join(':');
+  return args.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg))).join(":");
 };
 
-@Cache({
-  cacheKey: customKeyFn
-})
-method() { }
+class CacheExample {
+  @Cache({ cacheKey: customKeyFn })
+  method(seed: number) {
+    return seed;
+  }
+}
 ```
 
 ## Custom cache provider implementation
@@ -312,11 +310,15 @@ _Source: [examples/cache/custom.ts](/examples/cache/custom.ts)_
 
    ```typescript
    // Set appropriate TTL for data freshness
-   @Cache({
-     ttl: 5 * 60 * 1000, // 5 minutes
-     enabled: true
-   })
-   getData() { }
+   class DataManager {
+     @Cache({
+       ttl: 5 * 60 * 1000, // 5 minutes
+       enabled: true,
+     })
+     async fetchData() {
+       // Method implementation
+     }
+   }
    ```
 
 3. **Cache Invalidation**

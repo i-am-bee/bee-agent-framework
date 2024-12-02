@@ -258,23 +258,25 @@ try {
 
 1. **Error Creation**
 
-   ```typescript
-   throw new FrameworkError("Clear, descriptive message", [originalError], {
-     context: { relevant: "data" },
-     isFatal: whenUnrecoverable,
-     isRetryable: whenRetryPossible,
-   });
-   ```
+```typescript
+throw new FrameworkError("Clear, descriptive message", [originalError], {
+  context: { relevant: "data" },
+  isFatal: whenUnrecoverable,
+  isRetryable: whenRetryPossible,
+});
+```
 
 2. **Context Preservation**
 
-   ```typescript
-   catch (error) {
-     throw new FrameworkError("Higher-level context", [error], {
-       context: { ...error.context, newInfo: "value" }
-     });
-   }
-   ```
+```typescript
+try {
+  // Your code here
+} catch (error) {
+  throw new FrameworkError("Higher-level context", [error], {
+    context: { ...error.context, newInfo: "value" },
+  });
+}
+```
 
 3. **Error Recovery**
 

@@ -159,44 +159,45 @@ console.log(`Agent 🤖 : `, response.result.text);
 
 1. **Error Handling**
 
-   ```typescript
-   protected async executeIteration(iteration: number): Promise<IterationResult> {
-     try {
-       // ... iteration logic ...
-     } catch (error) {
-       this.devTools.emitter.emit('error', { error, context: { iteration } });
-       throw error;
-     }
-   }
-   ```
+```typescript
+function executeIteration(iteration: number): Promise<IterationResult> {
+  try {
+    // ... iteration logic ...
+  } catch (error) {
+    this.devTools.emitter.emit("error", { error, context: { iteration } });
+    throw error;
+  }
+}
+```
 
 2. **Memory Management**
 
-   ```typescript
-   protected async cleanup(): Promise<void> {
-     await this.memory.store('lastCleanup', Date.now());
-     // Clear temporary data
-   }
-   ```
+```typescript
+function cleanup(): Promise<void> {
+  await this.memory.store("lastCleanup", Date.now());
+  // Clear temporary data
+}
+```
 
 3. **Event Emission**
 
-   ```typescript
-   protected emitProgress(progress: number): void {
-     this.devTools.emitter.emit('progress', { value: progress });
-   }
-   ```
+```typescript
+function emitProgress(progress: number): void {
+  this.devTools.emitter.emit("progress", { value: progress });
+}
+```
 
 4. **Tool Management**
-   ```typescript
-   protected async validateTools(): Promise<void> {
-     for (const tool of this.tools) {
-       if (!await tool.validate()) {
-         throw new Error(`Tool validation failed: ${tool.name}`);
-       }
-     }
-   }
-   ```
+
+```typescript
+function validateTools(): Promise<void> {
+  for (const tool of this.tools) {
+    if (!(await tool.validate())) {
+      throw new Error(`Tool validation failed: ${tool.name}`);
+    }
+  }
+}
+```
 
 ## Best Practices
 
