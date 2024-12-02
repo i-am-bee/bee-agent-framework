@@ -233,8 +233,8 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
       guided.grammar = guidedOverride.grammar;
     } else if (guidedOverride?.json) {
       guided.json_schema = isString(guidedOverride.json)
-        ? JSON.parse(guidedOverride.json)
-        : guidedOverride.json;
+        ? guidedOverride.json
+        : JSON.stringify(guidedOverride.json);
     } else if (guidedOverride?.regex) {
       guided.regex = guidedOverride.regex;
     } else if (!isEmpty(guidedOverride ?? {})) {
