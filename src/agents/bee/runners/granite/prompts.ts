@@ -16,7 +16,7 @@
 
 import { PromptTemplate } from "@/template.js";
 import { z } from "zod";
-import { BeeAssistantPrompt } from "@/agents/bee/prompts.js";
+import { BeeAssistantPrompt, BeeSchemaErrorPrompt } from "@/agents/bee/prompts.js";
 
 export const GraniteBeeAssistantPrompt = BeeAssistantPrompt.fork((config) => ({
   ...config,
@@ -78,3 +78,9 @@ The current date and time is contained in the most recent user message.
 {{instructions}}
 `,
 });
+
+export const GraniteBeeSchemaErrorPrompt = BeeSchemaErrorPrompt.fork((config) => ({
+  ...config,
+  template: `Error: The generated response does not adhere to the communication structure mentioned in the system prompt.
+You communicate only in instruction lines. Valid instruction lines are 'Thought' followed by either 'Tool Name' + 'Tool Input' or 'Final Answer'.`,
+}));
