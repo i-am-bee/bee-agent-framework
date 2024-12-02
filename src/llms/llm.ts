@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-import { BaseLLM, BaseLLMOutput, GenerateOptions } from "./base.js";
+import { BaseLLM, BaseLLMOutput, BaseLLMEvents, GenerateOptions } from "./base.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 export type LLMInput = string;
+
+export type LLMEvents<TOutput extends BaseLLMOutput = BaseLLMOutput> = BaseLLMEvents<
+  LLMInput,
+  TOutput
+>;
 
 export abstract class LLM<
   TOutput extends BaseLLMOutput,
   TGenerateOptions extends GenerateOptions = GenerateOptions,
-> extends BaseLLM<LLMInput, TOutput, TGenerateOptions> {}
+> extends BaseLLM<LLMInput, TOutput, TGenerateOptions> {
+  public abstract readonly emitter: Emitter<LLMEvents<TOutput>>;
+}

@@ -2,7 +2,6 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMMeta,
@@ -10,7 +9,7 @@ import {
 import { shallowCopy } from "bee-agent-framework/serializer/utils";
 import type { GetRunContext } from "bee-agent-framework/context";
 import { Emitter } from "bee-agent-framework/emitter/emitter";
-import { ChatLLM, ChatLLMOutput } from "bee-agent-framework/llms/chat";
+import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "bee-agent-framework/llms/chat";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
 import { sum } from "remeda";
 
@@ -57,8 +56,10 @@ export interface CustomChatLLMInput {
   parameters?: Record<string, any>;
 }
 
+type CustomChatLLMEvents = ChatLLMGenerateEvents<CustomChatLLMOutput>;
+
 export class CustomChatLLM extends ChatLLM<CustomChatLLMOutput, CustomGenerateOptions> {
-  public readonly emitter: Emitter<GenerateCallbacks> = Emitter.root.child({
+  public readonly emitter = Emitter.root.child<CustomChatLLMEvents>({
     namespace: ["custom", "llm"],
     creator: this,
   });

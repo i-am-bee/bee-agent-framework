@@ -19,7 +19,6 @@ import {
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMError,
@@ -27,7 +26,7 @@ import {
 } from "@/llms/base.js";
 import { isEmpty, isString } from "remeda";
 import type { SingleGenerationRequest } from "@/adapters/ibm-vllm/types.js";
-import { LLM, LLMInput } from "@/llms/llm.js";
+import { LLM, LLMEvents, LLMInput } from "@/llms/llm.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GenerationResponse__Output } from "@/adapters/ibm-vllm/types.js";
 import { shallowCopy } from "@/serializer/utils.js";
@@ -98,8 +97,10 @@ export type IBMvLLMParameters = NonNullable<
 
 export interface IBMvLLMGenerateOptions extends GenerateOptions {}
 
+export type IBMvLLMEvents = LLMEvents<IBMvLLMOutput>;
+
 export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
-  public readonly emitter = new Emitter<GenerateCallbacks>({
+  public readonly emitter = new Emitter<IBMvLLMEvents>({
     namespace: ["ibm_vllm", "llm"],
     creator: this,
   });

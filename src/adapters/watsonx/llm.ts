@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { LLM, LLMInput } from "@/llms/llm.js";
+import { LLM, LLMEvents, LLMInput } from "@/llms/llm.js";
 import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMError,
@@ -277,8 +276,10 @@ function createApiClient({
   });
 }
 
+export type WatsonXLLMEvents = LLMEvents<WatsonXLLMOutput>;
+
 export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<WatsonXLLMEvents>({
     namespace: ["watsonx", "llm"],
     creator: this,
   });

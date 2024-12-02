@@ -21,15 +21,8 @@ import { IBMvLLM, IBMvLLMGenerateOptions, IBMvLLMOutput, IBMvLLMParameters } fro
 import { Cache } from "@/cache/decoratorCache.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
-import {
-  AsyncStream,
-  BaseLLMTokenizeOutput,
-  GenerateCallbacks,
-  LLMCache,
-  LLMError,
-  LLMMeta,
-} from "@/llms/base.js";
+import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
+import { AsyncStream, BaseLLMTokenizeOutput, LLMCache, LLMError, LLMMeta } from "@/llms/base.js";
 import { transformAsyncIterable } from "@/internals/helpers/stream.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { IBMVllmChatLLMPreset, IBMVllmChatLLMPresetModel } from "@/adapters/ibm-vllm/chatPreset.js";
@@ -91,8 +84,10 @@ export interface GrpcChatLLMInput {
   cache?: LLMCache<GrpcChatLLMOutput>;
 }
 
+export type IBMVllmChatEvents = ChatLLMGenerateEvents<GrpcChatLLMOutput>;
+
 export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
-  public readonly emitter = new Emitter<GenerateCallbacks>({
+  public readonly emitter = new Emitter<IBMVllmChatEvents>({
     namespace: ["ibm_vllm", "chat_llm"],
     creator: this,
   });

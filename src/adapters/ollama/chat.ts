@@ -18,14 +18,13 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMOutputError,
   StreamGenerateOptions,
 } from "@/llms/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
+import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { ChatResponse, Ollama as Client, Options as Parameters } from "ollama";
@@ -116,8 +115,10 @@ interface Input {
   cache?: LLMCache<OllamaChatLLMOutput>;
 }
 
+export type OllamaChatLLMEvents = ChatLLMGenerateEvents<OllamaChatLLMOutput>;
+
 export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<OllamaChatLLMEvents>({
     namespace: ["ollama", "chat_llm"],
     creator: this,
   });

@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  AsyncStream,
-  GenerateCallbacks,
-  LLMCache,
-  LLMError,
-  StreamGenerateOptions,
-} from "@/llms/base.js";
+import { AsyncStream, LLMCache, LLMError, StreamGenerateOptions } from "@/llms/base.js";
 import { isFunction, isObjectType } from "remeda";
 import {
   BAMLLM,
@@ -28,7 +22,7 @@ import {
   BAMLLMParameters,
   BAMLLMOutput,
 } from "@/adapters/bam/llm.js";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
+import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { BAMChatLLMPreset, BAMChatLLMPresetModel } from "@/adapters/bam/chatPreset.js";
@@ -97,8 +91,10 @@ export interface BAMChatLLMInput {
   cache?: LLMCache<BAMChatLLMOutput>;
 }
 
+export type BAMChatLLMEvents = ChatLLMGenerateEvents<BAMChatLLMOutput>;
+
 export class BAMChatLLM extends ChatLLM<BAMChatLLMOutput> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<BAMChatLLMEvents>({
     namespace: ["bam", "chat_llm"],
     creator: this,
   });

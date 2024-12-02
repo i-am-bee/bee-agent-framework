@@ -102,7 +102,7 @@ try {
         // To get raw LLM input (uncomment following block)
         // emitter.match(
         //   (event) => event.creator === llm && event.name === "start",
-        //   async (data: InferCallbackValue<GenerateCallbacks["start"]>, event) => {
+        //   async (data: InferCallbackValue<GenerateEvents["start"]>, event) => {
         //     logger.trace(
         //       event,
         //       [

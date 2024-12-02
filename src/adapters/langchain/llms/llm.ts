@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { LLM, LLMInput } from "@/llms/llm.js";
+import { LLM, LLMEvents, LLMInput } from "@/llms/llm.js";
 import { BaseLLM as LCBaseLLM } from "@langchain/core/language_models/llms";
 import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMMeta,
@@ -70,8 +69,10 @@ export class LangChainLLMOutput extends BaseLLMOutput {
   }
 }
 
+export type LangChainLLMEvents = LLMEvents<LangChainLLMOutput>;
+
 export class LangChainLLM extends LLM<LangChainLLMOutput> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<LangChainLLMEvents>({
     namespace: ["langchain", "llm"],
     creator: this,
   });

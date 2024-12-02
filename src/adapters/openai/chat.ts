@@ -18,14 +18,13 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   ExecutionOptions,
-  GenerateCallbacks,
   GenerateOptions,
   LLMCache,
   LLMMeta,
   StreamGenerateOptions,
 } from "@/llms/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
+import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, RoleType } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { ClientOptions, OpenAI as Client } from "openai";
@@ -92,8 +91,10 @@ interface Input {
   cache?: LLMCache<OpenAIChatLLMOutput>;
 }
 
+export type OpenAIChatLLMEvents = ChatLLMGenerateEvents<OpenAIChatLLMOutput>;
+
 export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
-  public readonly emitter = Emitter.root.child<GenerateCallbacks>({
+  public readonly emitter = Emitter.root.child<OpenAIChatLLMEvents>({
     namespace: ["openai", "chat_llm"],
     creator: this,
   });

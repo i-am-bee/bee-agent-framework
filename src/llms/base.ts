@@ -32,13 +32,18 @@ import { Task } from "promise-based-task";
 import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
 import { createTelemetryMiddleware } from "@/instrumentation/create-telemetry-middleware.js";
 
-export interface GenerateCallbacks {
-  newToken?: Callback<{ value: BaseLLMOutput; callbacks: { abort: () => void } }>;
-  success?: Callback<{ value: BaseLLMOutput }>;
-  start?: Callback<{ input: any; options: unknown }>;
-  error?: Callback<{ input: any; error: FrameworkError; options: unknown }>;
+export interface BaseLLMEvents<TInput = any, TOutput extends BaseLLMOutput = BaseLLMOutput> {
+  newToken?: Callback<{ value: TOutput; callbacks: { abort: () => void } }>;
+  success?: Callback<{ value: TOutput }>;
+  start?: Callback<{ input: TInput; options: unknown }>;
+  error?: Callback<{ input: TInput; error: FrameworkError; options: unknown }>;
   finish?: Callback<null>;
 }
+
+/**
+ * @deprecated Use BaseLLMEvents instead
+ */
+export type GenerateCallbacks = BaseLLMEvents;
 
 export type GuidedOptions = OneOf<
   [
@@ -125,7 +130,7 @@ export abstract class BaseLLM<
   TOutput extends BaseLLMOutput,
   TGenerateOptions extends GenerateOptions = GenerateOptions,
 > extends Serializable<any> {
-  public abstract readonly emitter: Emitter<GenerateCallbacks>;
+  public abstract readonly emitter: Emitter<BaseLLMEvents<unknown, TOutput>>;
 
   constructor(
     public readonly modelId: string,
