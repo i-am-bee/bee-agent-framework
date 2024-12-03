@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.0.46](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.45...v0.0.46) (2024-12-03)
+
+### ⚠ BREAKING CHANGES
+
+- **llms:** make "options" parameter for generate/stream always partial
+- **tools:** make run options always partial with fallback to an empty object
+- **tools:** improve type support for events (#209)
+
+### Features
+
+- **adapters:** add Azure OpenAI LLM adapter ([#201](https://github.com/i-am-bee/bee-agent-framework/issues/201)) ([a6a0653](https://github.com/i-am-bee/bee-agent-framework/commit/a6a06536d0048c37c7853e884416ec748b6a2a57))
+- **llms:** make "options" parameter for generate/stream always partial ([20fbe71](https://github.com/i-am-bee/bee-agent-framework/commit/20fbe7103a8dbcec01d1613f8c0f5ec0f4778c28))
+- **tools:** improve type support for events ([#209](https://github.com/i-am-bee/bee-agent-framework/issues/209)) ([456ff11](https://github.com/i-am-bee/bee-agent-framework/commit/456ff1103e12ccaf312a8ced4543279886dbbd8c))
+- **tools:** make run options always partial with fallback to an empty object ([ff65e0c](https://github.com/i-am-bee/bee-agent-framework/commit/ff65e0c25dc82c98fe731a8512deda3e3fe2c651))
+
+### Bug Fixes
+
+- **adapters:** handle undefined values for CD in BAM/vLLM ([0f45b64](https://github.com/i-am-bee/bee-agent-framework/commit/0f45b64b9ef856d8464c8ead072ed6e9194c9de9))
+
 ## [0.0.45](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.44...v0.0.45) (2024-12-03)
 
 ### Features
