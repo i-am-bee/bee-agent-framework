@@ -16,8 +16,10 @@
 
 import { ToolError } from "@/tools/base.js";
 import { Sequelize } from "sequelize";
+import { ColumnType } from "./sql.js";
 
 export type Provider = "mysql" | "mariadb" | "postgres" | "mssql" | "db2" | "sqlite" | "oracle";
+export type PublicProvider = Provider | "excel" | "csv";
 
 export interface Metadata {
   tableName: string;
@@ -142,4 +144,117 @@ function getDefaultSchema(provider: Provider): string {
     default:
       return "";
   }
+}
+
+export async function searchColumnValues(
+  sequelize: Sequelize,
+  columns: ColumnType[],
+  searchValues?: string[],
+  limit = 30,
+): Promise<ColumnType[]> {
+  try {
+    const results: ColumnType[] = [];
+
+    const searchPromises = columns.map(async ({ table, name }) => {
+      const searchResults = await getSearchResults(sequelize, table, name, searchValues, limit);
+      return { table, name, values: searchResults };
+    });
+
+    await Promise.all(searchPromises);
+
+    return results;
+  } catch (error) {
+    throw new ToolError(`Error searching column values: ${error}`, [], {
+      isRetryable: false,
+    });
+  }
+}
+
+async function getSearchResults(
+  sequelize: Sequelize,
+  tableName: string,
+  columnName: string,
+  searchValues?: string[],
+  limit = 10,
+): Promise<string[]> {
+  const searchResults: string[] = [];
+  const distinctResults: string[] = [];
+
+  if (searchValues && searchValues.length > 0) {
+    const searchPromises = searchValues.map(async (searchValue) => {
+      const searchPatterns = createSearchPatterns(searchValue);
+      const searchPatternPromises = searchPatterns.map(async (pattern) => {
+        const [results] = await sequelize.query(
+          `
+          SELECT DISTINCT "${columnName}" 
+          FROM "${tableName}"
+          WHERE "${columnName}" LIKE :pattern
+          LIMIT 10
+        `,
+          {
+            replacements: { pattern },
+            raw: true,
+          },
+        );
+
+        return results.map((r: any) => r[columnName]);
+      });
+
+      const allSearchResults = await Promise.all(searchPatternPromises);
+      allSearchResults.forEach((results) => {
+        searchResults.push(...results);
+        if (searchResults.length >= 10) {
+          return;
+        }
+      });
+    });
+
+    await Promise.all(searchPromises);
+  }
+
+  if (searchResults.length < limit) {
+    const [distinct] = await sequelize.query(
+      `
+      SELECT DISTINCT "${columnName}"
+      FROM "${tableName}"
+      LIMIT :limit
+    `,
+      {
+        replacements: { limit: limit - searchResults.length },
+        raw: true,
+      },
+    );
+
+    distinctResults.push(...distinct.map((r: any) => r[columnName]));
+  }
+
+  return deduplicateAndSortResults(searchResults, distinctResults, limit);
+}
+
+function createSearchPatterns(searchValue: string): string[] {
+  return [
+    searchValue, // Exact match
+    `%${searchValue}%`, // Contains
+    `${searchValue}%`, // Starts with
+    `%${searchValue}`, // Ends with
+    searchValue.replace(/\s+/g, "%"), // Words separated by wildcards
+    searchValue.toLowerCase(), // Lowercase
+    searchValue.toUpperCase(), // Uppercase
+  ];
+}
+
+function deduplicateAndSortResults(
+  searchResults: string[],
+  distinctResults: string[],
+  limit: number,
+): string[] {
+  const combined = [...new Set([...searchResults, ...distinctResults])];
+  const searchSet = new Set(searchResults);
+  return combined
+    .sort((a, b) => {
+      const aInSearch = searchSet.has(a);
+      const bInSearch = searchSet.has(b);
+      return aInSearch === bInSearch ? 0 : aInSearch ? -1 : 1;
+    })
+    .slice(0, limit);
 }

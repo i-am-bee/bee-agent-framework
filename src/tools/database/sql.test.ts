@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { beforeEach, expect, vi } from "vitest";
-import { SQLTool } from "@/tools/database/sql.js";
 import { getMetadata } from "@/tools/database/metadata.js";
+import { SQLTool } from "@/tools/database/sql.js";
 import { Sequelize } from "sequelize";
+import { beforeEach, expect, vi } from "vitest";
 
 vi.mock("@/tools/database/metadata.js", () => ({
   getMetadata: vi.fn(),
