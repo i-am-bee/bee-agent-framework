@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { PromptTemplate } from "@/template.js";
-import { z } from "zod";
 import { BeeSystemPrompt } from "@/agents/bee/prompts.js";
 
 export const BeeSystemPromptWithHumanTool = BeeSystemPrompt.fork((config) => {
