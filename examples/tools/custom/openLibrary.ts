@@ -5,10 +5,12 @@ import {
   ToolInput,
   JSONToolOutput,
   ToolError,
+  CustomToolEmitter,
 } from "bee-agent-framework/tools/base";
 import { z } from "zod";
 import { createURLParams } from "bee-agent-framework/internals/fetcher";
-import { RunContext } from "bee-agent-framework/context";
+import { GetRunContext } from "bee-agent-framework/context";
+import { Callback, Emitter } from "bee-agent-framework/emitter/emitter";
 
 type ToolOptions = BaseToolOptions & { maxResults?: number };
 type ToolRunOptions = BaseToolRunOptions;
@@ -47,6 +49,18 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
       .partial();
   }
 
+  public readonly emitter: CustomToolEmitter<
+    ToolInput<this>,
+    OpenLibraryToolOutput,
+    {
+      beforeFetch: Callback<{ request: { url: string; options: RequestInit } }>;
+      afterFetch: Callback<{ data: OpenLibraryResponse }>;
+    }
+  > = Emitter.root.child({
+    namespace: ["tool", "search", "openLibrary"],
+    creator: this,
+  });
+
   static {
     this.register();
   }
@@ -54,14 +68,17 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
   protected async _run(
     input: ToolInput<this>,
     _options: ToolRunOptions | undefined,
-    run: RunContext<this>,
+    run: GetRunContext<this>,
   ) {
-    const query = createURLParams({
-      searchon: input,
-    });
-    const response = await fetch(`https://openlibrary.org?${query}`, {
-      signal: run.signal,
-    });
+    const request = {
+      url: `https://openlibrary.org?${createURLParams({
+        searchon: input,
+      })}`,
+      options: { signal: run.signal } as RequestInit,
+    };
+
+    await run.emitter.emit("beforeFetch", { request });
+    const response = await fetch(request.url, request.options);
 
     if (!response.ok) {
       throw new ToolError(
@@ -78,6 +95,7 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
       json.docs.length = this.options.maxResults;
     }
 
+    await run.emitter.emit("afterFetch", { data: json });
     return new OpenLibraryToolOutput(json);
   }
 }

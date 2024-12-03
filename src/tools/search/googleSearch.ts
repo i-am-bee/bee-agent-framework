@@ -21,7 +21,7 @@ import {
   SearchToolResult,
   SearchToolRunOptions,
 } from "./base.js";
-import { Tool, ToolInput } from "@/tools/base.js";
+import { CustomToolEmitter, Tool, ToolInput } from "@/tools/base.js";
 import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
 import { ValueError } from "@/errors.js";
@@ -29,6 +29,7 @@ import { parseEnv } from "@/internals/env.js";
 import { RunContext } from "@/context.js";
 import { paginate } from "@/internals/helpers/paginate.js";
 import { ValidationError } from "ajv";
+import { Emitter } from "@/emitter/emitter.js";
 
 export interface GoogleSearchToolOptions extends SearchToolOptions {
   apiKey?: string;
@@ -67,6 +68,12 @@ export class GoogleSearchTool extends Tool<
 > {
   name = "GoogleSearch";
   description = `Search for online trends, news, current events, real-time information, or research topics.`;
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, GoogleSearchToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "search", "google"],
+      creator: this,
+    });
 
   @Cache()
   inputSchema() {
