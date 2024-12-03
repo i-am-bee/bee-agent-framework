@@ -45,7 +45,7 @@ function getChatLLM(provider?: Provider): ChatLLM<ChatLLMOutput> {
         projectId: getEnv("WATSONX_PROJECT_ID"),
         region: getEnv("WATSONX_REGION"),
       }),
-    [Providers.IBMVLLM]: () => IBMVllmChatLLM.fromPreset(IBMVllmModel.GRANITE_INSTRUCT),
+    [Providers.IBMVLLM]: () => IBMVllmChatLLM.fromPreset(IBMVllmModel.GRANITE_3_0_8B_INSTRUCT),
     [Providers.IBMRITS]: () =>
       new OpenAIChatLLM({
         client: new OpenAI({
