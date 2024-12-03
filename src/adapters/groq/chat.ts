@@ -209,7 +209,7 @@ export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
 
   protected async *_stream(
     input: BaseMessage[],
-    options: StreamGenerateOptions,
+    options: Partial<StreamGenerateOptions>,
     run: GetRunContext<typeof this>,
   ): AsyncStream<ChatGroqOutput> {
     for await (const chunk of await this.client.chat.completions.create(
