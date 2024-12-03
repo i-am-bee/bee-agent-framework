@@ -20,18 +20,19 @@ import {
   BaseLLMTokenizeOutput,
   ExecutionOptions,
   GenerateOptions,
+  GuidedOptions,
   LLMCache,
   LLMError,
   LLMMeta,
 } from "@/llms/base.js";
 import { isEmpty, isString } from "remeda";
-import type { SingleGenerationRequest } from "@/adapters/ibm-vllm/types.js";
+import type { DecodingParameters, SingleGenerationRequest } from "@/adapters/ibm-vllm/types.js";
 import { LLM, LLMEvents, LLMInput } from "@/llms/llm.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GenerationResponse__Output } from "@/adapters/ibm-vllm/types.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { FrameworkError, NotImplementedError } from "@/errors.js";
-import { assign } from "@/internals/helpers/object.js";
+import { assign, omitUndefined } from "@/internals/helpers/object.js";
 import { ServiceError } from "@grpc/grpc-js";
 import { Client } from "@/adapters/ibm-vllm/client.js";
 import { GetRunContext } from "@/context.js";
@@ -224,8 +225,10 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
   }
 
   protected _prepareParameters(overrides?: GenerateOptions): typeof this.parameters {
-    const guided = overrides?.guided ? {} : (this.parameters.decoding ?? {});
-    const guidedOverride = overrides?.guided;
+    const guided: DecodingParameters = omitUndefined(
+      overrides?.guided ? {} : (this.parameters.decoding ?? {}),
+    );
+    const guidedOverride: GuidedOptions = omitUndefined(overrides?.guided ?? {});
 
     if (guidedOverride?.choice) {
       guided.choice = { ...guided.choice, choices: guidedOverride.choice };
