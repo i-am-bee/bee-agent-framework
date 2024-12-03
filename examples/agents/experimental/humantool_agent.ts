@@ -16,7 +16,6 @@ import { OpenAIChatLLM } from "bee-agent-framework/adapters/openai/chat";
 
 import {
   BeeSystemPrompt,
-  BeeSystemPromptWithHumanTool,
   BeeAssistantPrompt,
   BeeUserPrompt,
   BeeUserEmptyPrompt,
@@ -25,6 +24,9 @@ import {
   BeeToolNoResultsPrompt,
   BeeToolNotFoundPrompt,
 } from "bee-agent-framework/agents/bee/prompts"; // Updated import path
+
+import { BeeSystemPromptWithHumanTool } from "../../../src/agents/experimental/human/prompts.js";
+
 
 // Set up logger
 Logger.root.level = "silent"; // Disable internal logs
