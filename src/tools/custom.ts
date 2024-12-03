@@ -95,7 +95,7 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
 
   protected async _run(
     input: any,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<typeof this>,
   ) {
     const { response } = await this.client.executeCustomTool(

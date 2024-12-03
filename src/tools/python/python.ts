@@ -138,7 +138,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
   protected async _run(
     input: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>,
   ) {
     const inputFiles = await pipe(

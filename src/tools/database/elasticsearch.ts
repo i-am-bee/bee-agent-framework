@@ -155,7 +155,7 @@ export class ElasticSearchTool extends Tool<
 
   protected async _run(
     input: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>,
   ): Promise<JSONToolOutput<any>> {
     if (input.action === ElasticSearchAction.ListIndices) {
