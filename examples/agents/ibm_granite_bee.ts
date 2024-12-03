@@ -20,7 +20,6 @@ import fs from "node:fs";
 const Providers = {
   WATSONX: "watsonx",
   OLLAMA: "ollama",
-  OPENAI: "openai",
   IBMVLLM: "ibmvllm",
   IBMRITS: "ibmrits",
 } as const;
@@ -28,14 +27,6 @@ type Provider = (typeof Providers)[keyof typeof Providers];
 
 function getChatLLM(provider?: Provider): ChatLLM<ChatLLMOutput> {
   const LLMFactories: Record<Provider, () => ChatLLM<ChatLLMOutput>> = {
-    [Providers.OPENAI]: () =>
-      new OpenAIChatLLM({
-        modelId: getEnv("OPENAI_MODEL") || "ibm-granite/granite-3-8b-instruct",
-        parameters: {
-          temperature: 0,
-          max_tokens: 2048,
-        },
-      }),
     [Providers.OLLAMA]: () =>
       new OllamaChatLLM({
         modelId: getEnv("OLLAMA_MODEL") || "granite3-dense:8b",
