@@ -335,12 +335,12 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
     };
   }
 
-  async embedMany(texts: string[], options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<number[][]> {
     const response: { results: { embedding: number[] }[] } = await this.client.fetch("embeddings", {
       method: "POST",
       searchParams: new URLSearchParams({ version: "2023-10-25" }),
       body: JSON.stringify({
-        inputs: texts,
+        inputs: input,
         model_id: this.modelId,
         project_id: this.projectId,
         parameters: {
@@ -349,7 +349,7 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
       }),
       signal: options?.signal,
     });
-    if (response.results?.length !== texts.length) {
+    if (response.results?.length !== input.length) {
       throw new Error("Missing embedding");
     }
     return response.results.map((result) => result.embedding);

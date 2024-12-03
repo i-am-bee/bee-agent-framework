@@ -146,9 +146,12 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
     };
   }
 
-  async embedMany(texts: string[], options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<number[][]> {
     const response = await this.client.embeddings.create(
-      { model: this.modelId, input: texts },
+      {
+        model: this.modelId,
+        input: input.flatMap((messages) => messages).flatMap((msg) => msg.text),
+      },
       { signal: options?.signal },
     );
     return response.data.map((data) => data.embedding);

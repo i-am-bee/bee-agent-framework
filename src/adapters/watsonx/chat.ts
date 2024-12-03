@@ -114,8 +114,9 @@ export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput> {
     return this.llm.meta();
   }
 
-  async embedMany(texts: string[], options?: EmbeddingOptions): Promise<number[][]> {
-    return this.llm.embedMany(texts, options);
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<number[][]> {
+    const inputs = input.map((messages) => this.messagesToPrompt(messages));
+    return this.llm.embed(inputs, options);
   }
 
   createSnapshot() {

@@ -78,7 +78,7 @@ export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
     return { tokenLimit: Infinity };
   }
 
-  async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(_input: LLMInput[], _options?: EmbeddingOptions): Promise<number[][]> {
     throw new Error("Method not implemented.");
   }
 

@@ -68,7 +68,7 @@ describe("BaseLLM", () => {
       return { tokenLimit: 4096 };
     }
 
-    async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+    async embed(_input: string[], _options?: EmbeddingOptions): Promise<number[][]> {
       throw new Error("Method not implemented.");
     }
 

@@ -116,7 +116,7 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
     return this.llm.meta();
   }
 
-  async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<number[][]> {
     throw new Error("Method not implemented.");
   }
 

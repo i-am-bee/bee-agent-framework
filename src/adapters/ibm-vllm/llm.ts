@@ -126,7 +126,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
     };
   }
 
-  async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(_input: LLMInput[], _options?: EmbeddingOptions): Promise<number[][]> {
     throw new Error("Method not implemented.");
   }
 

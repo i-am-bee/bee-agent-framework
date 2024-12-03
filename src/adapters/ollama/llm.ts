@@ -177,8 +177,8 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     return extractModelMeta(model);
   }
 
-  async embedMany(texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
-    const response = await this.client.embed({ model: this.modelId, input: texts });
+  async embed(input: LLMInput[], _options?: EmbeddingOptions): Promise<number[][]> {
+    const response = await this.client.embed({ model: this.modelId, input: input });
     return response.embeddings;
   }
 

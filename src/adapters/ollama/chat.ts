@@ -154,8 +154,11 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     return extractModelMeta(model);
   }
 
-  async embedMany(texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
-    const response = await this.client.embed({ model: this.modelId, input: texts });
+  async embed(input: BaseMessage[][], _options?: EmbeddingOptions): Promise<number[][]> {
+    const response = await this.client.embed({
+      model: this.modelId,
+      input: input.flatMap((messages) => messages).flatMap((msg) => msg.text),
+    });
     return response.embeddings;
   }
 

@@ -120,7 +120,7 @@ export class LangChainChatLLM<
     };
   }
 
-  async embedMany(_texts: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<number[][]> {
     throw new Error("Method not implemented.");
   }
 

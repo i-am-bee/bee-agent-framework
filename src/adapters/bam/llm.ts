@@ -227,9 +227,9 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
     }
   }
 
-  async embedMany(texts: string[], options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<number[][]> {
     const results = await Promise.all(
-      chunk(texts, MAX_EMBEDDING_INPUTS).map((texts) =>
+      chunk(input, MAX_EMBEDDING_INPUTS).map((texts) =>
         BAMLLM.limit(async () => {
           const response = await this.client.text.embedding.create(
             {
