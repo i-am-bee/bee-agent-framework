@@ -208,7 +208,7 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
 
   protected async _generate(
     input: BaseMessage[],
-    _options: GenerateOptions | undefined,
+    _options: Partial<GenerateOptions>,
     run: GetRunContext<typeof this>,
   ): Promise<ChatBedrockOutput> {
     const { conversation, systemMessage } = this.convertToConverseMessages(input);

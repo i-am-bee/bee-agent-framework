@@ -5,6 +5,7 @@ import {
   GenerateOptions,
   LLMCache,
   LLMMeta,
+  StreamGenerateOptions,
 } from "bee-agent-framework/llms/base";
 import { shallowCopy } from "bee-agent-framework/serializer/utils";
 import type { GetRunContext } from "bee-agent-framework/context";
@@ -86,7 +87,7 @@ export class CustomChatLLM extends ChatLLM<CustomChatLLMOutput, CustomGenerateOp
 
   protected async _generate(
     input: BaseMessage[],
-    options: CustomGenerateOptions,
+    options: Partial<CustomGenerateOptions>,
     run: GetRunContext<this>,
   ): Promise<CustomChatLLMOutput> {
     // this method should do non-stream request to the API
@@ -101,7 +102,7 @@ export class CustomChatLLM extends ChatLLM<CustomChatLLMOutput, CustomGenerateOp
 
   protected async *_stream(
     input: BaseMessage[],
-    options: CustomGenerateOptions,
+    options: Partial<StreamGenerateOptions>,
     run: GetRunContext<this>,
   ): AsyncStream<CustomChatLLMOutput, void> {
     // this method should do stream request to the API
