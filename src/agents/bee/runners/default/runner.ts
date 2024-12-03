@@ -18,6 +18,7 @@ import { BeeAgentRunIteration, BeeParserInput, BeeRunInput } from "@/agents/bee/
 import { Retryable } from "@/internals/helpers/retryable.js";
 import { AgentError } from "@/agents/base.js";
 import {
+  BeeSchemaErrorPrompt,
   BeeSystemPrompt,
   BeeToolErrorPrompt,
   BeeToolInputErrorPrompt,
@@ -29,7 +30,7 @@ import {
 import { AnyTool, ToolError, ToolInputValidationError, ToolOutput } from "@/tools/base.js";
 import { FrameworkError } from "@/errors.js";
 import { isEmpty, isTruthy, last } from "remeda";
-import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
+import { LinePrefixParser, LinePrefixParserError } from "@/agents/parsers/linePrefix.js";
 import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
@@ -44,11 +45,38 @@ export class DefaultRunner extends BaseRunner {
   }
 
   async llm({ signal, meta, emitter }: BeeRunnerLLMInput): Promise<BeeAgentRunIteration> {
+    const tempMessageKey = "tempMessage" as const;
+
     return new Retryable({
       onRetry: () => emitter.emit("retry", { meta }),
       onError: async (error) => {
         await emitter.emit("error", { error, meta });
         this.failedAttemptsCounter.use(error);
+
+        if (error instanceof LinePrefixParserError) {
+          // Prevent hanging on EOT
+          if (error.reason === LinePrefixParserError.Reason.NoDataReceived) {
+            await this.memory.add(
+              BaseMessage.of({
+                role: Role.ASSISTANT,
+                text: "\n",
+                meta: {
+                  [tempMessageKey]: true,
+                },
+              }),
+            );
+          } else {
+            await this.memory.add(
+              BaseMessage.of({
+                role: Role.ASSISTANT,
+                text: (this.input.templates?.schemaError ?? BeeSchemaErrorPrompt).render({}),
+                meta: {
+                  [tempMessageKey]: true,
+                },
+              }),
+            );
+          }
+        }
       },
       executor: async () => {
         await emitter.emit("start", { meta });
@@ -96,6 +124,9 @@ export class DefaultRunner extends BaseRunner {
           });
 
         await parser.end();
+        await this.memory.deleteMany(
+          this.memory.messages.filter((msg) => getProp(msg.meta, [tempMessageKey]) === true),
+        );
 
         return {
           state: parser.finalState,
