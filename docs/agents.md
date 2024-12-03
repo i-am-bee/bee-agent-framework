@@ -82,58 +82,58 @@ Subscribes to agent events for monitoring and debugging.
 
 ```ts
 const response = await agent
-      .run(
-        { prompt },
-        {
-          execution: {
-            maxRetriesPerStep: 3,
-            totalMaxRetries: 10,
-            maxIterations: 20,
-          },
-          signal: AbortSignal.timeout(2 * 60 * 1000),
-        },
-      )
-      .observe((emitter) => {
-        emitter.on("start", () => {
-          reader.write(`Agent 🤖 : `, "starting new iteration");
-        });
-        emitter.on("error", ({ error }) => {
-          reader.write(`Agent 🤖 : `, FrameworkError.ensure(error).dump());
-        });
-        emitter.on("retry", () => {
-          reader.write(`Agent 🤖 : `, "retrying the action...");
-        });
-        emitter.on("update", async ({ data, update, meta }) => {
-          // log 'data' to see the whole state
-          // to log only valid runs (no errors), check if meta.success === true
-          reader.write(`Agent (${update.key}) 🤖 : `, update.value);
-        });
-        emitter.on("partialUpdate", ({ data, update, meta }) => {
-          // ideal for streaming (line by line)
-          // log 'data' to see the whole state
-          // to log only valid runs (no errors), check if meta.success === true
-          // reader.write(`Agent (partial ${update.key}) 🤖 : `, update.value);
-        });
+  .run(
+    { prompt },
+    {
+      execution: {
+        maxRetriesPerStep: 3,
+        totalMaxRetries: 10,
+        maxIterations: 20,
+      },
+      signal: AbortSignal.timeout(2 * 60 * 1000),
+    },
+  )
+  .observe((emitter) => {
+    emitter.on("start", () => {
+      reader.write(`Agent 🤖 : `, "starting new iteration");
+    });
+    emitter.on("error", ({ error }) => {
+      reader.write(`Agent 🤖 : `, FrameworkError.ensure(error).dump());
+    });
+    emitter.on("retry", () => {
+      reader.write(`Agent 🤖 : `, "retrying the action...");
+    });
+    emitter.on("update", async ({ data, update, meta }) => {
+      // log 'data' to see the whole state
+      // to log only valid runs (no errors), check if meta.success === true
+      reader.write(`Agent (${update.key}) 🤖 : `, update.value);
+    });
+    emitter.on("partialUpdate", ({ data, update, meta }) => {
+      // ideal for streaming (line by line)
+      // log 'data' to see the whole state
+      // to log only valid runs (no errors), check if meta.success === true
+      // reader.write(`Agent (partial ${update.key}) 🤖 : `, update.value);
+    });
 
-        // To observe all events (uncomment following block)
-        // emitter.match("*.*", async (data: unknown, event) => {
-        //   logger.trace(event, `Received event "${event.path}"`);
-        // });
-      });
+    // To observe all events (uncomment following block)
+    // emitter.match("*.*", async (data: unknown, event) => {
+    //   logger.trace(event, `Received event "${event.path}"`);
+    // });
+  });
 ```
 
 ## Events
 
 Agent emits various events through its Emitter:
 
-| Event | Description | Payload |
-| --------------- | -------------------------- | ------------------------- |
-| `start` | New iteration started | `void` |
-| `error` | Error with framework error dump | `{ error }` |
-| `retry` | Retry attempt initiated | `void` |
-| `update` | Full state update with metadata | `{ data, update: {key, value}, meta }` |
-| `partialUpdate` | Streaming line-by-line update | `{ data, update: {key, value}, meta }` |
-| `*.*` | Optional catch-all event matcher | `data, event` |
+| Event           | Description                      | Payload                                |
+| --------------- | -------------------------------- | -------------------------------------- |
+| `start`         | New iteration started            | `void`                                 |
+| `error`         | Error with framework error dump  | `{ error }`                            |
+| `retry`         | Retry attempt initiated          | `void`                                 |
+| `update`        | Full state update with metadata  | `{ data, update: {key, value}, meta }` |
+| `partialUpdate` | Streaming line-by-line update    | `{ data, update: {key, value}, meta }` |
+| `*.*`           | Optional catch-all event matcher | `data, event`                          |
 
 ## Implementation Example
 
