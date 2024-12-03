@@ -46,6 +46,17 @@ For more complex tasks, the agent may do way more iterations.
 In the following example, we will transform the knowledge gained into code.
 
 ```ts
+import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
+
+const agent = new BeeAgent({
+  llm: new OllamaChatLLM(), // for more explore 'bee-agent-framework/adapters'
+  memory: new UnconstrainedMemory(), // for more explore 'bee-agent-framework/memory'
+  tools: [new OpenMeteoTool()], // for more explore 'bee-agent-framework/tools'
+});
+
 const response = await agent
   .run({ prompt: "What is the current weather in Las Vegas?" })
   .observe((emitter) => {
@@ -69,6 +80,8 @@ const response = await agent
     //   console.trace(`Received event "${event.path}"`, serializedData);
     // });
   });
+
+console.log(`Agent: ${response.result.text}`);
 ```
 
 ### Behaviour
