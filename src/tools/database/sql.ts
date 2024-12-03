@@ -14,67 +14,127 @@
  * limitations under the License.
  */
 
+import { Cache } from "@/cache/decoratorCache.js";
+import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
 import {
-  Tool,
-  ToolInput,
-  ToolError,
   BaseToolOptions,
   BaseToolRunOptions,
   JSONToolOutput,
+  Tool,
+  ToolError,
+  ToolInput,
   ToolInputValidationError,
 } from "@/tools/base.js";
-import { z } from "zod";
-import { Sequelize, Options } from "sequelize";
-import { Provider, getMetadata } from "@/tools/database/metadata.js";
-import { Cache } from "@/cache/decoratorCache.js";
+import {
+  Provider,
+  PublicProvider,
+  getMetadata,
+  searchColumnValues,
+} from "@/tools/database/metadata.js";
 import { ValidationError } from "ajv";
-import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
+import { Options, Sequelize } from "sequelize";
+import { z } from "zod";
+import { csvToSqlite, excelToSqlite } from "./utils.js";
+import { vectorStore } from "./vectordb.js";
+
+interface SQLExample {
+  question: string;
+  query: string;
+}
 
 interface ToolOptions extends BaseToolOptions {
-  provider: Provider;
-  connection: Options;
+  provider: PublicProvider;
+  connection:
+    | Options
+    | {
+        storage: string;
+      };
+  examples?: SQLExample[];
 }
+
+export const ColumnSchema = z.object({
+  name: z.string(),
+  table: z.string(),
+  values: z.array(z.string()).optional(),
+});
+
+export type ColumnType = z.infer<typeof ColumnSchema>;
 
 type ToolRunOptions = BaseToolRunOptions;
 
 export const SQLToolAction = {
   GetMetadata: "GET_METADATA",
   Query: "QUERY",
+  GetExamples: "GET_EXAMPLES",
+  SearchValues: "SEARCH_VALUES",
 } as const;
 
 export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptions> {
+  public options: ToolOptions;
+  public initialized = false;
+
   name = "SQLTool";
 
-  description = `Converts natural language to SQL query and executes it. IMPORTANT: strictly follow this order of actions:
-   1. ${SQLToolAction.GetMetadata} - get database tables structure (metadata)
-   2. ${SQLToolAction.Query} - execute the generated SQL query`;
+  actionDescriptions = [
+    `${SQLToolAction.GetMetadata} - get database tables structure (metadata) and example questions and SQL that you can use as a starting point. Optionally, using keywords to search for specific columns`,
+    `${SQLToolAction.SearchValues} - get distinct values for a set of columns using keywords to search`,
+    `${SQLToolAction.Query} - execute the generated SQL query`,
+  ];
+
+  get description() {
+    return `Converts natural language to SQL query and executes it. IMPORTANT: strictly follow this order of actions:
+    ${this.actionDescriptions.join("\n")}
+    
+    Make sure to always query metadata first to understand the database schema before generating a query. In the metadata output there might also be example questions and SQL that you can use as a starting point.`;
+  }
 
   inputSchema() {
     return z.object({
       action: z
         .nativeEnum(SQLToolAction)
-        .describe(
-          `The action to perform. ${SQLToolAction.GetMetadata} get database tables structure, ${SQLToolAction.Query} execute the SQL query`,
-        ),
+        .describe(`The action to perform. ${this.actionDescriptions.join("; ")}`),
       query: z
         .string()
         .optional()
         .describe(`The SQL query to be executed, required for ${SQLToolAction.Query} action`),
+      columns: z
+        .array(ColumnSchema)
+        .min(1)
+        .max(4)
+        .optional()
+        .describe(
+          `The columns to get distinct values for, required for ${SQLToolAction.SearchValues} action`,
+        ),
+
+      question: z
+        .string()
+        .optional()
+        .describe(`The user question. Required for metadata and examples actions`),
+
+      keywords: z
+        .array(z.string())
+        .min(1)
+        .max(4)
+        .optional()
+        .describe(
+          `Keywords used to search for specific columns, for ${SQLToolAction.GetMetadata} and ${SQLToolAction.SearchValues} actions`,
+        ),
     });
   }
 
   public constructor(options: ToolOptions) {
     super(options);
-    if (!options.connection.dialect) {
+    this.options = options;
+    if (!("dialect" in options.connection) && !("storage" in options.connection)) {
       throw new ValidationError([
         {
-          message: "Property is required",
+          message: "Either dialect or storage is required",
           propertyName: "connection.dialect",
         },
       ]);
     }
     if (
-      !options.connection.schema &&
+      !("schema" in options.connection) &&
       (options.provider === "oracle" || options.provider === "db2")
     ) {
       throw new ValidationError([
@@ -129,20 +189,70 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
     input: ToolInput<this>,
     _options: ToolRunOptions | undefined,
   ): Promise<JSONToolOutput<any>> {
-    const { provider, connection } = this.options;
-    const { schema } = connection;
+    if (!this.initialized) {
+      await this.initialize();
+    }
 
     if (input.action === SQLToolAction.GetMetadata) {
       const sequelize = await this.connection();
-      const metadata = await getMetadata(sequelize, provider, schema);
+      let metadata = await getMetadata(
+        sequelize,
+        this.options.provider as Provider,
+        "schema" in this.options.connection ? this.options.connection.schema : undefined,
+      );
+
+      // if examples also include them in the output
+      if (this.options.examples) {
+        const examples = await this.getExamples(
+          (input.question as string) || input.keywords?.join(" ") || "",
+        );
+        metadata += `\n\nExample Questions and SQL that you can use as a starting point:\n ${examples
+          .map((e) => `Question: ${e.question}\nSQL: ${e.sql}`)
+          .join("\n\n")}`;
+      }
+
       return new JSONToolOutput(metadata);
     }
 
+    if (input.action === SQLToolAction.GetExamples) {
+      const examples = await this.getExamples(input.question as string);
+      return new JSONToolOutput({ success: true, results: examples });
+    }
+
+    if (input.action === SQLToolAction.SearchValues) {
+      if (!input.columns?.length || !input.keywords?.length) {
+        throw new ToolInputValidationError(
+          "Columns or keywords are required for search values action",
+        );
+      }
+
+      const sequelize = await this.connection();
+      const results = await searchColumnValues(sequelize, input.columns!, input.keywords!, 20);
+      return new JSONToolOutput({ success: true, results });
+    }
+
     if (input.action === SQLToolAction.Query) {
-      return await this.executeQuery(input.query!, provider, schema);
+      return await this.executeQuery(
+        input.query!,
+        this.options.provider as Provider,
+        "schema" in this.options.connection ? this.options.connection.schema : undefined,
+      );
     }
 
     throw new ToolError(`Invalid action specified: ${input.action}`);
+  }
+
+  protected async getExamples(question: string): Promise<{ question: string; sql: string }[]> {
+    const similaritySearchResults = await vectorStore.similaritySearch(
+      question,
+      2,
+      (d) => d.metadata.type == "sql",
+    );
+
+    return similaritySearchResults.map((e) => ({
+      question: e.pageContent,
+      sql: e.metadata.query,
+    }));
   }
 
   protected async executeQuery(
@@ -181,11 +291,62 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
 
   private isReadOnlyQuery(query: string): boolean {
     const normalizedQuery = query.trim().toUpperCase();
-    return (
-      normalizedQuery.startsWith("SELECT") ||
-      normalizedQuery.startsWith("SHOW") ||
-      normalizedQuery.startsWith("DESC")
+    return !["UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "INSERT", "TRUNCATE"].some((keyword) =>
+      normalizedQuery.includes(keyword),
     );
+  }
+
+  private async initialize() {
+    if (this.initialized) {
+      return;
+    }
+
+    // Convert Excel to SQLite if provider is excel
+    if (this.options.provider === "excel") {
+      try {
+        const sqlitePath = await excelToSqlite(this.options.connection.storage as string);
+        // Update connection options to use the SQLite database
+        this.options.provider = "sqlite";
+        this.options.connection = {
+          ...this.options.connection,
+          dialect: "sqlite",
+          storage: sqlitePath,
+        };
+      } catch (error) {
+        throw new ToolError(`Failed to convert Excel to SQLite: ${error.message}`, [], {
+          isRetryable: false,
+          isFatal: true,
+        });
+      }
+    }
+
+    if (this.options.provider === "csv") {
+      try {
+        const sqlitePath = await csvToSqlite(this.options.connection.storage as string);
+        this.options.provider = "sqlite";
+        this.options.connection = {
+          ...this.options.connection,
+          dialect: "sqlite",
+          storage: sqlitePath,
+        };
+      } catch (error) {
+        throw new ToolError(`Failed to convert CSV to SQLite: ${error.message}`, [], {
+          isRetryable: false,
+          isFatal: true,
+        });
+      }
+    }
+
+    // Handle examples initialization
+    if (this.options?.examples?.length) {
+      const documents = this.options.examples.map((example) => ({
+        pageContent: example.question,
+        metadata: { type: "sql", query: example.query },
+      }));
+      await vectorStore.addDocuments(documents);
+    }
+
+    this.initialized = true;
   }
 
   public async destroy(): Promise<void> {

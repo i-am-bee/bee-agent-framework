@@ -1,12 +1,12 @@
-import "dotenv/config.js";
-import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
-import { SQLTool } from "bee-agent-framework/tools/database/sql";
+import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { FrameworkError } from "bee-agent-framework/errors";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
+import { SQLTool } from "bee-agent-framework/tools/database/sql";
+import "dotenv/config.js";
 import fs from "node:fs";
-import * as path from "node:path";
 import os from "node:os";
+import * as path from "node:path";
 
 const llm = new GroqChatLLM({
   modelId: "llama-3.1-70b-versatile",
