@@ -27,12 +27,12 @@ export interface FrameworkErrorOptions {
 export class FrameworkError extends AggregateError {
   isFatal = false;
   isRetryable = true;
-  context: Record<string, unknown>;
+  context: Record<string, any>;
 
   constructor(
     message = "Framework error has occurred.",
-    errors?: Error[],
-    options?: FrameworkErrorOptions,
+    errors: Error[] = [],
+    options: FrameworkErrorOptions = {},
   ) {
     super(errors || [], message);
     this.name = this.constructor.name;
