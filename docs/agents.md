@@ -69,7 +69,7 @@ classDiagram
 
 Executes the agent with the given prompt and options.
 
-```typescript
+```ts
 interface ExecutionOptions {
   signal?: AbortSignal;
   execution?: {
@@ -93,7 +93,7 @@ const response = await agent.run("What's the weather in Las Vegas?", {
 
 Subscribes to agent events for monitoring and debugging.
 
-```typescript
+```ts
 agent.observe((emitter) => {
   // Listen for complete updates
   emitter.on("update", ({ data, update, meta }) => {
@@ -130,7 +130,7 @@ Agent emits various events through its DevTools.Emitter:
 
 Here's an example of implementing an simple agent base in Bee Agent class:
 
-```typescript
+```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
@@ -159,7 +159,7 @@ console.log(`Agent 🤖 : `, response.result.text);
 
 1. **Error Handling**
 
-```typescript
+```ts
 function executeIteration(iteration: number): Promise<IterationResult> {
   try {
     // ... iteration logic ...
@@ -172,7 +172,7 @@ function executeIteration(iteration: number): Promise<IterationResult> {
 
 2. **Memory Management**
 
-```typescript
+```ts
 function cleanup(): Promise<void> {
   await this.memory.store("lastCleanup", Date.now());
   // Clear temporary data
@@ -181,7 +181,7 @@ function cleanup(): Promise<void> {
 
 3. **Event Emission**
 
-```typescript
+```ts
 function emitProgress(progress: number): void {
   this.devTools.emitter.emit("progress", { value: progress });
 }
@@ -189,7 +189,7 @@ function emitProgress(progress: number): void {
 
 4. **Tool Management**
 
-```typescript
+```ts
 function validateTools(): Promise<void> {
   for (const tool of this.tools) {
     if (!(await tool.validate())) {

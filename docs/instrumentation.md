@@ -58,13 +58,13 @@ classDiagram
 
 ### Tracer Configuration
 
-```typescript
+```ts
 const tracer = opentelemetry.trace.getTracer("bee-agent-framework", Version);
 ```
 
 ### Span Creation
 
-```typescript
+```ts
 interface SpanAttributes {
   ctx?: Attributes;
   data?: Attributes;
@@ -88,7 +88,7 @@ interface FrameworkSpan {
 
 ### With Agents
 
-```typescript
+```ts
 const agent = new BeeAgent({
   llm,
   memory,
@@ -105,7 +105,7 @@ await agent.run({
 
 ### With LLMs
 
-```typescript
+```ts
 const llm = new ChatLLM().middleware(createTelemetryMiddleware());
 
 await llm.generate([{ role: "user", text: "Hello" }], {
@@ -115,7 +115,7 @@ await llm.generate([{ role: "user", text: "Hello" }], {
 
 ### With Tools
 
-```typescript
+```ts
 const tool = new SearchTool().middleware(createTelemetryMiddleware());
 
 await tool.run(
@@ -153,7 +153,7 @@ You can manually create spans during the `run` process to track specific parts o
 
 Example of creating a span:
 
-```typescript
+```ts
 import { trace } from "@opentelemetry/api";
 
 const tracer = trace.getTracer("bee-agent-framework");
@@ -173,7 +173,7 @@ function exampleFunction() {
 
 ## Event Tracking
 
-```typescript
+```ts
 emitter.match("*.*", (data, meta) => {
   const span = createSpan({
     id: meta.id,
@@ -203,7 +203,7 @@ nvm use
 
 1. **Span Management**
 
-   ```typescript
+   ```ts
    try {
      const span = tracer.startSpan("operation");
      // Operation logic
@@ -218,7 +218,7 @@ nvm use
 
 2. **Attribute Handling**
 
-   ```typescript
+   ```ts
    span.setAttributes({
      "operation.name": name,
      "operation.params": JSON.stringify(params),
@@ -228,7 +228,7 @@ nvm use
 
 3. **Error Tracking**
 
-   ```typescript
+   ```ts
    function handleError(error: Error, span: Span) {
      span.recordException(error);
      span.setStatus({
@@ -239,7 +239,7 @@ nvm use
    ```
 
 4. **Performance Monitoring**
-   ```typescript
+   ```ts
    const startTime = performance.now();
    // Operation
    span.setAttributes({
@@ -258,7 +258,7 @@ nvm use
 
 ### Example Configuration
 
-```typescript
+```ts
 import { JaegerExporter } from "@opentelemetry/exporter-jaeger";
 
 const exporter = new JaegerExporter({

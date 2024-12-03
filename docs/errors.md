@@ -93,7 +93,7 @@ Traverses the error chain, yielding all nested errors.
 
 <!-- embedme examples/errors/base.ts -->
 
-```typescript
+```ts
 import { FrameworkError } from "bee-agent-framework/errors";
 
 const error = new FrameworkError(
@@ -125,7 +125,7 @@ _Source: [examples/errors/base.ts](/examples/errors/base.ts)_
 
 Generates a human-readable explanation of the error chain.
 
-```typescript
+```ts
 import { FrameworkError } from "bee-agent-framework/errors";
 
 const error = new FrameworkError("API call failed", [new Error("Network timeout")], {
@@ -147,7 +147,7 @@ console.log(error.explain());
 
 Provides a detailed inspection of the error object.
 
-```typescript
+```ts
 const error = new FrameworkError("Data validation failed");
 console.log(error.dump());
 // Detailed error structure including stack traces
@@ -159,7 +159,7 @@ console.log(error.dump());
 
 Ensures an error is wrapped as a FrameworkError.
 
-```typescript
+```ts
 try {
   throw new Error("Regular error");
 } catch (e) {
@@ -180,7 +180,7 @@ The Bee Agent Framework extends FrameworkError to create specialized error class
 
 For errors occurring during tool execution.
 
-```typescript
+```ts
 import { ToolError } from "bee-agent-framework/tools/base";
 import { FrameworkError } from "bee-agent-framework/errors";
 
@@ -201,7 +201,7 @@ _Source: [examples/errors/tool.ts](/examples/errors/tool.ts)_
 
 For errors occurring during agent execution.
 
-```typescript
+```ts
 class AgentError extends FrameworkError {
   constructor(message: string, errors?: Error[], context?: Record<string, any>) {
     super(message, errors, { context });
@@ -221,7 +221,7 @@ class AgentError extends FrameworkError {
 
 ### Basic Error Creation
 
-```typescript
+```ts
 const error = new FrameworkError("Operation failed", [new Error("Root cause")], {
   context: { operation: "data-fetch" },
   isFatal: true,
@@ -231,7 +231,7 @@ const error = new FrameworkError("Operation failed", [new Error("Root cause")], 
 
 ### Error Chaining
 
-```typescript
+```ts
 const rootError = new Error("Database connection failed");
 const middlewareError = new FrameworkError("Query execution failed", [rootError]);
 const applicationError = new FrameworkError("Data retrieval failed", [middlewareError]);
@@ -241,7 +241,7 @@ console.log(applicationError.getCause().message); // "Database connection failed
 
 ### Error in Tools
 
-```typescript
+```ts
 try {
   await tool.execute();
 } catch (error) {
@@ -258,7 +258,7 @@ try {
 
 1. **Error Creation**
 
-```typescript
+```ts
 throw new FrameworkError("Clear, descriptive message", [originalError], {
   context: { relevant: "data" },
   isFatal: whenUnrecoverable,
@@ -268,7 +268,7 @@ throw new FrameworkError("Clear, descriptive message", [originalError], {
 
 2. **Context Preservation**
 
-```typescript
+```ts
 try {
   // Your code here
 } catch (error) {
@@ -280,14 +280,14 @@ try {
 
 3. **Error Recovery**
 
-   ```typescript
+   ```ts
    if (!error.hasFatalError() && error.isRetryable) {
      // Implement retry logic
    }
    ```
 
 4. **Error Reporting**
-   ```typescript
+   ```ts
    logger.error({
      message: error.explain(),
      context: error.context,

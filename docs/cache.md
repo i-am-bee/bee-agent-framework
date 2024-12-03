@@ -67,7 +67,7 @@ classDiagram
 
 Provides unlimited storage capacity with no automatic eviction.
 
-```typescript
+```ts
 import { UnconstrainedCache } from "bee-agent-framework/cache/unconstrainedCache";
 
 const cache = new UnconstrainedCache<number>();
@@ -83,7 +83,7 @@ _Source: [examples/cache/unconstrainedCache.ts](/examples/cache/unconstrainedCac
 
 Maintains a fixed-size cache with TTL support and LRU eviction.
 
-```typescript
+```ts
 import { SlidingCache } from "bee-agent-framework/cache/slidingCache";
 
 const cache = new SlidingCache<string>({
@@ -103,7 +103,7 @@ Persists cache data to the filesystem.
 
 <!-- embedme examples/cache/fileCache.ts -->
 
-```typescript
+```ts
 import { FileCache } from "bee-agent-framework/cache/fileCache";
 
 const cache = new FileCache<UserData>({
@@ -130,7 +130,7 @@ Method-level caching using TypeScript decorators.
 
 <!-- embedme examples/cache/decoratorCache.ts -->
 
-```typescript
+```ts
 import { Cache } from "bee-agent-framework/cache/decoratorCache";
 
 class Generator {
@@ -153,7 +153,7 @@ _Source: [examples/cache/decoratorCache.ts](/examples/cache/decoratorCache.ts)_
 
 ### With Tools
 
-```typescript
+```ts
 import { SlidingCache } from "bee-agent-framework/cache/slidingCache";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 
@@ -179,7 +179,7 @@ _Source: [examples/cache/toolCache.ts](/examples/cache/toolCache.ts)_
 
 <!-- embedme examples/cache/llmCache.ts -->
 
-```typescript
+```ts
 import { SlidingCache } from "bee-agent-framework/cache/slidingCache";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
@@ -213,7 +213,7 @@ _Source: [examples/cache/llmCache.ts](/examples/cache/llmCache.ts)_
 
 ### Built-in Key Generators
 
-```typescript
+```ts
 // Object-based hashing
 const objectKey = ObjectHashKeyFn(input);
 
@@ -229,7 +229,7 @@ const jsonKey = JSONCacheKeyFn(input);
 
 ### Custom Key Generation
 
-```typescript
+```ts
 const customKeyFn: CacheKeyFn = (...args: any[]) => {
   return args.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg))).join(":");
 };
@@ -248,7 +248,7 @@ To create your cache implementation, you must implement the `BaseCache` class.
 
 <!-- embedme examples/cache/custom.ts -->
 
-```typescript
+```ts
 import { BaseCache } from "bee-agent-framework/cache/base";
 import { NotImplementedError } from "bee-agent-framework/errors";
 
@@ -293,7 +293,7 @@ _Source: [examples/cache/custom.ts](/examples/cache/custom.ts)_
 
 1. **Cache Strategy Selection**
 
-   ```typescript
+   ```ts
    // For memory-sensitive applications
    const cache = new SlidingCache({
      size: 1000,
@@ -308,7 +308,7 @@ _Source: [examples/cache/custom.ts](/examples/cache/custom.ts)_
 
 2. **TTL Management**
 
-   ```typescript
+   ```ts
    // Set appropriate TTL for data freshness
    class DataManager {
      @Cache({
@@ -323,7 +323,7 @@ _Source: [examples/cache/custom.ts](/examples/cache/custom.ts)_
 
 3. **Cache Invalidation**
 
-   ```typescript
+   ```ts
    // Clear specific entries
    await cache.delete("key");
 
@@ -336,7 +336,7 @@ _Source: [examples/cache/custom.ts](/examples/cache/custom.ts)_
 
 4. **Resource Management**
 
-   ```typescript
+   ```ts
    // Monitor cache size
    const size = await cache.size();
 

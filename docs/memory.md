@@ -67,7 +67,7 @@ classDiagram
 
 Adds a new message to memory at the specified index.
 
-```typescript
+```ts
 await memory.add(
   BaseMessage.of({
     role: "user",
@@ -83,7 +83,7 @@ await memory.add(systemMessage, 0);
 
 Removes a message from memory.
 
-```typescript
+```ts
 const deleted = await memory.delete(message);
 console.log(`Message ${deleted ? "was" : "was not"} deleted`);
 ```
@@ -92,7 +92,7 @@ console.log(`Message ${deleted ? "was" : "was not"} deleted`);
 
 Adds multiple messages to memory.
 
-```typescript
+```ts
 await memory.addMany([
   BaseMessage.of({ role: "user", text: "Hello" }),
   BaseMessage.of({ role: "assistant", text: "Hi there!" }),
@@ -103,7 +103,7 @@ await memory.addMany([
 
 Clears all messages from memory.
 
-```typescript
+```ts
 memory.reset();
 console.log(memory.isEmpty()); // true
 ```
@@ -114,7 +114,7 @@ console.log(memory.isEmpty()); // true
 
 Manages messages while respecting token limits, suitable for LLM context windows.
 
-```typescript
+```ts
 const memory = new TokenMemory({
   llm,
   maxTokens: 4096,
@@ -139,7 +139,7 @@ console.log(memory.stats());
 
 Simple memory implementation with no size or token limits.
 
-```typescript
+```ts
 const memory = new UnconstrainedMemory();
 
 await memory.add(
@@ -156,7 +156,7 @@ console.log(memory.messages.length);
 
 Wrapper providing read-only access to another memory instance.
 
-```typescript
+```ts
 const readOnly = memory.asReadOnly();
 await readOnly.add(message); // No effect
 console.log(readOnly.messages); // Same as source memory
@@ -166,7 +166,7 @@ console.log(readOnly.messages); // Same as source memory
 
 1. **Memory Management**
 
-   ```typescript
+   ```ts
    // Clean up messages when done
    memory.reset();
 
@@ -176,7 +176,7 @@ console.log(readOnly.messages); // Same as source memory
 
 2. **Error Handling**
 
-   ```typescript
+   ```ts
    try {
      await memory.add(message);
    } catch (error) {
@@ -188,7 +188,7 @@ console.log(readOnly.messages); // Same as source memory
 
 3. **State Persistence**
 
-   ```typescript
+   ```ts
    // Save memory state
    const snapshot = memory.createSnapshot();
 
@@ -200,7 +200,7 @@ console.log(readOnly.messages); // Same as source memory
 
 Here's an example of implementing a custom memory system:
 
-```typescript
+```ts
 class CustomMemory extends BaseMemory {
   private messages: BaseMessage[] = [];
 

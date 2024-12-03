@@ -63,7 +63,7 @@ classDiagram
 
 Converts an object into a serialized string representation.
 
-```typescript
+```ts
 import { Serializer } from "bee-agent-framework/serializer/serializer";
 
 const data = {
@@ -84,7 +84,7 @@ _Source: [examples/serialization/base.ts](/examples/tools/base.ts)_
 
 Reconstructs an object from its serialized form.
 
-```typescript
+```ts
 const original = {
   buffer: Buffer.from("Hello"),
   regex: /test/g,
@@ -101,7 +101,7 @@ const restored = Serializer.deserialize(serialized);
 
 Registers a new class for serialization support.
 
-```typescript
+```ts
 class CustomType {
   constructor(public data: string) {}
 }
@@ -122,7 +122,7 @@ Serializer.register(CustomType, {
 
 ### Primitive Types
 
-```typescript
+```ts
 // Built-in handlers for primitive types
 Serializer.register(Number, {
   toPlain: (value) => value.toString(),
@@ -142,7 +142,7 @@ Serializer.register(Boolean, {
 
 ### Complex Types
 
-```typescript
+```ts
 // Built-in handlers for complex types
 Serializer.register(Map, {
   toPlain: (value) => Array.from(value.entries()),
@@ -174,7 +174,7 @@ Most parts of the framework implement the internal [`Serializable`](/src/interna
 
 <!-- embedme examples/serialization/memory.ts -->
 
-```typescript
+```ts
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
@@ -203,7 +203,7 @@ _Source: [examples/serialization/memory.ts](/examples/serialization/memory.ts)_
 
 ### Custom Class Registration
 
-```typescript
+```ts
 class UserProfile {
   constructor(
     public name: string,
@@ -227,7 +227,7 @@ Serializer.register(UserProfile, {
 
 ### Handling Circular References
 
-```typescript
+```ts
 class Node {
   constructor(
     public value: string,
@@ -358,7 +358,7 @@ _Source: [examples/serialization/context.ts](/examples/serialization/context.ts)
 
 1. **Type Registration**
 
-   ```typescript
+   ```ts
    // Register types before using them
    Serializer.register(CustomType, {
      toPlain: (value) => ({
@@ -374,7 +374,7 @@ _Source: [examples/serialization/context.ts](/examples/serialization/context.ts)
 
 2. **Error Handling**
 
-   ```typescript
+   ```ts
    try {
      const serialized = Serializer.serialize(data);
    } catch (error) {
@@ -384,8 +384,19 @@ _Source: [examples/serialization/context.ts](/examples/serialization/context.ts)
    }
    ```
 
-3. **Performance Optimization**
-   ```typescript
+3. **Circular Reference Management**
+
+   ```ts
+   // Always implement createEmpty and updateInstance
+   // for classes that might have circular references
+   createEmpty: () => new CustomType();
+   updateInstance: (instance, update) => {
+     Object.assign(instance, update);
+   }
+   ```
+
+4. **Performance Optimization**
+   ```ts
    // Cache serialization results when appropriate
    class SerializableCache {
      @Cache()

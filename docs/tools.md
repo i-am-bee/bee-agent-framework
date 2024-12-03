@@ -78,7 +78,7 @@ classDiagram
 
 Executes the tool with the given input and options.
 
-```typescript
+```ts
 const tool = new WikipediaTool();
 const result = await tool.run({
   query: "Neural networks",
@@ -91,7 +91,7 @@ console.log(result.getTextContent());
 
 Creates a new tool that chains the output of the current tool to another tool.
 
-```typescript
+```ts
 const searchAndSummarize = wikipediaTool.pipe(llmTool, (input, output) => ({
   input: `Summarize this article: ${output.getTextContent()}`,
 }));
@@ -101,7 +101,7 @@ const searchAndSummarize = wikipediaTool.pipe(llmTool, (input, output) => ({
 
 Creates a new tool with modified input schema while reusing the original tool's functionality.
 
-```typescript
+```ts
 const enhancedSearch = wikipediaTool.extend(
   z.object({
     topic: z.string(),
@@ -133,7 +133,7 @@ const enhancedSearch = wikipediaTool.extend(
 
 <!-- embedme examples/tools/custom/base.ts -->
 
-```typescript
+```ts
 import {
   StringToolOutput,
   Tool,
@@ -271,7 +271,7 @@ _Source: [examples/tools/custom/python.ts](/examples/tools/custom/python.ts)_
 
 1. **Error Handling**
 
-   ```typescript
+   ```ts
    try {
      const result = await tool.run(input);
    } catch (error) {
@@ -285,7 +285,7 @@ _Source: [examples/tools/custom/python.ts](/examples/tools/custom/python.ts)_
 
 2. **Caching Strategy**
 
-   ```typescript
+   ```ts
    const tool = new SearchTool({
      cache: new UnconstrainedCache(),
      retryOptions: {
@@ -297,7 +297,7 @@ _Source: [examples/tools/custom/python.ts](/examples/tools/custom/python.ts)_
 
 3. **Event Monitoring**
 
-   ```typescript
+   ```ts
    tool.emitter.on("start", ({ input }) => {
      console.log("Tool execution started:", input);
    });

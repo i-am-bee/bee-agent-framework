@@ -71,7 +71,7 @@ classDiagram
 
 Emits an event to all registered listeners.
 
-```typescript
+```ts
 import { Emitter } from "bee-agent-framework/emitter/emitter";
 
 const emitter = new Emitter({ namespace: ["app"] });
@@ -86,7 +86,7 @@ _Source: [examples/emitter/base.ts](/examples/emitter/base.ts)_
 
 Registers a listener for a specific event.
 
-```typescript
+```ts
 import { Emitter } from "bee-agent-framework/emitter/emitter";
 
 const emitter = new Emitter({ namespace: ["app"] });
@@ -106,7 +106,7 @@ Registers a listener with advanced matching capabilities.
 
 <!-- embedme examples/emitter/matchers.ts -->
 
-```typescript
+```ts
 import { Emitter } from "bee-agent-framework/emitter/emitter";
 
 const emitter = new Emitter({ namespace: ["app"] });
@@ -136,7 +136,7 @@ _Source: [examples/emitter/matchers.ts](/examples/emitter/matchers.ts)_
 
 Creates a new emitter that inherits from the parent.
 
-```typescript
+```ts
 import { Emitter } from "bee-agent-framework/emitter/emitter";
 
 const parentEmitter = new Emitter({ namespace: ["app"] });
@@ -155,7 +155,7 @@ _Source: [examples/emitter/advanced.ts](/examples/emitter/advanced.ts)_
 
 #### Event Types
 
-```typescript
+```ts
 import { Callback, Emitter } from "bee-agent-framework/emitter/emitter";
 
 interface Events {
@@ -174,7 +174,7 @@ const emitter = new Emitter<Events>({
 
 <!-- embedme examples/emitter/piping.ts -->
 
-```typescript
+```ts
 import { Emitter, EventMeta } from "bee-agent-framework/emitter/emitter";
 
 const first = new Emitter({
@@ -217,7 +217,7 @@ _Source: [examples/emitter/piping.ts](/examples/emitter/piping.ts)_
 
 <!-- embedme examples/emitter/agentMatchers.ts -->
 
-```typescript
+```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
@@ -263,7 +263,7 @@ _Source: [examples/emitter/agentMatchers.ts](/examples/emitter/agentMatchers.ts)
 >
 > The `observe` method is also supported on [`Tools`](./tools.md) and [`LLMs`](./llms.md).
 
-```typescript
+```ts
 const tool = new SearchTool();
 
 tool.emitter.match("*.*", (data, event) => {
@@ -285,7 +285,7 @@ await tool.run({ query: "test" }).observe((emitter) => {
 
 1. **Event Naming**
 
-   ```typescript
+   ```ts
    // Good - clear, descriptive names
    await emitter.emit("processingStarted", { jobId: "123" });
 
@@ -295,7 +295,7 @@ await tool.run({ query: "test" }).observe((emitter) => {
 
 2. **Context Usage**
 
-   ```typescript
+   ```ts
    const emitter = new Emitter({
      context: {
        component: "auth",
@@ -306,7 +306,7 @@ await tool.run({ query: "test" }).observe((emitter) => {
 
 3. **Event Cleanup**
 
-   ```typescript
+   ```ts
    const cleanup = emitter.on("event", callback);
    try {
      // Use emitter
@@ -317,7 +317,7 @@ await tool.run({ query: "test" }).observe((emitter) => {
 
 4. **Type Safety**
 
-   ```typescript
+   ```ts
    interface MyEvents {
      start: Callback<{ id: string }>;
      end: Callback<{ id: string; result: any }>;

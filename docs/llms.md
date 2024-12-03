@@ -78,7 +78,7 @@ classDiagram
 
 Generates a response from the LLM based on the provided input.
 
-```typescript
+```ts
 // Text LLM
 const llm = new TextLLM({ modelId: "model-name" });
 const response = await llm.generate("What is the capital of France?", {
@@ -101,7 +101,7 @@ const chatResponse = await chatLlm.generate(messages);
 
 Streams the LLM's response as it's being generated.
 
-```typescript
+```ts
 const llm = new ChatLLM({ modelId: "streaming-model" });
 for await (const chunk of llm.stream(messages, {
   signal: AbortSignal.timeout(30000),
@@ -114,7 +114,7 @@ for await (const chunk of llm.stream(messages, {
 
 Returns token information for the provided input.
 
-```typescript
+```ts
 const tokenInfo = await llm.tokenize("Hello, world!");
 console.log(tokenInfo.tokensCount); // Number of tokens
 console.log(tokenInfo.tokens); // Array of token strings if available
@@ -140,7 +140,7 @@ console.log(tokenInfo.tokens); // Array of token strings if available
 
 Here's an example of implementing a custom LLM provider:
 
-```typescript
+```ts
 class CustomLLMOutput extends BaseLLMOutput {
   constructor(
     private content: string,
@@ -205,7 +205,7 @@ class CustomLLM extends LLM<CustomLLMOutput> {
 
 1. **Error Handling**
 
-   ```typescript
+   ```ts
    try {
      const response = await llm.generate(input);
    } catch (error) {
@@ -219,7 +219,7 @@ class CustomLLM extends LLM<CustomLLMOutput> {
 
 2. **Stream Management**
 
-   ```typescript
+   ```ts
    const controller = new AbortController();
    setTimeout(() => controller.abort(), 30000);
 
@@ -232,7 +232,7 @@ class CustomLLM extends LLM<CustomLLMOutput> {
 
 3. **Event Handling**
 
-   ```typescript
+   ```ts
    const response = await llm.generate(input).observe((emitter) => {
      emitter.on("newToken", ({ data }) => {
        console.log("New token:", data.value.getTextContent());
@@ -244,7 +244,7 @@ class CustomLLM extends LLM<CustomLLMOutput> {
    ```
 
 4. **Cache Usage**
-   ```typescript
+   ```ts
    const llm = new CustomLLM({
      modelId: "model-name",
      cache: new CustomCache(),

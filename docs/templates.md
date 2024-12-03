@@ -63,7 +63,7 @@ classDiagram
 
 Renders the template with provided input data.
 
-```typescript
+```ts
 import { PromptTemplate } from "bee-agent-framework/template";
 import { z } from "zod";
 
@@ -138,7 +138,7 @@ _Source: [examples/templates/objects.ts](/examples/templates/objects.ts)_
 
 Creates a new template by modifying an existing one.
 
-```typescript
+```ts
 import { PromptTemplate } from "bee-agent-framework/template";
 import { z } from "zod";
 
@@ -171,7 +171,7 @@ _Source: [examples/templates/forking.ts](/examples/templates/forking.ts)_
 
 ### Schema Validation
 
-```typescript
+```ts
 const userTemplate = new PromptTemplate({
   template: "User: {{name}}, Age: {{age}}",
   schema: z.object({
@@ -189,7 +189,7 @@ userTemplate.render({
 
 ### Default Values
 
-```typescript
+```ts
 const configTemplate = new PromptTemplate({
   template: "Server: {{host}}:{{port}}",
   schema: z.object({
@@ -205,7 +205,7 @@ const configTemplate = new PromptTemplate({
 
 ### Custom Functions
 
-```typescript
+```ts
 const messageTemplate = new PromptTemplate({
   schema: z.object({
     text: z.string(),
@@ -224,7 +224,7 @@ const messageTemplate = new PromptTemplate({
 
 ### Basic Template
 
-```typescript
+```ts
 const simpleTemplate = new PromptTemplate({
   template: "{{#trim}}{{#items}}{{.}},{{/items}}{{/trim}}",
   schema: z.object({
@@ -241,7 +241,7 @@ console.log(
 
 ### Complex Template
 
-```typescript
+```ts
 const profileTemplate = new PromptTemplate({
   template: `
     Name: {{name}}
@@ -275,7 +275,7 @@ const profileTemplate = new PromptTemplate({
 
 1. **Schema Definition**
 
-   ```typescript
+   ```ts
    // Define clear, specific schemas
    const schema = z.object({
      required: z.string(),
@@ -286,7 +286,7 @@ const profileTemplate = new PromptTemplate({
 
 2. **Error Handling**
 
-   ```typescript
+   ```ts
    try {
      template.render(input);
    } catch (error) {
@@ -298,7 +298,7 @@ const profileTemplate = new PromptTemplate({
 
 3. **Template Organization**
 
-   ```typescript
+   ```ts
    // Create base templates for reuse
    const baseTemplate = new PromptTemplate({
      template: "{{content}}",
@@ -315,7 +315,7 @@ const profileTemplate = new PromptTemplate({
    ```
 
 4. **Function Helpers**
-   ```typescript
+   ```ts
    const template = new PromptTemplate({
      schema: messageSchema,
      functions: {

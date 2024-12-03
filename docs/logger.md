@@ -65,7 +65,7 @@ classDiagram
 
 ## Logging Levels
 
-```typescript
+```ts
 const LoggerLevel = {
   TRACE: "trace", // Most detailed logging
   DEBUG: "debug", // Debug information
@@ -87,7 +87,7 @@ Creates a new logger instance inheriting from the parent.
 
 <!-- embedme examples/logger/base.ts -->
 
-```typescript
+```ts
 import { Logger, LoggerLevel } from "bee-agent-framework/logger/logger";
 
 // Configure logger defaults
@@ -105,7 +105,7 @@ const moduleLogger = parentLogger.child({
 
 #### Logging Methods
 
-```typescript
+```ts
 import { Logger, LoggerLevel } from "bee-agent-framework/logger/logger";
 
 Logger.defaults.level = LoggerLevel.TRACE; // Set log level to trace (default: TRACE, can also be set via ENV: BEE_FRAMEWORK_LOG_LEVEL=trace)
@@ -137,7 +137,7 @@ export BEE_FRAMEWORK_LOG_SINGLE_LINE=true
 
 ### Default Configuration
 
-```typescript
+```ts
 import { Logger } from "bee-agent-framework/logger/logger";
 
 Logger.defaults = {
@@ -156,7 +156,7 @@ The [Logger](/src/logger/logger.ts) seamlessly integrates with agents in the fra
 
 <!-- embedme examples/logger/agent.ts -->
 
-```typescript
+```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
@@ -196,7 +196,7 @@ If you need to integrate your own `pino` instance with the Bee Agent Framework L
 
 <!-- embedme examples/logger/pino.ts -->
 
-```typescript
+```ts
 import { Logger } from "bee-agent-framework/logger/logger";
 import { pino } from "pino";
 
@@ -219,7 +219,7 @@ _Source: [examples/logger/pino.ts](/examples/logger/pino.ts)_
 
 ## Pretty Printing
 
-```typescript
+```ts
 // Enable pretty printing with custom options
 Logger.defaults.pretty = true;
 
@@ -235,7 +235,7 @@ logger.info("This will be pretty printed!");
 
 1. **Logger Hierarchy**
 
-   ```typescript
+   ```ts
    const appLogger = Logger.root.child({ name: "app" });
    const dbLogger = appLogger.child({ name: "database" });
    const apiLogger = appLogger.child({ name: "api" });
@@ -243,7 +243,7 @@ logger.info("This will be pretty printed!");
 
 2. **Structured Logging**
 
-   ```typescript
+   ```ts
    logger.info({
      operation: "user-login",
      userId: "123",
@@ -253,7 +253,7 @@ logger.info("This will be pretty printed!");
 
 3. **Error Logging**
 
-   ```typescript
+   ```ts
    try {
      await operation();
    } catch (error) {
@@ -266,7 +266,7 @@ logger.info("This will be pretty printed!");
    ```
 
 4. **Performance Monitoring**
-   ```typescript
+   ```ts
    const start = performance.now();
    // Operation
    logger.debug({
