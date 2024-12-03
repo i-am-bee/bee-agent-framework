@@ -49,6 +49,7 @@ const exclude: string[] = [
     "examples/agents/bee_reusable.ts",
     "examples/llms/providers/openai.ts",
   ],
+  !hasEnv("AZURE_OPENAI_API_KEY") && ["examples/llms/providers/azure_openai.ts"],
   !hasEnv("IBM_VLLM_URL") && [
     "examples/llms/providers/ibm-vllm.ts",
     "examples/agents/granite/chat.ts",
