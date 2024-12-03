@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.0.47](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.46...v0.0.47) (2024-12-03)
+
+### ⚠ BREAKING CHANGES
+
+- **agents:** set auto retry for Bee as a default behaviour
+
+### Features
+
+- **agents:** extends the error-related context of LinePrefixParser ([740f1ef](https://github.com/i-am-bee/bee-agent-framework/commit/740f1efd573c8a4215e2b04bf59ca3c39dd93b90))
+- **agents:** set auto retry for Bee as a default behaviour ([04b5c45](https://github.com/i-am-bee/bee-agent-framework/commit/04b5c459b8795f3ab9d199e0305e832147d1aede))
+- example agent using IBM Granite LLM ([#213](https://github.com/i-am-bee/bee-agent-framework/issues/213)) ([9745920](https://github.com/i-am-bee/bee-agent-framework/commit/97459202f464b42fc48f37c37f3abd132e389b47))
+- **internals:** update type for context in FrameworkError ([6d457a1](https://github.com/i-am-bee/bee-agent-framework/commit/6d457a1515ce43d6781339bdfc8e5a48883fdca0))
+
+### Bug Fixes
+
+- **agents:** broaden the granite runner check ([#217](https://github.com/i-am-bee/bee-agent-framework/issues/217)) ([6d565eb](https://github.com/i-am-bee/bee-agent-framework/commit/6d565ebc3bde880cb3970806e1aa2c8c7a04ec1c))
+- **agents:** retry on a parser error ([6136c77](https://github.com/i-am-bee/bee-agent-framework/commit/6136c773962c8af59d380532631612c5f2d71bf3))
+
 ## [0.0.46](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.45...v0.0.46) (2024-12-03)
 
 ### ⚠ BREAKING CHANGES
