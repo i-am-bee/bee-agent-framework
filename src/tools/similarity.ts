@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-import { BaseToolOptions, BaseToolRunOptions, JSONToolOutput, Tool, ToolInput } from "./base.js";
+import {
+  BaseToolOptions,
+  BaseToolRunOptions,
+  CustomToolEmitter,
+  JSONToolOutput,
+  Tool,
+  ToolInput,
+} from "./base.js";
 import { string, z } from "zod";
 import { RunContext } from "@/context.js";
 import { map, pipe, prop, sortBy, take } from "remeda";
+import { Emitter } from "@/emitter/emitter.js";
 
 const documentSchema = z.object({ text: string() }).passthrough();
 
@@ -59,6 +67,12 @@ export class SimilarityTool<TProviderOptions> extends Tool<
 > {
   name = "Similarity";
   description = "Extract relevant information from documents.";
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, SimilarityToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "similarity"],
+      creator: this,
+    });
 
   inputSchema() {
     return z.object({ query: z.string(), documents: z.array(documentSchema) });

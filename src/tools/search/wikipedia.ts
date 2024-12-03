@@ -27,13 +27,14 @@ import {
 } from "./base.js";
 import { asyncProperties } from "@/internals/helpers/promise.js";
 import { z } from "zod";
-import { Tool, ToolInput } from "@/tools/base.js";
+import { CustomToolEmitter, Tool, ToolInput } from "@/tools/base.js";
 import Turndown from "turndown";
 // @ts-expect-error missing types
 import turndownPlugin from "joplin-turndown-plugin-gfm";
 import { keys, mapValues } from "remeda";
 import stringComparison from "string-comparison";
 import { pageResult } from "wikipedia/dist/resultTypes.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 wiki.default.setLang("en");
 
@@ -134,6 +135,12 @@ export class WikipediaTool extends Tool<
   name = "Wikipedia";
   description =
     "Search factual and historical information, including biography, history, politics, geography, society, culture, science, technology, people, animal species, mathematics, and other subjects.";
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, WikipediaToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "search", "wikipedia"],
+      creator: this,
+    });
 
   inputSchema() {
     return z.object({
