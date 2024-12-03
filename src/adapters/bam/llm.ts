@@ -21,6 +21,7 @@ import {
   BaseLLMTokenizeOutput,
   ExecutionOptions,
   GenerateOptions,
+  GuidedOptions,
   LLMCache,
   LLMError,
   LLMMeta,
@@ -342,8 +343,10 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
   }
 
   protected _prepareParameters(overrides?: GenerateOptions): typeof this.parameters {
-    const guided = overrides?.guided ? {} : (this.parameters.guided ?? {});
-    const guidedOverride = overrides?.guided;
+    const guided: BAMLLMParameters["guided"] = omitUndefined(
+      overrides?.guided ? {} : (this.parameters.guided ?? {}),
+    );
+    const guidedOverride: GuidedOptions = omitUndefined(overrides?.guided ?? {});
 
     if (guidedOverride?.choice) {
       guided.choice = guidedOverride.choice;

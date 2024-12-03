@@ -144,7 +144,10 @@ export abstract class BaseLLM<
 
   abstract tokenize(input: TInput): Promise<BaseLLMTokenizeOutput>;
 
-  generate(input: TInput, options?: TGenerateOptions) {
+  generate(input: TInput, options: Partial<TGenerateOptions> = {}) {
+    input = shallowCopy(input);
+    options = shallowCopy(options);
+
     return RunContext.enter(
       this,
       { params: [input, options] as const, signal: options?.signal },
@@ -187,8 +190,7 @@ export abstract class BaseLLM<
 
           const result: TOutput =
             cacheEntry?.value?.at(0) ||
-            // @ts-expect-error types
-            (await pRetry(() => this._generate(input, options ?? {}, run), {
+            (await pRetry(() => this._generate(input, options, run), {
               retries: this.executionOptions.maxRetries || 0,
               ...options,
               signal: run.signal,
@@ -211,7 +213,10 @@ export abstract class BaseLLM<
     ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
   }
 
-  async *stream(input: TInput, options?: StreamGenerateOptions): AsyncStream<TOutput> {
+  async *stream(input: TInput, options: Partial<StreamGenerateOptions> = {}): AsyncStream<TOutput> {
+    input = shallowCopy(input);
+    options = shallowCopy(options);
+
     return yield* emitterToGenerator(async ({ emit }) => {
       return RunContext.enter(
         this,
@@ -232,13 +237,13 @@ export abstract class BaseLLM<
 
   protected abstract _generate(
     input: TInput,
-    options: TGenerateOptions,
+    options: Partial<TGenerateOptions>,
     run: GetRunContext<typeof this>,
   ): Promise<TOutput>;
 
   protected abstract _stream(
     input: TInput,
-    options: StreamGenerateOptions,
+    options: Partial<StreamGenerateOptions>,
     run: GetRunContext<typeof this>,
   ): AsyncStream<TOutput, void>;
 
@@ -279,7 +284,7 @@ export abstract class BaseLLM<
 
   protected async createCacheAccessor(
     input: TInput,
-    options: GenerateOptions | StreamGenerateOptions | undefined,
+    options: Partial<GenerateOptions> | Partial<StreamGenerateOptions>,
     ...extra: any[]
   ) {
     const key = ObjectHashKeyFn(input, omit(options ?? {}, ["signal"]), ...extra);

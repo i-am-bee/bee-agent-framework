@@ -39,7 +39,7 @@ import { GetRunContext, RunContext } from "@/context.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
 import { createTelemetryMiddleware } from "@/instrumentation/create-telemetry-middleware.js";
-import { doNothing } from "remeda";
+import { doNothing, toCamelCase } from "remeda";
 
 export class ToolError extends FrameworkError {}
 
@@ -161,13 +161,22 @@ export type ToolInputRaw<T extends AnyTool> = FromSchemaLikeRaw<
 type ToolConstructorParameters<TOptions extends BaseToolOptions> =
   Partial<TOptions> extends TOptions ? [options?: TOptions] : [options: TOptions];
 
-export interface ToolCallbacks<TInput, TOutput> {
+export interface ToolEvents<
+  TInput extends Record<string, any> = Record<string, any>,
+  TOutput extends ToolOutput = ToolOutput,
+> {
   start: Callback<{ input: TInput; options: unknown }>;
   success: Callback<{ output: TOutput; input: TInput; options: unknown }>;
   error: Callback<{ input: TInput; error: ToolError | ToolInputValidationError; options: unknown }>;
   retry: Callback<{ error: ToolError | ToolInputValidationError; input: TInput; options: unknown }>;
   finish: Callback<null>;
 }
+
+export type CustomToolEmitter<
+  A extends Record<string, any>,
+  B extends ToolOutput,
+  C = Record<never, never>,
+> = Emitter<ToolEvents<A, B> & Omit<C, keyof ToolEvents>>;
 
 export abstract class Tool<
   TOutput extends ToolOutput = ToolOutput,
@@ -180,10 +189,7 @@ export abstract class Tool<
   public readonly cache: BaseCache<Task<TOutput>>;
   public readonly options: TOptions;
 
-  public readonly emitter = Emitter.root.child<ToolCallbacks<ToolInput<this>, TOutput>>({
-    namespace: ["tool"],
-    creator: this,
-  });
+  public abstract readonly emitter: Emitter<ToolEvents<any, TOutput>>;
 
   abstract inputSchema(): Promise<AnyToolSchemaLike> | AnyToolSchemaLike;
 
@@ -206,8 +212,9 @@ export abstract class Tool<
     }
   }
 
-  run(input: ToolInputRaw<this>, options?: TRunOptions) {
+  run(input: ToolInputRaw<this>, options: Partial<TRunOptions> = {}) {
     input = shallowCopy(input);
+    options = shallowCopy(options);
 
     return RunContext.enter(
       this,
@@ -267,7 +274,7 @@ export abstract class Tool<
 
   protected async _runCached(
     input: ToolInput<this>,
-    options: TRunOptions | undefined,
+    options: Partial<TRunOptions>,
     run: GetRunContext<this>,
   ): Promise<TOutput> {
     const key = ObjectHashKeyFn({
@@ -297,7 +304,7 @@ export abstract class Tool<
 
   protected abstract _run(
     arg: ToolInput<this>,
-    options: TRunOptions | undefined,
+    options: Partial<TRunOptions>,
     run: GetRunContext<typeof this>,
   ): Promise<TOutput>;
 
@@ -391,7 +398,7 @@ export abstract class Tool<
     mapper: (
       input: ToolInputRaw<S>,
       output: TOutput,
-      options: TRunOptions | undefined,
+      options: Partial<TRunOptions>,
       run: RunContext<
         DynamicTool<TOutput, ZodSchema<ToolInput<S>>, TOptions, TRunOptions, ToolInput<S>>
       >,
@@ -415,7 +422,7 @@ export abstract class Tool<
     schema: TS,
     mapper: (
       input: z.output<TS>,
-      options: TRunOptions | undefined,
+      options: Partial<TRunOptions>,
       run: RunContext<DynamicTool<TOutput, TS, TOptions, TRunOptions, z.output<TS>>>,
     ) => ToolInputRaw<S>,
     overrides: {
@@ -452,6 +459,7 @@ export class DynamicTool<
   declare name: string;
   declare description: string;
   private readonly _inputSchema: TInputSchema;
+  declare readonly emitter: Emitter<ToolEvents<FromSchemaLike<TInputSchema>, TOutput>>;
   private readonly handler;
 
   inputSchema(): TInputSchema {
@@ -464,7 +472,7 @@ export class DynamicTool<
     inputSchema: TInputSchema;
     handler: (
       input: TInput,
-      options: TRunOptions | undefined,
+      options: Partial<TRunOptions>,
       run: GetRunContext<DynamicTool<TOutput, TInputSchema, TOptions, TRunOptions, TInput>>,
     ) => Promise<TOutput>;
     options?: TOptions;
@@ -492,11 +500,15 @@ export class DynamicTool<
     this.description = fields.description;
     this._inputSchema = fields.inputSchema;
     this.handler = fields.handler;
+    this.emitter = Emitter.root.child({
+      namespace: ["tool", "dynamic", toCamelCase(this.name)],
+      creator: this,
+    });
   }
 
   protected _run(
     arg: TInput,
-    options: TRunOptions | undefined,
+    options: Partial<TRunOptions>,
     run: GetRunContext<DynamicTool<TOutput, TInputSchema, TOptions, TRunOptions, TInput>>,
   ): Promise<TOutput> {
     return this.handler(arg, options, run);

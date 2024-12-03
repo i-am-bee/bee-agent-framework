@@ -135,6 +135,7 @@ const enhancedSearch = wikipediaTool.extend(
 
 ```ts
 import {
+  CustomToolEmitter,
   StringToolOutput,
   Tool,
   ToolInput,
@@ -142,10 +143,17 @@ import {
 } from "bee-agent-framework/tools/base";
 import { z } from "zod";
 import { randomInteger } from "remeda";
+import { Emitter } from "bee-agent-framework/emitter/emitter";
 
 export class RiddleTool extends Tool<StringToolOutput> {
   name = "Riddle";
   description = "It generates a random puzzle to test your knowledge.";
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "riddle"],
+      creator: this,
+    });
 
   inputSchema() {
     return z.object({
@@ -186,7 +194,199 @@ export class RiddleTool extends Tool<StringToolOutput> {
 
 _Source: [examples/tools/custom/base.ts](/examples/tools/custom/base.ts)_
 
-Using the `DynamicTool` class
+> [!TIP]
+>
+> `inputSchema` can be asynchronous.
+
+> [!TIP]
+>
+> If you want to return an array or a plain object, use `JSONToolOutput` or implement your own.
+
+#### Advanced
+
+If your tool is more complex, you may want to use the full power of the tool abstraction, as the following example shows.
+
+<!-- embedme examples/tools/custom/openLibrary.ts -->
+
+```ts
+import {
+  BaseToolOptions,
+  BaseToolRunOptions,
+  Tool,
+  ToolInput,
+  JSONToolOutput,
+  ToolError,
+  CustomToolEmitter,
+} from "bee-agent-framework/tools/base";
+import { z } from "zod";
+import { createURLParams } from "bee-agent-framework/internals/fetcher";
+import { GetRunContext } from "bee-agent-framework/context";
+import { Callback, Emitter } from "bee-agent-framework/emitter/emitter";
+
+type ToolOptions = BaseToolOptions & { maxResults?: number };
+type ToolRunOptions = BaseToolRunOptions;
+
+export interface OpenLibraryResponse {
+  numFound: number;
+  start: number;
+  numFoundExact: boolean;
+  q: string;
+  offset: number;
+  docs: Record<string, any>[];
+}
+
+export class OpenLibraryToolOutput extends JSONToolOutput<OpenLibraryResponse> {
+  isEmpty(): boolean {
+    return !this.result || this.result.numFound === 0 || this.result.docs.length === 0;
+  }
+}
+
+export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, ToolRunOptions> {
+  name = "OpenLibrary";
+  description =
+    "Provides access to a library of books with information about book titles, authors, contributors, publication dates, publisher and isbn.";
+
+  inputSchema() {
+    return z
+      .object({
+        title: z.string(),
+        author: z.string(),
+        isbn: z.string(),
+        subject: z.string(),
+        place: z.string(),
+        person: z.string(),
+        publisher: z.string(),
+      })
+      .partial();
+  }
+
+  public readonly emitter: CustomToolEmitter<
+    ToolInput<this>,
+    OpenLibraryToolOutput,
+    {
+      beforeFetch: Callback<{ request: { url: string; options: RequestInit } }>;
+      afterFetch: Callback<{ data: OpenLibraryResponse }>;
+    }
+  > = Emitter.root.child({
+    namespace: ["tool", "search", "openLibrary"],
+    creator: this,
+  });
+
+  static {
+    this.register();
+  }
+
+  protected async _run(
+    input: ToolInput<this>,
+    _options: ToolRunOptions | undefined,
+    run: GetRunContext<this>,
+  ) {
+    const request = {
+      url: `https://openlibrary.org?${createURLParams({
+        searchon: input,
+      })}`,
+      options: { signal: run.signal } as RequestInit,
+    };
+
+    await run.emitter.emit("beforeFetch", { request });
+    const response = await fetch(request.url, request.options);
+
+    if (!response.ok) {
+      throw new ToolError(
+        "Request to Open Library API has failed!",
+        [new Error(await response.text())],
+        {
+          context: { input },
+        },
+      );
+    }
+
+    const json: OpenLibraryResponse = await response.json();
+    if (this.options.maxResults) {
+      json.docs.length = this.options.maxResults;
+    }
+
+    await run.emitter.emit("afterFetch", { data: json });
+    return new OpenLibraryToolOutput(json);
+  }
+}
+```
+
+_Source: [examples/tools/custom/openLibrary.ts](/examples/tools/custom/openLibrary.ts)_
+
+#### Implementation Notes
+
+- **Implement the `Tool` class:**
+
+  - `MyNewToolOutput` is required, must be an implementation of `ToolOutput` such as `StringToolOutput` or `JSONToolOutput`.
+
+  - `ToolOptions` is optional (default BaseToolOptions), constructor parameters that are passed during tool creation
+
+  - `ToolRunOptions` is optional (default BaseToolRunOptions), optional parameters that are passed to the run method
+
+- **Be given a unique name:**
+
+  Note: Convention and best practice is to set the tool's name to the name of its class
+
+  ```ts
+  name = "MyNewTool";
+  ```
+
+- **Provide a natural language description of what the tool does:**
+
+  ❗Important: the agent uses this description to determine when the tool should be used. It's probably the most important aspect of your tool and you should experiment with different natural language descriptions to ensure the tool is used in the correct circumstances. You can also include usage tips and guidance for the agent in the description, but
+  its advisable to keep the description succinct in order to reduce the probability of conflicting with other tools, or adversely affecting agent behavior.
+
+  ```ts
+  description = "Takes X action when given Y input resulting in Z output";
+  ```
+
+- **Declare an input schema:**
+
+  This is used to define the format of the input to your tool. The agent will formalise the natural language input(s) it has received and structure them into the fields described in the tool's input. The input schema can be specified using [Zod](https://github.com/colinhacks/zod) (recommended) or JSONSchema. It must be a function (either sync or async). Zod effects (e.g. `z.object().transform(...)`) are not supported. The return value of `inputSchema` must always be an object and pass validation by the `validateSchema()` function defined in [schema.ts](/src/internals/helpers/schema.ts). Keep your tool input schema simple and provide schema descriptions to help the agent to interpret fields.
+
+  <!-- eslint-skip -->
+
+  ```ts
+  inputSchema() {
+      // any Zod definition is good here, this is typical simple example
+      return z.object({
+        // list of key-value pairs
+        expression: z
+        .string()
+        .min(1)
+        .describe(
+          `The mathematical expression to evaluate (e.g., "2 + 3 * 4").`,
+        ),
+      });
+  }
+  ```
+
+- **Implement initialisation:**
+
+  The unnamed static block is executed when your tool is called for the first time. It is used to register your tool as `serializable` (you can then use the `serialize()` method).
+
+  <!-- eslint-skip -->
+
+  ```ts
+  static {
+      this.register();
+  }
+  ```
+
+- **Implement the `_run()` method:**
+
+  <!-- eslint-skip -->
+
+  ```ts
+  protected async _run(input: ToolInput<this>, options: Partial<BaseToolRunOptions>, run: RunContext<this>) {
+      // insert custom code here
+      // MUST: return an instance of the output type specified in the tool class definition
+      // MAY: throw an instance of ToolError upon unrecoverable error conditions encountered by the tool
+  }
+  ```
+
+### Using the `DynamicTool` class
 
 The `DynamicTool` allows you to create a tool without extending the base tool class.
 

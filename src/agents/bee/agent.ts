@@ -65,7 +65,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       );
     }
 
-    this.runner = this.input.llm.modelId.includes("ibm/granite") ? GraniteRunner : DefaultRunner;
+    this.runner = this.input.llm.modelId.includes("granite") ? GraniteRunner : DefaultRunner;
   }
 
   static {
@@ -102,7 +102,18 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
     options: BeeRunOptions = {},
     run: GetRunContext<typeof this>,
   ): Promise<BeeRunOutput> {
-    const runner = new this.runner(this.input, options, run);
+    const runner = new this.runner(
+      this.input,
+      {
+        ...options,
+        execution: options?.execution ?? {
+          maxRetriesPerStep: 3,
+          totalMaxRetries: 20,
+          maxIterations: 10,
+        },
+      },
+      run,
+    );
     await runner.init(input);
 
     let finalMessage: BaseMessage | undefined;

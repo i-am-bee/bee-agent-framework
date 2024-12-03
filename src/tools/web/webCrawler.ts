@@ -17,6 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
+  CustomToolEmitter,
   JSONToolOutput,
   Tool,
   ToolInput,
@@ -25,6 +26,7 @@ import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
 import { stripHtml } from "string-strip-html";
 import { RunContext } from "@/context.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 interface CrawlerOutput {
   url: string;
@@ -84,6 +86,12 @@ export class WebCrawlerTool extends Tool<WebCrawlerToolOutput, WebsiteCrawlerToo
   protected client: HttpClient;
   protected parser: Parser;
 
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, WebCrawlerToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "webCrawler"],
+      creator: this,
+    });
+
   constructor({ client, parser, ...options }: WebsiteCrawlerToolOptions = {}) {
     super(options);
     this.client = client ?? fetch;
@@ -92,7 +100,7 @@ export class WebCrawlerTool extends Tool<WebCrawlerToolOutput, WebsiteCrawlerToo
 
   protected async _run(
     { url }: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>,
   ) {
     const response = await this.client(url, {

@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { BaseToolOptions, BaseToolRunOptions, Tool, ToolInput } from "@/tools/base.js";
+import {
+  BaseToolOptions,
+  BaseToolRunOptions,
+  CustomToolEmitter,
+  Tool,
+  ToolInput,
+} from "@/tools/base.js";
 import { createGrpcTransport } from "@connectrpc/connect-node";
 import { PromiseClient, createPromiseClient } from "@connectrpc/connect";
 import { CodeInterpreterService } from "bee-proto/code_interpreter/v1/code_interpreter_service_connect";
@@ -29,6 +35,7 @@ import { ValidationError } from "ajv";
 import { ConnectionOptions } from "node:tls";
 import { RunContext } from "@/context.js";
 import { hasMinLength } from "@/internals/helpers/array.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 export interface CodeInterpreterOptions {
   url: string;
@@ -70,6 +77,12 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
   public readonly storage: PythonStorage;
   protected files: PythonFile[] = [];
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, PythonToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "python"],
+      creator: this,
+    });
 
   async inputSchema() {
     this.files = await this.storage.list();
@@ -125,7 +138,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
   protected async _run(
     input: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>,
   ) {
     const inputFiles = await pipe(

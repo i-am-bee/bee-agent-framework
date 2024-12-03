@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import { BaseToolOptions, BaseToolRunOptions, StringToolOutput, Tool } from "@/tools/base.js";
+import {
+  BaseToolOptions,
+  BaseToolRunOptions,
+  CustomToolEmitter,
+  StringToolOutput,
+  Tool,
+  ToolInput,
+} from "@/tools/base.js";
 import { createGrpcTransport } from "@connectrpc/connect-node";
 import { PromiseClient, createPromiseClient } from "@connectrpc/connect";
 import { FrameworkError } from "@/errors.js";
@@ -23,6 +30,7 @@ import { validate } from "@/internals/helpers/general.js";
 import { CodeInterpreterService } from "bee-proto/code_interpreter/v1/code_interpreter_service_connect";
 import { CodeInterpreterOptions } from "./python/python.js";
 import { RunContext } from "@/context.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 export class CustomToolCreateError extends FrameworkError {}
 export class CustomToolExecuteError extends FrameworkError {}
@@ -58,6 +66,12 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
   name: string;
   description: string;
 
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "custom"],
+      creator: this,
+    });
+
   public inputSchema() {
     return this.options.inputSchema;
   }
@@ -81,7 +95,7 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
 
   protected async _run(
     input: any,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<typeof this>,
   ) {
     const { response } = await this.client.executeCustomTool(

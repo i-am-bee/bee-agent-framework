@@ -17,6 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
+  CustomToolEmitter,
   JSONToolOutput,
   Tool,
   ToolError,
@@ -33,6 +34,7 @@ import { castArray } from "@/internals/helpers/array.js";
 import { ValueOf } from "@/internals/types.js";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
 import { RunContext } from "@/context.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 type ToolOptions = BaseToolOptions;
 type ToolRunOptions = BaseToolRunOptions;
@@ -112,6 +114,13 @@ export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions
   name = "ArXiv";
   description = `Retrieves research articles published on arXiv including related metadata.`;
 
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, ArXivToolOutput> = Emitter.root.child(
+    {
+      namespace: ["tool", "search", "arxiv"],
+      creator: this,
+    },
+  );
+
   @Cache()
   inputSchema() {
     const entrySchema = z.object({
@@ -174,7 +183,7 @@ export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions
 
   protected async _run(
     input: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>,
   ) {
     const params = this._prepareParams(input);

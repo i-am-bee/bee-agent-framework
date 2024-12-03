@@ -22,6 +22,7 @@ import {
   BaseToolRunOptions,
   JSONToolOutput,
   ToolInputValidationError,
+  CustomToolEmitter,
 } from "@/tools/base.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
@@ -33,6 +34,7 @@ import {
   DescribeCollectionResponse,
 } from "@zilliz/milvus2-sdk-node";
 import { z } from "zod";
+import { Emitter } from "@/emitter/emitter.js";
 
 export interface MilvusToolOptions extends BaseToolOptions {
   connection: ClientConfig;
@@ -114,6 +116,14 @@ export class MilvusDatabaseTool extends Tool<
     });
   }
 
+  public readonly emitter: CustomToolEmitter<
+    ToolInput<this>,
+    JSONToolOutput<MilvusSearchToolResult>
+  > = Emitter.root.child({
+    namespace: ["tool", "database", "milvus"],
+    creator: this,
+  });
+
   protected validateInput(
     schema: AnyToolSchemaLike,
     input: unknown,
@@ -157,7 +167,7 @@ export class MilvusDatabaseTool extends Tool<
 
   protected async _run(
     input: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
   ): Promise<JSONToolOutput<any>> {
     switch (input.action) {
       case MilvusAction.ListCollections: {

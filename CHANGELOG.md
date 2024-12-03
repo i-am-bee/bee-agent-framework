@@ -1,5 +1,54 @@
 # Changelog
 
+## [0.0.47](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.46...v0.0.47) (2024-12-03)
+
+### ⚠ BREAKING CHANGES
+
+- **agents:** set auto retry for Bee as a default behaviour
+
+### Features
+
+- **agents:** extends the error-related context of LinePrefixParser ([740f1ef](https://github.com/i-am-bee/bee-agent-framework/commit/740f1efd573c8a4215e2b04bf59ca3c39dd93b90))
+- **agents:** set auto retry for Bee as a default behaviour ([04b5c45](https://github.com/i-am-bee/bee-agent-framework/commit/04b5c459b8795f3ab9d199e0305e832147d1aede))
+- example agent using IBM Granite LLM ([#213](https://github.com/i-am-bee/bee-agent-framework/issues/213)) ([9745920](https://github.com/i-am-bee/bee-agent-framework/commit/97459202f464b42fc48f37c37f3abd132e389b47))
+- **internals:** update type for context in FrameworkError ([6d457a1](https://github.com/i-am-bee/bee-agent-framework/commit/6d457a1515ce43d6781339bdfc8e5a48883fdca0))
+
+### Bug Fixes
+
+- **agents:** broaden the granite runner check ([#217](https://github.com/i-am-bee/bee-agent-framework/issues/217)) ([6d565eb](https://github.com/i-am-bee/bee-agent-framework/commit/6d565ebc3bde880cb3970806e1aa2c8c7a04ec1c))
+- **agents:** retry on a parser error ([6136c77](https://github.com/i-am-bee/bee-agent-framework/commit/6136c773962c8af59d380532631612c5f2d71bf3))
+
+## [0.0.46](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.45...v0.0.46) (2024-12-03)
+
+### ⚠ BREAKING CHANGES
+
+- **llms:** make "options" parameter for generate/stream always partial
+- **tools:** make run options always partial with fallback to an empty object
+- **tools:** improve type support for events (#209)
+
+### Features
+
+- **adapters:** add Azure OpenAI LLM adapter ([#201](https://github.com/i-am-bee/bee-agent-framework/issues/201)) ([a6a0653](https://github.com/i-am-bee/bee-agent-framework/commit/a6a06536d0048c37c7853e884416ec748b6a2a57))
+- **llms:** make "options" parameter for generate/stream always partial ([20fbe71](https://github.com/i-am-bee/bee-agent-framework/commit/20fbe7103a8dbcec01d1613f8c0f5ec0f4778c28))
+- **tools:** improve type support for events ([#209](https://github.com/i-am-bee/bee-agent-framework/issues/209)) ([456ff11](https://github.com/i-am-bee/bee-agent-framework/commit/456ff1103e12ccaf312a8ced4543279886dbbd8c))
+- **tools:** make run options always partial with fallback to an empty object ([ff65e0c](https://github.com/i-am-bee/bee-agent-framework/commit/ff65e0c25dc82c98fe731a8512deda3e3fe2c651))
+
+### Bug Fixes
+
+- **adapters:** handle undefined values for CD in BAM/vLLM ([0f45b64](https://github.com/i-am-bee/bee-agent-framework/commit/0f45b64b9ef856d8464c8ead072ed6e9194c9de9))
+
+## [0.0.45](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.44...v0.0.45) (2024-12-03)
+
+### Features
+
+- **agents:** add retry for parser errors ([#204](https://github.com/i-am-bee/bee-agent-framework/issues/204)) ([226aaf5](https://github.com/i-am-bee/bee-agent-framework/commit/226aaf5e67037225223c59af68c6f96ab362aeb4))
+- **llms:** improve type support for events ([74713a6](https://github.com/i-am-bee/bee-agent-framework/commit/74713a601d6d1e4fcb85d160d67d16ad52715e8c))
+
+### Bug Fixes
+
+- **adapters:** vLLM JSON Schema guided decoding ([#207](https://github.com/i-am-bee/bee-agent-framework/issues/207)) ([7d83d21](https://github.com/i-am-bee/bee-agent-framework/commit/7d83d21c0af2b2489d997bfa1d8f47eca5f625f5))
+- **agents:** propagate groupId to events ([e63bc5b](https://github.com/i-am-bee/bee-agent-framework/commit/e63bc5bdfce96ba7c11a1cfaa9c1a05da495e914))
+
 ## [0.0.44](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.43...v0.0.44) (2024-11-29)
 
 ### Features
