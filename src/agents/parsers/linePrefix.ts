@@ -15,13 +15,16 @@
  */
 import { Emitter } from "@/emitter/emitter.js";
 import { entries } from "remeda";
-import { FrameworkError, ValueError } from "@/errors.js";
+import { ValueError } from "@/errors.js";
 import { Serializable } from "@/internals/serializable.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { ParserField } from "@/agents/parsers/field.js";
 import { Callback, InferCallbackValue } from "@/emitter/types.js";
 import { ZodError } from "zod";
+import { ValueOf } from "@/internals/types.js";
+import { LinePrefixParserError } from "@/agents/parsers/errors.js";
+export * from "@/agents/parsers/errors.js";
 
 export interface ParserNode<T extends string, P extends ParserField<any, any>> {
   prefix: string;
@@ -66,11 +69,6 @@ interface Line {
 }
 
 const NEW_LINE_CHARACTER = "\n" as const;
-
-export class LinePrefixParserError extends FrameworkError {
-  isFatal = true;
-  isRetryable = false;
-}
 
 interface ExtractedLine<T extends NonNullable<unknown>> {
   key: StringKey<T>;
@@ -195,6 +193,7 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
 
             this.throwWithContext(
               `Transition from '${this.lastNodeKey}' to '${parsedLine.key}' does not exist!`,
+              LinePrefixParserError.Reason.InvalidTransition,
               { line },
             );
           }
@@ -204,6 +203,7 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
           if (!this.options.waitForStartNode) {
             this.throwWithContext(
               `Parsed text line corresponds to a node "${parsedLine.key}" which is not a start node!`,
+              LinePrefixParserError.Reason.NotStartNode,
               { line },
             );
           }
@@ -244,12 +244,14 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
 
   protected throwWithContext(
     message: string,
+    reason: ValueOf<typeof LinePrefixParserError.Reason>,
     extra: { line?: Line; errors?: Error[] } = {},
   ): never {
     throw new LinePrefixParserError(
       [`The generated output does not adhere to the schema.`, message].join(NEW_LINE_CHARACTER),
-      extra.errors,
+      extra.errors ?? [],
       {
+        reason,
         context: {
           lines: linesToString(this.lines.concat(extra.line ? [extra.line] : [])),
           excludedLines: linesToString(this.excludedLines),
@@ -280,7 +282,10 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
     this.done = true;
 
     if (!this.lastNodeKey) {
-      this.throwWithContext("Nothing valid has been parsed yet!");
+      this.throwWithContext(
+        "Nothing valid has been parsed yet!",
+        LinePrefixParserError.Reason.NoDataReceived,
+      );
     }
 
     const stash = linesToString(this.lines);
@@ -300,7 +305,10 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
 
     const currentNode = this.nodes[this.lastNodeKey];
     if (!currentNode.isEnd) {
-      this.throwWithContext(`Node '${this.lastNodeKey}' is not an end node.`);
+      this.throwWithContext(
+        `Node '${this.lastNodeKey}' is not an end node.`,
+        LinePrefixParserError.Reason.NotEndNode,
+      );
     }
 
     await Promise.allSettled(Object.values(this.nodes).map(({ field }) => field.end()));
@@ -309,7 +317,10 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
 
   protected async emitPartialUpdate(data: InferCallbackValue<Callbacks<T>["partialUpdate"]>) {
     if (data.key in this.finalState) {
-      this.throwWithContext(`Cannot update partial event for completed key '${data.key}'`);
+      this.throwWithContext(
+        `Cannot update partial event for completed key '${data.key}'`,
+        LinePrefixParserError.Reason.AlreadyCompleted,
+      );
     }
     if (!(data.key in this.partialState)) {
       this.partialState[data.key] = "";
@@ -320,7 +331,10 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
 
   protected async emitFinalUpdate(key: StringKey<T>, field: ParserField<any, any>) {
     if (key in this.finalState) {
-      this.throwWithContext(`Duplicated key '${key}'`);
+      this.throwWithContext(
+        `Duplicated key '${key}'`,
+        LinePrefixParserError.Reason.AlreadyCompleted,
+      );
     }
 
     try {
@@ -335,6 +349,7 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
       if (e instanceof ZodError) {
         this.throwWithContext(
           `Value for '${key}' cannot be retrieved because it's value does not adhere to the appropriate schema.`,
+          LinePrefixParserError.Reason.InvalidSchema,
           { errors: [e] },
         );
       }
