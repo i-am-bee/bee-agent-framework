@@ -10,56 +10,43 @@ The `BaseAgent` class is the foundation of the Bee Framework, providing the core
 
 ```mermaid
 classDiagram
-    class BaseAgent {
-        +LLM llm
-        +Memory memory
-        +Tool[] tools
-        +DevTools devTools
-        +run(prompt: string, options?: ExecutionOptions)
+    class Serializable {
+        <<abstract>>
     }
-
-    BaseAgent *-- LLM
-    BaseAgent *-- Memory
-    BaseAgent *-- Tool
-    BaseAgent *-- DevTools
-
-    class LLM {
-        +inference()
-        +templates: TemplatePrompt
+    class FrameworkError {
+        <<class>>
     }
-
-    class Memory {
-        +store()
-        +retrieve()
-        +cache: Cache
+    class AgentError {
+        <<class>>
     }
-
-    class Tool {
-        +execute()
-        +validate()
-    }
-
-    class DevTools {
+    class BaseAgent~TInput,TOutput,TOptions~ {
+        <<abstract>>
+        #isRunning: boolean
         +emitter: Emitter
-        +logger: Logger
-        +adapter: Adapter
-        +serializer: Serializer
-        +errorHandler: ErrorHandler
+        +memory: BaseMemory
+        +meta: AgentMeta
+        +run(input: TInput, options?: TOptions)
+        #_run(input: TInput, options: TOptions, run: RunContext)*
+        +destroy()
+        +createSnapshot()
     }
+    class BaseMemory {
+        <<abstract>>
+    }
+    class Emitter {
+        +destroy()
+    }
+
+    Serializable <|-- BaseAgent
+    FrameworkError <|-- AgentError
+    BaseAgent --> Emitter
+    BaseAgent --> BaseMemory
+    BaseAgent --> AgentMeta
 ```
 
 > [!TIP]
 >
 > Location within the framework `bee-agent-framework/agents`.
-
-## Core Properties
-
-| Property   | Type       | Description                                  |
-| ---------- | ---------- | -------------------------------------------- |
-| `llm`      | `LLM`      | Manages interactions with the language model |
-| `memory`   | `Memory`   | Handles state management and persistence     |
-| `tools`    | `Tool[]`   | Array of available tools for the agent       |
-| `devTools` | `DevTools` | Development and debugging utilities          |
 
 ## Main Methods
 
@@ -94,41 +81,63 @@ const response = await agent.run("What's the weather in Las Vegas?", {
 Subscribes to agent events for monitoring and debugging.
 
 ```ts
-agent.observe((emitter) => {
-  // Listen for complete updates
-  emitter.on("update", ({ data, update, meta }) => {
-    console.log(`Complete Update: ${update.key} = ${update.value}`);
-  });
+const response = await agent
+      .run(
+        { prompt },
+        {
+          execution: {
+            maxRetriesPerStep: 3,
+            totalMaxRetries: 10,
+            maxIterations: 20,
+          },
+          signal: AbortSignal.timeout(2 * 60 * 1000),
+        },
+      )
+      .observe((emitter) => {
+        emitter.on("start", () => {
+          reader.write(`Agent 🤖 : `, "starting new iteration");
+        });
+        emitter.on("error", ({ error }) => {
+          reader.write(`Agent 🤖 : `, FrameworkError.ensure(error).dump());
+        });
+        emitter.on("retry", () => {
+          reader.write(`Agent 🤖 : `, "retrying the action...");
+        });
+        emitter.on("update", async ({ data, update, meta }) => {
+          // log 'data' to see the whole state
+          // to log only valid runs (no errors), check if meta.success === true
+          reader.write(`Agent (${update.key}) 🤖 : `, update.value);
+        });
+        emitter.on("partialUpdate", ({ data, update, meta }) => {
+          // ideal for streaming (line by line)
+          // log 'data' to see the whole state
+          // to log only valid runs (no errors), check if meta.success === true
+          // reader.write(`Agent (partial ${update.key}) 🤖 : `, update.value);
+        });
 
-  // Listen for partial updates (streaming)
-  emitter.on("partialUpdate", ({ data, update, meta }) => {
-    console.log(`Partial Update: ${update.key} = ${update.value}`);
-  });
-
-  // Listen for tool execution
-  emitter.on("toolStart", ({ tool, input }) => {
-    console.log(`Tool Started: ${tool.name}`);
-  });
-});
+        // To observe all events (uncomment following block)
+        // emitter.match("*.*", async (data: unknown, event) => {
+        //   logger.trace(event, `Received event "${event.path}"`);
+        // });
+      });
 ```
 
 ## Events
 
-Agent emits various events through its DevTools.Emitter:
+Agent emits various events through its Emitter:
 
-| Event           | Description                | Payload                   |
+| Event | Description | Payload |
 | --------------- | -------------------------- | ------------------------- |
-| `update`        | Complete update for a step | `{ data, update, meta }`  |
-| `partialUpdate` | Streaming update           | `{ data, update, meta }`  |
-| `toolStart`     | Tool execution started     | `{ tool, input }`         |
-| `toolEnd`       | Tool execution completed   | `{ tool, result }`        |
-| `error`         | Error occurred             | `{ error, context }`      |
-| `retry`         | Retry attempt              | `{ attempt, maxRetries }` |
-| `success`       | Successful completion      | `{ result }`              |
+| `start` | New iteration started | `void` |
+| `error` | Error with framework error dump | `{ error }` |
+| `retry` | Retry attempt initiated | `void` |
+| `update` | Full state update with metadata | `{ data, update: {key, value}, meta }` |
+| `partialUpdate` | Streaming line-by-line update | `{ data, update: {key, value}, meta }` |
+| `*.*` | Optional catch-all event matcher | `data, event` |
 
 ## Implementation Example
 
-Here's an example of implementing an simple agent base in Bee Agent class:
+Here's an example of usage an simple agent base in Bee Agent class:
 
 ```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
@@ -160,13 +169,18 @@ console.log(`Agent 🤖 : `, response.result.text);
 1. **Error Handling**
 
 ```ts
-function executeIteration(iteration: number): Promise<IterationResult> {
-  try {
-    // ... iteration logic ...
-  } catch (error) {
-    this.devTools.emitter.emit("error", { error, context: { iteration } });
-    throw error;
-  }
+import { FrameworkError } from "bee-agent-framework/errors";
+
+function getUser() {
+  throw new Error("User was not found!");
+}
+
+try {
+  getUser();
+} catch (e) {
+  const err = FrameworkError.ensure(e);
+  console.log(err.dump());
+  console.log(err.explain());
 }
 ```
 
@@ -183,7 +197,7 @@ function cleanup(): Promise<void> {
 
 ```ts
 function emitProgress(progress: number): void {
-  this.devTools.emitter.emit("progress", { value: progress });
+  this.agent.emitter.emit("progress", { value: progress });
 }
 ```
 
@@ -198,31 +212,6 @@ function validateTools(): Promise<void> {
   }
 }
 ```
-
-## Best Practices
-
-1. **Error Handling**
-
-   - Use `AgentError` for agent-specific errors
-   - Implement proper cleanup in `finally` blocks
-   - Handle tool execution errors gracefully
-
-2. **State Management**
-
-   - Use the `isRunning` flag to prevent concurrent executions
-   - Implement proper state cleanup in the `destroy` method
-   - Use snapshots for state persistence
-
-3. **Event Emission**
-
-   - Configure appropriate event namespaces
-   - Emit events for significant state changes
-   - Include relevant metadata with events
-
-4. **Type Safety**
-   - Leverage generic types for input/output typing
-   - Define clear interfaces for options and metadata
-   - Use type guards for runtime safety
 
 ## See Also
 

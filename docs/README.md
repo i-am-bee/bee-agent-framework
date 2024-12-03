@@ -110,7 +110,7 @@ The source directory (`src`) provides numerous modules that one can use.
     - [**Template Prompt**](/docs/templates.md): Templating system based on Mustache with various improvements.
     - [**Adapters**](/docs/llms.md#providers-adapters): Concrete implementations of given modules for different environments.
   - [**Memory**](/docs/memory.md) : Various types of memories to use with agent.
-    - [**Cache**](/docs/cache.md): Preset of different caching approaches that can be used together with tools.
+  - [**Cache**](/docs/cache.md): Preset of different caching approaches that can be used together with tools.
   - [**Tools**](/docs/tools.md) : Tools that an agent can use.
   - Dev tool:
     - [**emitter**](/docs/emitter.md) : Bringing visibility to the system by emitting events.

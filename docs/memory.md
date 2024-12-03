@@ -11,15 +11,15 @@ The `BaseMemory` class is the foundation of the Bee Framework's memory system, p
 ```mermaid
 classDiagram
     class BaseMemory {
-        +BaseMessage[] messages
-        +add(message: BaseMessage, index?: number)
-        +delete(message: BaseMessage)
+        +messages: BaseMessage[]
+        +add(message: BaseMessage): Promise
+        +delete(message: BaseMessage): Promise
         +reset()
         +addMany(messages: BaseMessage[])
         +deleteMany(messages: BaseMessage[])
-        +splice(start: number, deleteCount: number, items: BaseMessage[])
-        +isEmpty()
-        +asReadOnly()
+        +splice(start: number, deleteCount: number, ...items: BaseMessage[])
+        +isEmpty(): boolean
+        +asReadOnly(): ReadOnlyMemory
         #loadSnapshot(state: TState)
         #createSnapshot()
     }
