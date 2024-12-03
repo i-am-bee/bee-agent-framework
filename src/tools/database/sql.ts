@@ -22,6 +22,7 @@ import {
   BaseToolRunOptions,
   JSONToolOutput,
   ToolInputValidationError,
+  CustomToolEmitter,
 } from "@/tools/base.js";
 import { z } from "zod";
 import { Sequelize, Options } from "sequelize";
@@ -29,6 +30,7 @@ import { Provider, getMetadata } from "@/tools/database/metadata.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { ValidationError } from "ajv";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 interface ToolOptions extends BaseToolOptions {
   provider: Provider;
@@ -42,7 +44,9 @@ export const SQLToolAction = {
   Query: "QUERY",
 } as const;
 
-export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptions> {
+export class SQLToolOutput extends JSONToolOutput<any> {}
+
+export class SQLTool extends Tool<SQLToolOutput, ToolOptions, ToolRunOptions> {
   name = "SQLTool";
 
   description = `Converts natural language to SQL query and executes it. IMPORTANT: strictly follow this order of actions:
@@ -62,6 +66,11 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
         .describe(`The SQL query to be executed, required for ${SQLToolAction.Query} action`),
     });
   }
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, SQLToolOutput> = Emitter.root.child({
+    namespace: ["tool", "database", "sql"],
+    creator: this,
+  });
 
   public constructor(options: ToolOptions) {
     super(options);
@@ -128,14 +137,14 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
   protected async _run(
     input: ToolInput<this>,
     _options: ToolRunOptions | undefined,
-  ): Promise<JSONToolOutput<any>> {
+  ): Promise<SQLToolOutput> {
     const { provider, connection } = this.options;
     const { schema } = connection;
 
     if (input.action === SQLToolAction.GetMetadata) {
       const sequelize = await this.connection();
       const metadata = await getMetadata(sequelize, provider, schema);
-      return new JSONToolOutput(metadata);
+      return new SQLToolOutput(metadata);
     }
 
     if (input.action === SQLToolAction.Query) {
@@ -149,7 +158,7 @@ export class SQLTool extends Tool<JSONToolOutput<any>, ToolOptions, ToolRunOptio
     query: string,
     provider: Provider,
     schema: string | undefined,
-  ): Promise<JSONToolOutput<any>> {
+  ): Promise<SQLToolOutput> {
     if (!this.isReadOnlyQuery(query)) {
       return new JSONToolOutput({
         success: false,

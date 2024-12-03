@@ -17,6 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
+  CustomToolEmitter,
   JSONToolOutput,
   Tool,
   ToolError,
@@ -28,6 +29,7 @@ import { isNullish, omit, pick, pickBy } from "remeda";
 import { Cache } from "@/cache/decoratorCache.js";
 import { RunContext } from "@/context.js";
 import { getProp, setProp } from "@/internals/helpers/object.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 export interface ResponseFilter {
   excludedKeys: (keyof OpenMeteoToolResponse)[];
@@ -67,11 +69,9 @@ export interface OpenMeteoToolResponse {
   daily?: Record<string, any[]>;
 }
 
-export class OpenMeteoTool extends Tool<
-  JSONToolOutput<OpenMeteoToolResponse>,
-  ToolOptions,
-  ToolRunOptions
-> {
+export class OpenMeteoToolOutput extends JSONToolOutput<OpenMeteoToolResponse> {}
+
+export class OpenMeteoTool extends Tool<OpenMeteoToolOutput, ToolOptions, ToolRunOptions> {
   name = "OpenMeteo";
   description = `Retrieve current, past, or future weather forecasts for a location.`;
 
@@ -106,6 +106,12 @@ export class OpenMeteoTool extends Tool<
       })
       .strip();
   }
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, OpenMeteoToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "weather", "openMeteo"],
+      creator: this,
+    });
 
   static {
     this.register();
@@ -204,7 +210,7 @@ export class OpenMeteoTool extends Tool<
       data = omit(data, this.options.responseFilter.excludedKeys);
     }
 
-    return new JSONToolOutput(data);
+    return new OpenMeteoToolOutput(data);
   }
 
   @Cache()

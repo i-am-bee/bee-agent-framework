@@ -17,6 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
+  CustomToolEmitter,
   DynamicTool,
   JSONToolOutput,
   StringToolOutput,
@@ -32,6 +33,7 @@ import { z } from "zod";
 import { SlidingCache } from "@/cache/slidingCache.js";
 import { Serializer } from "@/serializer/serializer.js";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 describe("Base Tool", () => {
   beforeEach(() => {
@@ -44,6 +46,10 @@ describe("Base Tool", () => {
     class DummyTool extends Tool<StringToolOutput> {
       name = "DummyTool";
       description = "DummyTool description";
+      emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> = Emitter.root.child({
+        namespace: ["tool", "dummy"],
+        creator: this,
+      });
 
       inputSchema() {
         return z.object({ query: z.string() });
@@ -300,6 +306,7 @@ describe("Base Tool", () => {
     class ComplexTool extends Tool<StringToolOutput> {
       name = "ComplexTool";
       description = "ComplexTool description";
+      emitter = Emitter.root.child<any>({});
 
       inputSchema() {
         return z.object({ foo: z.string(), bar: z.string() });
@@ -538,27 +545,27 @@ describe("Base Tool", () => {
         [
           {
             "data": "null",
-            "event": "tool.run.start",
+            "event": "tool.dummy.run.start",
           },
           {
             "data": "{"input":{"query":"Hello!"}}",
-            "event": "tool.start",
+            "event": "tool.dummy.start",
           },
           {
             "data": "{"output":{"result":"Hey!"},"input":{"query":"Hello!"}}",
-            "event": "tool.success",
+            "event": "tool.dummy.success",
           },
           {
             "data": "null",
-            "event": "tool.finish",
+            "event": "tool.dummy.finish",
           },
           {
             "data": "{"result":"Hey!"}",
-            "event": "tool.run.success",
+            "event": "tool.dummy.run.success",
           },
           {
             "data": "null",
-            "event": "tool.run.finish",
+            "event": "tool.dummy.run.finish",
           },
         ]
       `);

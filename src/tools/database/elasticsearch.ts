@@ -22,6 +22,7 @@ import {
   BaseToolRunOptions,
   JSONToolOutput,
   ToolInputValidationError,
+  CustomToolEmitter,
 } from "@/tools/base.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { RunContext } from "@/context.js";
@@ -30,6 +31,7 @@ import { ValidationError } from "ajv";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
 import { parseBrokenJson } from "@/internals/helpers/schema.js";
 import { Client, ClientOptions, estypes as ESTypes } from "@elastic/elasticsearch";
+import { Emitter } from "@/emitter/emitter.js";
 
 export interface ElasticSearchToolOptions extends BaseToolOptions {
   connection: ClientOptions;
@@ -95,6 +97,14 @@ export class ElasticSearchTool extends Tool<
         .describe("How many records will be retrieved from the ElasticSearch query. Maximum is 10"),
     });
   }
+
+  public readonly emitter: CustomToolEmitter<
+    ToolInput<this>,
+    JSONToolOutput<ElasticSearchToolResult>
+  > = Emitter.root.child({
+    namespace: ["tool", "database", "elasticsearch"],
+    creator: this,
+  });
 
   protected validateInput(
     schema: AnyToolSchemaLike,

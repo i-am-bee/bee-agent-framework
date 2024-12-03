@@ -28,15 +28,24 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, RoleType } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { ClientOptions, OpenAI as Client } from "openai";
+import { ClientOptions, OpenAI, AzureOpenAI } from "openai";
 import { GetRunContext } from "@/context.js";
 import { promptTokensEstimate } from "openai-chat-tokens";
 import { Serializer } from "@/serializer/serializer.js";
 import { getProp, getPropStrict } from "@/internals/helpers/object.js";
 import { isString } from "remeda";
+import type {
+  ChatCompletionChunk,
+  ChatCompletionCreateParams,
+  ChatCompletionMessageParam,
+  ChatCompletionSystemMessageParam,
+  ChatCompletionUserMessageParam,
+  ChatCompletionAssistantMessageParam,
+  ChatModel,
+} from "openai/resources/index";
 
-type Parameters = Omit<Client.Chat.ChatCompletionCreateParams, "stream" | "messages" | "model">;
-type Response = Omit<Client.Chat.ChatCompletionChunk, "object">;
+type Parameters = Omit<ChatCompletionCreateParams, "stream" | "messages" | "model">;
+type Response = Omit<ChatCompletionChunk, "object">;
 
 export class OpenAIChatLLMOutput extends ChatLLMOutput {
   public readonly responses: Response[];
@@ -85,11 +94,12 @@ export class OpenAIChatLLMOutput extends ChatLLMOutput {
 }
 
 interface Input {
-  modelId?: Client.ChatModel;
-  client?: Client;
+  modelId?: ChatModel;
+  client?: OpenAI | AzureOpenAI;
   parameters?: Partial<Parameters>;
   executionOptions?: ExecutionOptions;
   cache?: LLMCache<OpenAIChatLLMOutput>;
+  azure?: boolean;
 }
 
 export type OpenAIChatLLMEvents = ChatLLMGenerateEvents<OpenAIChatLLMOutput>;
@@ -100,28 +110,36 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
     creator: this,
   });
 
-  public readonly client: Client;
+  public readonly client: OpenAI | AzureOpenAI;
   public readonly parameters: Partial<Parameters>;
 
-  constructor({
-    client,
-    modelId = "gpt-4o",
-    parameters,
-    executionOptions = {},
-    cache,
-  }: Input = {}) {
-    super(modelId, executionOptions, cache);
-    this.client = client ?? new Client();
+  constructor({ client, modelId, parameters, executionOptions = {}, cache, azure }: Input = {}) {
+    super(modelId || "gpt-4o-mini", executionOptions, cache);
+    if (client) {
+      this.client = client;
+    } else if (azure) {
+      this.client = new AzureOpenAI();
+    } else {
+      this.client = new OpenAI();
+    }
     this.parameters = parameters ?? { temperature: 0 };
   }
 
   static {
     this.register();
-    Serializer.register(Client, {
+    Serializer.register(AzureOpenAI, {
+      toPlain: (value) => ({
+        azureADTokenProvider: getPropStrict(value, "_azureADTokenProvider"),
+        apiVersion: getPropStrict(value, "apiVersion"),
+        deployment: getPropStrict(value, "_deployment"),
+      }),
+      fromPlain: (value) => new AzureOpenAI(value.azureADTokenProvider),
+    });
+    Serializer.register(OpenAI, {
       toPlain: (value) => ({
         options: getPropStrict(value, "_options") as ClientOptions,
       }),
-      fromPlain: (value) => new Client(value.options),
+      fromPlain: (value) => new OpenAI(value.options),
     });
   }
 
@@ -164,7 +182,7 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
           ({
             role: msg.role,
             content: msg.text,
-          }) as Client.Chat.ChatCompletionMessageParam,
+          }) as ChatCompletionMessageParam,
       ),
     });
 
@@ -176,11 +194,11 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
   protected _prepareRequest(
     input: BaseMessage[],
     options?: GenerateOptions,
-  ): Client.Chat.ChatCompletionCreateParams {
+  ): ChatCompletionCreateParams {
     type OpenAIMessage =
-      | Client.Chat.ChatCompletionSystemMessageParam
-      | Client.Chat.ChatCompletionUserMessageParam
-      | Client.Chat.ChatCompletionAssistantMessageParam;
+      | ChatCompletionSystemMessageParam
+      | ChatCompletionUserMessageParam
+      | ChatCompletionAssistantMessageParam;
 
     return {
       ...this.parameters,
@@ -192,6 +210,7 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
           content: message.text,
         }),
       ),
+
       response_format: (() => {
         if (options?.guided?.json) {
           const schema = isString(options.guided.json)
@@ -244,7 +263,7 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
             index: 1,
             logprobs: choice.logprobs,
             finish_reason: choice.finish_reason,
-          }) as Client.Chat.ChatCompletionChunk.Choice,
+          }) as ChatCompletionChunk.Choice,
       ),
     });
   }

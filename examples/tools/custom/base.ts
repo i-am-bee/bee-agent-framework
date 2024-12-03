@@ -1,4 +1,5 @@
 import {
+  CustomToolEmitter,
   StringToolOutput,
   Tool,
   ToolInput,
@@ -6,10 +7,17 @@ import {
 } from "bee-agent-framework/tools/base";
 import { z } from "zod";
 import { randomInteger } from "remeda";
+import { Emitter } from "bee-agent-framework/emitter/emitter";
 
 export class RiddleTool extends Tool<StringToolOutput> {
   name = "Riddle";
   description = "It generates a random puzzle to test your knowledge.";
+
+  public readonly emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> =
+    Emitter.root.child({
+      namespace: ["tool", "riddle"],
+      creator: this,
+    });
 
   inputSchema() {
     return z.object({

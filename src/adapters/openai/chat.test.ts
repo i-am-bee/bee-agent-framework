@@ -16,7 +16,26 @@
 
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { OpenAIChatLLM } from "@/adapters/openai/chat.js";
-import { OpenAI } from "openai";
+import { OpenAI, AzureOpenAI } from "openai";
+
+describe("AzureOpenAI ChatLLM", () => {
+  const getInstance = () => {
+    return new OpenAIChatLLM({
+      modelId: "gpt-4o",
+      client: new AzureOpenAI(),
+    });
+  };
+
+  it("Serializes", async () => {
+    process.env["OPENAI_BASE_URL"] = "http://dummy/";
+    process.env["AZURE_OPENAI_API_KEY"] = "123";
+    process.env["OPENAI_API_VERSION"] = "version 1";
+    const instance = getInstance();
+    const serialized = instance.serialize();
+    const deserialized = OpenAIChatLLM.fromSerialized(serialized);
+    verifyDeserialization(instance, deserialized);
+  });
+});
 
 describe("OpenAI ChatLLM", () => {
   const getInstance = () => {

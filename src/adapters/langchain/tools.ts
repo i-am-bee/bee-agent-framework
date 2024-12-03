@@ -17,8 +17,10 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
+  CustomToolEmitter,
   JSONToolOutput,
   Tool,
+  ToolEvents,
   ToolInput,
 } from "@/tools/base.js";
 import type { GetRunContext } from "@/context.js";
@@ -26,10 +28,11 @@ import type { RunnableConfig } from "@langchain/core/runnables";
 import { AnyZodObject, ZodEffects } from "zod";
 import * as LCTools from "@langchain/core/tools";
 import { Serializer } from "@/serializer/serializer.js";
-import { isTruthy, pick, pickBy } from "remeda";
+import { isTruthy, pick, pickBy, toCamelCase } from "remeda";
 import { toJsonSchema } from "@/internals/helpers/schema.js";
 import { getProp } from "@/internals/helpers/object.js";
 import { ClassConstructor } from "@/internals/types.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 export type LangChainToolRunOptions = RunnableConfig & BaseToolRunOptions;
 export type LangChainToolOptions<TOutput = any> = BaseToolOptions & {
@@ -47,6 +50,8 @@ export class LangChainTool<T extends AnyZodObject, TOutput = any> extends Tool<
   protected tool: LCTools.StructuredTool<T>;
   public static serializedSchemaKey = "_internalJsonSchema" as const;
 
+  public readonly emitter: CustomToolEmitter<ToolEvents<T>, JSONToolOutput<TOutput>>;
+
   constructor({
     tool,
     ...options
@@ -56,6 +61,10 @@ export class LangChainTool<T extends AnyZodObject, TOutput = any> extends Tool<
     this.tool = tool;
     this.name = tool.name;
     this.description = tool.description;
+    this.emitter = Emitter.root.child({
+      namespace: ["tool", "langchain", toCamelCase(this.name)],
+      creator: this,
+    });
   }
 
   static {
