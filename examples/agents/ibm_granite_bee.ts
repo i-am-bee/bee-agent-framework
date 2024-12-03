@@ -26,52 +26,52 @@ const Providers = {
 } as const;
 type Provider = (typeof Providers)[keyof typeof Providers];
 
-const LLMFactories: Record<Provider, () => ChatLLM<ChatLLMOutput>> = {
-  [Providers.OPENAI]: () =>
-    new OpenAIChatLLM({
-      modelId: getEnv("OPENAI_MODEL") || "ibm-granite/granite-3-8b-instruct",
-      parameters: {
-        temperature: 0,
-        max_tokens: 2048,
-      },
-    }),
-  [Providers.OLLAMA]: () =>
-    new OllamaChatLLM({
-      modelId: getEnv("OLLAMA_MODEL") || "granite3-dense:8b",
-      parameters: {
-        temperature: 0,
-        repeat_penalty: 1,
-        num_predict: 2000,
-      },
-      client: new Ollama({
-        host: getEnv("OLLAMA_HOST"),
-      }),
-    }),
-  [Providers.WATSONX]: () =>
-    WatsonXChatLLM.fromPreset(getEnv("WATSONX_MODEL") || "ibm/granite-3-8b-instruct", {
-      apiKey: getEnv("WATSONX_API_KEY"),
-      projectId: getEnv("WATSONX_PROJECT_ID"),
-      region: getEnv("WATSONX_REGION"),
-    }),
-  [Providers.IBMVLLM]: () => IBMVllmChatLLM.fromPreset(IBMVllmModel.GRANITE_INSTRUCT),
-  [Providers.IBMRITS]: () =>
-    new OpenAIChatLLM({
-      client: new OpenAI({
-        baseURL: process.env.IBM_RITS_URL,
-        apiKey: process.env.IBM_RITS_API_KEY,
-        defaultHeaders: {
-          RITS_API_KEY: process.env.IBM_RITS_API_KEY,
+function getChatLLM(provider?: Provider): ChatLLM<ChatLLMOutput> {
+  const LLMFactories: Record<Provider, () => ChatLLM<ChatLLMOutput>> = {
+    [Providers.OPENAI]: () =>
+      new OpenAIChatLLM({
+        modelId: getEnv("OPENAI_MODEL") || "ibm-granite/granite-3-8b-instruct",
+        parameters: {
+          temperature: 0,
+          max_tokens: 2048,
         },
       }),
-      modelId: getEnv("IBM_RITS_MODEL") || "ibm-granite/granite-3.0-8b-instruct",
-      parameters: {
-        temperature: 0,
-        max_tokens: 2048,
-      },
-    }),
-};
+    [Providers.OLLAMA]: () =>
+      new OllamaChatLLM({
+        modelId: getEnv("OLLAMA_MODEL") || "granite3-dense:8b",
+        parameters: {
+          temperature: 0,
+          repeat_penalty: 1,
+          num_predict: 2000,
+        },
+        client: new Ollama({
+          host: getEnv("OLLAMA_HOST"),
+        }),
+      }),
+    [Providers.WATSONX]: () =>
+      WatsonXChatLLM.fromPreset(getEnv("WATSONX_MODEL") || "ibm/granite-3-8b-instruct", {
+        apiKey: getEnv("WATSONX_API_KEY"),
+        projectId: getEnv("WATSONX_PROJECT_ID"),
+        region: getEnv("WATSONX_REGION"),
+      }),
+    [Providers.IBMVLLM]: () => IBMVllmChatLLM.fromPreset(IBMVllmModel.GRANITE_INSTRUCT),
+    [Providers.IBMRITS]: () =>
+      new OpenAIChatLLM({
+        client: new OpenAI({
+          baseURL: process.env.IBM_RITS_URL,
+          apiKey: process.env.IBM_RITS_API_KEY,
+          defaultHeaders: {
+            RITS_API_KEY: process.env.IBM_RITS_API_KEY,
+          },
+        }),
+        modelId: getEnv("IBM_RITS_MODEL") || "ibm-granite/granite-3.0-8b-instruct",
+        parameters: {
+          temperature: 0,
+          max_tokens: 2048,
+        },
+      }),
+  };
 
-function getChatLLM(provider?: Provider): ChatLLM<ChatLLMOutput> {
   if (!provider) {
     provider = parseEnv("LLM_BACKEND", z.nativeEnum(Providers), Providers.OLLAMA);
   }
