@@ -27,7 +27,7 @@ export const IBMVllmModel = {
   LLAMA_3_1_405B_INSTRUCT_FP8: "meta-llama/llama-3-1-405b-instruct-fp8",
   LLAMA_3_1_70B_INSTRUCT: "meta-llama/llama-3-1-70b-instruct",
   LLAMA_3_1_8B_INSTRUCT: "meta-llama/llama-3-1-8b-instruct",
-  GRANITE_INSTRUCT: "ibm/granite-instruct", // Generic model ID is used for ease of development, ground it once stable
+  GRANITE_3_0_8B_INSTRUCT: "ibm-granite/granite-3.0-8b-instruct",
 } as const;
 export type IBMVllmModel = (typeof IBMVllmModel)[keyof typeof IBMVllmModel];
 
@@ -95,11 +95,11 @@ export const IBMVllmChatLLMPreset = {
       },
     };
   },
-  [IBMVllmModel.GRANITE_INSTRUCT]: (): IBMVllmChatLLMPreset => {
+  [IBMVllmModel.GRANITE_3_0_8B_INSTRUCT]: (): IBMVllmChatLLMPreset => {
     const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("granite3Instruct");
     return {
       base: {
-        modelId: IBMVllmModel.GRANITE_INSTRUCT,
+        modelId: IBMVllmModel.GRANITE_3_0_8B_INSTRUCT,
         parameters: {
           method: "GREEDY",
           stopping: {
