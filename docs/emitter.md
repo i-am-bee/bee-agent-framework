@@ -107,27 +107,34 @@ Registers a listener with advanced matching capabilities.
 <!-- embedme examples/emitter/matchers.ts -->
 
 ```ts
-import { Emitter } from "bee-agent-framework/emitter/emitter";
+import { Callback, Emitter } from "bee-agent-framework/emitter/emitter";
+import { BaseLLM } from "bee-agent-framework/llms/base";
 
-const emitter = new Emitter({ namespace: ["app"] });
+interface Events {
+  update: Callback<{ data: string }>;
+}
 
-// Match all events in namespace
-emitter.match("*.*", (data, event) => {
-  console.log(`${event.path}: ${JSON.stringify(data)}`);
+const emitter = new Emitter<Events>({
+  namespace: ["app"],
 });
 
-// Match with regular expression
-emitter.match(/error/, (data, event) => {
-  console.log(`Error event: ${event.name}`);
-});
+// Match events by a concrete name (strictly typed)
+emitter.on("update", async (data, event) => {});
 
-// Match with custom function
+// Match all events emitted directly on the instance (not nested)
+emitter.match("*", async (data, event) => {});
+
+// Match all events (included nested)
+emitter.match("*.*", async (data, event) => {});
+
+// Match events by providing a filter function
 emitter.match(
-  (event) => event.context.priority === "high",
-  (data, event) => {
-    console.log(`High priority event: ${event.name}`);
-  },
+  (event) => event.creator instanceof BaseLLM,
+  async (data, event) => {},
 );
+
+// Match events by regex
+emitter.match(/watsonx/, async (data, event) => {});
 ```
 
 _Source: [examples/emitter/matchers.ts](/examples/emitter/matchers.ts)_

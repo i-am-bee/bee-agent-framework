@@ -113,6 +113,9 @@ const error = new FrameworkError(
 console.log("Message", error.message); // Main error message
 console.log("Meta", { fatal: error.isFatal, retryable: error.isRetryable }); // Is the error fatal/retryable?
 console.log("Context", error.context); // Context in which the error occurred
+console.log(error.explain()); // Human-readable format without stack traces (ideal for LLMs)
+console.log(error.dump()); // Full error dump, including sub-errors
+console.log(error.getCause()); // Retrieve the initial cause of the error
 ```
 
 _Source: [examples/errors/base.ts](/examples/errors/base.ts)_

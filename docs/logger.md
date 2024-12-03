@@ -96,11 +96,16 @@ Logger.defaults.level = LoggerLevel.TRACE; // Set log level to trace (default: T
 Logger.defaults.name = undefined; // Optional name for logger (default: undefined)
 Logger.defaults.bindings = {}; // Optional bindings for structured logging (default: empty)
 
-const parentLogger = Logger.root.child({ name: "app" });
-const moduleLogger = parentLogger.child({
-  name: "module",
-  level: "debug",
-});
+// Create a child logger for your app
+const logger = Logger.root.child({ name: "app" });
+
+// Log at different levels
+logger.trace("Trace!");
+logger.debug("Debug!");
+logger.info("Info!");
+logger.warn("Warning!");
+logger.error("Error!");
+logger.fatal("Fatal!");
 ```
 
 #### Logging Methods

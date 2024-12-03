@@ -137,7 +137,7 @@ Key features:
 
 The development tools can be configured through environment variables:
 
-```bash
+```shell
 # Logging
 export BEE_FRAMEWORK_LOG_LEVEL=debug
 export BEE_FRAMEWORK_LOG_PRETTY=true
