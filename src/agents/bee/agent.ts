@@ -65,7 +65,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       );
     }
 
-    this.runner = this.input.llm.modelId.includes("ibm/granite") ? GraniteRunner : DefaultRunner;
+    this.runner = this.input.llm.modelId.includes("granite") ? GraniteRunner : DefaultRunner;
   }
 
   static {
