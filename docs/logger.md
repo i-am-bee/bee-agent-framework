@@ -277,7 +277,7 @@ logger.info("This will be pretty printed!");
 
 ## See Also
 
-- [Agent System](./agent.md)
+- [Agent System](./agents.md)
 - [Error Handling](./errors.md)
 - [Instrumentation](./instrumentation.md)
-- [Event System](./emitter.md)
+- [Event System (emitter)](./emitter.md)

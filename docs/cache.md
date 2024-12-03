@@ -346,7 +346,7 @@ _Source: [examples/cache/custom.ts](/examples/cache/custom.ts)_
 
 ## See Also
 
-- [Agent System](./agent.md)
+- [Agent System](./agents.md)
 - [Tools System](./tools.md)
 - [LLM Integration](./llms.md)
 - [Serialization](./serialization.md)

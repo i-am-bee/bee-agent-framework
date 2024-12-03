@@ -254,6 +254,5 @@ class CustomLLM extends LLM<CustomLLMOutput> {
 ## See Also
 
 - [Memory System](./memory.md)
-- [Agent System](./agent.md)
-- [Providers Guide](./providers.md)
-- [Event System](./events.md)
+- [Agent System](./agents.md)
+- [Event System (emitter)](./emitter.md)

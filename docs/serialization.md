@@ -399,5 +399,5 @@ _Source: [examples/serialization/context.ts](/examples/serialization/context.ts)
 
 - [Memory System](./memory.md)
 - [Cache System](./cache.md)
-- [Agent System](./agent.md)
+- [Agent System](./agents.md)
 - [Tools System](./tools.md)

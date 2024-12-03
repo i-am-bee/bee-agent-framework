@@ -229,5 +229,5 @@ function validateTools(): Promise<void> {
 - [LLM Documentation](./llms.md)
 - [Memory System](./memory.md)
 - [Tools Guide](./tools.md)
-- [DevTools Reference](./dev-tools.md)
-- [Event System](./emiter.md)
+- [DevTools Reference](./dev_tools.md)
+- [Event System](./emitter.md)

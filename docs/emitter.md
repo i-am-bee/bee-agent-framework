@@ -328,7 +328,7 @@ await tool.run({ query: "test" }).observe((emitter) => {
 
 ## See Also
 
-- [Agent System](./agent.md)
+- [Agent System](./agents.md)
 - [Tools System](./tools.md)
 - [Error Handling](./errors.md)
 - [Logging System](./logger.md)

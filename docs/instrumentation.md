@@ -284,7 +284,7 @@ provider.addSpanProcessor(spanProcessor);
 
 ## See Also
 
-- [Agent System](./agent.md)
+- [Agent System](./agents.md)
 - [LLM System](./llms.md)
 - [Tools System](./tools.md)
 - [Logging System](./logger.md)

@@ -236,7 +236,7 @@ class CustomMemory extends BaseMemory {
 
 ## See Also
 
-- [Agent Documentation](./agent.md)
+- [Agent Documentation](./agents.md)
 - [LLM Integration](./llms.md)
-- [Message System](./messages.md)
+- [Templates](./templates.md)
 - [Serialization](./serialization.md)

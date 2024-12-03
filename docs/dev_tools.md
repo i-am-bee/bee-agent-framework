@@ -152,7 +152,7 @@ export BEE_FRAMEWORK_ERROR_VERBOSE=true
 
 ## See Also
 
-- [Agent System](./agent.md)
+- [Agent System](./agents.md)
 - [Memory System](./memory.md)
 - [Tool System](./tools.md)
 - [LLM System](./llms.md)
