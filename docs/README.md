@@ -118,7 +118,7 @@ The source directory (`src`) provides numerous modules that one can use.
     - [**serializer**](/docs/serialization.md) : Core component for the ability to serialize/deserialize modules.
     - [**errors**](/docs/errors.md) : Error classes and helpers to catch errors fast.
 - [**version**](/docs/version.md) : Constants representing the framework (e.g., latest version)
-- **internals** : Modules used by other modules within the framework.
+- **internals** : Modules used by other modules within the framework. |
 
 To see more in-depth explanation see [overview](/docs/overview.md).
 
