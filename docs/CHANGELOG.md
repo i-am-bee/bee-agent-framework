@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.45](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.44...v0.0.45) (2024-12-03)
+
+### Features
+
+- **agents:** add retry for parser errors ([#204](https://github.com/i-am-bee/bee-agent-framework/issues/204)) ([226aaf5](https://github.com/i-am-bee/bee-agent-framework/commit/226aaf5e67037225223c59af68c6f96ab362aeb4))
+- **llms:** improve type support for events ([74713a6](https://github.com/i-am-bee/bee-agent-framework/commit/74713a601d6d1e4fcb85d160d67d16ad52715e8c))
+
+### Bug Fixes
+
+- **adapters:** vLLM JSON Schema guided decoding ([#207](https://github.com/i-am-bee/bee-agent-framework/issues/207)) ([7d83d21](https://github.com/i-am-bee/bee-agent-framework/commit/7d83d21c0af2b2489d997bfa1d8f47eca5f625f5))
+- **agents:** propagate groupId to events ([e63bc5b](https://github.com/i-am-bee/bee-agent-framework/commit/e63bc5bdfce96ba7c11a1cfaa9c1a05da495e914))
+
 ## [0.0.44](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.43...v0.0.44) (2024-11-29)
 
 ### Features
