@@ -15,7 +15,11 @@ interface ConsoleReader {
   write: (role: string, data: string) => void;
   prompt: () => Promise<string>;
   close: () => void;
-  [Symbol.asyncIterator]: () => AsyncGenerator<{ prompt: string; iteration: number }, void, unknown>;
+  [Symbol.asyncIterator]: () => AsyncGenerator<
+    { prompt: string; iteration: number },
+    void,
+    unknown
+  >;
 }
 
 let sharedReaderInstance: ConsoleReader | null = null; // Singleton instance
@@ -41,14 +45,12 @@ export function createConsoleReader({
         [role && R.piped(picocolors.red, picocolors.bold)(role), stripAnsi(data ?? "")]
           .filter(Boolean)
           .join(" ")
-          .concat("\n")
+          .concat("\n"),
       );
     },
     async prompt(): Promise<string> {
       try {
-        const userInput = await rl.question(
-          `${R.piped(picocolors.cyan, picocolors.bold)(input)}`
-        );
+        const userInput = await rl.question(`${R.piped(picocolors.cyan, picocolors.bold)(input)}`);
         return stripAnsi(userInput.trim());
       } catch (error: any) {
         // Handle error during prompt
@@ -72,14 +74,12 @@ export function createConsoleReader({
       try {
         rl.write(
           `${picocolors.dim(
-            `Interactive session has started. To escape, input 'q' and submit.\n`
-          )}`
+            `Interactive session has started. To escape, input 'q' and submit.\n`,
+          )}`,
         );
 
         for (let iteration = 1, userInput = ""; isActive; iteration++) {
-          userInput = await rl.question(
-            `${R.piped(picocolors.cyan, picocolors.bold)(input)}`
-          );
+          userInput = await rl.question(`${R.piped(picocolors.cyan, picocolors.bold)(input)}`);
           userInput = stripAnsi(userInput.trim());
 
           if (userInput.toLowerCase() === "q") {

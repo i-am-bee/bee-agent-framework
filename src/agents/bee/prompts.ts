@@ -106,9 +106,10 @@ Prefer to use these capabilities over functions.
 export const BeeSystemPromptWithHumanTool = BeeSystemPrompt.fork((config) => {
   return {
     ...config,
-    template: config.template.replace(
-      "## Examples",
-      `## Examples
+    template: config.template
+      .replace(
+        "## Examples",
+        `## Examples
 Message: I need advice.
 Thought: The user's request is too general. I need to ask for more specifics.
 Function Name: HumanTool
@@ -125,12 +126,13 @@ Function Output: // Waits for user input
 Thought: The user has provided the location. I can now retrieve the weather information.
 Final Answer: [Provide the weather information based on user's input]
 
-## Examples`
-    ).replace(
-      "# Instructions",
-      `# Instructions
-When the message is unclear, incomplete, or lacks context, you must use the "HumanTool" function to ask for clarification. Always avoid guessing or providing incomplete answers without the user's input.`
-    ),
+## Examples`,
+      )
+      .replace(
+        "# Instructions",
+        `# Instructions
+When the message is unclear, incomplete, or lacks context, you must use the "HumanTool" function to ask for clarification. Always avoid guessing or providing incomplete answers without the user's input.`,
+      ),
   };
 });
 

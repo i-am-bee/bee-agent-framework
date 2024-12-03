@@ -84,7 +84,7 @@ const reader = sharedConsoleReader();
 if (codeInterpreterUrl) {
   reader.write(
     "🛠️ System",
-    `The code interpreter tool is enabled. Please ensure that it is running on ${codeInterpreterUrl}`
+    `The code interpreter tool is enabled. Please ensure that it is running on ${codeInterpreterUrl}`,
   );
 }
 
@@ -101,7 +101,7 @@ try {
             totalMaxRetries: 10,
             maxIterations: 20,
           },
-        }
+        },
       )
       .observe((emitter) => {
         // Show only final answers
@@ -128,7 +128,7 @@ try {
     } else {
       reader.write(
         "Agent 🤖 : ",
-        "No result was returned. Ensure your input is valid or check tool configurations."
+        "No result was returned. Ensure your input is valid or check tool configurations.",
       );
     }
   }

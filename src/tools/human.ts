@@ -13,7 +13,7 @@ export class HumanTool extends Tool<StringToolOutput> {
 
   async _run(
     input: z.infer<ReturnType<typeof this.inputSchema>>,
-    _options: BaseToolRunOptions
+    _options: BaseToolRunOptions,
   ): Promise<StringToolOutput> {
     const reader = sharedConsoleReader(); // Use shared reader instance
 
