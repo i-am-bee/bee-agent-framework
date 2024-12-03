@@ -167,7 +167,7 @@ export class MilvusDatabaseTool extends Tool<
 
   protected async _run(
     input: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
   ): Promise<JSONToolOutput<any>> {
     switch (input.action) {
       case MilvusAction.ListCollections: {

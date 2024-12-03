@@ -152,7 +152,7 @@ export class OpenMeteoTool extends Tool<OpenMeteoToolOutput, ToolOptions, ToolRu
 
   protected async _run(
     { location, start_date: startDate, end_date: endDate, ...input }: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>,
   ) {
     const { apiKey } = this.options;

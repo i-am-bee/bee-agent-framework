@@ -84,7 +84,7 @@ export class SimilarityTool<TProviderOptions> extends Tool<
 
   protected async _run(
     { query, documents }: ToolInput<this>,
-    options: SimilarityToolRunOptions<TProviderOptions> | undefined,
+    options: Partial<SimilarityToolRunOptions<TProviderOptions>>,
     run: RunContext<this>,
   ) {
     return pipe(

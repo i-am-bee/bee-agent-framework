@@ -371,7 +371,7 @@ _Source: [examples/tools/custom/openLibrary.ts](/examples/tools/custom/openLibra
   <!-- eslint-skip -->
 
   ```ts
-  protected async _run(input: ToolInput<this>, options: BaseToolRunOptions | undefined, run: RunContext<this>) {
+  protected async _run(input: ToolInput<this>, options: Partial<BaseToolRunOptions>, run: RunContext<this>) {
       // insert custom code here
       // MUST: return an instance of the output type specified in the tool class definition
       // MAY: throw an instance of ToolError upon unrecoverable error conditions encountered by the tool

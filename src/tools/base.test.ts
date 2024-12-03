@@ -57,7 +57,7 @@ describe("Base Tool", () => {
 
       protected async _run(
         { query }: ToolInput<this>,
-        options?: BaseToolRunOptions,
+        options: Partial<BaseToolRunOptions>,
       ): Promise<StringToolOutput> {
         const result = await fn(query, options);
         return new StringToolOutput(result);
@@ -89,7 +89,7 @@ describe("Base Tool", () => {
       handler.mockResolvedValue(output);
       await expect(tool.run({ query }, runOptions)).resolves.toBeTruthy();
       expect(handler).toBeCalledTimes(1);
-      expect(handler).toBeCalledWith(query, runOptions);
+      expect(handler).toBeCalledWith(query, runOptions ?? {});
     },
   );
 
@@ -548,11 +548,11 @@ describe("Base Tool", () => {
             "event": "tool.dummy.run.start",
           },
           {
-            "data": "{"input":{"query":"Hello!"}}",
+            "data": "{"input":{"query":"Hello!"},"options":{}}",
             "event": "tool.dummy.start",
           },
           {
-            "data": "{"output":{"result":"Hey!"},"input":{"query":"Hello!"}}",
+            "data": "{"output":{"result":"Hey!"},"input":{"query":"Hello!"},"options":{}}",
             "event": "tool.dummy.success",
           },
           {
