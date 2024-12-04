@@ -363,7 +363,7 @@ export class DefaultRunner extends BaseRunner {
     const parserRegex = isEmpty(tools)
       ? new RegExp(`Thought: .+\\nFinal Answer: [\\s\\S]+`)
       : new RegExp(
-          `Thought: .+\\n(?:Final Answer: [\\s\\S]+|Function Name: (${tools.map((tool) => tool.name).join("|")})\\nFunction Input: \\{.*\\}\\nFunction Output:)?`,
+          `Thought: .+\\n(?:Final Answer: [\\s\\S]+|Function Name: (${tools.map((tool) => tool.name).join("|")})\\nFunction Input: \\{.*\\}\\nFunction Output:)`,
         );
 
     const parser = new LinePrefixParser<BeeParserInput>(
