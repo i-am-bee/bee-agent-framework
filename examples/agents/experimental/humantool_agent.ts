@@ -6,10 +6,9 @@ import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { Logger } from "bee-agent-framework/logger/logger";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { HumanTool } from "bee-agent-framework/tools/human";
-import { OpenAIChatLLM } from "bee-agent-framework/adapters/openai/chat";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 
 import {
-  BeeSystemPrompt,
   BeeAssistantPrompt,
   BeeUserPrompt,
   BeeUserEmptyPrompt,
@@ -26,8 +25,8 @@ Logger.root.level = "silent"; // Disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
 // Initialize LLM
-const llm = new OpenAIChatLLM({
-  modelId: "gpt-4o", // Model ID
+const llm = new OllamaChatLLM({
+  modelId: "llama3.1", // llama3.1:70b for better performance
 });
 
 // Initialize BeeAgent
