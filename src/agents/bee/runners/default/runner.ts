@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 import { BaseRunner, BeeRunnerLLMInput, BeeRunnerToolInput } from "@/agents/bee/runners/base.js";
-import { BeeAgentRunIteration, BeeParserInput, BeeRunInput } from "@/agents/bee/types.js";
+import type {
+  BeeAgentRunIteration,
+  BeeAgentTemplates,
+  BeeParserInput,
+  BeeRunInput,
+} from "@/agents/bee/types.js";
 import { Retryable } from "@/internals/helpers/retryable.js";
 import { AgentError } from "@/agents/base.js";
 import {
+  BeeAssistantPrompt,
   BeeSchemaErrorPrompt,
   BeeSystemPrompt,
   BeeToolErrorPrompt,
@@ -69,7 +75,7 @@ export class DefaultRunner extends BaseRunner {
             await this.memory.add(
               BaseMessage.of({
                 role: Role.ASSISTANT,
-                text: (this.input.templates?.schemaError ?? BeeSchemaErrorPrompt).render({}),
+                text: this.templates.schemaError.render({}),
                 meta: {
                   [tempMessageKey]: true,
                 },
@@ -151,10 +157,9 @@ export class DefaultRunner extends BaseRunner {
         }),
       );
 
-      const template = this.input.templates?.toolNotFoundError ?? BeeToolNotFoundPrompt;
       return {
         success: false,
-        output: template.render({
+        output: this.templates.toolNotFoundError.render({
           tools: this.input.tools,
         }),
       };
@@ -202,8 +207,7 @@ export class DefaultRunner extends BaseRunner {
           });
 
           if (toolOutput.isEmpty()) {
-            const template = this.input.templates?.toolNoResultError ?? BeeToolNoResultsPrompt;
-            return { output: template.render({}), success: true };
+            return { output: this.templates.toolNoResultError.render({}), success: true };
           }
 
           return {
@@ -225,10 +229,9 @@ export class DefaultRunner extends BaseRunner {
           if (error instanceof ToolInputValidationError) {
             this.failedAttemptsCounter.use(error);
 
-            const template = this.input.templates?.toolInputError ?? BeeToolInputErrorPrompt;
             return {
               success: false,
-              output: template.render({
+              output: this.templates.toolInputError.render({
                 reason: error.toString(),
               }),
             };
@@ -237,10 +240,9 @@ export class DefaultRunner extends BaseRunner {
           if (error instanceof ToolError) {
             this.failedAttemptsCounter.use(error);
 
-            const template = this.input.templates?.toolError ?? BeeToolErrorPrompt;
             return {
               success: false,
-              output: template.render({
+              output: this.templates.toolError.render({
                 reason: error.explain(),
               }),
             };
@@ -288,7 +290,7 @@ export class DefaultRunner extends BaseRunner {
         message: async () =>
           BaseMessage.of({
             role: Role.SYSTEM,
-            text: (this.input.templates?.system ?? BeeSystemPrompt).render({
+            text: this.templates.system.render({
               tools: await self.system.variables.tools(),
               instructions: undefined,
             }),
@@ -357,6 +359,23 @@ export class DefaultRunner extends BaseRunner {
     });
     await memory.addMany([await this.renderers.system.message(), ...prevConversation]);
     return memory;
+  }
+
+  @Cache({ enumerable: false })
+  get templates(): BeeAgentTemplates {
+    const customTemplates = this.input.templates ?? {};
+
+    return {
+      system: customTemplates.system ?? BeeSystemPrompt,
+      assistant: customTemplates.assistant ?? BeeAssistantPrompt,
+      user: customTemplates.user ?? BeeUserPrompt,
+      userEmpty: customTemplates.userEmpty ?? BeeUserEmptyPrompt,
+      toolError: customTemplates.toolError ?? BeeToolErrorPrompt,
+      toolInputError: customTemplates.toolInputError ?? BeeToolInputErrorPrompt,
+      toolNoResultError: customTemplates.toolNoResultError ?? BeeToolNoResultsPrompt,
+      toolNotFoundError: customTemplates.toolNotFoundError ?? BeeToolNotFoundPrompt,
+      schemaError: customTemplates.schemaError ?? BeeSchemaErrorPrompt,
+    };
   }
 
   protected createParser(tools: AnyTool[]) {
