@@ -31,6 +31,7 @@ import {
   GraniteBeeSchemaErrorPrompt,
   GraniteBeeSystemPrompt,
 } from "@/agents/bee/runners/granite/prompts.js";
+import { Cache } from "@/cache/decoratorCache.js";
 
 export class GraniteRunner extends DefaultRunner {
   static {
@@ -38,19 +39,7 @@ export class GraniteRunner extends DefaultRunner {
   }
 
   constructor(input: BeeInput, options: BeeRunOptions, run: GetRunContext<BeeAgent>) {
-    super(
-      {
-        ...input,
-        templates: {
-          ...input.templates,
-          system: input.templates?.system ?? GraniteBeeSystemPrompt,
-          assistant: input.templates?.assistant ?? GraniteBeeAssistantPrompt,
-          schemaError: input.templates?.schemaError ?? GraniteBeeSchemaErrorPrompt,
-        },
-      },
-      options,
-      run,
-    );
+    super(input, options, run);
 
     run.emitter.on(
       "update",
@@ -88,12 +77,15 @@ export class GraniteRunner extends DefaultRunner {
     return memory;
   }
 
+  @Cache({ enumerable: false })
   get templates(): BeeAgentTemplates {
+    const customTemplates = this.input.templates ?? {};
+
     return {
       ...super.templates,
-      system: this.input.templates?.system ?? GraniteBeeSystemPrompt,
-      assistant: this.input.templates?.assistant ?? GraniteBeeAssistantPrompt,
-      schemaError: this.input.templates?.schemaError ?? GraniteBeeSchemaErrorPrompt,
+      system: customTemplates.system ?? GraniteBeeSystemPrompt,
+      assistant: customTemplates.assistant ?? GraniteBeeAssistantPrompt,
+      schemaError: customTemplates.schemaError ?? GraniteBeeSchemaErrorPrompt,
     };
   }
 
