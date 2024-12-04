@@ -172,7 +172,16 @@ export interface ToolEvents<
   finish: Callback<null>;
 }
 
+/**
+ * @deprecated Use ToolEmitter instead
+ */
 export type CustomToolEmitter<
+  A extends Record<string, any>,
+  B extends ToolOutput,
+  C = Record<never, never>,
+> = Emitter<ToolEvents<A, B> & Omit<C, keyof ToolEvents>>;
+
+export type ToolEmitter<
   A extends Record<string, any>,
   B extends ToolOutput,
   C = Record<never, never>,

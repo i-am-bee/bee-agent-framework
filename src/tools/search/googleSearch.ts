@@ -21,7 +21,7 @@ import {
   SearchToolResult,
   SearchToolRunOptions,
 } from "./base.js";
-import { CustomToolEmitter, Tool, ToolInput } from "@/tools/base.js";
+import { ToolEmitter, Tool, ToolInput } from "@/tools/base.js";
 import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
 import { ValueError } from "@/errors.js";
@@ -69,7 +69,7 @@ export class GoogleSearchTool extends Tool<
   name = "GoogleSearch";
   description = `Search for online trends, news, current events, real-time information, or research topics.`;
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, GoogleSearchToolOutput> =
+  public readonly emitter: ToolEmitter<ToolInput<this>, GoogleSearchToolOutput> =
     Emitter.root.child({
       namespace: ["tool", "search", "google"],
       creator: this,

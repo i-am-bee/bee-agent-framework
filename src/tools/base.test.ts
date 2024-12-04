@@ -17,7 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
-  CustomToolEmitter,
+  ToolEmitter,
   DynamicTool,
   JSONToolOutput,
   StringToolOutput,
@@ -46,7 +46,7 @@ describe("Base Tool", () => {
     class DummyTool extends Tool<StringToolOutput> {
       name = "DummyTool";
       description = "DummyTool description";
-      emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> = Emitter.root.child({
+      emitter: ToolEmitter<ToolInput<this>, StringToolOutput> = Emitter.root.child({
         namespace: ["tool", "dummy"],
         creator: this,
       });
