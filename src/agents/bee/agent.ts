@@ -30,7 +30,6 @@ import {
 } from "@/agents/bee/types.js";
 import { GetRunContext } from "@/context.js";
 import { assign } from "@/internals/helpers/object.js";
-import { BeeAssistantPrompt } from "@/agents/bee/prompts.js";
 import * as R from "remeda";
 import { BaseRunner } from "@/agents/bee/runners/base.js";
 import { GraniteRunner } from "@/agents/bee/runners/granite/runner.js";
@@ -130,7 +129,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
         await runner.memory.add(
           BaseMessage.of({
             role: Role.ASSISTANT,
-            text: (this.input.templates?.assistant ?? BeeAssistantPrompt).render({
+            text: runner.templates.assistant.render({
               thought: [state.thought].filter(R.isTruthy),
               toolName: [state.tool_name].filter(R.isTruthy),
               toolInput: [state.tool_input].filter(R.isTruthy).map((call) => JSON.stringify(call)),

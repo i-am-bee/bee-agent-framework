@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 import { BaseRunner, BeeRunnerLLMInput, BeeRunnerToolInput } from "@/agents/bee/runners/base.js";
-import { BeeAgentRunIteration, BeeParserInput, BeeRunInput } from "@/agents/bee/types.js";
+import {
+  BeeAgentRunIteration,
+  BeeAgentTemplates,
+  BeeParserInput,
+  BeeRunInput,
+} from "@/agents/bee/types.js";
 import { Retryable } from "@/internals/helpers/retryable.js";
 import { AgentError } from "@/agents/base.js";
 import {
+  BeeAssistantPrompt,
   BeeSchemaErrorPrompt,
   BeeSystemPrompt,
   BeeToolErrorPrompt,
@@ -357,6 +363,20 @@ export class DefaultRunner extends BaseRunner {
     });
     await memory.addMany([await this.renderers.system.message(), ...prevConversation]);
     return memory;
+  }
+
+  get templates(): BeeAgentTemplates {
+    return {
+      system: this.input.templates?.system ?? BeeSystemPrompt,
+      assistant: this.input.templates?.assistant ?? BeeAssistantPrompt,
+      user: this.input.templates?.user ?? BeeUserPrompt,
+      userEmpty: this.input.templates?.userEmpty ?? BeeUserEmptyPrompt,
+      toolError: this.input.templates?.toolError ?? BeeToolErrorPrompt,
+      toolInputError: this.input.templates?.toolInputError ?? BeeToolInputErrorPrompt,
+      toolNoResultError: this.input.templates?.toolNoResultError ?? BeeToolNoResultsPrompt,
+      toolNotFoundError: this.input.templates?.toolNotFoundError ?? BeeToolNotFoundPrompt,
+      schemaError: this.input.templates?.schemaError ?? BeeSchemaErrorPrompt,
+    };
   }
 
   protected createParser(tools: AnyTool[]) {

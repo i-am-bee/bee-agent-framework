@@ -17,6 +17,7 @@
 import { Serializable } from "@/internals/serializable.js";
 import {
   BeeAgentRunIteration,
+  BeeAgentTemplates,
   BeeCallbacks,
   BeeIterationToolResult,
   BeeMeta,
@@ -89,6 +90,8 @@ export abstract class BaseRunner extends Serializable {
   abstract llm(input: BeeRunnerLLMInput): Promise<BeeAgentRunIteration>;
 
   abstract tool(input: BeeRunnerToolInput): Promise<{ output: string; success: boolean }>;
+
+  abstract get templates(): BeeAgentTemplates;
 
   protected abstract initMemory(input: BeeRunInput): Promise<BaseMemory>;
 

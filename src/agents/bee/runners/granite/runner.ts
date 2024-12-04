@@ -18,7 +18,12 @@ import type { AnyTool } from "@/tools/base.js";
 import { isEmpty } from "remeda";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import { BaseMemory } from "@/memory/base.js";
-import type { BeeParserInput, BeeRunInput, BeeRunOptions } from "@/agents/bee/types.js";
+import type {
+  BeeAgentTemplates,
+  BeeParserInput,
+  BeeRunInput,
+  BeeRunOptions,
+} from "@/agents/bee/types.js";
 import { BeeAgent, BeeInput } from "@/agents/bee/agent.js";
 import type { GetRunContext } from "@/context.js";
 import {
@@ -81,6 +86,15 @@ export class GraniteRunner extends DefaultRunner {
     }
 
     return memory;
+  }
+
+  get templates(): BeeAgentTemplates {
+    return {
+      ...super.templates,
+      system: this.input.templates?.system ?? GraniteBeeSystemPrompt,
+      assistant: this.input.templates?.assistant ?? GraniteBeeAssistantPrompt,
+      schemaError: this.input.templates?.schemaError ?? GraniteBeeSchemaErrorPrompt,
+    };
   }
 
   protected createParser(tools: AnyTool[]) {
