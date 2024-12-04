@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AsyncStream, EmbeddingOptions, LLMCache, LLMError } from "@/llms/base.js";
+import { AsyncStream, EmbeddingOptions, EmbeddingOutput, LLMCache, LLMError } from "@/llms/base.js";
 import {
   WatsonXLLM,
   WatsonXLLMGenerateOptions,
@@ -114,7 +114,7 @@ export class WatsonXChatLLM extends ChatLLM<WatsonXChatLLMOutput> {
     return this.llm.meta();
   }
 
-  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     const inputs = input.map((messages) => this.messagesToPrompt(messages));
     return this.llm.embed(inputs, options);
   }

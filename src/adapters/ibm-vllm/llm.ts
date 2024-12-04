@@ -19,6 +19,7 @@ import {
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   GuidedOptions,
@@ -127,7 +128,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
     };
   }
 
-  async embed(_input: LLMInput[], _options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(_input: LLMInput[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     throw new Error("Method not implemented.");
   }
 

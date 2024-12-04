@@ -18,6 +18,7 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -120,7 +121,7 @@ export class LangChainChatLLM<
     };
   }
 
-  async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     throw new Error("Method not implemented.");
   }
 

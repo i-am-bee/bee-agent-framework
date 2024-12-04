@@ -18,6 +18,7 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -164,7 +165,7 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
     };
   }
 
-  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     const response = await this.client.embeddings.create(
       {
         model: this.modelId,
@@ -172,7 +173,8 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
       },
       { signal: options?.signal },
     );
-    return response.data.map((data) => data.embedding);
+    const embeddings = response.data.map((data) => data.embedding);
+    return { embeddings };
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {

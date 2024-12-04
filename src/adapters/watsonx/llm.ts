@@ -20,6 +20,7 @@ import {
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -335,7 +336,7 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
     };
   }
 
-  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     const response: { results: { embedding: number[] }[] } = await this.client.fetch("embeddings", {
       method: "POST",
       searchParams: new URLSearchParams({ version: "2023-10-25" }),
@@ -352,7 +353,8 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
     if (response.results?.length !== input.length) {
       throw new Error("Missing embedding");
     }
-    return response.results.map((result) => result.embedding);
+    const embeddings = response.results.map((result) => result.embedding);
+    return { embeddings };
   }
 
   createSnapshot() {

@@ -26,6 +26,7 @@ import {
   AsyncStream,
   BaseLLMTokenizeOutput,
   EmbeddingOptions,
+  EmbeddingOutput,
   LLMCache,
   LLMError,
   LLMMeta,
@@ -116,7 +117,7 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
     return this.llm.meta();
   }
 
-  async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     throw new Error("Method not implemented.");
   }
 

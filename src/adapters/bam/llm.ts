@@ -20,6 +20,7 @@ import {
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   GuidedOptions,
@@ -228,7 +229,7 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
     }
   }
 
-  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     const results = await Promise.all(
       chunk(input, MAX_EMBEDDING_INPUTS).map((texts) =>
         BAMLLM.limit(async () => {
@@ -249,7 +250,7 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
         }),
       ),
     );
-    return results.flat();
+    return { embeddings: results.flat() };
   }
 
   createSnapshot() {

@@ -21,6 +21,7 @@ import {
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
   EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -177,9 +178,9 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     return extractModelMeta(model);
   }
 
-  async embed(input: LLMInput[], _options?: EmbeddingOptions): Promise<number[][]> {
+  async embed(input: LLMInput[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     const response = await this.client.embed({ model: this.modelId, input: input });
-    return response.embeddings;
+    return { embeddings: response.embeddings };
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {

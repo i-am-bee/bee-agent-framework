@@ -23,6 +23,7 @@ import {
   BaseLLM,
   BaseLLMEvents,
   EmbeddingOptions,
+  EmbeddingOutput,
 } from "./base.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { UnconstrainedCache } from "@/cache/unconstrainedCache.js";
@@ -68,7 +69,7 @@ describe("BaseLLM", () => {
       return { tokenLimit: 4096 };
     }
 
-    async embed(_input: string[], _options?: EmbeddingOptions): Promise<number[][]> {
+    async embed(_input: string[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
       throw new Error("Method not implemented.");
     }
 
