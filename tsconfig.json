@@ -17,7 +17,7 @@
     "sourceMap": false,
     "allowJs": true,
     "outDir": "./dist",
-    "removeComments": true,
+    "removeComments": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
