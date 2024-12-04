@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.0.48](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.47...v0.0.48) (2024-12-04)
+
+### Features
+
+- **adapters:** add watsonx debug example ([a737327](https://github.com/i-am-bee/bee-agent-framework/commit/a73732743bc78f9ccc0a4b5b9a95d04c2b34cd02))
+- **agents:** update system prompt for Bee ([#199](https://github.com/i-am-bee/bee-agent-framework/issues/199)) ([a38804d](https://github.com/i-am-bee/bee-agent-framework/commit/a38804dd41a6051212824b8987294fe4dda50613))
+- **agents:** use prompt templates from a concrete runner ([#223](https://github.com/i-am-bee/bee-agent-framework/issues/223)) ([b868974](https://github.com/i-am-bee/bee-agent-framework/commit/b8689749ca9f613a92fe5d807c599f20743113b7)), closes [#219](https://github.com/i-am-bee/bee-agent-framework/issues/219)
+- **internals:** extends RestfulClient by emitting events ([e7a95c0](https://github.com/i-am-bee/bee-agent-framework/commit/e7a95c019ccdcb5e88a4e4b61c3af63f937a05d2))
+- **tools:** rename CustomToolEmitter to ToolEmitter ([a22a4d9](https://github.com/i-am-bee/bee-agent-framework/commit/a22a4d9d65b96b53e35890c52a32757fef2aa5e5))
+
+### Bug Fixes
+
+- **llms:** correct the vllm granite model_id ([#218](https://github.com/i-am-bee/bee-agent-framework/issues/218)) ([643cd8e](https://github.com/i-am-bee/bee-agent-framework/commit/643cd8e3b7553db430516382bcb2de25837dd800))
+
+### Reverts
+
+- **agents:** update constrained decoding for Bee ([#220](https://github.com/i-am-bee/bee-agent-framework/issues/220)) ([6e616ed](https://github.com/i-am-bee/bee-agent-framework/commit/6e616edd3acf622f5a776decf69d39a385fa878c))
+
 ## [0.0.47](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.46...v0.0.47) (2024-12-03)
 
 ### ⚠ BREAKING CHANGES
