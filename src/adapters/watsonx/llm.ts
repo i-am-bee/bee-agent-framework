@@ -284,7 +284,7 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
     creator: this,
   });
 
-  protected client;
+  public readonly client;
   protected projectId;
   protected deploymentId;
   protected spaceId;
