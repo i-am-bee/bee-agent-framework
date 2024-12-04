@@ -27,7 +27,6 @@ import {
 
 import { BeeSystemPromptWithHumanTool } from "../../../src/agents/experimental/human/prompts.js";
 
-
 // Set up logger
 Logger.root.level = "silent"; // Disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
