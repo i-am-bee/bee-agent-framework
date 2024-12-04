@@ -27,7 +27,7 @@ import {
 } from "./base.js";
 import { asyncProperties } from "@/internals/helpers/promise.js";
 import { z } from "zod";
-import { CustomToolEmitter, Tool, ToolInput } from "@/tools/base.js";
+import { ToolEmitter, Tool, ToolInput } from "@/tools/base.js";
 import Turndown from "turndown";
 // @ts-expect-error missing types
 import turndownPlugin from "joplin-turndown-plugin-gfm";
@@ -136,11 +136,10 @@ export class WikipediaTool extends Tool<
   description =
     "Search factual and historical information, including biography, history, politics, geography, society, culture, science, technology, people, animal species, mathematics, and other subjects.";
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, WikipediaToolOutput> =
-    Emitter.root.child({
-      namespace: ["tool", "search", "wikipedia"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<ToolInput<this>, WikipediaToolOutput> = Emitter.root.child({
+    namespace: ["tool", "search", "wikipedia"],
+    creator: this,
+  });
 
   inputSchema() {
     return z.object({

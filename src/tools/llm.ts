@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  BaseToolOptions,
-  CustomToolEmitter,
-  StringToolOutput,
-  Tool,
-  ToolInput,
-} from "@/tools/base.js";
+import { BaseToolOptions, ToolEmitter, StringToolOutput, Tool, ToolInput } from "@/tools/base.js";
 import { AnyLLM, GenerateOptions } from "@/llms/base.js";
 import { z } from "zod";
 import { Emitter } from "@/emitter/emitter.js";
@@ -49,11 +43,10 @@ export class LLMTool<T> extends Tool<StringToolOutput, LLMToolOptions<T>, LLMToo
     return z.object({ input: z.string() });
   }
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> =
-    Emitter.root.child({
-      namespace: ["tool", "llm"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> = Emitter.root.child({
+    namespace: ["tool", "llm"],
+    creator: this,
+  });
 
   static {
     this.register();

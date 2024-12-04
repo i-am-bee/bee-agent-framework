@@ -22,7 +22,7 @@ import {
   BaseToolRunOptions,
   JSONToolOutput,
   ToolInputValidationError,
-  CustomToolEmitter,
+  ToolEmitter,
 } from "@/tools/base.js";
 import { z } from "zod";
 import { Sequelize, Options } from "sequelize";
@@ -67,7 +67,7 @@ export class SQLTool extends Tool<SQLToolOutput, ToolOptions, ToolRunOptions> {
     });
   }
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, SQLToolOutput> = Emitter.root.child({
+  public readonly emitter: ToolEmitter<ToolInput<this>, SQLToolOutput> = Emitter.root.child({
     namespace: ["tool", "database", "sql"],
     creator: this,
   });

@@ -17,7 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
-  CustomToolEmitter,
+  ToolEmitter,
   JSONToolOutput,
   Tool,
   ToolInput,
@@ -68,11 +68,10 @@ export class SimilarityTool<TProviderOptions> extends Tool<
   name = "Similarity";
   description = "Extract relevant information from documents.";
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, SimilarityToolOutput> =
-    Emitter.root.child({
-      namespace: ["tool", "similarity"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<ToolInput<this>, SimilarityToolOutput> = Emitter.root.child({
+    namespace: ["tool", "similarity"],
+    creator: this,
+  });
 
   inputSchema() {
     return z.object({ query: z.string(), documents: z.array(documentSchema) });

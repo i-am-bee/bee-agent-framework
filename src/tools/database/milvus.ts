@@ -22,7 +22,7 @@ import {
   BaseToolRunOptions,
   JSONToolOutput,
   ToolInputValidationError,
-  CustomToolEmitter,
+  ToolEmitter,
 } from "@/tools/base.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { AnyToolSchemaLike } from "@/internals/helpers/schema.js";
@@ -116,13 +116,11 @@ export class MilvusDatabaseTool extends Tool<
     });
   }
 
-  public readonly emitter: CustomToolEmitter<
-    ToolInput<this>,
-    JSONToolOutput<MilvusSearchToolResult>
-  > = Emitter.root.child({
-    namespace: ["tool", "database", "milvus"],
-    creator: this,
-  });
+  public readonly emitter: ToolEmitter<ToolInput<this>, JSONToolOutput<MilvusSearchToolResult>> =
+    Emitter.root.child({
+      namespace: ["tool", "database", "milvus"],
+      creator: this,
+    });
 
   protected validateInput(
     schema: AnyToolSchemaLike,
