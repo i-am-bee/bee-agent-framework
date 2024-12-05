@@ -9,6 +9,7 @@ import { HumanTool } from "bee-agent-framework/tools/human";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 
 import {
+  BeeSystemPrompt,
   BeeAssistantPrompt,
   BeeUserPrompt,
   BeeUserEmptyPrompt,
@@ -17,8 +18,6 @@ import {
   BeeToolNoResultsPrompt,
   BeeToolNotFoundPrompt,
 } from "bee-agent-framework/agents/bee/prompts"; // Updated import path
-
-import { BeeSystemPromptWithHumanTool } from "../../../src/agents/experimental/human/prompts.js";
 
 // Set up logger
 Logger.root.level = "silent"; // Disable internal logs
@@ -38,7 +37,7 @@ const agent = new BeeAgent({
     new HumanTool(),
   ],
   templates: {
-    system: BeeSystemPromptWithHumanTool,
+    system: BeeSystemPrompt,
     assistant: BeeAssistantPrompt,
     user: BeeUserPrompt,
     userEmpty: BeeUserEmptyPrompt,
