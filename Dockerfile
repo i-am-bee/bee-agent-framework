@@ -1,4 +1,4 @@
-FROM node:alpine:latest
+FROM node:alpine
 
 WORKDIR /app
 
@@ -6,10 +6,10 @@ COPY .env /app
 COPY package.json /app
 
 
-RUN npm install 
+RUN yarn  install --imutable
 
 COPY . .
 
 EXPOSE 80
 
-CMD ["npm", "start"]
+CMD ["yarn", "run"]
