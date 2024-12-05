@@ -32,9 +32,9 @@ The [ibm_granite_bee](/examples/agents/ibm_granite_bee.ts) example agent is set 
 
 1. Follow the [Local Installation](https://github.com/i-am-bee/bee-agent-framework?tab=readme-ov-file#local-installation) section of our main README to [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the Bee Agent Framework git repository and install its dependencies. Return to this guide when you have completed these steps and are ready to configure environment variables.
 
-1. Copy the [.env.template](/.env.template) file to a new file called `.env` and fill out the required details within the `.env` file, as follows
+1. Copy the [.env.template](/.env.template) file to a new file called `.env` and fill out the required details within the `.env` file (replace the values shown in braces), as follows
 
-   1. For watsonx (replace the values shown in braces):
+   1. For watsonx:
 
       ```.env
       LLM_BACKEND=watsonx
@@ -45,7 +45,7 @@ The [ibm_granite_bee](/examples/agents/ibm_granite_bee.ts) example agent is set 
 
       Note: [other regions](https://www.ibm.com/docs/en/watsonx/saas?topic=integrations-regional-availability-cloud) are also available
 
-   1. For Ollama (replace the values shown in braces)
+   1. For Ollama:
 
       ```.env
       LLM_BACKEND=ollama
