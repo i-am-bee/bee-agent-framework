@@ -55,7 +55,7 @@ The [ibm_granite_bee](/examples/agents/ibm_granite_bee.ts) example agent is set 
 1. Run the [ibm_granite_bee](/examples/agents/ibm_granite_bee.ts) example:
 
    ```shell
-   npm run start examples/agents/ibm_granite_bee.ts
+   yarn run start examples/agents/ibm_granite_bee.ts
    ```
 
    This will show the various stages of the agent running and ultimately deliver an answer similar to the following:
@@ -67,11 +67,11 @@ The [ibm_granite_bee](/examples/agents/ibm_granite_bee.ts) example agent is set 
    You can provide other prompts as follows:
 
    ```shell
-    npm run start examples/agents/ibm_granite_bee.ts <<< 'Who is the president of the USA?'
-    npm run start examples/agents/ibm_granite_bee.ts <<< 'What is the spanish word for dog?'
-    npm run start examples/agents/ibm_granite_bee.ts <<< 'What does the alias command do in the BASH shell?'
-    npm run start examples/agents/ibm_granite_bee.ts <<< "What’s the largest technology company by market capitalization right now?"
-    npm run start examples/agents/ibm_granite_bee.ts <<< "What’s the weather going to be like tomorrow in Sydney?"
+    yarn run start examples/agents/ibm_granite_bee.ts <<< 'Who is the president of the USA?'
+    yarn run start examples/agents/ibm_granite_bee.ts <<< 'What is the spanish word for dog?'
+    yarn run start examples/agents/ibm_granite_bee.ts <<< 'What does the alias command do in the BASH shell?'
+    yarn run start examples/agents/ibm_granite_bee.ts <<< "What’s the largest technology company by market capitalization right now?"
+    yarn run start examples/agents/ibm_granite_bee.ts <<< "What’s the weather going to be like tomorrow in Sydney?"
    ```
 
    The example is configured with 2 available [tools](/docs/tools.md), these are OpenMeteo for facilitating weather related prompts and DuckDuckGo for facilitating search related prompts. The above example prompts demonstrate how each of these tools can be exercised.
