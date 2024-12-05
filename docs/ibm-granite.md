@@ -30,19 +30,9 @@ Before getting started, ensure you have access to an IBM Granite model and have 
 
 The [ibm_granite_bee](/examples/agents/ibm_granite_bee.ts) example agent is set up to demonstrate how to use IBM Granite with the Bee Agent Framework. In order to run this example, take the following steps:
 
-> [!TIP]
-> More detailed installation instructions are available for step 1 in the [Location Installation](https://github.com/i-am-bee/bee-agent-framework?tab=readme-ov-file#local-installation) section of our main README
+1. Follow the [Local Installation](https://github.com/i-am-bee/bee-agent-framework?tab=readme-ov-file#local-installation) section of our main README to [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the Bee Agent Framework git repository and install its dependencies. Return to this guide when you have completed these steps and are ready to configure environment variables.
 
-1. [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the Bee Agent Framework git repository by running the following command:
-
-   ```shell
-   git clone https://github.com/i-am-bee/bee-agent-framework.git
-   yarn install --immutable
-   ```
-
-1. Copy the [.env.template](/.env.template) file to a new file called `.env`
-
-1. Fill out the required details within the `.env` file, as follows
+1. Copy the [.env.template](/.env.template) file to a new file called `.env` and fill out the required details within the `.env` file, as follows
 
    1. For watsonx (replace the values shown in braces):
 
