@@ -147,7 +147,10 @@ export class RestfulClient<K extends Record<string, string>> extends Serializabl
         },
       })
         .then(() => emitter.emit("streamSuccess", { input }))
-        .catch((error) => emitter.emit("streamError", { input, error }).catch(doNothing()))
+        .catch(async (error) => {
+          await emitter.emit("streamError", { input, error }).catch(doNothing());
+          throw error;
+        })
         .finally(() => emitter.emit("streamDone", { input })),
     );
   }
