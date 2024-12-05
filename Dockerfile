@@ -6,7 +6,7 @@ COPY .env /app
 COPY package.json /app
 
 
-RUN yarn  install --imutable
+RUN yarn  install --imutable 
 
 COPY . .
 
