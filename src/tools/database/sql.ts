@@ -136,7 +136,7 @@ export class SQLTool extends Tool<SQLToolOutput, ToolOptions, ToolRunOptions> {
 
   protected async _run(
     input: ToolInput<this>,
-    _options: ToolRunOptions | undefined,
+    _options: Partial<ToolRunOptions>,
   ): Promise<SQLToolOutput> {
     const { provider, connection } = this.options;
     const { schema } = connection;

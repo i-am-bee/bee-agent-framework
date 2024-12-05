@@ -115,7 +115,7 @@ export class LangChainTool<T extends AnyZodObject, TOutput = any> extends Tool<
 
   protected async _run(
     arg: ToolInput<this>,
-    options: LangChainToolRunOptions | undefined,
+    options: Partial<LangChainToolRunOptions>,
     run: GetRunContext<this>,
   ): Promise<JSONToolOutput<TOutput>> {
     const { outputClass = JSONToolOutput } = this.options;
