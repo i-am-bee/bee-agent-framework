@@ -116,7 +116,7 @@ export class DuckDuckGoSearchTool extends Tool<
 
   protected async _run(
     { query: input }: ToolInput<this>,
-    options: DuckDuckGoSearchToolRunOptions | undefined,
+    options: Partial<DuckDuckGoSearchToolRunOptions>,
     run: RunContext<this>,
   ) {
     const headers = new HeaderGenerator().getHeaders();

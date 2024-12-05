@@ -123,7 +123,7 @@ export class GoogleSearchTool extends Tool<
 
   protected async _run(
     { query: input }: ToolInput<this>,
-    _options: GoogleSearchToolRunOptions | undefined,
+    _options: Partial<GoogleSearchToolRunOptions>,
     run: RunContext<this>,
   ) {
     const results = await paginate({

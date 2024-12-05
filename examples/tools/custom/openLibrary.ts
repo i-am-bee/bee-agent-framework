@@ -67,7 +67,7 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
 
   protected async _run(
     input: ToolInput<this>,
-    _options: ToolRunOptions | undefined,
+    _options: Partial<ToolRunOptions>,
     run: GetRunContext<this>,
   ) {
     const request = {
