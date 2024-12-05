@@ -1,0 +1,15 @@
+FROM node:alpine:latest
+
+WORKDIR /app
+
+COPY .env /app
+COPY package.json /app
+
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 80
+
+CMD ["npm", "start"]
