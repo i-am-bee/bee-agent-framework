@@ -18,6 +18,7 @@ To unify differences between various APIs, the framework defines a common interf
 | `WatsonX`                                                                 | ✅                         | ⚠️ (model specific template must be provided) | ❌                                       |
 | `Ollama`                                                                  | ✅                         | ✅                                            | ⚠️ (JSON only)                           |
 | `OpenAI`                                                                  | ❌                         | ✅                                            | ⚠️ (JSON schema only)                    |
+| `Azure OpenAI`                                                            | ❌                         | ✅                                            | ⚠️ (JSON schema only)                    |
 | `LangChain`                                                               | ⚠️ (depends on a provider) | ⚠️ (depends on a provider)                    | ❌                                       |
 | `Groq`                                                                    | ❌                         | ✅                                            | ⚠️ (JSON object only)                    |
 | `AWS Bedrock`                                                             | ❌                         | ✅                                            | ⚠️ (JSON only) - model specific          |
