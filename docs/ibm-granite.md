@@ -46,7 +46,7 @@ The [ibm_granite_bee](/examples/agents/ibm_granite_bee.ts) example agent is set 
 
    1. For watsonx (replace the values shown in braces):
 
-      ```ini
+      ```.env
       LLM_BACKEND=watsonx
       WATSONX_API_KEY={YOUR_WATSONX_API_KEY}
       WATSONX_PROJECT_ID={YOUR_WATSONX_PROJECT_ID}
@@ -57,7 +57,7 @@ The [ibm_granite_bee](/examples/agents/ibm_granite_bee.ts) example agent is set 
 
    1. For Ollama (replace the values shown in braces)
 
-      ```ini
+      ```.env
       LLM_BACKEND=ollama
       OLLAMA_HOST={http://0.0.0.0:11434}
       ```
