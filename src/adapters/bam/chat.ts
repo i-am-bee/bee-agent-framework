@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import { AsyncStream, LLMCache, LLMError, StreamGenerateOptions } from "@/llms/base.js";
+import {
+  AsyncStream,
+  EmbeddingOptions,
+  EmbeddingOutput,
+  LLMCache,
+  LLMError,
+  StreamGenerateOptions,
+} from "@/llms/base.js";
 import { isFunction, isObjectType } from "remeda";
 import {
   BAMLLM,
@@ -114,6 +121,11 @@ export class BAMChatLLM extends ChatLLM<BAMChatLLMOutput> {
 
   async meta() {
     return this.llm.meta();
+  }
+
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    const inputs = input.map((messages) => this.messagesToPrompt(messages));
+    return this.llm.embed(inputs, options);
   }
 
   createSnapshot() {

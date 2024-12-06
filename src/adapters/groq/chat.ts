@@ -17,6 +17,8 @@
 import {
   AsyncStream,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -32,6 +34,7 @@ import { GetRunContext } from "@/context.js";
 import { Serializer } from "@/serializer/serializer.js";
 import { getPropStrict } from "@/internals/helpers/object.js";
 import { ChatCompletionCreateParams } from "groq-sdk/resources/chat/completions";
+import { NotImplementedError } from "@/errors.js";
 
 type Parameters = Omit<ChatCompletionCreateParams, "stream" | "messages" | "model">;
 type Response = Omit<Client.Chat.ChatCompletionChunk, "object">;
@@ -143,6 +146,10 @@ export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
     return {
       tokenLimit: Infinity,
     };
+  }
+
+  async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    throw new NotImplementedError();
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {
