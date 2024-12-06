@@ -33,6 +33,7 @@ import { VertexAI, BaseModelParams as Params } from "@google-cloud/vertexai";
 import { Role } from "@/llms/primitives/message.js";
 import { signalRace } from "@/internals/helpers/promise.js";
 import { processContentResponse, getTokenCount, registerVertexAI, createModel } from "./utils.js";
+import { NotImplementedError } from "@/errors.js";
 
 interface VertexAILLMChunk {
   text: string;
@@ -106,7 +107,7 @@ export class VertexAILLM extends LLM<VertexAILLMOutput> {
   }
 
   async embed(_input: LLMInput[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new Error("Method not implemented.");
+    throw new NotImplementedError();
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {

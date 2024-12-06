@@ -129,7 +129,7 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
   }
 
   async embed(_input: LLMInput[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new Error("Method not implemented.");
+    throw new NotImplementedError();
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {

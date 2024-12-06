@@ -13,6 +13,7 @@ import {
 import { shallowCopy } from "bee-agent-framework/serializer/utils";
 import type { GetRunContext } from "bee-agent-framework/context";
 import { Emitter } from "bee-agent-framework/emitter/emitter";
+import { NotImplementedError } from "bee-agent-framework/errors";
 
 interface CustomLLMChunk {
   text: string;
@@ -80,7 +81,7 @@ export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
   }
 
   async embed(_input: LLMInput[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new Error("Method not implemented.");
+    throw new NotImplementedError();
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {

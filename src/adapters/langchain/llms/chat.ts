@@ -44,6 +44,7 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { getProp, omitUndefined } from "@/internals/helpers/object.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
+import { NotImplementedError } from "@/errors.js";
 
 export class LangChainChatLLMOutput extends ChatLLMOutput {
   constructor(
@@ -122,7 +123,7 @@ export class LangChainChatLLM<
   }
 
   async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new Error("Method not implemented.");
+    throw new NotImplementedError();
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {

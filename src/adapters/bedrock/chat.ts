@@ -42,6 +42,7 @@ import {
 } from "@aws-sdk/client-bedrock-runtime";
 import { GetRunContext } from "@/context.js";
 import { Serializer } from "@/serializer/serializer.js";
+import { NotImplementedError } from "@/errors.js";
 
 type Response = ContentBlockDeltaEvent | ConverseCommandOutput;
 
@@ -204,7 +205,7 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
   }
 
   async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new Error("Method not implemented.");
+    throw new NotImplementedError();
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {

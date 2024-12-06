@@ -36,6 +36,7 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { IBMVllmChatLLMPreset, IBMVllmChatLLMPresetModel } from "@/adapters/ibm-vllm/chatPreset.js";
 import { Client } from "./client.js";
 import { GetRunContext } from "@/context.js";
+import { NotImplementedError } from "@/errors.js";
 
 export class GrpcChatLLMOutput extends ChatLLMOutput {
   public readonly raw: IBMvLLMOutput;
@@ -118,7 +119,7 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
   }
 
   async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new Error("Method not implemented.");
+    throw new NotImplementedError();
   }
 
   createSnapshot() {

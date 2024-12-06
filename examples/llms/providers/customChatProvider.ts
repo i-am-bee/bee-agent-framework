@@ -14,6 +14,7 @@ import { Emitter } from "bee-agent-framework/emitter/emitter";
 import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "bee-agent-framework/llms/chat";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
 import { sum } from "remeda";
+import { NotImplementedError } from "bee-agent-framework/errors";
 
 export class CustomChatLLMOutput extends ChatLLMOutput {
   public readonly chunks: BaseMessage[] = [];
@@ -80,7 +81,7 @@ export class CustomChatLLM extends ChatLLM<CustomChatLLMOutput, CustomGenerateOp
   }
 
   async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new Error("Method not implemented.");
+    throw new NotImplementedError();
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {
