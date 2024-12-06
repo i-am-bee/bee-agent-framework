@@ -228,22 +228,21 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
   async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     const results = await Promise.all(
       chunk(input, MAX_EMBEDDING_INPUTS).map(async (texts) => {
-          const response = await this.client.text.embedding.create(
-            {
-              model_id: this.modelId,
-              input: texts,
-              parameters: {
-                truncate_input_tokens: true,
-              },
+        const response = await this.client.text.embedding.create(
+          {
+            model_id: this.modelId,
+            input: texts,
+            parameters: {
+              truncate_input_tokens: true,
             },
-            { signal: options?.signal },
-          );
-          if (response.results?.length !== texts.length) {
-            throw new Error("Missing embedding");
-          }
-          return response.results.map((result) => result.embedding);
-        },
-      ),
+          },
+          { signal: options?.signal },
+        );
+        if (response.results?.length !== texts.length) {
+          throw new Error("Missing embedding");
+        }
+        return response.results.map((result) => result.embedding);
+      }),
     );
     return { embeddings: results.flat() };
   }
