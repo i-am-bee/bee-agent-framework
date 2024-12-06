@@ -40,8 +40,6 @@ export interface StreamlitRunInput {
   prompt: string | null;
 }
 
-interface Options extends BaseAgentRunOptions {}
-
 interface Block {
   name: "text" | "app";
   content: string;
@@ -70,7 +68,7 @@ export interface StreamlitEvents {
   }>;
 }
 
-export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOutput, Options> {
+export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOutput> {
   public emitter = new Emitter<StreamlitEvents>({
     namespace: ["agent", "experimental", "streamlit"],
     creator: this,
@@ -94,7 +92,7 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
 
   protected async _run(
     input: StreamlitRunInput,
-    _options: Options | undefined,
+    _options: BaseAgentRunOptions,
     run: GetRunContext<typeof this>,
   ): Promise<StreamlitRunOutput> {
     const { userMessage, runMemory } = await this.prepare(input);
