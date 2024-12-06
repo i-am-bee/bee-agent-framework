@@ -197,7 +197,7 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
 
   protected async *_stream(
     input: BaseMessage[],
-    options: StreamGenerateOptions,
+    options: Partial<StreamGenerateOptions>,
     run: GetRunContext<typeof this>,
   ): AsyncStream<OllamaChatLLMOutput> {
     for await (const chunk of await this.client.chat({

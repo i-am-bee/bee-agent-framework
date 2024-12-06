@@ -151,7 +151,7 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
 
   protected async *_stream(
     input: LLMInput,
-    options: StreamGenerateOptions,
+    options: Partial<StreamGenerateOptions>,
     run: GetRunContext<typeof this>,
   ): AsyncStream<OllamaLLMOutput, void> {
     for await (const chunk of await this.client.generate({

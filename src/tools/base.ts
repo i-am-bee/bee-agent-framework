@@ -172,7 +172,16 @@ export interface ToolEvents<
   finish: Callback<null>;
 }
 
+/**
+ * @deprecated Use ToolEmitter instead
+ */
 export type CustomToolEmitter<
+  A extends Record<string, any>,
+  B extends ToolOutput,
+  C = Record<never, never>,
+> = Emitter<ToolEvents<A, B> & Omit<C, keyof ToolEvents>>;
+
+export type ToolEmitter<
   A extends Record<string, any>,
   B extends ToolOutput,
   C = Record<never, never>,
@@ -212,8 +221,9 @@ export abstract class Tool<
     }
   }
 
-  run(input: ToolInputRaw<this>, options?: TRunOptions) {
+  run(input: ToolInputRaw<this>, options: Partial<TRunOptions> = {}) {
     input = shallowCopy(input);
+    options = shallowCopy(options);
 
     return RunContext.enter(
       this,
@@ -273,7 +283,7 @@ export abstract class Tool<
 
   protected async _runCached(
     input: ToolInput<this>,
-    options: TRunOptions | undefined,
+    options: Partial<TRunOptions>,
     run: GetRunContext<this>,
   ): Promise<TOutput> {
     const key = ObjectHashKeyFn({
@@ -303,7 +313,7 @@ export abstract class Tool<
 
   protected abstract _run(
     arg: ToolInput<this>,
-    options: TRunOptions | undefined,
+    options: Partial<TRunOptions>,
     run: GetRunContext<typeof this>,
   ): Promise<TOutput>;
 
@@ -397,7 +407,7 @@ export abstract class Tool<
     mapper: (
       input: ToolInputRaw<S>,
       output: TOutput,
-      options: TRunOptions | undefined,
+      options: Partial<TRunOptions>,
       run: RunContext<
         DynamicTool<TOutput, ZodSchema<ToolInput<S>>, TOptions, TRunOptions, ToolInput<S>>
       >,
@@ -421,7 +431,7 @@ export abstract class Tool<
     schema: TS,
     mapper: (
       input: z.output<TS>,
-      options: TRunOptions | undefined,
+      options: Partial<TRunOptions>,
       run: RunContext<DynamicTool<TOutput, TS, TOptions, TRunOptions, z.output<TS>>>,
     ) => ToolInputRaw<S>,
     overrides: {
@@ -471,7 +481,7 @@ export class DynamicTool<
     inputSchema: TInputSchema;
     handler: (
       input: TInput,
-      options: TRunOptions | undefined,
+      options: Partial<TRunOptions>,
       run: GetRunContext<DynamicTool<TOutput, TInputSchema, TOptions, TRunOptions, TInput>>,
     ) => Promise<TOutput>;
     options?: TOptions;
@@ -507,7 +517,7 @@ export class DynamicTool<
 
   protected _run(
     arg: TInput,
-    options: TRunOptions | undefined,
+    options: Partial<TRunOptions>,
     run: GetRunContext<DynamicTool<TOutput, TInputSchema, TOptions, TRunOptions, TInput>>,
   ): Promise<TOutput> {
     return this.handler(arg, options, run);

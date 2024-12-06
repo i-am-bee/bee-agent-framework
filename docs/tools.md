@@ -127,7 +127,7 @@ The recommended and most sustainable way to create a tool is by implementing the
 
 ```ts
 import {
-  CustomToolEmitter,
+  ToolEmitter,
   StringToolOutput,
   Tool,
   ToolInput,
@@ -141,11 +141,10 @@ export class RiddleTool extends Tool<StringToolOutput> {
   name = "Riddle";
   description = "It generates a random puzzle to test your knowledge.";
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> =
-    Emitter.root.child({
-      namespace: ["tool", "riddle"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> = Emitter.root.child({
+    namespace: ["tool", "riddle"],
+    creator: this,
+  });
 
   inputSchema() {
     return z.object({
@@ -208,7 +207,7 @@ import {
   ToolInput,
   JSONToolOutput,
   ToolError,
-  CustomToolEmitter,
+  ToolEmitter,
 } from "bee-agent-framework/tools/base";
 import { z } from "zod";
 import { createURLParams } from "bee-agent-framework/internals/fetcher";
@@ -252,7 +251,7 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
       .partial();
   }
 
-  public readonly emitter: CustomToolEmitter<
+  public readonly emitter: ToolEmitter<
     ToolInput<this>,
     OpenLibraryToolOutput,
     {
@@ -270,7 +269,7 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
 
   protected async _run(
     input: ToolInput<this>,
-    _options: ToolRunOptions | undefined,
+    _options: Partial<ToolRunOptions>,
     run: GetRunContext<this>,
   ) {
     const request = {
@@ -371,7 +370,7 @@ _Source: [examples/tools/custom/openLibrary.ts](/examples/tools/custom/openLibra
   <!-- eslint-skip -->
 
   ```ts
-  protected async _run(input: ToolInput<this>, options: BaseToolRunOptions | undefined, run: RunContext<this>) {
+  protected async _run(input: ToolInput<this>, options: Partial<BaseToolRunOptions>, run: RunContext<this>) {
       // insert custom code here
       // MUST: return an instance of the output type specified in the tool class definition
       // MAY: throw an instance of ToolError upon unrecoverable error conditions encountered by the tool

@@ -18,7 +18,7 @@ import { expect } from "vitest";
 import { exec } from "child_process";
 import { glob } from "glob";
 import { isTruthy } from "remeda";
-import { hasEnv } from "@/internals/env.js";
+import { getEnv } from "@/internals/env.js";
 import { ExecException } from "node:child_process";
 
 const execAsync = (command: string) =>
@@ -37,29 +37,30 @@ const excludePattern = process.env.EXCLUDE_PATTERN || ``;
 
 const exclude: string[] = [
   "examples/playground/**/*.ts",
-  !hasEnv("WATSONX_API_KEY") && [
+  // prevents 'Too many requests' error on Free Tier
+  "examples/llms/providers/watsonx_verbose.ts",
+  !getEnv("WATSONX_API_KEY") && [
     "examples/llms/text.ts",
-    "examples/llms/providers/watsonx_verbose.ts",
-    "examples/llms/providers/watsonx.ts",
+    "examples/llms/providers/watson*.ts",
     "examples/agents/granite/*.ts",
     "examples/agents/granite/single_turn.ts",
   ],
-  !hasEnv("GROQ_API_KEY") && ["examples/agents/sql.ts", "examples/llms/providers/groq.ts"],
-  !hasEnv("OPENAI_API_KEY") && [
+  !getEnv("GROQ_API_KEY") && ["examples/agents/sql.ts", "examples/llms/providers/groq.ts"],
+  !getEnv("OPENAI_API_KEY") && [
     "examples/agents/bee_reusable.ts",
     "examples/llms/providers/openai.ts",
   ],
-  !hasEnv("AZURE_OPENAI_API_KEY") && ["examples/llms/providers/azure_openai.ts"],
-  !hasEnv("IBM_VLLM_URL") && [
+  !getEnv("AZURE_OPENAI_API_KEY") && ["examples/llms/providers/azure_openai.ts"],
+  !getEnv("IBM_VLLM_URL") && [
     "examples/llms/providers/ibm-vllm.ts",
     "examples/agents/granite/chat.ts",
   ],
-  !hasEnv("COHERE_API_KEY") && ["examples/llms/providers/langchain.ts"],
-  !hasEnv("CODE_INTERPRETER_URL") && ["examples/tools/custom/python.ts"],
+  !getEnv("COHERE_API_KEY") && ["examples/llms/providers/langchain.ts"],
+  !getEnv("CODE_INTERPRETER_URL") && ["examples/tools/custom/python.ts"],
   ["examples/llms/providers/bam.ts", "examples/llms/providers/bam_verbose.ts"],
-  !hasEnv("ELASTICSEARCH_NODE") && ["examples/agents/elasticsearch.ts"],
-  !hasEnv("AWS_REGION") && ["examples/llms/providers/bedrock.ts"],
-  !hasEnv("GOOGLE_APPLICATION_CREDENTIALS") && ["examples/llms/providers/vertexai.ts"],
+  !getEnv("ELASTICSEARCH_NODE") && ["examples/agents/elasticsearch.ts"],
+  !getEnv("AWS_REGION") && ["examples/llms/providers/bedrock.ts"],
+  !getEnv("GOOGLE_APPLICATION_CREDENTIALS") && ["examples/llms/providers/vertexai.ts"],
 ]
   .filter(isTruthy)
   .flat(); // list of examples that are excluded

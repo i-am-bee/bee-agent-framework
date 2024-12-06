@@ -23,6 +23,7 @@ import {
   GenerateOptions,
   LLMCache,
   LLMMeta,
+  StreamGenerateOptions,
 } from "@/llms/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import type { GetRunContext } from "@/context.js";
@@ -144,7 +145,7 @@ export class VertexAIChatLLM extends ChatLLM<VertexAIChatLLMOutput> {
 
   protected async *_stream(
     input: BaseMessage[],
-    options: GenerateOptions | undefined,
+    options: Partial<StreamGenerateOptions>,
     run: GetRunContext<this>,
   ): AsyncStream<VertexAIChatLLMOutput, void> {
     const generativeModel = createModel(

@@ -9,10 +9,13 @@ import {
 } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import {
+  BeeAssistantPrompt,
+  BeeSchemaErrorPrompt,
   BeeSystemPrompt,
   BeeToolErrorPrompt,
   BeeToolInputErrorPrompt,
   BeeToolNoResultsPrompt,
+  BeeUserEmptyPrompt,
 } from "bee-agent-framework/agents/bee/prompts";
 import { PromptTemplate } from "bee-agent-framework/template";
 import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
@@ -60,6 +63,9 @@ const agent = new BeeAgent({
 Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
 {{/tools.length}}`,
     }),
+    schemaError: BeeSchemaErrorPrompt,
+    assistant: BeeAssistantPrompt,
+    userEmpty: BeeUserEmptyPrompt,
   },
   tools: [
     new DuckDuckGoSearchTool({

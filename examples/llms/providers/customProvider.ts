@@ -93,7 +93,7 @@ export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
 
   protected async _generate(
     input: LLMInput,
-    options: CustomGenerateOptions,
+    options: Partial<CustomGenerateOptions>,
     run: GetRunContext<this>,
   ): Promise<CustomLLMOutput> {
     // this method should do non-stream request to the API
@@ -108,7 +108,7 @@ export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
 
   protected async *_stream(
     input: LLMInput,
-    options: CustomGenerateOptions,
+    options: Partial<CustomGenerateOptions>,
     run: GetRunContext<this>,
   ): AsyncStream<CustomLLMOutput, void> {
     // this method should do stream request to the API

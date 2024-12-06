@@ -238,7 +238,7 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
 
   protected async _generate(
     input: BaseMessage[],
-    options: GenerateOptions | undefined,
+    options: Partial<GenerateOptions>,
     run: GetRunContext<typeof this>,
   ): Promise<OpenAIChatLLMOutput> {
     const response = await this.client.chat.completions.create(

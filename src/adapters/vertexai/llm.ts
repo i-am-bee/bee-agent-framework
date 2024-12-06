@@ -25,6 +25,7 @@ import {
   GenerateOptions,
   LLMCache,
   LLMMeta,
+  StreamGenerateOptions,
 } from "@/llms/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import type { GetRunContext } from "@/context.js";
@@ -141,7 +142,7 @@ export class VertexAILLM extends LLM<VertexAILLMOutput> {
 
   protected async *_stream(
     input: LLMInput,
-    options: GenerateOptions | undefined,
+    options: Partial<StreamGenerateOptions>,
     run: GetRunContext<this>,
   ): AsyncStream<VertexAILLMOutput, void> {
     const generativeModel = createModel(

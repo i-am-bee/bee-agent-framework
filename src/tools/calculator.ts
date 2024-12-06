@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CustomToolEmitter, StringToolOutput, Tool, ToolInput } from "@/tools/base.js";
+import { ToolEmitter, StringToolOutput, Tool, ToolInput } from "@/tools/base.js";
 import { z } from "zod";
 import { create, all, evaluate, ImportOptions, ImportObject, ConfigOptions } from "mathjs";
 import { Emitter } from "@/emitter/emitter.js";
@@ -39,11 +39,10 @@ export class CalculatorTool extends Tool<StringToolOutput> {
   description = `A calculator tool that performs basic arithmetic operations like addition, subtraction, multiplication, and division. 
 Only use the calculator tool if you need to perform a calculation.`;
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> =
-    Emitter.root.child({
-      namespace: ["tool", "calculator"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> = Emitter.root.child({
+    namespace: ["tool", "calculator"],
+    creator: this,
+  });
 
   inputSchema() {
     return z.object({

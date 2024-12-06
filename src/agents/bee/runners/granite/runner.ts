@@ -18,7 +18,12 @@ import type { AnyTool } from "@/tools/base.js";
 import { isEmpty } from "remeda";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import { BaseMemory } from "@/memory/base.js";
-import type { BeeParserInput, BeeRunInput, BeeRunOptions } from "@/agents/bee/types.js";
+import type {
+  BeeAgentTemplates,
+  BeeParserInput,
+  BeeRunInput,
+  BeeRunOptions,
+} from "@/agents/bee/types.js";
 import { BeeAgent, BeeInput } from "@/agents/bee/agent.js";
 import type { GetRunContext } from "@/context.js";
 import {
@@ -26,6 +31,7 @@ import {
   GraniteBeeSchemaErrorPrompt,
   GraniteBeeSystemPrompt,
 } from "@/agents/bee/runners/granite/prompts.js";
+import { Cache } from "@/cache/decoratorCache.js";
 
 export class GraniteRunner extends DefaultRunner {
   static {
@@ -33,19 +39,7 @@ export class GraniteRunner extends DefaultRunner {
   }
 
   constructor(input: BeeInput, options: BeeRunOptions, run: GetRunContext<BeeAgent>) {
-    super(
-      {
-        ...input,
-        templates: {
-          ...input.templates,
-          system: input.templates?.system ?? GraniteBeeSystemPrompt,
-          assistant: input.templates?.assistant ?? GraniteBeeAssistantPrompt,
-          schemaError: input.templates?.schemaError ?? GraniteBeeSchemaErrorPrompt,
-        },
-      },
-      options,
-      run,
-    );
+    super(input, options, run);
 
     run.emitter.on(
       "update",
@@ -83,6 +77,18 @@ export class GraniteRunner extends DefaultRunner {
     return memory;
   }
 
+  @Cache({ enumerable: false })
+  get templates(): BeeAgentTemplates {
+    const customTemplates = this.input.templates ?? {};
+
+    return {
+      ...super.templates,
+      system: customTemplates.system ?? GraniteBeeSystemPrompt,
+      assistant: customTemplates.assistant ?? GraniteBeeAssistantPrompt,
+      schemaError: customTemplates.schemaError ?? GraniteBeeSchemaErrorPrompt,
+    };
+  }
+
   protected createParser(tools: AnyTool[]) {
     const { parser } = super.createParser(tools);
 
@@ -90,7 +96,7 @@ export class GraniteRunner extends DefaultRunner {
       parserRegex: isEmpty(tools)
         ? new RegExp(`Thought: .+\\nFinal Answer: [\\s\\S]+`)
         : new RegExp(
-            `Thought: (?!.*Tool Name:).+\\n(?:Final Answer: [\\s\\S]+|Tool Name: (?:${tools.map((tool) => tool.name).join("|")})\\nTool Input: \\{.*\\})`,
+            `Thought: .+\\n(?:Final Answer: [\\s\\S]+|Tool Name: (${tools.map((tool) => tool.name).join("|")})\\nTool Input: \\{.*\\})`,
           ),
       parser: parser.fork<BeeParserInput>((nodes, options) => ({
         options,

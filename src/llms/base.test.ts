@@ -16,7 +16,6 @@
 
 import {
   BaseLLMTokenizeOutput,
-  StreamGenerateOptions,
   AsyncStream,
   BaseLLMOutput,
   GenerateOptions,
@@ -24,6 +23,7 @@ import {
   BaseLLMEvents,
   EmbeddingOptions,
   EmbeddingOutput,
+  StreamGenerateOptions,
 } from "./base.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { UnconstrainedCache } from "@/cache/unconstrainedCache.js";
@@ -81,7 +81,7 @@ describe("BaseLLM", () => {
 
     protected async _generate(
       input: string,
-      options: GenerateOptions | undefined,
+      options: Partial<GenerateOptions>,
     ): Promise<DummyOutput> {
       options?.signal?.throwIfAborted();
       await setTimeout(200);
@@ -94,7 +94,7 @@ describe("BaseLLM", () => {
 
     protected async *_stream(
       input: string,
-      options: StreamGenerateOptions | undefined,
+      options: Partial<StreamGenerateOptions>,
     ): AsyncStream<DummyOutput, void> {
       for (const chunk of input.split(",")) {
         if (options?.signal?.aborted) {

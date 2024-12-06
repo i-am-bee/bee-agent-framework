@@ -117,7 +117,7 @@ export class LangChainLLM extends LLM<LangChainLLMOutput> {
 
   protected async _generate(
     input: LLMInput,
-    _options: GenerateOptions | undefined,
+    _options: Partial<GenerateOptions>,
     run: GetRunContext<this>,
   ): Promise<LangChainLLMOutput> {
     const { generations } = await this.lcLLM.generate([input], {

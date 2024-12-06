@@ -17,7 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
-  CustomToolEmitter,
+  ToolEmitter,
   StringToolOutput,
   Tool,
   ToolInput,
@@ -66,11 +66,10 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
   name: string;
   description: string;
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> =
-    Emitter.root.child({
-      namespace: ["tool", "custom"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> = Emitter.root.child({
+    namespace: ["tool", "custom"],
+    creator: this,
+  });
 
   public inputSchema() {
     return this.options.inputSchema;
@@ -95,7 +94,7 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
 
   protected async _run(
     input: any,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<typeof this>,
   ) {
     const { response } = await this.client.executeCustomTool(

@@ -22,7 +22,7 @@ import {
   BaseToolRunOptions,
   JSONToolOutput,
   ToolInputValidationError,
-  CustomToolEmitter,
+  ToolEmitter,
 } from "@/tools/base.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { RunContext } from "@/context.js";
@@ -98,13 +98,11 @@ export class ElasticSearchTool extends Tool<
     });
   }
 
-  public readonly emitter: CustomToolEmitter<
-    ToolInput<this>,
-    JSONToolOutput<ElasticSearchToolResult>
-  > = Emitter.root.child({
-    namespace: ["tool", "database", "elasticsearch"],
-    creator: this,
-  });
+  public readonly emitter: ToolEmitter<ToolInput<this>, JSONToolOutput<ElasticSearchToolResult>> =
+    Emitter.root.child({
+      namespace: ["tool", "database", "elasticsearch"],
+      creator: this,
+    });
 
   protected validateInput(
     schema: AnyToolSchemaLike,
@@ -155,7 +153,7 @@ export class ElasticSearchTool extends Tool<
 
   protected async _run(
     input: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>,
   ): Promise<JSONToolOutput<any>> {
     if (input.action === ElasticSearchAction.ListIndices) {

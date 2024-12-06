@@ -17,7 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
-  CustomToolEmitter,
+  ToolEmitter,
   JSONToolOutput,
   Tool,
   ToolError,
@@ -114,12 +114,10 @@ export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions
   name = "ArXiv";
   description = `Retrieves research articles published on arXiv including related metadata.`;
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, ArXivToolOutput> = Emitter.root.child(
-    {
-      namespace: ["tool", "search", "arxiv"],
-      creator: this,
-    },
-  );
+  public readonly emitter: ToolEmitter<ToolInput<this>, ArXivToolOutput> = Emitter.root.child({
+    namespace: ["tool", "search", "arxiv"],
+    creator: this,
+  });
 
   @Cache()
   inputSchema() {
@@ -183,7 +181,7 @@ export class ArXivTool extends Tool<ArXivToolOutput, ToolOptions, ToolRunOptions
 
   protected async _run(
     input: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>,
   ) {
     const params = this._prepareParams(input);

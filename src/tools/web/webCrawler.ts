@@ -17,7 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
-  CustomToolEmitter,
+  ToolEmitter,
   JSONToolOutput,
   Tool,
   ToolInput,
@@ -86,11 +86,10 @@ export class WebCrawlerTool extends Tool<WebCrawlerToolOutput, WebsiteCrawlerToo
   protected client: HttpClient;
   protected parser: Parser;
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, WebCrawlerToolOutput> =
-    Emitter.root.child({
-      namespace: ["tool", "webCrawler"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<ToolInput<this>, WebCrawlerToolOutput> = Emitter.root.child({
+    namespace: ["tool", "webCrawler"],
+    creator: this,
+  });
 
   constructor({ client, parser, ...options }: WebsiteCrawlerToolOptions = {}) {
     super(options);
@@ -100,7 +99,7 @@ export class WebCrawlerTool extends Tool<WebCrawlerToolOutput, WebsiteCrawlerToo
 
   protected async _run(
     { url }: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>,
   ) {
     const response = await this.client(url, {

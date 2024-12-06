@@ -30,7 +30,6 @@ import {
 } from "@/agents/bee/types.js";
 import { GetRunContext } from "@/context.js";
 import { assign } from "@/internals/helpers/object.js";
-import { BeeAssistantPrompt } from "@/agents/bee/prompts.js";
 import * as R from "remeda";
 import { BaseRunner } from "@/agents/bee/runners/base.js";
 import { GraniteRunner } from "@/agents/bee/runners/granite/runner.js";
@@ -65,7 +64,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       );
     }
 
-    this.runner = this.input.llm.modelId.includes("ibm/granite") ? GraniteRunner : DefaultRunner;
+    this.runner = this.input.llm.modelId.includes("granite") ? GraniteRunner : DefaultRunner;
   }
 
   static {
@@ -102,7 +101,18 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
     options: BeeRunOptions = {},
     run: GetRunContext<typeof this>,
   ): Promise<BeeRunOutput> {
-    const runner = new this.runner(this.input, options, run);
+    const runner = new this.runner(
+      this.input,
+      {
+        ...options,
+        execution: options?.execution ?? {
+          maxRetriesPerStep: 3,
+          totalMaxRetries: 20,
+          maxIterations: 10,
+        },
+      },
+      run,
+    );
     await runner.init(input);
 
     let finalMessage: BaseMessage | undefined;
@@ -119,7 +129,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
         await runner.memory.add(
           BaseMessage.of({
             role: Role.ASSISTANT,
-            text: (this.input.templates?.assistant ?? BeeAssistantPrompt).render({
+            text: runner.templates.assistant.render({
               thought: [state.thought].filter(R.isTruthy),
               toolName: [state.tool_name].filter(R.isTruthy),
               toolInput: [state.tool_input].filter(R.isTruthy).map((call) => JSON.stringify(call)),

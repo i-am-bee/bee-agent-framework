@@ -3,7 +3,6 @@ import {
   DuckDuckGoSearchTool,
   DuckDuckGoSearchToolSearchType as SafeSearchType,
 } from "bee-agent-framework/tools/search/duckDuckGoSearch";
-import { setProp } from "bee-agent-framework/internals/helpers/object";
 
 const searchTool = new DuckDuckGoSearchTool();
 
@@ -13,11 +12,11 @@ const customSearchTool = searchTool.extend(
     safeSearch: z.boolean().default(true),
   }),
   (input, options) => {
-    setProp(
-      options,
-      ["search", "safeSearch"],
-      input.safeSearch ? SafeSearchType.STRICT : SafeSearchType.OFF,
-    );
+    if (!options.search) {
+      options.search = {};
+    }
+    options.search.safeSearch = input.safeSearch ? SafeSearchType.STRICT : SafeSearchType.OFF;
+
     return { query: input.query };
   },
 );
