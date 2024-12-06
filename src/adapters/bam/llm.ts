@@ -49,8 +49,6 @@ import { chunk, isEmpty, isString } from "remeda";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
 
-import pLimit from "p-limit";
-
 export type BAMLLMOutputMeta = Omit<ExcludeNonStringIndex<TextGenerationCreateOutput>, "results">;
 
 export type BAMLLMOutputResult = ExcludeNonStringIndex<
@@ -194,8 +192,6 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
     this.register();
   }
 
-  protected static limit = pLimit(5);
-
   async meta(): Promise<LLMMeta> {
     try {
       const { result } = await this.client.model.retrieve({
@@ -231,8 +227,7 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
 
   async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     const results = await Promise.all(
-      chunk(input, MAX_EMBEDDING_INPUTS).map((texts) =>
-        BAMLLM.limit(async () => {
+      chunk(input, MAX_EMBEDDING_INPUTS).map(async (texts) => {
           const response = await this.client.text.embedding.create(
             {
               model_id: this.modelId,
@@ -247,7 +242,7 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
             throw new Error("Missing embedding");
           }
           return response.results.map((result) => result.embedding);
-        }),
+        },
       ),
     );
     return { embeddings: results.flat() };
