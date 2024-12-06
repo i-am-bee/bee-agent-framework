@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { SpanStatusCode } from "@opentelemetry/api";
+import { SpanStatusCode, TimeInput } from "@opentelemetry/api";
 import { FrameworkSpan } from "@/instrumentation/types.js";
 import { isEmpty } from "remeda";
 
@@ -22,7 +22,7 @@ interface CreateSpanProps {
   id: string;
   name: string;
   target: string;
-  startedAt: Date;
+  startedAt: TimeInput;
   ctx?: any;
   data?: any;
   error?: string;
@@ -55,6 +55,6 @@ export function createSpan({
       message: error ? error : "",
     },
     start_time: startedAt,
-    end_time: new Date(),
+    end_time: performance.now(),
   };
 }
