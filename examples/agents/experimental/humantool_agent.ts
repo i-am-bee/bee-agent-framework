@@ -1,12 +1,13 @@
 import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { sharedConsoleReader } from "bee-agent-framework/helpers/io";
+import { createConsoleReader } from "../../helpers/io.js"; // Use the examples console reader
 import { FrameworkError } from "bee-agent-framework/errors";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { Logger } from "bee-agent-framework/logger/logger";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
-import { HumanTool } from "bee-agent-framework/tools/human";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+
+// Import the HumanTool from the examples folder
+import { HumanTool } from "../../tools/experimental/human.js";
 
 import {
   BeeSystemPrompt,
@@ -17,15 +18,16 @@ import {
   BeeToolInputErrorPrompt,
   BeeToolNoResultsPrompt,
   BeeToolNotFoundPrompt,
-} from "bee-agent-framework/agents/bee/prompts"; // Updated import path
+} from "bee-agent-framework/agents/bee/prompts";
 
 // Set up logger
 Logger.root.level = "silent"; // Disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
-// Initialize LLM
+// Initialize LLM (test against llama as requested)
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 const llm = new OllamaChatLLM({
-  modelId: "llama3.1", // llama3.1:70b for better performance
+  modelId: "llama3.1",
 });
 
 // Initialize BeeAgent
@@ -45,8 +47,8 @@ const agent = new BeeAgent({
   },
 });
 
-// Shared console reader
-const reader = sharedConsoleReader();
+// Create the console reader
+const reader = createConsoleReader();
 
 // Main loop
 try {
@@ -67,24 +69,24 @@ try {
         // Show only final answers
         emitter.on("update", async ({ update }) => {
           if (update.key === "final_answer") {
-            reader.write(`Agent 🤖 : `, update.value);
+            reader.write("Agent 🤖 : ", update.value);
           }
         });
 
         // Log errors
         emitter.on("error", ({ error }) => {
-          reader.write(`Agent 🤖 : `, FrameworkError.ensure(error).dump());
+          reader.write("Agent 🤖 : ", FrameworkError.ensure(error).dump());
         });
 
         // Retry notifications
         emitter.on("retry", () => {
-          reader.write(`Agent 🤖 : `, "Retrying the action...");
+          reader.write("Agent 🤖 : ", "Retrying the action...");
         });
       });
 
     // Print the final response
     if (response.result?.text) {
-      reader.write(`Agent 🤖 : `, response.result.text);
+      reader.write("Agent 🤖 : ", response.result.text);
     } else {
       reader.write(
         "Agent 🤖 : ",

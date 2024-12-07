@@ -1,6 +1,12 @@
-import { Emitter } from "@/emitter/emitter.js";
-import { Tool, BaseToolRunOptions, StringToolOutput, ToolInput, ToolEvents } from "@/tools/base.js";
-import { sharedConsoleReader } from "@/helpers/io.js"; // Shared reader
+import { Emitter } from "bee-agent-framework/emitter/emitter";
+import {
+  Tool,
+  BaseToolRunOptions,
+  StringToolOutput,
+  ToolInput,
+  ToolEvents,
+} from "bee-agent-framework/tools/base";
+import { createConsoleReader } from "../../helpers/io.js"; // Use the console reader from examples
 import { z } from "zod";
 
 export class HumanTool extends Tool<StringToolOutput> {
@@ -56,7 +62,7 @@ export class HumanTool extends Tool<StringToolOutput> {
     input: z.infer<ReturnType<typeof this.inputSchema>>,
     _options: BaseToolRunOptions,
   ): Promise<StringToolOutput> {
-    const reader = sharedConsoleReader(); // Shared console reader instance
+    const reader = createConsoleReader(); // Use the console reader from examples/helpers/io.js
 
     reader.write("HumanTool", input.message);
 
@@ -64,8 +70,8 @@ export class HumanTool extends Tool<StringToolOutput> {
 
     // Ensure proper formatting of the output
     const formattedOutput = `{
-        "clarification": "${userInput.trim()}"
-      }`;
+      "clarification": "${userInput.trim()}"
+    }`;
 
     return new StringToolOutput(formattedOutput); // Return the user's clarification in the required format
   }
