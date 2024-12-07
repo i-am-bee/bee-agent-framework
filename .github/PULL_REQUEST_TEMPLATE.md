@@ -19,6 +19,7 @@ Closes: #
 <!-- For completed items, change [ ] to [x]. -->
 
 - [ ] I have read the [contributor guide](https://github.com/i-am-bee/bee-agent-framework/blob/main/CONTRIBUTING.md)
+- [ ] I have [signed off](https://github.com/i-am-bee/bee-agent-framework/blob/main/CONTRIBUTING.md#developer-certificate-of-origin-dco) on my commit
 - [ ] Linting passes: `yarn lint` or `yarn lint:fix`
 - [ ] Formatting is applied: `yarn format` or `yarn format:fix`
 - [ ] Unit tests pass: `yarn test:unit`
