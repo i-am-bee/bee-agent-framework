@@ -6,7 +6,7 @@ import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { Logger } from "bee-agent-framework/logger/logger";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
-// Import the HumanTool from the examples folder
+// Import the HumanTool from the updated file
 import { HumanTool } from "../../tools/experimental/human.js";
 
 import {
@@ -30,11 +30,14 @@ const llm = new OllamaChatLLM({
   modelId: "llama3.1",
 });
 
-// Initialize BeeAgent
+// Create the console reader once, share it with HumanTool
+const reader = createConsoleReader();
+
+// Initialize BeeAgent with shared reader for HumanTool
 const agent = new BeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
-  tools: [new OpenMeteoTool(), new HumanTool()],
+  tools: [new OpenMeteoTool(), new HumanTool(reader)],
   templates: {
     system: BeeSystemPrompt,
     assistant: BeeAssistantPrompt,
@@ -46,9 +49,6 @@ const agent = new BeeAgent({
     toolNotFoundError: BeeToolNotFoundPrompt,
   },
 });
-
-// Create the console reader
-const reader = createConsoleReader();
 
 // Main loop
 try {

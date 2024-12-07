@@ -6,7 +6,6 @@ import {
   ToolInput,
   ToolEvents,
 } from "bee-agent-framework/tools/base";
-import { createConsoleReader } from "../../helpers/io.js"; // Use the console reader from examples
 import { z } from "zod";
 
 export class HumanTool extends Tool<StringToolOutput> {
@@ -53,6 +52,13 @@ export class HumanTool extends Tool<StringToolOutput> {
       creator: this,
     });
 
+  private reader: ReturnType<typeof import("../../helpers/io.js").createConsoleReader>;
+
+  constructor(reader: ReturnType<typeof import("../../helpers/io.js").createConsoleReader>) {
+    super();
+    this.reader = reader;
+  }
+
   inputSchema = () =>
     z.object({
       message: z.string().min(1, "Message cannot be empty"),
@@ -62,17 +68,17 @@ export class HumanTool extends Tool<StringToolOutput> {
     input: z.infer<ReturnType<typeof this.inputSchema>>,
     _options: BaseToolRunOptions,
   ): Promise<StringToolOutput> {
-    const reader = createConsoleReader(); // Use the console reader from examples/helpers/io.js
+    // Use the shared reader instance provided to the constructor
+    this.reader.write("HumanTool", input.message);
 
-    reader.write("HumanTool", input.message);
+    // Use askSingleQuestion instead of prompt to avoid interfering with main loop iterator
+    const userInput = await this.reader.askSingleQuestion("User 👤 : ");
 
-    const userInput = await reader.prompt(); // Prompt the user for input
-
-    // Ensure proper formatting of the output
+    // Format the output as required
     const formattedOutput = `{
       "clarification": "${userInput.trim()}"
     }`;
 
-    return new StringToolOutput(formattedOutput); // Return the user's clarification in the required format
+    return new StringToolOutput(formattedOutput);
   }
 }
