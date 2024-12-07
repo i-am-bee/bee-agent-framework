@@ -47,7 +47,7 @@ No functions are available.
 
 {{/tools.length}}
 # Communication structure
-You communicate only in instruction lines. The format is: "Instruction: expected output". You must only use these instruction lines and must not enter empty lines or anything else between instruction lines.
+You communicate only in instruction lines. The format is: "Instruction: expected output\n". You must only use these instruction lines and must not enter empty lines between them. Each instruction must start on a new line.
 {{#tools.length}}
 You must skip the instruction lines Function Name, Function Input and Function Output if no function calling is required.
 {{/tools.length}}

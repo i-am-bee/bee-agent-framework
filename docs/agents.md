@@ -132,6 +132,8 @@ The agent uses the following prompt templates.
 
 7. **Tool Not Found Error**
 
+8. **Invalid Schema Error** (output from LLM cannot be processed)
+
 Please refer to the [following example](/examples/agents/bee_advanced.ts) to see how to modify them.
 
 ## Creating your own agent

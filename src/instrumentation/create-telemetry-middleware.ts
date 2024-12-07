@@ -82,7 +82,12 @@ export function createTelemetryMiddleware() {
 
     const eventsIterationsMap = new Map<string, Map<string, string>>();
 
-    const startTime = performance.now();
+    const startTimeDate = new Date().getTime();
+    const startTimePerf = performance.now();
+    function convertDateToPerformance(date: Date) {
+      return date.getTime() - startTimeDate + startTimePerf;
+    }
+
     const serializer = traceSerializer({ ignored_keys: INSTRUMENTATION_IGNORED_KEYS });
 
     function cleanSpanSources({ spanId }: { spanId: string }) {
@@ -140,7 +145,7 @@ export function createTelemetryMiddleware() {
             traceId,
             version: Version,
             runErrorSpanKey: `${basePath}.run.${errorEventName}`,
-            startTime,
+            startTime: startTimePerf,
             endTime: performance.now(),
             source: activeTracesMap.get(traceId)!,
           });
@@ -180,7 +185,7 @@ export function createTelemetryMiddleware() {
             id: meta.groupId,
             name: meta.groupId,
             target: "groupId",
-            startedAt: meta.createdAt,
+            startedAt: convertDateToPerformance(meta.createdAt),
           }),
         );
         groupIterations.push(meta.groupId);
@@ -209,7 +214,7 @@ export function createTelemetryMiddleware() {
         ctx: getSerializedObjectSafe(meta.context),
         data: serializedData,
         error: getErrorSafe(data),
-        startedAt: meta.createdAt,
+        startedAt: convertDateToPerformance(meta.createdAt),
       });
 
       const lastIteration = groupIterations[groupIterations.length - 1];
@@ -296,7 +301,7 @@ export function createTelemetryMiddleware() {
               id: spanId,
               name: `${meta.name}Custom`,
               target: path,
-              startedAt: meta.createdAt,
+              startedAt: convertDateToPerformance(meta.createdAt),
               ...(parentSpanId && { parent: { id: parentSpanId } }),
               data: {
                 rawPrompt,

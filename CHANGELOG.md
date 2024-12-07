@@ -1,5 +1,26 @@
 # Changelog
 
+## <small>0.0.50 (2024-12-06)</small>
+
+- chore: update .env.template ([36a4a83](https://github.com/i-am-bee/bee-agent-framework/commit/36a4a83))
+- chore(agents): remove optional type for streamlit ([d552506](https://github.com/i-am-bee/bee-agent-framework/commit/d552506))
+- chore(deps): upgrade dependencies ([a3352d9](https://github.com/i-am-bee/bee-agent-framework/commit/a3352d9))
+- chore(examples): update bee advanced ([10314af](https://github.com/i-am-bee/bee-agent-framework/commit/10314af))
+- feat: (instrumentation): increase timestamp precision (#234) ([72c8717](https://github.com/i-am-bee/bee-agent-framework/commit/72c8717)), closes [#234](https://github.com/i-am-bee/bee-agent-framework/issues/234)
+- feat(agents): update Thought in Bee agent system prompt (#221) ([cdb3731](https://github.com/i-am-bee/bee-agent-framework/commit/cdb3731)), closes [#221](https://github.com/i-am-bee/bee-agent-framework/issues/221)
+- docs(agents): add granite bee documentation (#229) ([9199ff5](https://github.com/i-am-bee/bee-agent-framework/commit/9199ff5)), closes [#229](https://github.com/i-am-bee/bee-agent-framework/issues/229)
+
+## [0.0.49](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.48...v0.0.49) (2024-12-05)
+
+### Features
+
+- **agents:** update StreamlitAgent system prompt ([#231](https://github.com/i-am-bee/bee-agent-framework/issues/231)) ([a88bf7a](https://github.com/i-am-bee/bee-agent-framework/commit/a88bf7a287b7f5070e409ce440a9ef5905a23fe3))
+- preserve comments in dist ([e2d7390](https://github.com/i-am-bee/bee-agent-framework/commit/e2d739045161660956c8a76af0dab3c608cebd9c))
+
+### Bug Fixes
+
+- **adapters:** propagate WatsonX API errors ([46dc651](https://github.com/i-am-bee/bee-agent-framework/commit/46dc651180963bf3ebac5a3b5e6a7abdb3530af3))
+
 ## [0.0.48](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.47...v0.0.48) (2024-12-04)
 
 ### Features
