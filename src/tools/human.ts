@@ -52,22 +52,21 @@ export class HumanTool extends Tool<StringToolOutput> {
       message: z.string().min(1, "Message cannot be empty"),
     });
 
-    async _run(
-      input: z.infer<ReturnType<typeof this.inputSchema>>,
-      _options: BaseToolRunOptions,
-    ): Promise<StringToolOutput> {
-      const reader = sharedConsoleReader(); // Shared console reader instance
-    
-      reader.write("HumanTool", input.message);
-    
-      const userInput = await reader.prompt(); // Prompt the user for input
-    
-      // Ensure proper formatting of the output
-      const formattedOutput = `{
+  async _run(
+    input: z.infer<ReturnType<typeof this.inputSchema>>,
+    _options: BaseToolRunOptions,
+  ): Promise<StringToolOutput> {
+    const reader = sharedConsoleReader(); // Shared console reader instance
+
+    reader.write("HumanTool", input.message);
+
+    const userInput = await reader.prompt(); // Prompt the user for input
+
+    // Ensure proper formatting of the output
+    const formattedOutput = `{
         "clarification": "${userInput.trim()}"
       }`;
-    
-      return new StringToolOutput(formattedOutput); // Return the user's clarification in the required format
-    }
-    
+
+    return new StringToolOutput(formattedOutput); // Return the user's clarification in the required format
+  }
 }

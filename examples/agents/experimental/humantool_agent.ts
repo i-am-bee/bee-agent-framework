@@ -32,10 +32,7 @@ const llm = new OllamaChatLLM({
 const agent = new BeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
-  tools: [
-    new OpenMeteoTool(),
-    new HumanTool(),
-  ],
+  tools: [new OpenMeteoTool(), new HumanTool()],
   templates: {
     system: BeeSystemPrompt,
     assistant: BeeAssistantPrompt,
