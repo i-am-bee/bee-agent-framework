@@ -34,6 +34,11 @@ export interface GenerateSchemaInput<T> {
   options?: T;
 }
 
+export interface DriverResponse<T extends AnySchemaLike> {
+  raw: ChatLLMOutput;
+  parsed: FromSchemaLike<T>;
+}
+
 export abstract class BaseDriver<
   TGenerateOptions extends GenerateOptions = GenerateOptions,
 > extends Serializable<any> {
@@ -64,7 +69,7 @@ Validation Errors: "{{errors}}"`,
     schema: T,
     input: BaseMessage[],
     { maxRetries = 3, options }: GenerateSchemaInput<TGenerateOptions> = {},
-  ): Promise<FromSchemaLike<T>> {
+  ): Promise<DriverResponse<T>> {
     const jsonSchema = toJsonSchema(schema);
     const validator = createSchemaValidator(jsonSchema);
     const schemaString = await this.schemaToString(jsonSchema);
@@ -77,7 +82,7 @@ Validation Errors: "{{errors}}"`,
       ...input,
     ];
 
-    return new Retryable({
+    return new Retryable<DriverResponse<T>>({
       executor: async () => {
         const rawResponse = await this.llm.generate(messages, {
           guided: this.guided(jsonSchema),
@@ -120,7 +125,10 @@ Validation Errors: "{{errors}}"`,
             },
           );
         }
-        return parsedResponse as FromSchemaLike<T>;
+        return {
+          raw: rawResponse,
+          parsed: parsedResponse as FromSchemaLike<T>,
+        };
       },
       config: {
         signal: options?.signal,

@@ -192,8 +192,4 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       runner: this.runner,
     };
   }
-
-  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
-    Object.assign(this, snapshot);
-  }
 }

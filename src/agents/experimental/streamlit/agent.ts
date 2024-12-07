@@ -205,8 +205,4 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
       input: this.input,
     };
   }
-
-  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
-    Object.assign(this, snapshot);
-  }
 }

@@ -33,3 +33,5 @@ export abstract class ChatLLM<
 > extends BaseLLM<BaseMessage[], TOutput, TGenerateOptions> {
   public abstract readonly emitter: Emitter<ChatLLMGenerateEvents<TOutput>>;
 }
+
+export type AnyChatLLM = ChatLLM<ChatLLMOutput>;

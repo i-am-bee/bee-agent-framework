@@ -83,13 +83,13 @@ IMPORTANT: Every message must be a parsable JSON string without additional outpu
 
     const result = BaseMessage.of({
       role: Role.ASSISTANT,
-      text: response.final_answer,
+      text: response.parsed.final_answer,
     });
     await this.memory.add(result);
 
     return {
       message: result,
-      raw: response,
+      raw: response.parsed,
     };
   }
 
