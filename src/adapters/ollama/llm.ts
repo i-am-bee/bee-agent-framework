@@ -27,14 +27,25 @@ import {
   LLMOutputError,
   StreamGenerateOptions,
 } from "@/llms/base.js";
-import { GenerateResponse, Ollama as Client, Options as Parameters } from "ollama";
+import {
+  Config,
+  GenerateRequest,
+  GenerateResponse,
+  Ollama as Client,
+  Options as Parameters,
+} from "ollama";
 import { GetRunContext } from "@/context.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { safeSum } from "@/internals/helpers/number.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { signalRace } from "@/internals/helpers/promise.js";
-import { customMerge } from "@/internals/helpers/object.js";
-import { extractModelMeta, registerClient } from "@/adapters/ollama/shared.js";
+import { customMerge, getPropStrict } from "@/internals/helpers/object.js";
+import {
+  extractModelMeta,
+  registerClient,
+  retrieveFormat,
+  retrieveVersion,
+} from "@/adapters/ollama/shared.js";
 import { getEnv } from "@/internals/env.js";
 
 interface Input {
@@ -131,14 +142,10 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     run: GetRunContext<typeof this>,
   ): Promise<OllamaLLMOutput> {
     const response = await signalRace(
-      () =>
+      async () =>
         this.client.generate({
-          model: this.modelId,
+          ...(await this.prepareParameters(input, options)),
           stream: false,
-          raw: true,
-          prompt: input,
-          options: this.parameters,
-          format: options.guided?.json ? "json" : undefined,
         }),
       run.signal,
       () => this.client.abort(),
@@ -153,12 +160,8 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     run: GetRunContext<typeof this>,
   ): AsyncStream<OllamaLLMOutput, void> {
     for await (const chunk of await this.client.generate({
-      model: this.modelId,
+      ...(await this.prepareParameters(input, options)),
       stream: true,
-      raw: true,
-      prompt: input,
-      options: this.parameters,
-      format: options.guided?.json ? "json" : undefined,
     })) {
       if (run.signal.aborted) {
         break;
@@ -166,6 +169,12 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
       yield new OllamaLLMOutput(chunk);
     }
     run.signal.throwIfAborted();
+  }
+
+  @Cache()
+  async version() {
+    const config = getPropStrict(this.client, "config") as Config;
+    return retrieveVersion(config.host, config.fetch);
   }
 
   async meta(): Promise<LLMMeta> {
@@ -179,6 +188,19 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {
     return {
       tokensCount: Math.ceil(input.length / 4),
+    };
+  }
+
+  protected async prepareParameters(
+    input: LLMInput,
+    overrides?: GenerateOptions,
+  ): Promise<GenerateRequest> {
+    return {
+      model: this.modelId,
+      prompt: input,
+      raw: true,
+      options: this.parameters,
+      format: retrieveFormat(await this.version(), overrides?.guided),
     };
   }
 

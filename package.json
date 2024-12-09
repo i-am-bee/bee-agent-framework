@@ -205,7 +205,7 @@
     "@zilliz/milvus2-sdk-node": "^2.4.9",
     "google-auth-library": "*",
     "groq-sdk": "^0.7.0",
-    "ollama": "^0.5.8",
+    "ollama": "^0.5.11",
     "openai": "^4.67.3",
     "openai-chat-tokens": "^0.2.8",
     "sequelize": "^6.37.3"
@@ -305,7 +305,7 @@
     "langchain": "~0.3.6",
     "linkinator": "^6.1.2",
     "lint-staged": "^15.2.10",
-    "ollama": "^0.5.10",
+    "ollama": "^0.5.11",
     "openai": "^4.76.0",
     "openai-chat-tokens": "^0.2.8",
     "openapi-fetch": "^0.13.3",
