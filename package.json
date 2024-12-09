@@ -154,7 +154,7 @@
     "test:all": "yarn test:unit && yarn test:e2e && yarn test:examples",
     "test:examples": "vitest --config ./examples/vitest.examples.config.ts run tests/examples",
     "test:examples:watch": "vitest --config ./examples/vitest.examples.config.ts watch tests/examples",
-    "prepare": "husky",
+    "postinstall": "husky",
     "copyright": "./scripts/copyright.sh",
     "release": "release-it",
     "ibm-vllm:generate-types": "./scripts/ibm_vllm_generate_protos/ibm_vllm_generate_protos.sh",
