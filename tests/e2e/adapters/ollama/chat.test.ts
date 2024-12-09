@@ -17,16 +17,18 @@
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
 import { Ollama } from "ollama";
+import { toJsonSchema } from "@/internals/helpers/schema.js";
+import { z } from "zod";
 
 const host = process.env.OLLAMA_HOST;
 
 describe.runIf(Boolean(host))("Ollama Chat LLM", () => {
-  const createChatLLM = () => {
+  const createChatLLM = (maxTokens?: number) => {
     return new OllamaChatLLM({
       modelId: "llama3.1",
       parameters: {
         temperature: 0,
-        num_predict: 5,
+        num_predict: maxTokens,
       },
       client: new Ollama({
         host,
@@ -41,7 +43,7 @@ describe.runIf(Boolean(host))("Ollama Chat LLM", () => {
         text: `You are a helpful and respectful and honest assistant. Your name is Bee.`,
       }),
     ];
-    const llm = createChatLLM();
+    const llm = createChatLLM(5);
     const response = await llm.generate([
       ...conversation,
       BaseMessage.of({
@@ -50,5 +52,32 @@ describe.runIf(Boolean(host))("Ollama Chat LLM", () => {
       }),
     ]);
     expect(response.getTextContent()).includes("Bee");
+  });
+
+  it("Leverages structured output", async () => {
+    const llm = createChatLLM();
+    const response = await llm.generate(
+      [
+        BaseMessage.of({
+          role: "user",
+          text: "Generate a valid JSON object.",
+        }),
+      ],
+      {
+        stream: false,
+        guided: {
+          json: toJsonSchema(
+            z
+              .object({
+                a: z.literal("a"),
+                b: z.literal("b"),
+                c: z.literal("c"),
+              })
+              .strict(),
+          ),
+        },
+      },
+    );
+    expect(response.getTextContent()).toMatchInlineSnapshot(`"{"a": "a", "b": "b", "c": "c"}"`);
   });
 });
