@@ -17,6 +17,8 @@
 import {
   AsyncStream,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -31,6 +33,7 @@ import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { signalRace } from "@/internals/helpers/promise.js";
 import { processContentResponse, registerVertexAI, createModel } from "./utils.js";
+import { NotImplementedError } from "@/errors.js";
 
 export class VertexAIChatLLMOutput extends ChatLLMOutput {
   public readonly chunks: BaseMessage[] = [];
@@ -99,6 +102,11 @@ export class VertexAIChatLLM extends ChatLLM<VertexAIChatLLMOutput> {
 
   async meta(): Promise<LLMMeta> {
     return { tokenLimit: Infinity };
+  }
+
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    throw new NotImplementedError();
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {

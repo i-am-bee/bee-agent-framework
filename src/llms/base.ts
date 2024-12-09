@@ -119,6 +119,14 @@ export interface ExecutionOptions {
   maxRetries?: number;
 }
 
+export interface EmbeddingOptions {
+  signal?: AbortSignal;
+}
+
+export interface EmbeddingOutput {
+  embeddings: number[][];
+}
+
 export interface LLMMeta {
   tokenLimit: number;
 }
@@ -141,6 +149,8 @@ export abstract class BaseLLM<
   }
 
   abstract meta(): Promise<LLMMeta>;
+
+  abstract embed(input: TInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput>;
 
   abstract tokenize(input: TInput): Promise<BaseLLMTokenizeOutput>;
 

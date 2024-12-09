@@ -19,6 +19,8 @@ import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -211,6 +213,7 @@ function createApiClient({
       deployment: deploymentId
         ? `/ml/v4/deployments/${deploymentId}?${createURLParams({ version, project_id: projectId, space_id: projectId ? undefined : spaceId })}`
         : "not_defined_endpoint",
+      embeddings: "/ml/v1/text/embeddings",
     };
   })();
 
@@ -331,6 +334,27 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
     return {
       tokenLimit: model?.model_limits?.max_sequence_length ?? Infinity,
     };
+  }
+
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    const response: { results: { embedding: number[] }[] } = await this.client.fetch("embeddings", {
+      method: "POST",
+      searchParams: new URLSearchParams({ version: "2023-10-25" }),
+      body: JSON.stringify({
+        inputs: input,
+        model_id: this.modelId,
+        project_id: this.projectId,
+        parameters: {
+          truncate_input_tokens: 512,
+        },
+      }),
+      signal: options?.signal,
+    });
+    if (response.results?.length !== input.length) {
+      throw new Error("Missing embedding");
+    }
+    const embeddings = response.results.map((result) => result.embedding);
+    return { embeddings };
   }
 
   createSnapshot() {

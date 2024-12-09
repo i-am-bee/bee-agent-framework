@@ -3,6 +3,8 @@ import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -11,6 +13,7 @@ import {
 import { shallowCopy } from "bee-agent-framework/serializer/utils";
 import type { GetRunContext } from "bee-agent-framework/context";
 import { Emitter } from "bee-agent-framework/emitter/emitter";
+import { NotImplementedError } from "bee-agent-framework/errors";
 
 interface CustomLLMChunk {
   text: string;
@@ -75,6 +78,10 @@ export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
   async meta(): Promise<LLMMeta> {
     // TODO: retrieve data about current model from the given provider API
     return { tokenLimit: Infinity };
+  }
+
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    throw new NotImplementedError();
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {
