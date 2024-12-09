@@ -224,9 +224,9 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
   }
 
   async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    const max_embedding_inputs = 20;
+    const maxEmbeddingInputs = 20;
     const results = await Promise.all(
-      chunk(input, max_embedding_inputs).map(async (texts) => {
+      chunk(input, maxEmbeddingInputs).map(async (texts) => {
         const response = await this.client.text.embedding.create(
           {
             model_id: this.modelId,
