@@ -1,5 +1,19 @@
 # Changelog
 
+## <small>0.0.51 (2024-12-09)</small>
+
+- feat(adapters): add llama3.3 template (#235) ([2778a9a](https://github.com/i-am-bee/bee-agent-framework/commit/2778a9a)), closes [#235](https://github.com/i-am-bee/bee-agent-framework/issues/235)
+- feat(adpters): add ollama structured output and version retrieval (#237) ([821364e](https://github.com/i-am-bee/bee-agent-framework/commit/821364e)), closes [#237](https://github.com/i-am-bee/bee-agent-framework/issues/237)
+- feat(agents): add experimental RePlan (#236) ([3b5c20b](https://github.com/i-am-bee/bee-agent-framework/commit/3b5c20b)), closes [#236](https://github.com/i-am-bee/bee-agent-framework/issues/236)
+- feat(agents): base updates ([8b740d4](https://github.com/i-am-bee/bee-agent-framework/commit/8b740d4))
+- feat(internals): handle async middlewares/observes ([b802216](https://github.com/i-am-bee/bee-agent-framework/commit/b802216))
+- chore(agents): move RePlan example ([29fbcf0](https://github.com/i-am-bee/bee-agent-framework/commit/29fbcf0))
+- chore(llms): return driver response type ([28293a6](https://github.com/i-am-bee/bee-agent-framework/commit/28293a6))
+- test: log tool errors ([99e5f49](https://github.com/i-am-bee/bee-agent-framework/commit/99e5f49))
+- test: remove dummy value ([55847e5](https://github.com/i-am-bee/bee-agent-framework/commit/55847e5))
+- fix: auto install pre-commit hooks ([b5c4e64](https://github.com/i-am-bee/bee-agent-framework/commit/b5c4e64))
+- feat(llms)!: extend driver response type ([16d4bfd](https://github.com/i-am-bee/bee-agent-framework/commit/16d4bfd))
+
 ## <small>0.0.50 (2024-12-06)</small>
 
 - chore: update .env.template ([36a4a83](https://github.com/i-am-bee/bee-agent-framework/commit/36a4a83))
