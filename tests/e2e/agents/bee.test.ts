@@ -27,7 +27,7 @@ import { createChatLLM } from "@tests/utils/llmFactory.js";
 import { BeeMeta } from "@/agents/bee/types.js";
 import { GoogleSearchTool } from "@/tools/search/googleSearch.js";
 
-const googleSearchApiKey = process.env.GOOGLE_API_KEY;
+const googleSearchApiKey = "123";
 const googleSearchCseId = process.env.GOOGLE_CSE_ID;
 
 describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", () => {
@@ -114,7 +114,14 @@ describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", ()
             update: callbacks.create("update"),
             toolStart: callbacks.create("toolStart"),
             toolSuccess: callbacks.create("toolSuccess"),
-            toolError: callbacks.create("toolError", { required: false }),
+            toolError: callbacks.create("toolError", {
+              required: false,
+              check: ({ data }) => {
+                expect(data.error).toBeInstanceOf(FrameworkError);
+                // eslint-disable-next-line no-console
+                console.warn("Tool Error", data.error.explain());
+              },
+            }),
           });
         });
     } catch (e) {
