@@ -27,7 +27,7 @@ import { createChatLLM } from "@tests/utils/llmFactory.js";
 import { BeeMeta } from "@/agents/bee/types.js";
 import { GoogleSearchTool } from "@/tools/search/googleSearch.js";
 
-const googleSearchApiKey = "123";
+const googleSearchApiKey = process.env.GOOGLE_API_KEY;
 const googleSearchCseId = process.env.GOOGLE_CSE_ID;
 
 describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", () => {
