@@ -27,13 +27,18 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { ChatRequest, ChatResponse, Ollama as Client, Options as Parameters } from "ollama";
+import { ChatRequest, ChatResponse, Config, Ollama as Client, Options as Parameters } from "ollama";
 import { signalRace } from "@/internals/helpers/promise.js";
 import { GetRunContext } from "@/context.js";
 import { Cache } from "@/cache/decoratorCache.js";
-import { customMerge } from "@/internals/helpers/object.js";
+import { customMerge, getPropStrict } from "@/internals/helpers/object.js";
 import { safeSum } from "@/internals/helpers/number.js";
-import { extractModelMeta, registerClient } from "@/adapters/ollama/shared.js";
+import {
+  extractModelMeta,
+  registerClient,
+  retrieveFormat,
+  retrieveVersion,
+} from "@/adapters/ollama/shared.js";
 import { getEnv } from "@/internals/env.js";
 
 export class OllamaChatLLMOutput extends ChatLLMOutput {
@@ -161,15 +166,21 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     };
   }
 
+  @Cache()
+  async version() {
+    const config = getPropStrict(this.client, "config") as Config;
+    return retrieveVersion(config.host, config.fetch);
+  }
+
   protected async _generate(
     input: BaseMessage[],
     options: GenerateOptions,
     run: GetRunContext<typeof this>,
   ): Promise<OllamaChatLLMOutput> {
     const response = await signalRace(
-      () =>
+      async () =>
         this.client.chat({
-          ...this.prepareParameters(input, options),
+          ...(await this.prepareParameters(input, options)),
           stream: false,
         }),
       run.signal,
@@ -185,7 +196,7 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     run: GetRunContext<typeof this>,
   ): AsyncStream<OllamaChatLLMOutput> {
     for await (const chunk of await this.client.chat({
-      ...this.prepareParameters(input, options),
+      ...(await this.prepareParameters(input, options)),
       stream: true,
     })) {
       if (run.signal.aborted) {
@@ -196,9 +207,10 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     run.signal.throwIfAborted();
   }
 
-  protected prepareParameters(input: BaseMessage[], overrides?: GenerateOptions): ChatRequest {
-    const jsonSchema = overrides?.guided?.json;
-
+  protected async prepareParameters(
+    input: BaseMessage[],
+    overrides?: GenerateOptions,
+  ): Promise<ChatRequest> {
     return {
       model: this.modelId,
       messages: input.map((msg) => ({
@@ -206,11 +218,7 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
         content: msg.text,
       })),
       options: this.parameters,
-      format: jsonSchema
-        ? typeof jsonSchema === "string"
-          ? JSON.parse(jsonSchema)
-          : jsonSchema
-        : undefined,
+      format: retrieveFormat(await this.version(), overrides?.guided),
     };
   }
 

@@ -19,6 +19,7 @@ import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
 import { Ollama } from "ollama";
 import { toJsonSchema } from "@/internals/helpers/schema.js";
 import { z } from "zod";
+import { Comparator, compareVersion } from "@/internals/helpers/string.js";
 
 const host = process.env.OLLAMA_HOST;
 
@@ -56,6 +57,14 @@ describe.runIf(Boolean(host))("Ollama Chat LLM", () => {
 
   it("Leverages structured output", async () => {
     const llm = createChatLLM();
+    const version = await llm.version();
+
+    if (compareVersion(version, Comparator.LT, "0.5.0")) {
+      // eslint-disable-next-line no-console
+      console.warn(`Structured output is not available in the current version (${version})`);
+      return;
+    }
+
     const response = await llm.generate(
       [
         BaseMessage.of({
@@ -79,5 +88,11 @@ describe.runIf(Boolean(host))("Ollama Chat LLM", () => {
       },
     );
     expect(response.getTextContent()).toMatchInlineSnapshot(`"{"a": "a", "b": "b", "c": "c"}"`);
+  });
+
+  it("Retrieves version", async () => {
+    const llm = createChatLLM();
+    const version = await llm.version();
+    expect(version).toBeDefined();
   });
 });

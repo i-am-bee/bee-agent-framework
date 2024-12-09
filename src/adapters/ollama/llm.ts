@@ -27,14 +27,25 @@ import {
   LLMOutputError,
   StreamGenerateOptions,
 } from "@/llms/base.js";
-import { GenerateRequest, GenerateResponse, Ollama as Client, Options as Parameters } from "ollama";
+import {
+  Config,
+  GenerateRequest,
+  GenerateResponse,
+  Ollama as Client,
+  Options as Parameters,
+} from "ollama";
 import { GetRunContext } from "@/context.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { safeSum } from "@/internals/helpers/number.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { signalRace } from "@/internals/helpers/promise.js";
-import { customMerge } from "@/internals/helpers/object.js";
-import { extractModelMeta, registerClient } from "@/adapters/ollama/shared.js";
+import { customMerge, getPropStrict } from "@/internals/helpers/object.js";
+import {
+  extractModelMeta,
+  registerClient,
+  retrieveFormat,
+  retrieveVersion,
+} from "@/adapters/ollama/shared.js";
 import { getEnv } from "@/internals/env.js";
 
 interface Input {
@@ -131,9 +142,9 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     run: GetRunContext<typeof this>,
   ): Promise<OllamaLLMOutput> {
     const response = await signalRace(
-      () =>
+      async () =>
         this.client.generate({
-          ...this.prepareParameters(input, options),
+          ...(await this.prepareParameters(input, options)),
           stream: false,
         }),
       run.signal,
@@ -149,7 +160,7 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     run: GetRunContext<typeof this>,
   ): AsyncStream<OllamaLLMOutput, void> {
     for await (const chunk of await this.client.generate({
-      ...this.prepareParameters(input, options),
+      ...(await this.prepareParameters(input, options)),
       stream: true,
     })) {
       if (run.signal.aborted) {
@@ -158,6 +169,12 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
       yield new OllamaLLMOutput(chunk);
     }
     run.signal.throwIfAborted();
+  }
+
+  @Cache()
+  async version() {
+    const config = getPropStrict(this.client, "config") as Config;
+    return retrieveVersion(config.host, config.fetch);
   }
 
   async meta(): Promise<LLMMeta> {
@@ -174,19 +191,16 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     };
   }
 
-  protected prepareParameters(input: LLMInput, overrides?: GenerateOptions): GenerateRequest {
-    const jsonSchema = overrides?.guided?.json;
-
+  protected async prepareParameters(
+    input: LLMInput,
+    overrides?: GenerateOptions,
+  ): Promise<GenerateRequest> {
     return {
       model: this.modelId,
       prompt: input,
       raw: true,
       options: this.parameters,
-      format: jsonSchema
-        ? typeof jsonSchema === "string"
-          ? JSON.parse(jsonSchema)
-          : jsonSchema
-        : undefined,
+      format: retrieveFormat(await this.version(), overrides?.guided),
     };
   }
 
