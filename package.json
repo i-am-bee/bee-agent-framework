@@ -279,7 +279,7 @@
     "@opentelemetry/sdk-node": "^0.56.0",
     "@opentelemetry/sdk-trace-node": "^1.29.0",
     "@opentelemetry/semantic-conventions": "^1.28.0",
-    "@release-it/conventional-changelog": "^9.0.3",
+    "@release-it/conventional-changelog": "^8.0.2",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@swc/core": "^1.10.0",
     "@types/eslint": "^9.6.1",
