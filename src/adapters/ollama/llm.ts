@@ -27,7 +27,7 @@ import {
   LLMOutputError,
   StreamGenerateOptions,
 } from "@/llms/base.js";
-import { GenerateResponse, Ollama as Client, Options as Parameters } from "ollama";
+import { GenerateRequest, GenerateResponse, Ollama as Client, Options as Parameters } from "ollama";
 import { GetRunContext } from "@/context.js";
 import { Cache } from "@/cache/decoratorCache.js";
 import { safeSum } from "@/internals/helpers/number.js";
@@ -133,12 +133,8 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     const response = await signalRace(
       () =>
         this.client.generate({
-          model: this.modelId,
+          ...this.prepareParameters(input, options),
           stream: false,
-          raw: true,
-          prompt: input,
-          options: this.parameters,
-          format: options.guided?.json ? "json" : undefined,
         }),
       run.signal,
       () => this.client.abort(),
@@ -153,12 +149,8 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     run: GetRunContext<typeof this>,
   ): AsyncStream<OllamaLLMOutput, void> {
     for await (const chunk of await this.client.generate({
-      model: this.modelId,
+      ...this.prepareParameters(input, options),
       stream: true,
-      raw: true,
-      prompt: input,
-      options: this.parameters,
-      format: options.guided?.json ? "json" : undefined,
     })) {
       if (run.signal.aborted) {
         break;
@@ -179,6 +171,22 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {
     return {
       tokensCount: Math.ceil(input.length / 4),
+    };
+  }
+
+  protected prepareParameters(input: LLMInput, overrides?: GenerateOptions): GenerateRequest {
+    const jsonSchema = overrides?.guided?.json;
+
+    return {
+      model: this.modelId,
+      prompt: input,
+      raw: true,
+      options: this.parameters,
+      format: jsonSchema
+        ? typeof jsonSchema === "string"
+          ? JSON.parse(jsonSchema)
+          : jsonSchema
+        : undefined,
     };
   }
 

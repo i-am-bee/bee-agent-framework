@@ -4845,7 +4845,7 @@ __metadata:
     mathjs: "npm:^14.0.0"
     mustache: "npm:^4.2.0"
     object-hash: "npm:^3.0.0"
-    ollama: "npm:^0.5.10"
+    ollama: "npm:^0.5.11"
     openai: "npm:^4.76.0"
     openai-chat-tokens: "npm:^0.2.8"
     openapi-fetch: "npm:^0.13.3"
@@ -4893,7 +4893,7 @@ __metadata:
     "@zilliz/milvus2-sdk-node": ^2.4.9
     google-auth-library: "*"
     groq-sdk: ^0.7.0
-    ollama: ^0.5.8
+    ollama: ^0.5.11
     openai: ^4.67.3
     openai-chat-tokens: ^0.2.8
     sequelize: ^6.37.3
@@ -10911,12 +10911,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ollama@npm:^0.5.10":
-  version: 0.5.10
-  resolution: "ollama@npm:0.5.10"
+"ollama@npm:^0.5.11":
+  version: 0.5.11
+  resolution: "ollama@npm:0.5.11"
   dependencies:
     whatwg-fetch: "npm:^3.6.20"
-  checksum: 10c0/424b92ef640fb562c590bd8bf394c0cdab3eb93a1b70a58bcb98090957375e05130f41d94578124c0fc79b68448db351e3439e4dc3582ccdb7ae13343951c527
+  checksum: 10c0/9f8bb6715144fac2d423121f29bf7697e3c2132c6696574e2f2de63de8dfa95ac3ed435f3abf35cece6ef07c309065cbf722cead1bee1eda3541b095745f64bf
   languageName: node
   linkType: hard
 

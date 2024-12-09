@@ -27,7 +27,7 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { ChatResponse, Ollama as Client, Options as Parameters } from "ollama";
+import { ChatRequest, ChatResponse, Ollama as Client, Options as Parameters } from "ollama";
 import { signalRace } from "@/internals/helpers/promise.js";
 import { GetRunContext } from "@/context.js";
 import { Cache } from "@/cache/decoratorCache.js";
@@ -169,14 +169,8 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     const response = await signalRace(
       () =>
         this.client.chat({
-          model: this.modelId,
+          ...this.prepareParameters(input, options),
           stream: false,
-          messages: input.map((msg) => ({
-            role: msg.role,
-            content: msg.text,
-          })),
-          options: this.parameters,
-          format: options.guided?.json ? "json" : undefined,
         }),
       run.signal,
       () => this.client.abort(),
@@ -191,14 +185,8 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     run: GetRunContext<typeof this>,
   ): AsyncStream<OllamaChatLLMOutput> {
     for await (const chunk of await this.client.chat({
-      model: this.modelId,
+      ...this.prepareParameters(input, options),
       stream: true,
-      messages: input.map((msg) => ({
-        role: msg.role,
-        content: msg.text,
-      })),
-      options: this.parameters,
-      format: options.guided?.json ? "json" : undefined,
     })) {
       if (run.signal.aborted) {
         break;
@@ -206,6 +194,24 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
       yield new OllamaChatLLMOutput(chunk);
     }
     run.signal.throwIfAborted();
+  }
+
+  protected prepareParameters(input: BaseMessage[], overrides?: GenerateOptions): ChatRequest {
+    const jsonSchema = overrides?.guided?.json;
+
+    return {
+      model: this.modelId,
+      messages: input.map((msg) => ({
+        role: msg.role,
+        content: msg.text,
+      })),
+      options: this.parameters,
+      format: jsonSchema
+        ? typeof jsonSchema === "string"
+          ? JSON.parse(jsonSchema)
+          : jsonSchema
+        : undefined,
+    };
   }
 
   createSnapshot() {
