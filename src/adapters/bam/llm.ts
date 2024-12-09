@@ -65,8 +65,6 @@ export interface BAMLLMOutputConstructor {
   moderations?: BAMLLMOutputModeration | BAMLLMOutputModeration[];
 }
 
-const MAX_EMBEDDING_INPUTS = 20;
-
 export class BAMLLMOutput extends BaseLLMOutput {
   public readonly meta: BAMLLMOutputMeta;
   public readonly results: BAMLLMOutputResult[];
@@ -226,8 +224,9 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
   }
 
   async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    const max_embedding_inputs = 20;
     const results = await Promise.all(
-      chunk(input, MAX_EMBEDDING_INPUTS).map(async (texts) => {
+      chunk(input, max_embedding_inputs).map(async (texts) => {
         const response = await this.client.text.embedding.create(
           {
             model_id: this.modelId,
