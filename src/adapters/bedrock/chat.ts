@@ -204,7 +204,8 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
     };
   }
 
-  async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     throw new NotImplementedError();
   }
 

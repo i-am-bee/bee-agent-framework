@@ -178,7 +178,8 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     return extractModelMeta(model);
   }
 
-  async embed(input: LLMInput[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     const response = await this.client.embed({ model: this.modelId, input: input });
     return { embeddings: response.embeddings };
   }

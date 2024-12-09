@@ -80,7 +80,7 @@ export class CustomLLM extends LLM<CustomLLMOutput, CustomGenerateOptions> {
     return { tokenLimit: Infinity };
   }
 
-  async embed(_input: LLMInput[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     throw new NotImplementedError();
   }
 

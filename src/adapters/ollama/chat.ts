@@ -155,7 +155,8 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     return extractModelMeta(model);
   }
 
-  async embed(input: BaseMessage[][], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     const response = await this.client.embed({
       model: this.modelId,
       input: input.flatMap((messages) => messages).flatMap((msg) => msg.text),

@@ -107,7 +107,8 @@ export class VertexAILLM extends LLM<VertexAILLMOutput> {
     return { tokenLimit: Infinity };
   }
 
-  async embed(_input: LLMInput[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     throw new NotImplementedError();
   }
 

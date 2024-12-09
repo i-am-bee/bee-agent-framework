@@ -70,7 +70,8 @@ describe("BaseLLM", () => {
       return { tokenLimit: 4096 };
     }
 
-    async embed(_input: string[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    async embed(input: string[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
       throw new NotImplementedError();
     }
 

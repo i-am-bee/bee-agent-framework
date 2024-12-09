@@ -128,7 +128,8 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
     };
   }
 
-  async embed(_input: LLMInput[], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     throw new NotImplementedError();
   }
 

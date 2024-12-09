@@ -81,7 +81,7 @@ export class CustomChatLLM extends ChatLLM<CustomChatLLMOutput, CustomGenerateOp
     return { tokenLimit: Infinity };
   }
 
-  async embed(_input: BaseMessage[][], _options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
     throw new NotImplementedError();
   }
 
