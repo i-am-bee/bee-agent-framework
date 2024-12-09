@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AnySchemaLike, createSchemaValidator, toJsonSchema } from "@/internals/helpers/schema.js";
+import { createSchemaValidator, toJsonSchema } from "@/internals/helpers/schema.js";
 import { GenerateOptions, LLMError } from "@/llms/base.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
@@ -62,7 +62,7 @@ Validation Errors: "{{errors}}"`,
   }
 
   async generate<T = any>(
-    schema: T extends AnySchemaLike ? T : SchemaObject,
+    schema: T extends ZodTypeAny ? T : SchemaObject,
     input: BaseMessage[],
     { maxRetries = 3, options }: GenerateSchemaInput<TGenerateOptions> = {},
   ): Promise<DriverResponse<T>> {
