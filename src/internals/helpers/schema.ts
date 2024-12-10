@@ -15,7 +15,7 @@
  */
 
 import { TypeOf, ZodType, ZodEffects, ZodTypeAny, AnyZodObject, input } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { zodToJsonSchema, Options } from "zod-to-json-schema";
 import { Ajv, SchemaObject, ValidateFunction, Options as AjvOptions } from "ajv";
 import addFormats from "ajv-formats";
 import { findFirstPair } from "@/internals/helpers/string.js";
@@ -39,10 +39,13 @@ export function validateSchema<T extends AnySchemaLike>(
   }
 }
 
-export function toJsonSchema<T extends AnySchemaLike>(schema: T): SchemaObject {
+export function toJsonSchema<T extends AnySchemaLike>(
+  schema: T,
+  options?: Partial<Options>,
+): SchemaObject {
   validateSchema(schema);
   if (schema instanceof ZodType) {
-    return zodToJsonSchema(schema);
+    return zodToJsonSchema(schema, options);
   }
   return schema;
 }

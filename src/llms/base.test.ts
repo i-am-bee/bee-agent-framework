@@ -21,12 +21,15 @@ import {
   GenerateOptions,
   BaseLLM,
   BaseLLMEvents,
+  EmbeddingOptions,
+  EmbeddingOutput,
   StreamGenerateOptions,
 } from "./base.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { UnconstrainedCache } from "@/cache/unconstrainedCache.js";
 import { setTimeout } from "node:timers/promises";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
+import { NotImplementedError } from "@/errors.js";
 
 describe("BaseLLM", () => {
   class DummyOutput extends BaseLLMOutput {
@@ -68,8 +71,13 @@ describe("BaseLLM", () => {
     }
 
     // eslint-disable-next-line unused-imports/no-unused-vars
+    async embed(input: string[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+      throw new NotImplementedError();
+    }
+
+    // eslint-disable-next-line unused-imports/no-unused-vars
     tokenize(input: string): Promise<BaseLLMTokenizeOutput> {
-      throw new Error("Method not implemented.");
+      throw new NotImplementedError();
     }
 
     protected async _generate(

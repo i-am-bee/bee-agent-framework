@@ -17,6 +17,8 @@
 import {
   AsyncStream,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -40,6 +42,7 @@ import {
 } from "@aws-sdk/client-bedrock-runtime";
 import { GetRunContext } from "@/context.js";
 import { Serializer } from "@/serializer/serializer.js";
+import { NotImplementedError } from "@/errors.js";
 
 type Response = ContentBlockDeltaEvent | ConverseCommandOutput;
 
@@ -199,6 +202,11 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
     return {
       tokenLimit: Infinity,
     };
+  }
+
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    throw new NotImplementedError();
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {

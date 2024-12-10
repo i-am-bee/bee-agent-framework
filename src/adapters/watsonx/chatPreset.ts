@@ -24,6 +24,24 @@ interface WatsonXChatLLMPreset {
 }
 
 export const WatsonXChatLLMPreset = {
+  "meta-llama/llama-3-3-70b-instruct": (): WatsonXChatLLMPreset => {
+    const { template, messagesToPrompt, parameters } = LLMChatTemplates.get("llama3.3");
+
+    return {
+      base: {
+        parameters: {
+          decoding_method: "greedy",
+          include_stop_sequence: false,
+          max_new_tokens: 2048,
+          repetition_penalty: 1,
+          stop_sequences: [...parameters.stop_sequence],
+        },
+      },
+      chat: {
+        messagesToPrompt: messagesToPrompt(template),
+      },
+    };
+  },
   "ibm/granite-3-8b-instruct": (): WatsonXChatLLMPreset => {
     const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("granite3Instruct");
     return {

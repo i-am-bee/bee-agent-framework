@@ -24,6 +24,24 @@ interface BAMChatLLMPreset {
 }
 
 export const BAMChatLLMPreset = {
+  "meta-llama/llama-3-3-70b-instruct": (): BAMChatLLMPreset => {
+    const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("llama3.3");
+
+    return {
+      base: {
+        parameters: {
+          decoding_method: "greedy",
+          include_stop_sequence: false,
+          max_new_tokens: 2048,
+          repetition_penalty: 1,
+          stop_sequences: [...parameters.stop_sequence],
+        },
+      },
+      chat: {
+        messagesToPrompt: messagesToPrompt(template),
+      },
+    };
+  },
   "meta-llama/llama-3-1-70b-instruct": (): BAMChatLLMPreset => {
     const { template, parameters, messagesToPrompt } = LLMChatTemplates.get("llama3.1");
 

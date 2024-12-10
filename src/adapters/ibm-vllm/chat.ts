@@ -22,12 +22,21 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
-import { AsyncStream, BaseLLMTokenizeOutput, LLMCache, LLMError, LLMMeta } from "@/llms/base.js";
+import {
+  AsyncStream,
+  BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
+  LLMCache,
+  LLMError,
+  LLMMeta,
+} from "@/llms/base.js";
 import { transformAsyncIterable } from "@/internals/helpers/stream.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { IBMVllmChatLLMPreset, IBMVllmChatLLMPresetModel } from "@/adapters/ibm-vllm/chatPreset.js";
 import { Client } from "./client.js";
 import { GetRunContext } from "@/context.js";
+import { NotImplementedError } from "@/errors.js";
 
 export class GrpcChatLLMOutput extends ChatLLMOutput {
   public readonly raw: IBMvLLMOutput;
@@ -107,6 +116,11 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
 
   async meta(): Promise<LLMMeta> {
     return this.llm.meta();
+  }
+
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    throw new NotImplementedError();
   }
 
   createSnapshot() {

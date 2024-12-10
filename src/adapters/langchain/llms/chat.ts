@@ -17,6 +17,8 @@
 import {
   AsyncStream,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -42,6 +44,7 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { getProp, omitUndefined } from "@/internals/helpers/object.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
+import { NotImplementedError } from "@/errors.js";
 
 export class LangChainChatLLMOutput extends ChatLLMOutput {
   constructor(
@@ -117,6 +120,11 @@ export class LangChainChatLLM<
     return {
       tokenLimit: Infinity,
     };
+  }
+
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    throw new NotImplementedError();
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {

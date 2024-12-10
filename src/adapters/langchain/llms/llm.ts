@@ -20,6 +20,8 @@ import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -31,6 +33,7 @@ import { assign } from "@/internals/helpers/object.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
+import { NotImplementedError } from "@/errors.js";
 
 export class LangChainLLMOutput extends BaseLLMOutput {
   constructor(
@@ -100,6 +103,11 @@ export class LangChainLLM extends LLM<LangChainLLMOutput> {
     return {
       tokenLimit: Infinity,
     };
+  }
+
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    throw new NotImplementedError();
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {

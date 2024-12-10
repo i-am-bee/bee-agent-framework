@@ -134,7 +134,7 @@ To run these examples, make sure you have the Bee Agent Framework cloned and pro
    ```
 2. Install dependencies:
    ```
-   yarn install --immutable
+   yarn install --immutable && yarn prepare
    ```
 3. Create `.env` file (from `.env.template`) and fill in missing values (if any).
 

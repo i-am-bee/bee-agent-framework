@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-import {
-  AnySchemaLike,
-  FromSchemaLike,
-  createSchemaValidator,
-  toJsonSchema,
-} from "@/internals/helpers/schema.js";
+import { createSchemaValidator, toJsonSchema } from "@/internals/helpers/schema.js";
 import { GenerateOptions, LLMError } from "@/llms/base.js";
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { Retryable } from "@/internals/helpers/retryable.js";
 import { PromptTemplate } from "@/template.js";
 import { SchemaObject } from "ajv";
-import { z } from "zod";
+import { TypeOf, z, ZodTypeAny } from "zod";
 import { Serializable } from "@/internals/serializable.js";
 
 export interface GenerateSchemaInput<T> {
   maxRetries?: number;
   options?: T;
+}
+
+export interface DriverResponse<T> {
+  raw: ChatLLMOutput;
+  parsed: T extends ZodTypeAny ? TypeOf<T> : T;
+  messages: BaseMessage[];
 }
 
 export abstract class BaseDriver<
@@ -60,11 +61,11 @@ Validation Errors: "{{errors}}"`,
     return undefined;
   }
 
-  async generate<T extends AnySchemaLike>(
-    schema: T,
+  async generate<T = any>(
+    schema: T extends ZodTypeAny ? T : SchemaObject,
     input: BaseMessage[],
     { maxRetries = 3, options }: GenerateSchemaInput<TGenerateOptions> = {},
-  ): Promise<FromSchemaLike<T>> {
+  ): Promise<DriverResponse<T>> {
     const jsonSchema = toJsonSchema(schema);
     const validator = createSchemaValidator(jsonSchema);
     const schemaString = await this.schemaToString(jsonSchema);
@@ -79,15 +80,15 @@ Validation Errors: "{{errors}}"`,
 
     return new Retryable({
       executor: async () => {
-        const rawResponse = await this.llm.generate(messages, {
+        const raw = await this.llm.generate(messages, {
           guided: this.guided(jsonSchema),
           ...options,
         } as TGenerateOptions);
-        const textResponse = rawResponse.getTextContent();
-        let parsedResponse: any;
+        const textResponse = raw.getTextContent();
+        let parsed: any;
 
         try {
-          parsedResponse = this.parseResponse(textResponse);
+          parsed = this.parseResponse(textResponse);
         } catch (error) {
           throw new LLMError(`Failed to parse the generated response.`, [], {
             isFatal: false,
@@ -96,7 +97,7 @@ Validation Errors: "{{errors}}"`,
           });
         }
 
-        const success = validator(parsedResponse);
+        const success = validator(parsed);
         if (!success) {
           const context = {
             expected: schemaString,
@@ -120,7 +121,11 @@ Validation Errors: "{{errors}}"`,
             },
           );
         }
-        return parsedResponse as FromSchemaLike<T>;
+        return {
+          raw: raw,
+          parsed: parsed,
+          messages,
+        };
       },
       config: {
         signal: options?.signal,

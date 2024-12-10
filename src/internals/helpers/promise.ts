@@ -112,21 +112,23 @@ export class LazyPromise<R> implements Promise<R> {
 
   readonly [Symbol.toStringTag] = "Promise";
 
+  protected async before(): Promise<void> {}
+
   then<TResult1 = R, TResult2 = never>(
     onfulfilled?: ((value: R) => PromiseLike<TResult1> | TResult1) | undefined | null,
     onrejected?: ((reason: any) => PromiseLike<TResult2> | TResult2) | undefined | null,
   ): Promise<TResult1 | TResult2> {
-    return this.handler().then(onfulfilled).catch(onrejected);
+    return this.before().then(this.handler).then(onfulfilled).catch(onrejected);
   }
 
   catch<TResult = never>(
     onrejected?: ((reason: any) => PromiseLike<TResult> | TResult) | undefined | null,
   ): Promise<R | TResult> {
-    return this.handler().then(undefined).catch(onrejected);
+    return this.before().then(this.handler).then(undefined).catch(onrejected);
   }
 
   finally(onfinally?: (() => void) | undefined | null): Promise<R> {
-    return this.handler().finally(onfinally);
+    return this.before().then(this.handler).finally(onfinally);
   }
 }
 
@@ -151,4 +153,10 @@ export async function signalRace<R>(
       .catch(reject)
       .finally(() => signal?.removeEventListener?.("abort", signalFn));
   });
+}
+
+export async function executeSequentially(tasks: (() => Promise<any>)[]): Promise<void> {
+  for (const task of tasks) {
+    await task();
+  }
 }

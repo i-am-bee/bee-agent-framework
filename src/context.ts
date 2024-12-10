@@ -22,7 +22,7 @@ import { Callback } from "@/emitter/types.js";
 import { createNonOverridableObject } from "@/internals/helpers/object.js";
 import { registerSignals } from "@/internals/helpers/cancellation.js";
 import { Serializable } from "@/internals/serializable.js";
-import { LazyPromise } from "@/internals/helpers/promise.js";
+import { executeSequentially, LazyPromise } from "@/internals/helpers/promise.js";
 import { FrameworkError } from "@/errors.js";
 import { shallowCopy } from "@/serializer/utils.js";
 
@@ -41,6 +41,8 @@ export type GetRunContext<T, P = any> = T extends RunInstance ? RunContext<T, P>
 export type GetRunInstance<T> = T extends RunInstance<infer P> ? P : never;
 
 export class Run<R, I extends RunInstance, P = any> extends LazyPromise<R> {
+  protected readonly tasks: (() => Promise<void>)[] = [];
+
   constructor(
     handler: () => Promise<R>,
     protected readonly runContext: GetRunContext<I, P>,
@@ -51,19 +53,26 @@ export class Run<R, I extends RunInstance, P = any> extends LazyPromise<R> {
   readonly [Symbol.toStringTag] = "Promise";
 
   observe(fn: (emitter: Emitter<GetRunInstance<I>>) => void) {
-    fn(this.runContext.emitter);
+    this.tasks.push(async () => fn(this.runContext.emitter));
     return this;
   }
 
   context(value: object) {
-    Object.assign(this.runContext.context, value);
-    Object.assign(this.runContext.emitter.context, value);
+    this.tasks.push(async () => {
+      Object.assign(this.runContext.context, value);
+      Object.assign(this.runContext.emitter.context, value);
+    });
     return this;
   }
 
   middleware(fn: (context: GetRunContext<I, P>) => void) {
-    fn(this.runContext);
+    this.tasks.push(async () => fn(this.runContext));
     return this;
+  }
+
+  protected async before(): Promise<void> {
+    await super.before();
+    await executeSequentially(this.tasks.splice(0, Infinity));
   }
 }
 

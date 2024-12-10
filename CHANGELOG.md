@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.0.52](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.51...v0.0.52) (2024-12-10)
+
+### Features
+
+- **adapters:** implement embed ([#210](https://github.com/i-am-bee/bee-agent-framework/issues/210)) ([84a3bf4](https://github.com/i-am-bee/bee-agent-framework/commit/84a3bf47bd85c4791d9afaf6de07d59208dbbb09))
+- **agents:** update streamlit agent prompt ([#240](https://github.com/i-am-bee/bee-agent-framework/issues/240)) ([b73a2e5](https://github.com/i-am-bee/bee-agent-framework/commit/b73a2e5b75fcf3bd058fcd99b7c7d34e3e8e72c9))
+- **agents:** update streamlit agent prompt to write async code ([#239](https://github.com/i-am-bee/bee-agent-framework/issues/239)) ([2bd9c39](https://github.com/i-am-bee/bee-agent-framework/commit/2bd9c399665bbc124a2b637d0225f324b02e57b0))
+- **cache:** propagate self to custom cache keys ([85a27d2](https://github.com/i-am-bee/bee-agent-framework/commit/85a27d21fda0080d71fd7c96d2279a9914442106))
+- **tools:** update cache policies ([9613472](https://github.com/i-am-bee/bee-agent-framework/commit/96134728047af1c083ecfe215c313e2805ceccac))
+
+### Bug Fixes
+
+- **agents:** connect RePlan emitter to the root one ([7f79d5f](https://github.com/i-am-bee/bee-agent-framework/commit/7f79d5f5e6207286ee4493bf537458a8af2b5cb3))
+- **cache:** retrieve descriptors for inherited members ([df52337](https://github.com/i-am-bee/bee-agent-framework/commit/df5233768295610844b42c22a791d8245246bc40))
+
+## <small>0.0.51 (2024-12-09)</small>
+
+- feat(adapters): add llama3.3 template (#235) ([2778a9a](https://github.com/i-am-bee/bee-agent-framework/commit/2778a9a)), closes [#235](https://github.com/i-am-bee/bee-agent-framework/issues/235)
+- feat(adpters): add ollama structured output and version retrieval (#237) ([821364e](https://github.com/i-am-bee/bee-agent-framework/commit/821364e)), closes [#237](https://github.com/i-am-bee/bee-agent-framework/issues/237)
+- feat(agents): add experimental RePlan (#236) ([3b5c20b](https://github.com/i-am-bee/bee-agent-framework/commit/3b5c20b)), closes [#236](https://github.com/i-am-bee/bee-agent-framework/issues/236)
+- feat(agents): base updates ([8b740d4](https://github.com/i-am-bee/bee-agent-framework/commit/8b740d4))
+- feat(internals): handle async middlewares/observes ([b802216](https://github.com/i-am-bee/bee-agent-framework/commit/b802216))
+- chore(agents): move RePlan example ([29fbcf0](https://github.com/i-am-bee/bee-agent-framework/commit/29fbcf0))
+- chore(llms): return driver response type ([28293a6](https://github.com/i-am-bee/bee-agent-framework/commit/28293a6))
+- test: log tool errors ([99e5f49](https://github.com/i-am-bee/bee-agent-framework/commit/99e5f49))
+- test: remove dummy value ([55847e5](https://github.com/i-am-bee/bee-agent-framework/commit/55847e5))
+- fix: auto install pre-commit hooks ([b5c4e64](https://github.com/i-am-bee/bee-agent-framework/commit/b5c4e64))
+- feat(llms)!: extend driver response type ([16d4bfd](https://github.com/i-am-bee/bee-agent-framework/commit/16d4bfd))
+
 ## <small>0.0.50 (2024-12-06)</small>
 
 - chore: update .env.template ([36a4a83](https://github.com/i-am-bee/bee-agent-framework/commit/36a4a83))
