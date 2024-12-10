@@ -1,49 +1,84 @@
-# Agents
+# Agent
 
-AI agents built on large language models control the path to solving a complex problem. They can typically act on feedback to refine their plan of action, a capability that can improve performance and help them accomplish more sophisticated tasks.
+The `BaseAgent` class is the foundation of the Bee Framework, providing the core interface and functionality that all agent implementations must follow. It orchestrates the interaction between LLMs, tools, memory, and development utilities to create intelligent, automated workflows.
 
-We recommend reading the [following article](https://research.ibm.com/blog/what-are-ai-agents-llm) to learn more.
+## Overview
 
-## Implementation in Bee Agent Framework
+`BaseAgent` acts as an abstract base class that defines the standard interface and basic functionality for all agents in the framework. It manages the lifecycle of agent operations, coordinates between different components, and provides a consistent interface for agent implementations.
 
-An agent can be thought of as a program powered by LLM. The LLM generates structured output that is then processed by your program.
+## Architecture
 
-Your program then decides what to do next based on the retrieved content. It may leverage a tool, reflect, or produce a final answer.
-Before the agent determines the final answer, it performs a series of `steps`. A step might be calling an LLM, parsing the LLM output, or calling a tool.
+```mermaid
+classDiagram
+    class Serializable {
+        <<abstract>>
+    }
+    class FrameworkError {
+        <<class>>
+    }
+    class AgentError {
+        <<class>>
+    }
+    class BaseAgent~TInput,TOutput,TOptions~ {
+        <<abstract>>
+        #isRunning: boolean
+        +emitter: Emitter
+        +memory: BaseMemory
+        +meta: AgentMeta
+        +run(input: TInput, options?: TOptions)
+        #_run(input: TInput, options: TOptions, run: RunContext)*
+        +destroy()
+        +createSnapshot()
+    }
+    class BaseMemory {
+        <<abstract>>
+    }
+    class Emitter {
+        +destroy()
+    }
 
-Steps are grouped in a `iteration`, and every update (either complete or partial) is emitted to the user.
-
-### Bee Agent
-
-Our Bee Agent is based on the `ReAct` ([Reason and Act](https://arxiv.org/abs/2210.03629)) approach.
-
-Hence, the agent in each iteration produces one of the following outputs.
-
-For the sake of simplicity, imagine that the input prompt is "What is the current weather in Las Vegas?"
-
-First iteration:
-
+    Serializable <|-- BaseAgent
+    FrameworkError <|-- AgentError
+    BaseAgent --> Emitter
+    BaseAgent --> BaseMemory
+    BaseAgent --> AgentMeta
 ```
-thought: I need to retrieve the current weather in Las Vegas. I can use the OpenMeteo function to get the current weather forecast for a location.
-tool_name: OpenMeteo
-tool_input: {"location": {"name": "Las Vegas"}, "start_date": "2024-10-17", "end_date": "2024-10-17", "temperature_unit": "celsius"}
-```
 
-> [!NOTE]
+> [!TIP]
 >
-> Agent emitted 3 complete updates in the following order (`thought`, `tool_name`, `tool_input`) and tons of partial updates in the same order.
-> Partial update means that new tokens are being added to the iteration. Updates are always in strict order: You first get many partial updates for thought, followed by a final update for thought (that means no final updates are coming for a given key).
+> Location within the framework `bee-agent-framework/agents`.
 
-Second iteration:
+## Main Methods
 
+### Public Methods
+
+#### `run(prompt: string, options?: ExecutionOptions): Promise<AgentResponse>`
+
+Executes the agent with the given prompt and options.
+
+```ts
+interface ExecutionOptions {
+  signal?: AbortSignal;
+  execution?: {
+    maxRetriesPerStep?: number;
+    totalMaxRetries?: number;
+    maxIterations?: number;
+  };
+}
+
+const response = await agent.run("What's the weather in Las Vegas?", {
+  signal: AbortSignal.timeout(60000),
+  execution: {
+    maxIterations: 20,
+    maxRetriesPerStep: 3,
+    totalMaxRetries: 10,
+  },
+});
 ```
-thought: I have the current weather in Las Vegas in Celsius.
-final_answer: The current weather in Las Vegas is 20.5°C with an apparent temperature of 18.3°C.
-```
 
-For more complex tasks, the agent may do way more iterations.
+#### `observe(callback: (emitter: Emitter) => void): void`
 
-In the following example, we will transform the knowledge gained into code.
+Subscribes to agent events for monitoring and debugging.
 
 ```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
@@ -58,30 +93,88 @@ const agent = new BeeAgent({
 });
 
 const response = await agent
-  .run({ prompt: "What is the current weather in Las Vegas?" })
+  .run(
+    { prompt },
+    {
+      execution: {
+        maxRetriesPerStep: 3,
+        totalMaxRetries: 10,
+        maxIterations: 20,
+      },
+      signal: AbortSignal.timeout(2 * 60 * 1000),
+    },
+  )
   .observe((emitter) => {
+    emitter.on("start", () => {
+      reader.write(`Agent 🤖 : `, "starting new iteration");
+    });
+    emitter.on("error", ({ error }) => {
+      reader.write(`Agent 🤖 : `, FrameworkError.ensure(error).dump());
+    });
+    emitter.on("retry", () => {
+      reader.write(`Agent 🤖 : `, "retrying the action...");
+    });
     emitter.on("update", async ({ data, update, meta }) => {
+      // log 'data' to see the whole state
       // to log only valid runs (no errors), check if meta.success === true
-      console.log(`Agent Update (${update.key}) 🤖 : ${update.value}`);
-      console.log("-> Iteration state", data);
+      reader.write(`Agent (${update.key}) 🤖 : `, update.value);
+    });
+    emitter.on("partialUpdate", ({ data, update, meta }) => {
+      // ideal for streaming (line by line)
+      // log 'data' to see the whole state
+      // to log only valid runs (no errors), check if meta.success === true
+      // reader.write(`Agent (partial ${update.key}) 🤖 : `, update.value);
     });
 
-    emitter.on("partialUpdate", async ({ data, update, meta }) => {
-      // to log only valid runs (no errors), check if meta.success === true
-      console.log(`Agent Partial Update (${update.key}) 🤖 : ${update.value}`);
-      console.log("-> Iteration state", data);
-    });
-
-    // you can observe other events such as "success" / "retry" / "error" / "toolStart" / "toolEnd", ...
-
-    // To see all events, uncomment the following code block
+    // To observe all events (uncomment following block)
     // emitter.match("*.*", async (data: unknown, event) => {
-    //   const serializedData = JSON.stringify(data).substring(0, 128); // show only part of the event data
-    //   console.trace(`Received event "${event.path}"`, serializedData);
+    //   logger.trace(event, `Received event "${event.path}"`);
     // });
   });
 
 console.log(`Agent: ${response.result.text}`);
+```
+
+## Events
+
+Agent emits various events through its Emitter:
+
+| Event           | Description                      | Payload                                |
+| --------------- | -------------------------------- | -------------------------------------- |
+| `start`         | New iteration started            | `void`                                 |
+| `error`         | Error with framework error dump  | `{ error }`                            |
+| `retry`         | Retry attempt initiated          | `void`                                 |
+| `update`        | Full state update with metadata  | `{ data, update: {key, value}, meta }` |
+| `partialUpdate` | Streaming line-by-line update    | `{ data, update: {key, value}, meta }` |
+| `*.*`           | Optional catch-all event matcher | `data, event`                          |
+
+## Implementation Example
+
+Here's an example of usage an simple agent base in Bee Agent class:
+
+```ts
+import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
+import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
+import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
+
+const llm = new OllamaChatLLM();
+const agent = new BeeAgent({
+  llm,
+  memory: new TokenMemory({ llm }),
+  tools: [new DuckDuckGoSearchTool(), new OpenMeteoTool()],
+});
+
+const response = await agent
+  .run({ prompt: "What's the current weather in Las Vegas?" })
+  .observe((emitter) => {
+    emitter.on("update", async ({ data, update, meta }) => {
+      console.log(`Agent (${update.key}) 🤖 : `, update.value);
+    });
+  });
+
+console.log(`Agent 🤖 : `, response.result.text);
 ```
 
 ### Behaviour
@@ -136,8 +229,59 @@ The agent uses the following prompt templates.
 
 Please refer to the [following example](/examples/agents/bee_advanced.ts) to see how to modify them.
 
-## Creating your own agent
+## Best Practices
 
-To create your own agent, you must implement the agent's base class (`BaseAgent`).
+1. **Error Handling**
 
-The example can be found [here](/examples/agents/custom_agent.ts).
+```ts
+import { FrameworkError } from "bee-agent-framework/errors";
+
+function getUser() {
+  throw new Error("User was not found!");
+}
+
+try {
+  getUser();
+} catch (e) {
+  const err = FrameworkError.ensure(e);
+  console.log(err.dump());
+  console.log(err.explain());
+}
+```
+
+2. **Memory Management**
+
+```ts
+function cleanup(): Promise<void> {
+  await this.memory.store("lastCleanup", Date.now());
+  // Clear temporary data
+}
+```
+
+3. **Event Emission**
+
+```ts
+function emitProgress(progress: number): void {
+  this.agent.emitter.emit("progress", { value: progress });
+}
+```
+
+4. **Tool Management**
+
+```ts
+function validateTools(): Promise<void> {
+  for (const tool of this.tools) {
+    if (!(await tool.validate())) {
+      throw new Error(`Tool validation failed: ${tool.name}`);
+    }
+  }
+}
+```
+
+## See Also
+
+- [LLM Documentation](./llms.md)
+- [Memory System](./memory.md)
+- [Tools Guide](./tools.md)
+- [DevTools Reference](./dev_tools.md)
+- [Event System](./emitter.md)
