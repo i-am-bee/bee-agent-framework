@@ -93,7 +93,7 @@ console.log(`Agent 🤖 : `, response.result.text);
 > `yarn` should be installed via Corepack ([tutorial](https://yarnpkg.com/corepack))
 
 1. Clone the repository `git clone git@github.com:i-am-bee/bee-agent-framework`.
-2. Install dependencies `yarn install --immutable`.
+2. Install dependencies `yarn install --immutable && yarn prepare`.
 3. Create `.env` (from `.env.template`) and fill in missing values (if any).
 4. Start the agent `yarn run start:bee` (it runs `/examples/agents/bee.ts` file).
 

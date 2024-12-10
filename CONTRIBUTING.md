@@ -56,6 +56,7 @@ corepack enable
 
 ```bash
 yarn install --immutable
+yarn prepare
 ```
 
 5.  **Setup environmental variables:** To run E2E Tests, you should set the following variables in your `.env` file in the repository’s root.
