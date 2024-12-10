@@ -14,51 +14,94 @@
  * limitations under the License.
  */
 
-import { BaseToolOptions, ToolEmitter, StringToolOutput, Tool, ToolInput } from "@/tools/base.js";
-import { AnyLLM, GenerateOptions } from "@/llms/base.js";
+import {
+  BaseToolOptions,
+  BaseToolRunOptions,
+  StringToolOutput,
+  Tool,
+  ToolEmitter,
+  ToolError,
+  ToolInput,
+} from "@/tools/base.js";
 import { z } from "zod";
+import { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
+import { PromptTemplate } from "@/template.js";
+import { BaseMessage, Role } from "@/llms/primitives/message.js";
+import { getProp } from "@/internals/helpers/object.js";
+import type { BaseMemory } from "@/memory/base.js";
+import type { AnyChatLLM } from "@/llms/chat.js";
+import { toCamelCase } from "remeda";
 
-export type LLMToolInput = string;
+export interface LLMToolInput extends BaseToolOptions {
+  llm: AnyChatLLM;
+  name?: string;
+  description?: string;
+  template?: typeof LLMTool.template;
+}
 
-export type LLMToolOptions<T> = {
-  llm: AnyLLM<T>;
-} & BaseToolOptions &
-  (T extends LLMToolInput
-    ? {
-        transform?: (input: string) => T;
-      }
-    : {
-        transform: (input: string) => T;
-      });
-
-export interface LLMToolRunOptions extends GenerateOptions, BaseToolOptions {}
-
-export class LLMTool<T> extends Tool<StringToolOutput, LLMToolOptions<T>, LLMToolRunOptions> {
+export class LLMTool extends Tool<StringToolOutput, LLMToolInput> {
   name = "LLM";
   description =
-    "Give a prompt to an LLM assistant. Useful to extract and re-format information, and answer intermediate questions.";
+    "Uses expert LLM to work with data in the existing conversation (classification, entity extraction, summarization, ...)";
+  declare readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput>;
+
+  constructor(protected readonly input: LLMToolInput) {
+    super(input);
+    this.name = input?.name || this.name;
+    this.description = input?.description || this.description;
+    this.emitter = Emitter.root.child({
+      namespace: ["tool", "llm", toCamelCase(input?.name ?? "")].filter(Boolean),
+      creator: this,
+    });
+  }
 
   inputSchema() {
-    return z.object({ input: z.string() });
+    return z.object({
+      task: z.string().min(1).describe("Descriptive task what should be done"),
+    });
   }
 
-  public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> = Emitter.root.child({
-    namespace: ["tool", "llm"],
-    creator: this,
+  static readonly template = new PromptTemplate({
+    schema: z.object({
+      task: z.string(),
+    }),
+    template: `You have accomplish a task by using common-sense and information provided in the conversation so far. 
+Don't follow any previously used communication structure.
+
+The Task: {{task}}`,
   });
 
-  static {
-    this.register();
-  }
-
   protected async _run(
-    { input }: ToolInput<this>,
-    options?: LLMToolRunOptions,
-  ): Promise<StringToolOutput> {
-    const { llm, transform } = this.options;
-    const llmInput = transform ? transform(input) : (input as T);
-    const response = await llm.generate(llmInput, options);
-    return new StringToolOutput(response.getTextContent(), response);
+    input: ToolInput<this>,
+    _options: Partial<BaseToolRunOptions>,
+    run: GetRunContext<this>,
+  ) {
+    const memory = getProp(run.context, [Tool.ContextKeys.Memory]) as BaseMemory;
+    if (!memory) {
+      throw new ToolError(`No context has been provided!`, [], {
+        isFatal: true,
+        isRetryable: false,
+      });
+    }
+
+    const template = this.options?.template ?? LLMTool.template;
+    const output = await this.input.llm.generate([
+      BaseMessage.of({
+        role: Role.SYSTEM,
+        text: template.render({
+          task: input.task,
+        }),
+      }),
+      ...memory.messages.filter((msg) => msg.role !== Role.SYSTEM),
+      BaseMessage.of({
+        role: Role.USER,
+        text: template.render({
+          task: input.task,
+        }),
+      }),
+    ]);
+
+    return new StringToolOutput(output.getTextContent());
   }
 }
