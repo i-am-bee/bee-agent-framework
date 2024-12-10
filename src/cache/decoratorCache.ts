@@ -24,7 +24,7 @@ type InputFn = AnyFn;
 type TargetFn = AnyFn;
 type Instance = NonNullable<any>;
 
-type CacheKeyFn = (...args: any[]) => string;
+type CacheKeyFn = (this: Instance, ...args: any[]) => string;
 
 export interface CacheDecoratorOptions {
   enabled: boolean;
@@ -138,7 +138,7 @@ export function Cache(_options?: Partial<CacheDecoratorOptions>) {
         return invokeOriginal();
       }
 
-      const inputHash = ctx.options.cacheKey(...args);
+      const inputHash = ctx.options.cacheKey.apply(this, args);
       if (
         !ctx.cache.has(inputHash) ||
         (ctx.cache.get(inputHash)?.expiresAt ?? Infinity) < Date.now() // is expired check
@@ -224,10 +224,10 @@ Cache.getInstance = function getInstance<T extends NonNullable<unknown>>(
   };
 };
 
-export const WeakRefKeyFn: CacheKeyFn = (() => {
+export const WeakRefKeyFn = (() => {
   const _lookup = new WeakMap();
 
-  return (...args: any[]) => {
+  const fn = (...args: any[]) => {
     const chunks = args.map((value) => {
       if (R.isObjectType(value) || R.isFunction(value)) {
         if (!_lookup.has(value)) {
@@ -239,7 +239,13 @@ export const WeakRefKeyFn: CacheKeyFn = (() => {
     });
     return createHash(JSON.stringify(chunks));
   };
-})();
+  fn.from = <T>(cb: (self: T) => any[]) => {
+    return function (this: T) {
+      return cb(this).map(fn).join("#");
+    };
+  };
+  return fn;
+})() satisfies CacheKeyFn;
 
 export const ObjectHashKeyFn: CacheKeyFn = (...args: any[]) =>
   hash(args, {
