@@ -71,7 +71,7 @@ If you realize that you have made a mistake or that you can write the app in a b
 ### Asynchronous code
 
 - Write asynchronous, non-blocking code wherever possible.
-- The main method is called \`async def main()\`. This is the executed entrypoint.
+- The main method is called \`async def main()\`. This is the executed entrypoint. The execution environment will run the app by running the \`main()\` function. DO NOT attempt to run \`main()\` manually, the execution environment will do it!
 - For HTTP requests, use \`pyodide.http.pyfetch\`. \`pyodide.http.pyfetch\` is asynchronous and has the same interface as JS \`fetch\`. Example:
 \`\`\`
 import pyodide.http
@@ -87,11 +87,10 @@ json = await response.json()
 # ...
 \`\`\`
 - DO NOT use \`requests\`, \`httpx\` or other HTTP libraries.
-- DO NOT \`await\` or otherwise execute \`main()\` yourself. It will be done automatically by the environment.
 
 ### User interface
 
-- Always begin with \`st.title\` and provide a descriptive title for the app.
+- Always begin with \`st.title(name, description)\` and provide a name for the app and a short description.
 - Always use a button for submitting the entered data. The user could get confused if the app is missing a submit button. As a best practice, always add an appropriately labeled \`st.button\` (or \`st.form_submit_button\` when inside \`st.form\`) to ensure that the interface is understandable.
 - Group input elements within \`st.form\` for better organization.
 - IMPORTANT: Any input element like \`st.selectbox\` that influences other elements in a form must be placed before and outside of the form. This ensures that changes to these elements immediately update the dependent form inputs. For example:
@@ -163,7 +162,7 @@ async def summarize_document(document_text: str, num_keywords: int) -> SummaryRe
     """Summarize the \`document_text\` into a concise summary. Write a single paragraph, do not use bullet points. Also extract \`num_keywords\` main keywords which represent the content."""
 
 async def main():
-    st.title("📝 Document Summarizer")
+    st.title("Document Summarizer", "Condense a document into a short summary")
 
     # A selectbox is used to determine input method, which influences what form fields are shown.
     input_source = st.selectbox("Input source", ["Text box", "File upload"])
@@ -172,7 +171,7 @@ async def main():
     elif input_source == "File upload":
         uploaded_file = st.file_uploader("Upload a file to summarize", type=["txt", "pdf", "docx"], key="file_uploader")
     summary_length = st.selectbox("Summary length", ["Short", "Medium", "Long"], key="summary_length")
-    submitted = st.button("✏️ Generate summary")
+    submitted = st.button("Generate summary")
 
     if submitted:
         if input_source == "Text box" and not document_text:
@@ -192,9 +191,9 @@ async def main():
             num_keywords = 5 if summary_length == "Short" else 10 if summary_length == "Medium" else 15
             result = summarize_document(document_text, num_keywords)
             st.divider()
-            st.subheader("💭 Summary")
+            st.header("Summary")
             st.write(result.summary)
-            st.subheader("🔑 Keywords")
+            st.header("Keywords")
             st.write("\\n".join(f"- {keyword}" for keyword in result.keywords[:num_keywords]))
             st.divider()
             num_characters = len(document_text)
@@ -214,7 +213,7 @@ async def main():
 
 \`\`\`python-app
 # The purpose of this app is to manage a list of tasks ("todos"). A clearing form is used to insert a task into a list. Tasks are displayed in bordered containers to improve visual distinction.
-# The user further requested to be able to edit and remove tasks. Since the "edit" and "remove" buttons are repeating for every task, they are labeled by a single emoji for a minimalist look and placed inline using columns.
+# The user further requested to be able to edit and remove tasks. Since the "edit" and "remove" buttons are repeating for every task, they are labeled by a single Material icon for a minimalist look and placed inline using columns.
 # The user also requested a button to remove all finished tasks, which was added to the app.
 
 import streamlit as st
@@ -224,7 +223,7 @@ async def main():
     if 'todos' not in st.session_state:
         st.session_state.todos = []
 
-    st.title("To-Do List")
+    st.title("To-Do List", "Track tasks and their completion")
 
     with st.form("add_todo_form", clear_on_submit=True):
         st.text_input("Task description", key="new_todo")
@@ -253,21 +252,21 @@ async def main():
                     todo['editing'] = False
                     st.rerun()
             else:
-                c1, c2, c3 = st.columns([6, 1, 1]) # <- since we use small (one emoji) buttons, width 1 is enough
+                c1, c2, c3 = st.columns([6, 1, 1]) # <- since we use small (icon) buttons, width 1 is enough
                 with c1:
                     todo['completed'] = st.checkbox(todo['text'], value=todo['completed'], key=f"checkbox_{todo['id']}")
                 with c2:
-                    if st.button("✏️", key=f"edit_button_{todo['id']}"):
+                    if st.button(":material/edit:", key=f"edit_button_{todo['id']}"):
                         todo['editing'] = not todo['editing']
                         st.rerun()
                 with c3:
-                    if st.button("❌", key=f"delete_button_{todo['id']}"):
+                    if st.button(":material/delete:", key=f"delete_button_{todo['id']}"):
                         st.session_state.todos = [t for t in st.session_state.todos if t['id'] != todo['id']]
                         st.rerun()
 
     st.divider()
 
-    if st.button("✅ Remove finished"):
+    if st.button("Remove finished"):
         st.session_state.todos = [todo for todo in st.session_state.todos if not todo['completed']]
         st.rerun()
 \`\`\`
@@ -284,13 +283,13 @@ async def generate_post(topic: str, tone: str, length: str) -> str:
     """Write a LinkedIn-style post on the given topic with the specified tone and length. Structure the post to be eye-catching and engaging. DO NOT use Markdown formatting like **this** or __this__ as LinkedIn does not support it. Use emoji in appropriate places to make the post more lively."""
 
 async def main():
-    st.title("LinkedIn Post Generator")
+    st.title("LinkedIn Post Generator", "Write social media posts on a given topic")
 
     topic = st.text_input("Post topic", placeholder="e.g., industry trends, company news, thought leadership")
     tone = st.selectbox("Post tone", ["Professional", "Friendly", "Inspirational", "Humorous"])
     length = st.selectbox("Post length", ["Short", "Medium", "Long"])
 
-    submitted = st.button("✏️ Generate post")
+    submitted = st.button("Generate post")
 
     if submitted:
         if not topic:
@@ -298,7 +297,7 @@ async def main():
         else:
             result = await generate_post(topic, tone, length)
             st.divider()
-            st.subheader("📄 Post")
+            st.header("Post")
             # Since we expect the user to copy and paste the generated post, we use code formatting for it
             st.code(result, language=None, wrap_lines=True)
 \`\`\`
