@@ -9,7 +9,7 @@
   <h4 align="center">Open-source framework for building, deploying, and serving powerful agentic workflows at scale.</h4>
 </p>
 
-The Bee Agent Framework makes it easy to build scalable agent-based workflows with your model of choice. The framework is been designed to perform robustly with [IBM Granite](https://www.ibm.com/granite?adoper=255252_0_LS1) and [Llama 3.x](https://ai.meta.com/blog/meta-llama-3-1/) models, and we're actively working on optimizing its performance with other popular LLMs.<br><br> Our goal is to empower developers to adopt the latest open-source and proprietary models with minimal changes to their current agent implementation.
+The Bee Agent Framework makes it easy to build scalable agent-based workflows with your model of choice. The framework is been designed to perform robustly with [IBM Granite](https://www.ibm.com/granite/docs/) and [Llama 3.x](https://ai.meta.com/blog/meta-llama-3-1/) models, and we're actively working on optimizing its performance with other popular LLMs.<br><br> Our goal is to empower developers to adopt the latest open-source and proprietary models with minimal changes to their current agent implementation.
 
 ## Key Features
 

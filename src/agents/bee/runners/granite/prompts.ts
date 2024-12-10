@@ -25,7 +25,7 @@ export const GraniteBeeAssistantPrompt = BeeAssistantPrompt.fork((config) => ({
 
 export const GraniteBeeSystemPrompt = new PromptTemplate({
   schema: z.object({
-    instructions: z.string().default("You are a helpful assistant."),
+    instructions: z.string().default(""),
     tools: z.array(
       z
         .object({
@@ -36,11 +36,12 @@ export const GraniteBeeSystemPrompt = new PromptTemplate({
         .passthrough(),
     ),
   }),
+
   template: `# Setting
 You are an AI assistant.
 When the user sends a message figure out a solution and provide a final answer.
 {{#tools.length}}
-You have access to a set of available_tools that can be used to retrieve information and perform actions.
+You have access to a set of available tools that can be used to retrieve information and perform actions.
 Pay close attention to the tool description to determine if a tool is useful in a partcular context.
 {{/tools.length}}
 
@@ -66,15 +67,13 @@ Pay close attention to the tool description to determine if a tool is useful in 
 - When the message is unclear, respond with a line starting with 'Final Answer:' followed by a request for additional information needed to solve the problem.
 - When the user wants to chitchat instead, always respond politely.
 
-{{#tools.length}}
-# File Handling
-If a file is provided by the user, make sure you always use the FileRead tool immediately to read the contents of the file.
-{{/tools.length}}
+# Current Date and Time
+${new Intl.DateTimeFormat(undefined, {
+  dateStyle: "full",
+  timeStyle: "medium",
+}).format(new Date())}.
 
-# Date and Time
-The current date and time is contained in the most recent user message.
-
-# Persona
+# Additional instructions
 {{instructions}}
 `,
 });
@@ -82,5 +81,48 @@ The current date and time is contained in the most recent user message.
 export const GraniteBeeSchemaErrorPrompt = BeeSchemaErrorPrompt.fork((config) => ({
   ...config,
   template: `Error: The generated response does not adhere to the communication structure mentioned in the system prompt.
-You communicate only in instruction lines. Valid instruction lines are 'Thought' followed by either 'Tool Name' + 'Tool Input' or 'Final Answer'.`,
+You communicate only in instruction lines. Valid instruction lines are 'Thought' followed by 'Tool Name' and then 'Tool Input' or 'Thought' followed by 'Final Answer'.`,
 }));
+
+export const GraniteBeeUserPrompt = new PromptTemplate({
+  schema: z
+    .object({
+      input: z.string(),
+    })
+    .passthrough(),
+  template: `Message: {{input}}`,
+});
+
+export const GraniteBeeToolNotFoundPrompt = new PromptTemplate({
+  schema: z
+    .object({
+      tools: z.array(z.object({ name: z.string() }).passthrough()),
+    })
+    .passthrough(),
+  template: `Tool does not exist!
+{{#tools.length}}
+Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
+{{/tools.length}}`,
+});
+
+export const GraniteBeeToolErrorPrompt = new PromptTemplate({
+  schema: z
+    .object({
+      reason: z.string(),
+    })
+    .passthrough(),
+  template: `The tool has failed; the error log is shown below. If the tool cannot accomplish what you want, use a different tool or explain why you can't use it.
+
+{{reason}}`,
+});
+
+export const GraniteBeeToolInputErrorPrompt = new PromptTemplate({
+  schema: z
+    .object({
+      reason: z.string(),
+    })
+    .passthrough(),
+  template: `{{reason}}
+
+HINT: If you're convinced that the input was correct but the tool cannot process it then use a different tool or say I don't know.`,
+});
