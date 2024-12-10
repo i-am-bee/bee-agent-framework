@@ -61,7 +61,7 @@ interface Input {
 }
 
 export class RePlanAgent extends BaseAgent<RePlanRunInput, RePlanRunOutput> {
-  public emitter = new Emitter<RePlanEvents>({
+  public emitter = Emitter.root.child<RePlanEvents>({
     namespace: ["agent", "rePlan"],
     creator: this,
   });
