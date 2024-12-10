@@ -18,6 +18,7 @@ import { AnyFn, TypedFn } from "@/internals/types.js";
 import * as R from "remeda";
 import hash from "object-hash";
 import { createHash, createRandomHash } from "@/internals/helpers/hash.js";
+import { findDescriptor } from "@/internals/helpers/prototype.js";
 
 type InputFn = AnyFn;
 type TargetFn = AnyFn;
@@ -174,7 +175,7 @@ Cache.getInstance = function getInstance<T extends NonNullable<unknown>>(
   target: T,
   property: keyof T,
 ): CacheDecoratorInstance {
-  const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(target), property);
+  const descriptor = findDescriptor(target, property);
   if (!descriptor) {
     throw new TypeError(`No descriptor has been found for '${String(property)}'`);
   }
