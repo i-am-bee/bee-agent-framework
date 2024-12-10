@@ -33,7 +33,7 @@ import {
   BeeUserEmptyPrompt,
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
-import { AnyTool, ToolError, ToolInputValidationError, ToolOutput } from "@/tools/base.js";
+import { AnyTool, Tool, ToolError, ToolInputValidationError, ToolOutput } from "@/tools/base.js";
 import { FrameworkError } from "@/errors.js";
 import { isEmpty, isTruthy, last } from "remeda";
 import { LinePrefixParser, LinePrefixParserError } from "@/agents/parsers/linePrefix.js";
@@ -194,7 +194,9 @@ export class DefaultRunner extends BaseRunner {
             },
             meta,
           });
-          const toolOutput: ToolOutput = await tool.run(state.tool_input, this.options);
+          const toolOutput: ToolOutput = await tool.run(state.tool_input, this.options).context({
+            [Tool.ContextKeys.Memory]: this.memory,
+          });
           await emitter.emit("toolSuccess", {
             data: {
               tool,
