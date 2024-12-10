@@ -16,5 +16,5 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
 }
 
 export function cosineSimilarityWithMatrix(vector: number[], matrix: number[][]): number[] {
-  return matrix.map((vecB) => cosineSimilarity(vector, vecB));
+  return matrix.map((row) => cosineSimilarity(vector, row));
 }
