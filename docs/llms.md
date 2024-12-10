@@ -122,19 +122,26 @@ console.log(tokenInfo.tokens); // Array of token strings if available
 
 ## Supported Providers
 
-| Provider    | Text Generation | Chat | Structured Output |
-| ----------- | --------------- | ---- | ----------------- |
-| WatsonX     | ✅              | ⚠️   | ❌                |
-| Ollama      | ✅              | ✅   | ⚠️                |
-| OpenAI      | ❌              | ✅   | ⚠️                |
-| LangChain   | ⚠️              | ⚠️   | ❌                |
-| Groq        | ❌              | ✅   | ⚠️                |
-| AWS Bedrock | ❌              | ✅   | ⚠️                |
-| VertexAI    | ✅              | ✅   | ⚠️                |
+| Name                                                                      | LLM                        | Chat LLM                                      | Structured output (constrained decoding) |
+| ------------------------------------------------------------------------- | -------------------------- | --------------------------------------------- | ---------------------------------------- |
+| `WatsonX`                                                                 | ✅                         | ⚠️ (model specific template must be provided) | ❌                                       |
+| `Ollama`                                                                  | ✅                         | ✅                                            | ⚠️ (JSON only)                           |
+| `OpenAI`                                                                  | ❌                         | ✅                                            | ⚠️ (JSON schema only)                    |
+| `Azure OpenAI`                                                            | ❌                         | ✅                                            | ⚠️ (JSON schema only)                    |
+| `LangChain`                                                               | ⚠️ (depends on a provider) | ⚠️ (depends on a provider)                    | ❌                                       |
+| `Groq`                                                                    | ❌                         | ✅                                            | ⚠️ (JSON object only)                    |
+| `AWS Bedrock`                                                             | ❌                         | ✅                                            | ⚠️ (JSON only) - model specific          |
+| `VertexAI`                                                                | ✅                         | ✅                                            | ⚠️ (JSON only)                           |
+| `BAM (Internal)`                                                          | ✅                         | ⚠️ (model specific template must be provided) | ✅                                       |
+| ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                            |                                               |                                          |
 
 ✅ Full support
 ⚠️ Partial support/limitations
 ❌ Not supported
+
+All providers' examples can be found in [examples/llms/providers](/examples/llms/providers).
+
+Are you interested in creating your own adapter? Jump to the [adding a new provider](#adding-a-new-provider-adapter) section.
 
 ## Implementation Example
 

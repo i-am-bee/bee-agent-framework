@@ -17,7 +17,9 @@
 import { Serializer } from "@/serializer/serializer.js";
 import { Config, Ollama as Client, ShowResponse } from "ollama";
 import { getPropStrict } from "@/internals/helpers/object.js";
-import { LLMMeta } from "@/llms/base.js";
+import { GuidedOptions, LLMMeta } from "@/llms/base.js";
+import { Comparator, compareVersion } from "@/internals/helpers/string.js";
+import { isString } from "remeda";
 
 export function registerClient() {
   Serializer.register(Client, {
@@ -32,6 +34,34 @@ export function registerClient() {
         proxy: value.config.proxy,
       }),
   });
+}
+
+export async function retrieveVersion(
+  baseUrl: string,
+  client: typeof fetch = fetch,
+): Promise<string> {
+  const url = new URL("/api/version", baseUrl);
+  const response = await client(url);
+  if (!response.ok) {
+    throw new Error(`Could not retrieve Ollama API version.`);
+  }
+  const data = await response.json();
+  return data.version;
+}
+
+export function retrieveFormat(
+  version: string | number,
+  guided?: GuidedOptions,
+): string | object | undefined {
+  if (!guided?.json) {
+    return undefined;
+  }
+
+  if (compareVersion(String(version), Comparator.GTE, "0.5.0")) {
+    return isString(guided.json) ? JSON.parse(guided.json) : guided.json;
+  } else {
+    return "json";
+  }
 }
 
 export function extractModelMeta(response: ShowResponse): LLMMeta {

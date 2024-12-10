@@ -17,7 +17,7 @@ interface RunInput {
 
 interface RunOutput {
   message: BaseMessage;
-  raw: {
+  state: {
     thought: string;
     final_answer: string;
   };
@@ -83,13 +83,13 @@ IMPORTANT: Every message must be a parsable JSON string without additional outpu
 
     const result = BaseMessage.of({
       role: Role.ASSISTANT,
-      text: response.final_answer,
+      text: response.parsed.final_answer,
     });
     await this.memory.add(result);
 
     return {
       message: result,
-      raw: response,
+      state: response.parsed,
     };
   }
 
@@ -122,4 +122,4 @@ const agent = new CustomAgent({
 const response = await agent.run({
   message: BaseMessage.of({ role: Role.USER, text: "Why is the sky blue?" }),
 });
-console.info(response.raw);
+console.info(response.state);

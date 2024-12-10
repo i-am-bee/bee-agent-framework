@@ -1,5 +1,73 @@
 # Changelog
 
+## [0.0.52](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.51...v0.0.52) (2024-12-10)
+
+### Features
+
+- **adapters:** implement embed ([#210](https://github.com/i-am-bee/bee-agent-framework/issues/210)) ([84a3bf4](https://github.com/i-am-bee/bee-agent-framework/commit/84a3bf47bd85c4791d9afaf6de07d59208dbbb09))
+- **agents:** update streamlit agent prompt ([#240](https://github.com/i-am-bee/bee-agent-framework/issues/240)) ([b73a2e5](https://github.com/i-am-bee/bee-agent-framework/commit/b73a2e5b75fcf3bd058fcd99b7c7d34e3e8e72c9))
+- **agents:** update streamlit agent prompt to write async code ([#239](https://github.com/i-am-bee/bee-agent-framework/issues/239)) ([2bd9c39](https://github.com/i-am-bee/bee-agent-framework/commit/2bd9c399665bbc124a2b637d0225f324b02e57b0))
+- **cache:** propagate self to custom cache keys ([85a27d2](https://github.com/i-am-bee/bee-agent-framework/commit/85a27d21fda0080d71fd7c96d2279a9914442106))
+- **tools:** update cache policies ([9613472](https://github.com/i-am-bee/bee-agent-framework/commit/96134728047af1c083ecfe215c313e2805ceccac))
+
+### Bug Fixes
+
+- **agents:** connect RePlan emitter to the root one ([7f79d5f](https://github.com/i-am-bee/bee-agent-framework/commit/7f79d5f5e6207286ee4493bf537458a8af2b5cb3))
+- **cache:** retrieve descriptors for inherited members ([df52337](https://github.com/i-am-bee/bee-agent-framework/commit/df5233768295610844b42c22a791d8245246bc40))
+
+## <small>0.0.51 (2024-12-09)</small>
+
+- feat(adapters): add llama3.3 template (#235) ([2778a9a](https://github.com/i-am-bee/bee-agent-framework/commit/2778a9a)), closes [#235](https://github.com/i-am-bee/bee-agent-framework/issues/235)
+- feat(adpters): add ollama structured output and version retrieval (#237) ([821364e](https://github.com/i-am-bee/bee-agent-framework/commit/821364e)), closes [#237](https://github.com/i-am-bee/bee-agent-framework/issues/237)
+- feat(agents): add experimental RePlan (#236) ([3b5c20b](https://github.com/i-am-bee/bee-agent-framework/commit/3b5c20b)), closes [#236](https://github.com/i-am-bee/bee-agent-framework/issues/236)
+- feat(agents): base updates ([8b740d4](https://github.com/i-am-bee/bee-agent-framework/commit/8b740d4))
+- feat(internals): handle async middlewares/observes ([b802216](https://github.com/i-am-bee/bee-agent-framework/commit/b802216))
+- chore(agents): move RePlan example ([29fbcf0](https://github.com/i-am-bee/bee-agent-framework/commit/29fbcf0))
+- chore(llms): return driver response type ([28293a6](https://github.com/i-am-bee/bee-agent-framework/commit/28293a6))
+- test: log tool errors ([99e5f49](https://github.com/i-am-bee/bee-agent-framework/commit/99e5f49))
+- test: remove dummy value ([55847e5](https://github.com/i-am-bee/bee-agent-framework/commit/55847e5))
+- fix: auto install pre-commit hooks ([b5c4e64](https://github.com/i-am-bee/bee-agent-framework/commit/b5c4e64))
+- feat(llms)!: extend driver response type ([16d4bfd](https://github.com/i-am-bee/bee-agent-framework/commit/16d4bfd))
+
+## <small>0.0.50 (2024-12-06)</small>
+
+- chore: update .env.template ([36a4a83](https://github.com/i-am-bee/bee-agent-framework/commit/36a4a83))
+- chore(agents): remove optional type for streamlit ([d552506](https://github.com/i-am-bee/bee-agent-framework/commit/d552506))
+- chore(deps): upgrade dependencies ([a3352d9](https://github.com/i-am-bee/bee-agent-framework/commit/a3352d9))
+- chore(examples): update bee advanced ([10314af](https://github.com/i-am-bee/bee-agent-framework/commit/10314af))
+- feat: (instrumentation): increase timestamp precision (#234) ([72c8717](https://github.com/i-am-bee/bee-agent-framework/commit/72c8717)), closes [#234](https://github.com/i-am-bee/bee-agent-framework/issues/234)
+- feat(agents): update Thought in Bee agent system prompt (#221) ([cdb3731](https://github.com/i-am-bee/bee-agent-framework/commit/cdb3731)), closes [#221](https://github.com/i-am-bee/bee-agent-framework/issues/221)
+- docs(agents): add granite bee documentation (#229) ([9199ff5](https://github.com/i-am-bee/bee-agent-framework/commit/9199ff5)), closes [#229](https://github.com/i-am-bee/bee-agent-framework/issues/229)
+
+## [0.0.49](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.48...v0.0.49) (2024-12-05)
+
+### Features
+
+- **agents:** update StreamlitAgent system prompt ([#231](https://github.com/i-am-bee/bee-agent-framework/issues/231)) ([a88bf7a](https://github.com/i-am-bee/bee-agent-framework/commit/a88bf7a287b7f5070e409ce440a9ef5905a23fe3))
+- preserve comments in dist ([e2d7390](https://github.com/i-am-bee/bee-agent-framework/commit/e2d739045161660956c8a76af0dab3c608cebd9c))
+
+### Bug Fixes
+
+- **adapters:** propagate WatsonX API errors ([46dc651](https://github.com/i-am-bee/bee-agent-framework/commit/46dc651180963bf3ebac5a3b5e6a7abdb3530af3))
+
+## [0.0.48](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.47...v0.0.48) (2024-12-04)
+
+### Features
+
+- **adapters:** add watsonx debug example ([a737327](https://github.com/i-am-bee/bee-agent-framework/commit/a73732743bc78f9ccc0a4b5b9a95d04c2b34cd02))
+- **agents:** update system prompt for Bee ([#199](https://github.com/i-am-bee/bee-agent-framework/issues/199)) ([a38804d](https://github.com/i-am-bee/bee-agent-framework/commit/a38804dd41a6051212824b8987294fe4dda50613))
+- **agents:** use prompt templates from a concrete runner ([#223](https://github.com/i-am-bee/bee-agent-framework/issues/223)) ([b868974](https://github.com/i-am-bee/bee-agent-framework/commit/b8689749ca9f613a92fe5d807c599f20743113b7)), closes [#219](https://github.com/i-am-bee/bee-agent-framework/issues/219)
+- **internals:** extends RestfulClient by emitting events ([e7a95c0](https://github.com/i-am-bee/bee-agent-framework/commit/e7a95c019ccdcb5e88a4e4b61c3af63f937a05d2))
+- **tools:** rename CustomToolEmitter to ToolEmitter ([a22a4d9](https://github.com/i-am-bee/bee-agent-framework/commit/a22a4d9d65b96b53e35890c52a32757fef2aa5e5))
+
+### Bug Fixes
+
+- **llms:** correct the vllm granite model_id ([#218](https://github.com/i-am-bee/bee-agent-framework/issues/218)) ([643cd8e](https://github.com/i-am-bee/bee-agent-framework/commit/643cd8e3b7553db430516382bcb2de25837dd800))
+
+### Reverts
+
+- **agents:** update constrained decoding for Bee ([#220](https://github.com/i-am-bee/bee-agent-framework/issues/220)) ([6e616ed](https://github.com/i-am-bee/bee-agent-framework/commit/6e616edd3acf622f5a776decf69d39a385fa878c))
+
 ## [0.0.47](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.46...v0.0.47) (2024-12-03)
 
 ### ⚠ BREAKING CHANGES

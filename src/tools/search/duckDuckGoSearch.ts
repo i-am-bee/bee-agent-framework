@@ -23,7 +23,7 @@ import {
   SearchToolResult,
   SearchToolRunOptions,
 } from "./base.js";
-import { CustomToolEmitter, Tool, ToolInput } from "@/tools/base.js";
+import { ToolEmitter, Tool, ToolInput } from "@/tools/base.js";
 import { HeaderGenerator } from "header-generator";
 import type { NeedleOptions } from "needle";
 import { z } from "zod";
@@ -77,7 +77,7 @@ export class DuckDuckGoSearchTool extends Tool<
   description =
     "Search for online trends, news, current events, real-time information, or research topics.";
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, DuckDuckGoSearchToolOutput> =
+  public readonly emitter: ToolEmitter<ToolInput<this>, DuckDuckGoSearchToolOutput> =
     Emitter.root.child({
       namespace: ["tool", "search", "ddg"],
       creator: this,
@@ -116,7 +116,7 @@ export class DuckDuckGoSearchTool extends Tool<
 
   protected async _run(
     { query: input }: ToolInput<this>,
-    options: DuckDuckGoSearchToolRunOptions | undefined,
+    options: Partial<DuckDuckGoSearchToolRunOptions>,
     run: RunContext<this>,
   ) {
     const headers = new HeaderGenerator().getHeaders();

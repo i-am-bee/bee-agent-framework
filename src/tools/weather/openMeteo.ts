@@ -17,7 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
-  CustomToolEmitter,
+  ToolEmitter,
   JSONToolOutput,
   Tool,
   ToolError,
@@ -107,11 +107,10 @@ export class OpenMeteoTool extends Tool<OpenMeteoToolOutput, ToolOptions, ToolRu
       .strip();
   }
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, OpenMeteoToolOutput> =
-    Emitter.root.child({
-      namespace: ["tool", "weather", "openMeteo"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<ToolInput<this>, OpenMeteoToolOutput> = Emitter.root.child({
+    namespace: ["tool", "weather", "openMeteo"],
+    creator: this,
+  });
 
   static {
     this.register();

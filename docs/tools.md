@@ -135,7 +135,7 @@ const enhancedSearch = wikipediaTool.extend(
 
 ```ts
 import {
-  CustomToolEmitter,
+  ToolEmitter,
   StringToolOutput,
   Tool,
   ToolInput,
@@ -149,11 +149,10 @@ export class RiddleTool extends Tool<StringToolOutput> {
   name = "Riddle";
   description = "It generates a random puzzle to test your knowledge.";
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> =
-    Emitter.root.child({
-      namespace: ["tool", "riddle"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> = Emitter.root.child({
+    namespace: ["tool", "riddle"],
+    creator: this,
+  });
 
   inputSchema() {
     return z.object({
@@ -216,7 +215,7 @@ import {
   ToolInput,
   JSONToolOutput,
   ToolError,
-  CustomToolEmitter,
+  ToolEmitter,
 } from "bee-agent-framework/tools/base";
 import { z } from "zod";
 import { createURLParams } from "bee-agent-framework/internals/fetcher";
@@ -260,7 +259,7 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
       .partial();
   }
 
-  public readonly emitter: CustomToolEmitter<
+  public readonly emitter: ToolEmitter<
     ToolInput<this>,
     OpenLibraryToolOutput,
     {
@@ -278,7 +277,7 @@ export class OpenLibraryTool extends Tool<OpenLibraryToolOutput, ToolOptions, To
 
   protected async _run(
     input: ToolInput<this>,
-    _options: ToolRunOptions | undefined,
+    _options: Partial<ToolRunOptions>,
     run: GetRunContext<this>,
   ) {
     const request = {

@@ -177,6 +177,58 @@ const response = await agent
 console.log(`Agent 🤖 : `, response.result.text);
 ```
 
+### Behaviour
+
+You can alter the agent's behavior in the following ways.
+
+#### Setting execution policy
+
+```ts
+await agent.run(
+  { prompt: "What is the current weather in Las Vegas?" },
+
+  {
+    signal: AbortSignal.timeout(60 * 1000), // 1 minute timeout
+    execution: {
+      // How many times an agent may repeat the given step before it halts (tool call, llm call, ...)
+      maxRetriesPerStep: 3,
+
+      // How many retries can the agent occur before halting
+      totalMaxRetries: 10,
+
+      // Maximum number of iterations in which the agent must figure out the final answer
+      maxIterations: 20,
+    },
+  },
+);
+```
+
+> [!NOTE]
+>
+> The default is zero retries and no timeout.
+
+##### Overriding prompt templates
+
+The agent uses the following prompt templates.
+
+1. **System Prompt**
+
+2. **User Prompt** (to reformat the user's prompt)
+
+3. **User Empty Prompt**
+
+4. **Tool Error**
+
+5. **Tool Input Error** (validation error)
+
+6. **Tool No Result Error**
+
+7. **Tool Not Found Error**
+
+8. **Invalid Schema Error** (output from LLM cannot be processed)
+
+Please refer to the [following example](/examples/agents/bee_advanced.ts) to see how to modify them.
+
 ## Best Practices
 
 1. **Error Handling**

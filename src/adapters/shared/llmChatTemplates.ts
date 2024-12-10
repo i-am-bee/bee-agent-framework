@@ -96,6 +96,8 @@ const llama31: LLMChatTemplate = {
   },
 };
 
+const llama33: LLMChatTemplate = llama31;
+
 const llama3: LLMChatTemplate = {
   template: new PromptTemplate({
     schema: templateSchemaFactory(["system", "user", "assistant"] as const),
@@ -151,6 +153,7 @@ const granite3Instruct: LLMChatTemplate = {
 
 export class LLMChatTemplates {
   protected static readonly registry = {
+    "llama3.3": llama33,
     "llama3.1": llama31,
     "llama3": llama3,
     "granite3Instruct": granite3Instruct,

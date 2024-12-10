@@ -19,7 +19,7 @@ import * as R from "remeda";
 import { Retryable, RetryableConfig } from "@/internals/helpers/retryable.js";
 import { Serializable } from "@/internals/serializable.js";
 import { Task } from "promise-based-task";
-import { Cache, ObjectHashKeyFn } from "@/cache/decoratorCache.js";
+import { Cache, ObjectHashKeyFn, WeakRefKeyFn } from "@/cache/decoratorCache.js";
 import { BaseCache } from "@/cache/base.js";
 import { NullCache } from "@/cache/nullCache.js";
 import type { ErrorObject, ValidateFunction } from "ajv";
@@ -94,7 +94,9 @@ export class StringToolOutput extends ToolOutput {
     return !this.result;
   }
 
-  @Cache()
+  @Cache({
+    cacheKey: WeakRefKeyFn.from<StringToolOutput>((self) => [self.result]),
+  })
   getTextContent(): string {
     return this.result.toString();
   }
@@ -127,7 +129,6 @@ export class JSONToolOutput<T> extends ToolOutput {
     return !this.result || R.isEmpty(this.result);
   }
 
-  @Cache()
   getTextContent(): string {
     return JSON.stringify(this.result);
   }
@@ -172,7 +173,16 @@ export interface ToolEvents<
   finish: Callback<null>;
 }
 
+/**
+ * @deprecated Use ToolEmitter instead
+ */
 export type CustomToolEmitter<
+  A extends Record<string, any>,
+  B extends ToolOutput,
+  C = Record<never, never>,
+> = Emitter<ToolEvents<A, B> & Omit<C, keyof ToolEvents>>;
+
+export type ToolEmitter<
   A extends Record<string, any>,
   B extends ToolOutput,
   C = Record<never, never>,

@@ -17,6 +17,8 @@
 import {
   AsyncStream,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -27,13 +29,18 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { ChatResponse, Ollama as Client, Options as Parameters } from "ollama";
+import { ChatRequest, ChatResponse, Config, Ollama as Client, Options as Parameters } from "ollama";
 import { signalRace } from "@/internals/helpers/promise.js";
 import { GetRunContext } from "@/context.js";
 import { Cache } from "@/cache/decoratorCache.js";
-import { customMerge } from "@/internals/helpers/object.js";
+import { customMerge, getPropStrict } from "@/internals/helpers/object.js";
 import { safeSum } from "@/internals/helpers/number.js";
-import { extractModelMeta, registerClient } from "@/adapters/ollama/shared.js";
+import {
+  extractModelMeta,
+  registerClient,
+  retrieveFormat,
+  retrieveVersion,
+} from "@/adapters/ollama/shared.js";
 import { getEnv } from "@/internals/env.js";
 
 export class OllamaChatLLMOutput extends ChatLLMOutput {
@@ -153,6 +160,15 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     return extractModelMeta(model);
   }
 
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    const response = await this.client.embed({
+      model: this.modelId,
+      input: input.flatMap((messages) => messages).flatMap((msg) => msg.text),
+    });
+    return { embeddings: response.embeddings };
+  }
+
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {
     const contentLength = input.reduce((acc, msg) => acc + msg.text.length, 0);
 
@@ -161,22 +177,22 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     };
   }
 
+  @Cache()
+  async version() {
+    const config = getPropStrict(this.client, "config") as Config;
+    return retrieveVersion(config.host, config.fetch);
+  }
+
   protected async _generate(
     input: BaseMessage[],
     options: GenerateOptions,
     run: GetRunContext<typeof this>,
   ): Promise<OllamaChatLLMOutput> {
     const response = await signalRace(
-      () =>
+      async () =>
         this.client.chat({
-          model: this.modelId,
+          ...(await this.prepareParameters(input, options)),
           stream: false,
-          messages: input.map((msg) => ({
-            role: msg.role,
-            content: msg.text,
-          })),
-          options: this.parameters,
-          format: options.guided?.json ? "json" : undefined,
         }),
       run.signal,
       () => this.client.abort(),
@@ -191,14 +207,8 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     run: GetRunContext<typeof this>,
   ): AsyncStream<OllamaChatLLMOutput> {
     for await (const chunk of await this.client.chat({
-      model: this.modelId,
+      ...(await this.prepareParameters(input, options)),
       stream: true,
-      messages: input.map((msg) => ({
-        role: msg.role,
-        content: msg.text,
-      })),
-      options: this.parameters,
-      format: options.guided?.json ? "json" : undefined,
     })) {
       if (run.signal.aborted) {
         break;
@@ -206,6 +216,21 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
       yield new OllamaChatLLMOutput(chunk);
     }
     run.signal.throwIfAborted();
+  }
+
+  protected async prepareParameters(
+    input: BaseMessage[],
+    overrides?: GenerateOptions,
+  ): Promise<ChatRequest> {
+    return {
+      model: this.modelId,
+      messages: input.map((msg) => ({
+        role: msg.role,
+        content: msg.text,
+      })),
+      options: this.parameters,
+      format: retrieveFormat(await this.version(), overrides?.guided),
+    };
   }
 
   createSnapshot() {

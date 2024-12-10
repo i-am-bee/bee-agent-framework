@@ -17,7 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
-  CustomToolEmitter,
+  ToolEmitter,
   StringToolOutput,
   Tool,
   ToolInput,
@@ -66,11 +66,10 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
   name: string;
   description: string;
 
-  public readonly emitter: CustomToolEmitter<ToolInput<this>, StringToolOutput> =
-    Emitter.root.child({
-      namespace: ["tool", "custom"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> = Emitter.root.child({
+    namespace: ["tool", "custom"],
+    creator: this,
+  });
 
   public inputSchema() {
     return this.options.inputSchema;

@@ -56,6 +56,7 @@ corepack enable
 
 ```bash
 yarn install --immutable
+yarn prepare
 ```
 
 5.  **Setup environmental variables:** To run E2E Tests, you should set the following variables in your `.env` file in the repository’s root.
@@ -68,6 +69,13 @@ GROQ_API_KEY=""
 WATSONX_API_KEY=""
 WATSONX_PROJECT_ID=""
 OLLAMA_HOST=""
+OPENAI_API_VERSION=""
+AZURE_DEPLOYMENT_NAME=""
+AZURE_OPENAI_API_KEY=""
+AZURE_OPENAI_ENDPOINT=""
+GOOGLE_APPLICATION_CREDENTIALS=""
+GCP_VERTEXAI_PROJECT=""
+GCP_VERTEXAI_LOCATION=""
 
 WATSONX_SPACE_ID="" # optional
 WATSONX_DEPLOYMENT_ID=""  # optional
@@ -86,7 +94,7 @@ WATSONX_DEPLOYMENT_ID=""  # optional
 _Example:_
 
 ```
-feat(llm): add streaming support for watsonx adapter
+feat(llms): add streaming support for watsonx adapter
 
 Ref: #15
 ```

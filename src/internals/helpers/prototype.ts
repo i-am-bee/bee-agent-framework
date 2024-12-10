@@ -33,3 +33,16 @@ export function isDirectInstanceOf<A>(
 ): object is A {
   return R.isTruthy(object) && Object.getPrototypeOf(object) === constructor.prototype;
 }
+
+export function findDescriptor<T extends NonNullable<unknown>>(
+  target: T,
+  property: keyof T,
+): PropertyDescriptor | null {
+  for (const node of traversePrototypeChain(target)) {
+    const descriptor = Object.getOwnPropertyDescriptor(node, property);
+    if (descriptor) {
+      return descriptor;
+    }
+  }
+  return null;
+}

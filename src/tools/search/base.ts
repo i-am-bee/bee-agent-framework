@@ -15,7 +15,7 @@
  */
 
 import { BaseToolOptions, BaseToolRunOptions, ToolOutput } from "@/tools/base.js";
-import { Cache } from "@/cache/decoratorCache.js";
+import { Cache, WeakRefKeyFn } from "@/cache/decoratorCache.js";
 import * as R from "remeda";
 
 export interface SearchToolOptions extends BaseToolOptions {}
@@ -35,6 +35,10 @@ export abstract class SearchToolOutput<
     super();
   }
 
+  @Cache({
+    cacheKey: WeakRefKeyFn.from<SearchToolOutput>((self) => self.results),
+    enumerable: false,
+  })
   get sources() {
     return R.unique(this.results.map((result) => result.url));
   }
@@ -43,7 +47,9 @@ export abstract class SearchToolOutput<
     return this.results.length === 0;
   }
 
-  @Cache()
+  @Cache({
+    cacheKey: WeakRefKeyFn.from<SearchToolOutput>((self) => self.results),
+  })
   getTextContent(): string {
     return this.results.map((result) => JSON.stringify(result, null, 2)).join("\n\n");
   }

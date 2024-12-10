@@ -19,6 +19,8 @@ import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   LLMCache,
@@ -32,6 +34,7 @@ import { VertexAI, BaseModelParams as Params } from "@google-cloud/vertexai";
 import { Role } from "@/llms/primitives/message.js";
 import { signalRace } from "@/internals/helpers/promise.js";
 import { processContentResponse, getTokenCount, registerVertexAI, createModel } from "./utils.js";
+import { NotImplementedError } from "@/errors.js";
 
 interface VertexAILLMChunk {
   text: string;
@@ -102,6 +105,11 @@ export class VertexAILLM extends LLM<VertexAILLMOutput> {
 
   async meta(): Promise<LLMMeta> {
     return { tokenLimit: Infinity };
+  }
+
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    throw new NotImplementedError();
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {

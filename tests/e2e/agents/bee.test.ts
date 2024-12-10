@@ -114,7 +114,14 @@ describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", ()
             update: callbacks.create("update"),
             toolStart: callbacks.create("toolStart"),
             toolSuccess: callbacks.create("toolSuccess"),
-            toolError: callbacks.create("toolError", { required: false }),
+            toolError: callbacks.create("toolError", {
+              required: false,
+              check: ({ data }) => {
+                expect(data.error).toBeInstanceOf(FrameworkError);
+                // eslint-disable-next-line no-console
+                console.warn("Tool Error", data.error.explain());
+              },
+            }),
           });
         });
     } catch (e) {

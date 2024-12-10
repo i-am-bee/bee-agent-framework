@@ -146,6 +146,27 @@ describe("@Cache decorator", () => {
     expect(a.getNumber).toEqual(2);
   });
 
+  it("Clears cache for inherited members", () => {
+    class A {
+      constructor(public readonly results: number[]) {}
+
+      @Cache()
+      toString() {
+        return this.results.join(",");
+      }
+    }
+
+    class B extends A {}
+
+    const instance = new B([1, 2, 3]);
+    expect(instance.toString()).toEqual("1,2,3");
+    instance.results.length = 0;
+    expect(instance.toString()).toEqual("1,2,3");
+    instance.results.push(4);
+    Cache.getInstance(instance, "toString").clear();
+    expect(instance.toString()).toEqual("4");
+  });
+
   it("Clears cache by a key", () => {
     class A {
       static calls = 0;

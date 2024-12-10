@@ -17,7 +17,7 @@
 import {
   BaseToolOptions,
   BaseToolRunOptions,
-  CustomToolEmitter,
+  ToolEmitter,
   JSONToolOutput,
   Tool,
   ToolEvents,
@@ -50,7 +50,7 @@ export class LangChainTool<T extends AnyZodObject, TOutput = any> extends Tool<
   protected tool: LCTools.StructuredTool<T>;
   public static serializedSchemaKey = "_internalJsonSchema" as const;
 
-  public readonly emitter: CustomToolEmitter<ToolEvents<T>, JSONToolOutput<TOutput>>;
+  public readonly emitter: ToolEmitter<ToolEvents<T>, JSONToolOutput<TOutput>>;
 
   constructor({
     tool,
@@ -115,7 +115,7 @@ export class LangChainTool<T extends AnyZodObject, TOutput = any> extends Tool<
 
   protected async _run(
     arg: ToolInput<this>,
-    options: LangChainToolRunOptions | undefined,
+    options: Partial<LangChainToolRunOptions>,
     run: GetRunContext<this>,
   ): Promise<JSONToolOutput<TOutput>> {
     const { outputClass = JSONToolOutput } = this.options;

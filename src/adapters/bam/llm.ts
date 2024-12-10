@@ -19,6 +19,8 @@ import {
   AsyncStream,
   BaseLLMOutput,
   BaseLLMTokenizeOutput,
+  EmbeddingOptions,
+  EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
   GuidedOptions,
@@ -43,7 +45,7 @@ import { transformAsyncIterable } from "@/internals/helpers/stream.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { safeSum } from "@/internals/helpers/number.js";
 import { customMerge, omitUndefined } from "@/internals/helpers/object.js";
-import { isEmpty, isString } from "remeda";
+import { chunk, isEmpty, isString } from "remeda";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
 
@@ -219,6 +221,29 @@ export class BAMLLM extends LLM<BAMLLMOutput, BAMLLMGenerateOptions> {
         tokenLimit: Infinity,
       };
     }
+  }
+
+  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+    const maxEmbeddingInputs = 20;
+    const results = await Promise.all(
+      chunk(input, maxEmbeddingInputs).map(async (texts) => {
+        const response = await this.client.text.embedding.create(
+          {
+            model_id: this.modelId,
+            input: texts,
+            parameters: {
+              truncate_input_tokens: true,
+            },
+          },
+          { signal: options?.signal },
+        );
+        if (response.results?.length !== texts.length) {
+          throw new Error("Missing embedding");
+        }
+        return response.results.map((result) => result.embedding);
+      }),
+    );
+    return { embeddings: results.flat() };
   }
 
   createSnapshot() {
