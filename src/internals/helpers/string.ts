@@ -17,7 +17,7 @@
 import { ValueOf } from "@/internals/types.js";
 import * as R from "remeda";
 import { ValueError } from "@/errors.js";
-import { unique } from "remeda";
+import { isString, unique } from "remeda";
 
 export function* splitString(
   text: string,
@@ -149,7 +149,25 @@ export function halveString(
   }
 }
 
-export function findFirstPair(text: string, pair: [string, string]) {
+export function countSharedStartEndLetters(a: string, b: string): number {
+  if (!isString(a) || !isString(b)) {
+    throw new ValueError("Provided values must be all strings.");
+  }
+
+  const minLength = Math.min(a.length, b.length);
+  for (let i = 0; i < minLength; i++) {
+    if (a.at((i + 1) * -1) !== b.at(i)) {
+      return i;
+    }
+  }
+  return minLength;
+}
+
+export function findFirstPair(
+  text: string,
+  pair: [string, string],
+  options: { allowOverlap?: boolean } = {},
+) {
   const [opening, closing] = pair || [];
   if (!pair || !opening || !closing) {
     throw new ValueError(`The "pair" parameter is required and must be non-empty!`);
@@ -157,6 +175,7 @@ export function findFirstPair(text: string, pair: [string, string]) {
 
   let balance = 0;
   let startIndex = -1;
+  const pairOverlap = options.allowOverlap ? countSharedStartEndLetters(opening, closing) : 0;
 
   const isSame = opening === closing;
   for (let index = 0; index < text.length; index++) {
@@ -165,18 +184,40 @@ export function findFirstPair(text: string, pair: [string, string]) {
         startIndex = index;
       }
       balance++;
+      if (!options.allowOverlap) {
+        index += opening.length - 1;
+      }
     } else if (text.substring(index, index + closing.length) === closing) {
       if (balance > 0) {
         balance--;
         if (balance === 0) {
+          const inner = {
+            start: startIndex + opening.length,
+            get end() {
+              let innerEnd = index;
+              const innerSize = innerEnd - this.start;
+
+              if (innerSize < 0) {
+                innerEnd = this.start;
+              } else {
+                innerEnd += pairOverlap;
+              }
+
+              return innerEnd;
+            },
+          };
+
           return {
             start: startIndex,
             end: index + closing.length,
             pair,
-            inner: text.substring(startIndex + opening.length, index),
+            inner: text.substring(inner.start, inner.end),
             outer: text.substring(startIndex, index + closing.length),
           };
         }
+      }
+      if (!options.allowOverlap) {
+        index += closing.length - 1;
       }
     }
   }

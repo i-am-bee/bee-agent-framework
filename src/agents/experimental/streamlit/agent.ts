@@ -170,7 +170,7 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
     for (let i = 0; i < raw.length; ) {
       const text = raw.substring(i);
 
-      const code = findFirstPair(text, ["```python-app\n", "```\n"]);
+      const code = findFirstPair(text, ["```python-app\n", "\n```"], { allowOverlap: true });
       if (!code) {
         blocks.push({ start: i, end: i + text.length, content: text, name: "text" });
         break;
