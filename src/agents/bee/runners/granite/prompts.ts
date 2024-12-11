@@ -47,7 +47,7 @@ export const GraniteBeeSystemPrompt = new PromptTemplate({
   functions: {
     formatDate: function () {
       const date = this.createdAt ? new Date(this.createdAt) : new Date();
-      return new Intl.DateTimeFormat(undefined, {
+      return new Intl.DateTimeFormat("en-US", {
         dateStyle: "full",
         timeStyle: "medium",
       }).format(date);
@@ -83,8 +83,11 @@ Pay close attention to the tool description to determine if a tool is useful in 
 - When the message is unclear, respond with a line starting with 'Final Answer:' followed by a request for additional information needed to solve the problem.
 - When the user wants to chitchat instead, always respond politely.
 
-# Current Date and Time
-{{formatDate}}
+# Date and Time
+The current date and time is: {{formatDate}}
+{{#tools.length}}
+You do not need a tool to get the current Date and Time. Use the information available here.
+{{/tools.length}}
 
 # Additional instructions
 {{instructions}}
