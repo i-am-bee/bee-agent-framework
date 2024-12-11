@@ -195,7 +195,7 @@ export class DefaultRunner extends BaseRunner {
             meta,
           });
           const toolOutput: ToolOutput = await tool.run(state.tool_input, this.options).context({
-            [Tool.ContextKeys.Memory]: this.memory,
+            [Tool.contextKeys.Memory]: this.memory,
           });
           await emitter.emit("toolSuccess", {
             data: {

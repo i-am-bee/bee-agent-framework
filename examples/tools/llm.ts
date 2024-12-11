@@ -21,7 +21,8 @@ const response = await tool
     task: "Classify whether the tone of text is POSITIVE/NEGATIVE/NEUTRAL.",
   })
   .context({
-    [Tool.ContextKeys.Memory]: memory,
+    // if the context is not passed, the tool will throw an error
+    [Tool.contextKeys.Memory]: memory,
   });
 
 console.info(response.getTextContent());

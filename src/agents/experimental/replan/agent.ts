@@ -148,7 +148,7 @@ export class RePlanAgent extends BaseAgent<RePlanRunInput, RePlanRunOutput> {
           await context.emitter.emit("tool", { type: "start", ...meta });
           try {
             const output = await tool.run(call.input, { signal: context.signal }).context({
-              [Tool.ContextKeys.Memory]: memory,
+              [Tool.contextKeys.Memory]: memory,
             });
             await context.emitter.emit("tool", { type: "success", ...meta, output });
             return output;

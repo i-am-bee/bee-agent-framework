@@ -76,7 +76,7 @@ The Task: {{task}}`,
     _options: Partial<BaseToolRunOptions>,
     run: GetRunContext<this>,
   ) {
-    const memory = getProp(run.context, [Tool.ContextKeys.Memory]) as BaseMemory;
+    const memory = getProp(run.context, [Tool.contextKeys.Memory]) as BaseMemory;
     if (!memory) {
       throw new ToolError(`No context has been provided!`, [], {
         isFatal: true,

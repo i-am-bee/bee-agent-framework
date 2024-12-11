@@ -199,7 +199,7 @@ export abstract class Tool<
   public readonly cache: BaseCache<Task<TOutput>>;
   public readonly options: TOptions;
 
-  public static ContextKeys = {
+  public static contextKeys = {
     Memory: Symbol("Memory"),
   } as const;
 
