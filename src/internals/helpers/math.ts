@@ -1,8 +1,8 @@
-import { FrameworkError } from "@/errors.js";
+import { ValueError } from "@/errors.js";
 
 export function cosineSimilarity(vecA: number[], vecB: number[]): number {
   if (vecA.length !== vecB.length) {
-    throw new FrameworkError("Vectors must have equal length");
+    throw new ValueError("Vectors must have equal length");
   }
   // (cos θ) = (A · B) / (|A| * |B|)
   const dot = vecA.reduce((sum, value, index) => sum + value * vecB[index], 0);
@@ -10,11 +10,15 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
   const magB = Math.sqrt(vecB.reduce((sum, value) => sum + value ** 2, 0));
 
   if (magA === 0 || magB === 0) {
-    throw new FrameworkError("Vectors cannot not have zero magnitude");
+    throw new ValueError("Vectors cannot not have zero magnitude");
   }
   return dot / (magA * magB);
 }
 
-export function cosineSimilarityWithMatrix(vector: number[], matrix: number[][]): number[] {
-  return matrix.map((row) => cosineSimilarity(vector, row));
+export function cosineSimilarityMatrix(matrixA: number[][], matrixB: number[][]): number[][] {
+  if ((matrixA[0]?.length ?? 0) !== (matrixA[0]?.length ?? 0)) {
+    throw new Error("Matrices must have the same number of columns.");
+  }
+
+  return matrixA.map((rowA) => matrixB.map((rowB) => cosineSimilarity(rowA, rowB)));
 }

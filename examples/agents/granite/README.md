@@ -76,15 +76,17 @@ The [granite_bee](/examples/agents/granite/granite_bee.ts) example agent is set 
 
    The example is configured with 2 available [tools](/docs/tools.md), these are OpenMeteo for facilitating weather related prompts and DuckDuckGo for facilitating search related prompts. The above example prompts demonstrate how each of these tools can be exercised.
 
-## 🤖 Granite wiki bee
+## 🤖 Granite Wiki Bee
 
-The [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) example agent is set up to demonstrate more advanced usage of the bee agent framework, specifically
-performing information retrieval on tool output via the frameworks tool customization options. This agent is configured to use the `WikipediaTool` which enables the agent to
-search wikipedia and access articles. However the tool interface is extended so that the agent can specify both a wikipedia topic and a search query within the topic. The wikipedia tool output is chunked and piped into a `SimilarityTool` that calculates the cosine similarity between the query and the data chunks. Only the most relevant chunks are then provided to the agents memory.
+The [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) agent is set up to demonstrate more advanced usage of the bee agent framework, specifically performing information retrieval on tool output via the frameworks tool customization options.
 
-This example uses ollama exclusively.
+This agent uses the `WikipediaTool` which enables it to search wikipedia and access articles. However, Wikipedia articles are often quite large which can overfill the LLM's context window and include inforation that may not be relevant to the task.
 
-To get started you will need to pull `granite3-dense:8b` and `nomic-embed-text` (to perform text embedding).
+In this example the wikipedia tool interface is extended so that the agent can specify both a wikipedia page and a search query within the page. The wikipedia tool output is chunked and piped into a `SimilarityTool` that calculates the cosine similarity between the query and the data chunks. Only the most relevant chunks are then provided to the agents memory.
+
+This example uses Ollama exclusively.
+
+To get started you will need to pull `granite3-dense:8b` and `nomic-embed-text` (to perform text embedding). If you are unfamilar with using Ollama then check out instructions for getting up and running at the the [Ollama Gitgub repo](https://github.com/ollama/ollama).
 
 ```shell
 ollama pull granite3-dense:8b
@@ -97,7 +99,7 @@ Run the [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) example
 yarn run start examples/agents/granite/granite_wiki_bee.ts
 ```
 
-You will see the agent running and producing an answer similar to the following:
+You will see the agent running a react pattern and producing a final answer similar to the following:
 
 > Agent 🤖 : The authors of the paper 'Attention is all you need' are Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan Gomez, Lukasz Kaiser, and Illia Polosukhin. The paper has been cited more than 100,000 times as of 2024.
 
@@ -106,10 +108,10 @@ The default prompt is the question `Who were the authors of the paper 'Attention
 You can provide other prompts as follows:
 
 ```shell
-   yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'When did the Roman Empire collapse?'
-   yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'What is the Great Barrier Reef?'
-   yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'Where is IBM headquartered?'
+yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'When did the Roman Empire collapse?'
+yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'What is the Great Barrier Reef?'
+yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'Where is IBM headquartered?'
 ```
 
-> [!TIP]
-> Better performance will be achieved by using larger Granite models.
+> [!NOTE]
+> The peformance of the [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) is dependent on wikipedia as an information source, as well as the retrieval settings included in the example. If you are encountering performance issues with a particular example, try to experiment with the retirval setting i.e. passageSize, overlap and maxResults. You can also try other emnedding models via Ollama.

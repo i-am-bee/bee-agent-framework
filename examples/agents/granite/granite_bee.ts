@@ -16,6 +16,7 @@ import OpenAI from "openai";
 import { z } from "zod";
 import * as process from "node:process";
 import fs from "node:fs";
+import pc from "picocolors";
 
 const Providers = {
   WATSONX: "watsonx",
@@ -90,7 +91,7 @@ const agent = new BeeAgent({
 
 try {
   const prompt = getPrompt(`What is the current weather in London?`);
-  console.info(`User 👤 : ${prompt}`);
+  console.log(pc.blue(`User 👤:`), prompt);
 
   const response = await agent
     .run(
@@ -99,16 +100,16 @@ try {
         execution: {
           maxIterations: 8,
           maxRetriesPerStep: 3,
-          totalMaxRetries: 0,
+          totalMaxRetries: 3,
         },
       },
     )
     .observe((emitter) => {
       emitter.on("update", (data) => {
-        console.info(`Agent 🤖 (${data.update.key}) : ${data.update.value}`);
+        console.log(pc.gray(`Agent 🤖 (${data.update.key}): ${data.update.value.trim()}`));
       });
     });
-  console.info(`Agent 🤖 : ${response.result.text}`);
+  console.log(pc.red(`Agent 🤖:`), response.result.text);
 } catch (error) {
   console.error(FrameworkError.ensure(error).dump());
 } finally {

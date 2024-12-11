@@ -16,7 +16,14 @@
 
 import { PromptTemplate } from "@/template.js";
 import { z } from "zod";
-import { BeeAssistantPrompt, BeeSchemaErrorPrompt } from "@/agents/bee/prompts.js";
+import {
+  BeeAssistantPrompt,
+  BeeSchemaErrorPrompt,
+  BeeToolErrorPrompt,
+  BeeToolInputErrorPrompt,
+  BeeToolNotFoundPrompt,
+  BeeUserPrompt,
+} from "@/agents/bee/prompts.js";
 
 export const GraniteBeeAssistantPrompt = BeeAssistantPrompt.fork((config) => ({
   ...config,
@@ -35,8 +42,17 @@ export const GraniteBeeSystemPrompt = new PromptTemplate({
         })
         .passthrough(),
     ),
+    createdAt: z.string().datetime().nullish(),
   }),
-
+  functions: {
+    formatDate: function () {
+      const date = this.createdAt ? new Date(this.createdAt) : new Date();
+      return new Intl.DateTimeFormat(undefined, {
+        dateStyle: "full",
+        timeStyle: "medium",
+      }).format(date);
+    },
+  },
   template: `# Setting
 You are an AI assistant.
 When the user sends a message figure out a solution and provide a final answer.
@@ -68,10 +84,7 @@ Pay close attention to the tool description to determine if a tool is useful in 
 - When the user wants to chitchat instead, always respond politely.
 
 # Current Date and Time
-${new Intl.DateTimeFormat(undefined, {
-  dateStyle: "full",
-  timeStyle: "medium",
-}).format(new Date())}.
+{{formatDate}}
 
 # Additional instructions
 {{instructions}}
@@ -84,45 +97,29 @@ export const GraniteBeeSchemaErrorPrompt = BeeSchemaErrorPrompt.fork((config) =>
 You communicate only in instruction lines. Valid instruction lines are 'Thought' followed by 'Tool Name' and then 'Tool Input' or 'Thought' followed by 'Final Answer'.`,
 }));
 
-export const GraniteBeeUserPrompt = new PromptTemplate({
-  schema: z
-    .object({
-      input: z.string(),
-    })
-    .passthrough(),
+export const GraniteBeeUserPrompt = BeeUserPrompt.fork((config) => ({
+  ...config,
   template: `Message: {{input}}`,
-});
+}));
 
-export const GraniteBeeToolNotFoundPrompt = new PromptTemplate({
-  schema: z
-    .object({
-      tools: z.array(z.object({ name: z.string() }).passthrough()),
-    })
-    .passthrough(),
+export const GraniteBeeToolNotFoundPrompt = BeeToolNotFoundPrompt.fork((config) => ({
+  ...config,
   template: `Tool does not exist!
 {{#tools.length}}
 Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
 {{/tools.length}}`,
-});
+}));
 
-export const GraniteBeeToolErrorPrompt = new PromptTemplate({
-  schema: z
-    .object({
-      reason: z.string(),
-    })
-    .passthrough(),
+export const GraniteBeeToolErrorPrompt = BeeToolErrorPrompt.fork((config) => ({
+  ...config,
   template: `The tool has failed; the error log is shown below. If the tool cannot accomplish what you want, use a different tool or explain why you can't use it.
 
 {{reason}}`,
-});
+}));
 
-export const GraniteBeeToolInputErrorPrompt = new PromptTemplate({
-  schema: z
-    .object({
-      reason: z.string(),
-    })
-    .passthrough(),
+export const GraniteBeeToolInputErrorPrompt = BeeToolInputErrorPrompt.fork((config) => ({
+  ...config,
   template: `{{reason}}
 
 HINT: If you're convinced that the input was correct but the tool cannot process it then use a different tool or say I don't know.`,
-});
+}));
