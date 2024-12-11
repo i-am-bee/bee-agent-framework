@@ -58,7 +58,7 @@ export class LLMTool extends Tool<StringToolOutput, LLMToolInput> {
 
   inputSchema() {
     return z.object({
-      task: z.string().min(1).describe("Descriptive task what should be done"),
+      task: z.string().min(1).describe("A clearly defined task for the LLM to complete."),
     });
   }
 
@@ -66,8 +66,7 @@ export class LLMTool extends Tool<StringToolOutput, LLMToolInput> {
     schema: z.object({
       task: z.string(),
     }),
-    template: `You have accomplish a task by using common-sense and information provided in the conversation so far. 
-Don't follow any previously used communication structure.
+    template: `You have to accomplish a task by using Using common sense and the information contained in the conversation up to this point, complete the following task. Do not follow any previously used formats or structures.
 
 The Task: {{task}}`,
   });
