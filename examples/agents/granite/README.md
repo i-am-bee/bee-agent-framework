@@ -55,7 +55,7 @@ The [granite_bee](/examples/agents/granite/granite_bee.ts) example agent is set 
 1. Run the [granite_bee](/examples/agents/granite/granite_bee.ts) example:
 
    ```shell
-   yarn run start examples/agents/granite_bee.ts
+   yarn run start examples/agents/granite/granite_bee.ts
    ```
 
    This will show the various stages of the agent running and ultimately deliver an answer similar to the following:
@@ -80,9 +80,9 @@ The [granite_bee](/examples/agents/granite/granite_bee.ts) example agent is set 
 
 The [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) agent is set up to demonstrate more advanced usage of the bee agent framework, specifically performing information retrieval on tool output via the frameworks tool customization options.
 
-This agent uses the `WikipediaTool` which enables it to search wikipedia and access articles. However, Wikipedia articles are often quite large which can overfill the LLM's context window and include inforation that may not be relevant to the task.
+This agent uses the [WikipediaTool](/src/tools/search/wikipedia.ts) which enables it to search wikipedia and access articles. However, Wikipedia articles are often quite large which can overfill the LLM's context window and include information that may not be relevant to the task.
 
-In this example the wikipedia tool interface is extended so that the agent can specify both a wikipedia page and a search query within the page. The wikipedia tool output is chunked and piped into a `SimilarityTool` that calculates the cosine similarity between the query and the data chunks. Only the most relevant chunks are then provided to the agents memory.
+In this example the wikipedia tool interface is extended so that the agent can specify both a wikipedia page and a search query within the page. The wikipedia tool output is chunked and piped into a [SimilarityTool](/src/tools/similarity.ts) that calculates the cosine similarity between the query and the data chunks. Only the most relevant chunks are then provided to the agents memory.
 
 This example uses Ollama exclusively.
 
@@ -91,6 +91,7 @@ To get started you will need to pull `granite3-dense:8b` and `nomic-embed-text` 
 ```shell
 ollama pull granite3-dense:8b
 ollama pull nomic-embed-text
+ollama serve
 ```
 
 Run the [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) example:
@@ -108,7 +109,7 @@ The default prompt is the question `Who were the authors of the paper 'Attention
 You can provide other prompts as follows:
 
 ```shell
-yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'When did the Roman Empire collapse?'
+yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'When was the collapse of the Roman Empire?'
 yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'What is the Great Barrier Reef?'
 yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'Where is IBM headquartered?'
 ```
