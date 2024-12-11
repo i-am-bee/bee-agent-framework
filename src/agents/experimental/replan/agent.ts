@@ -28,7 +28,7 @@ import {
 import { BaseMemory } from "@/memory/base.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
 import { JsonDriver } from "@/llms/drivers/json.js";
-import { AnyTool } from "@/tools/base.js";
+import { AnyTool, Tool } from "@/tools/base.js";
 import { AnyChatLLM } from "@/llms/chat.js";
 
 export interface RePlanRunInput {
@@ -147,7 +147,9 @@ export class RePlanAgent extends BaseAgent<RePlanRunInput, RePlanRunOutput> {
           const meta = { input: call, tool, calls };
           await context.emitter.emit("tool", { type: "start", ...meta });
           try {
-            const output = await tool.run(call.input, { signal: context.signal });
+            const output = await tool.run(call.input, { signal: context.signal }).context({
+              [Tool.contextKeys.Memory]: memory,
+            });
             await context.emitter.emit("tool", { type: "success", ...meta, output });
             return output;
           } catch (error) {

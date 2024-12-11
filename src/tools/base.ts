@@ -199,6 +199,10 @@ export abstract class Tool<
   public readonly cache: BaseCache<Task<TOutput>>;
   public readonly options: TOptions;
 
+  public static contextKeys = {
+    Memory: Symbol("Memory"),
+  } as const;
+
   public abstract readonly emitter: Emitter<ToolEvents<any, TOutput>>;
 
   abstract inputSchema(): Promise<AnyToolSchemaLike> | AnyToolSchemaLike;
