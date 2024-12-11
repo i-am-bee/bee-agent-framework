@@ -1,42 +1,27 @@
 import "dotenv/config";
-import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { createConsoleReader } from "examples/helpers/io.js";
-import { FrameworkError } from "bee-agent-framework/errors";
-import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
-import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { LLMTool } from "bee-agent-framework/tools/llm";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { Tool } from "bee-agent-framework/tools/base";
+import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 
-const agent = new BeeAgent({
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
-  memory: new UnconstrainedMemory(),
-  tools: [
-    new LLMTool({
-      llm: BAMChatLLM.fromPreset("meta-llama/llama-3-8b-instruct"),
-    }),
-    new WikipediaTool(),
-  ],
+const memory = new UnconstrainedMemory();
+await memory.addMany([
+  BaseMessage.of({ role: "system", text: "You are a helpful assistant." }),
+  BaseMessage.of({ role: "user", text: "Hello!" }),
+  BaseMessage.of({ role: "assistant", text: "Hello user. I am here to help you." }),
+]);
+
+const tool = new LLMTool({
+  llm: new OllamaChatLLM(),
 });
 
-const reader = createConsoleReader();
+const response = await tool
+  .run({
+    task: "Classify whether the tone of text is POSITIVE/NEGATIVE/NEUTRAL.",
+  })
+  .context({
+    [Tool.ContextKeys.Memory]: memory,
+  });
 
-try {
-  for await (const { prompt } of reader) {
-    const response = await agent
-      .run({
-        prompt,
-      })
-      .observe((emitter) => {
-        emitter.on("retry", () => {
-          reader.write(`Agent 🤖 : `, "retrying the action...");
-        });
-        emitter.on("update", async ({ update }) => {
-          reader.write(`Agent (${update.key}) 🤖 : `, `${update.value}`);
-        });
-      });
-
-    reader.write(`Agent 🤖 : `, response.result.text);
-  }
-} catch (error) {
-  reader.write("ERROR", FrameworkError.ensure(error).dump());
-}
+console.info(response.getTextContent());
