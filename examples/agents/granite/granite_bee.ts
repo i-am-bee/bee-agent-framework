@@ -89,7 +89,7 @@ const agent = new BeeAgent({
 });
 
 try {
-  const prompt = getPrompt(`What is the current weather in london?`);
+  const prompt = getPrompt(`What is the current weather in London?`);
   console.info(`User 👤 : ${prompt}`);
 
   const response = await agent
