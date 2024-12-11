@@ -169,9 +169,13 @@ export class OpenMeteoTool extends Tool<OpenMeteoToolOutput, ToolOptions, ToolRu
       const start = startDate
         ? new Date(startDate)
         : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-      const end = endDate
+      let end = endDate
         ? new Date(endDate)
         : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+
+      if (end < start) {
+        end = new Date(start);
+      }
 
       const toDateString = (date: Date) => date.toISOString().split("T")[0];
 
