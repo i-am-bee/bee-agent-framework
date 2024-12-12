@@ -307,7 +307,7 @@ export class DefaultRunner extends BaseRunner {
   }
 
   protected async initMemory({ prompt }: BeeRunInput): Promise<BaseMemory> {
-    const { memory: history, llm: llm } = this.input;
+    const { memory: history, llm } = this.input;
 
     const prevConversation = [...history.messages, this.renderers.user.message({ prompt })]
       .filter(isTruthy)
