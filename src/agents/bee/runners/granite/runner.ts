@@ -72,17 +72,16 @@ export class GraniteRunner extends DefaultRunner {
       await memory.add(
         BaseMessage.of({
           role: "available_tools",
-          text: JSON.stringify(
-            (await this.renderers.system.variables.tools()).map((tool) => {
-              return {
+          text: await (async () =>
+            JSON.stringify(
+              (await this.renderers.system.variables.tools()).map((tool) => ({
                 name: tool.name,
                 description: tool.description,
                 schema: JSON.parse(tool.schema),
-              };
-            }),
-            null,
-            4,
-          ),
+              })),
+              null,
+              4,
+            ))(),
         }),
         index,
       );
