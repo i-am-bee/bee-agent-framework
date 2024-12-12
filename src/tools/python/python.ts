@@ -50,7 +50,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
   name = "Python";
   description = [
     "Run Python and/or shell code and return the console output. Use for isolated calculations, computations, data or file manipulation but still prefer assistant's capabilities and NEVER use for text summarization.",
-    "Files provided by the user, or created in a previous run, will be accesible if and only if they are specified in the input. It is necessary to always print() results.",
+    "Files provided by the user, or created in a previous run, will be accessible if and only if they are specified in the input. It is necessary to always print() results.",
     "The following shell commands are available:",
     "Use ffmpeg to convert videos.",
     "Use yt-dlp to download videos, and unless specified otherwise use `-S vcodec:h264,res,acodec:m4a` for video and `-x --audio-format mp3` for audio-only.",
