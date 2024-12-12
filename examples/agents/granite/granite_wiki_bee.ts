@@ -4,15 +4,13 @@ import { FrameworkError } from "bee-agent-framework/errors";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { z } from "zod";
-import * as process from "node:process";
 import { OllamaLLM } from "bee-agent-framework/adapters/ollama/llm";
 import { SimilarityTool } from "bee-agent-framework/tools/similarity";
 import { cosineSimilarityMatrix } from "bee-agent-framework/internals/helpers/math";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { splitString } from "bee-agent-framework/internals/helpers/string";
 import { AnyTool } from "bee-agent-framework/tools/base";
-import pc from "picocolors";
-import fs from "node:fs";
+import { createConsoleReader } from "examples/helpers/io.js";
 
 // Creates a wikipedia tool that supports information retrieval
 function wikipediaRetrivalTool(passageSize: number, overlap: number, maxResults: number): AnyTool {
@@ -76,13 +74,6 @@ function wikipediaRetrivalTool(passageSize: number, overlap: number, maxResults:
     }));
 }
 
-function getPrompt(fallback: string) {
-  if (process.stdin.isTTY) {
-    return fallback;
-  }
-  return fs.readFileSync(process.stdin.fd).toString().trim() || fallback;
-}
-
 // Agent LLM
 const llm = new OllamaChatLLM({
   modelId: "granite3-dense:8b",
@@ -99,11 +90,10 @@ const agent = new BeeAgent({
   tools: [wikipediaRetrivalTool(200, 50, 3)],
 });
 
+const reader = createConsoleReader();
+
 try {
-  const prompt = getPrompt(
-    `Who were the authors of the paper 'Attention is all you need' and how many citations does it have?`,
-  );
-  console.log(pc.blue(`User 👤:`), prompt);
+  const prompt = await reader.prompt();
   const response = await agent
     .run(
       { prompt },
@@ -117,10 +107,12 @@ try {
     )
     .observe((emitter) => {
       emitter.on("update", (data) => {
-        console.log(pc.gray(`Agent 🤖 (${data.update.key}): ${data.update.value.trim()}`));
+        reader.write(`Agent (${data.update.key}) 🤖 : `, data.update.value.trim());
       });
     });
-  console.log(pc.red(`Agent 🤖:`), response.result.text);
+  reader.write(`Agent 🤖: `, response.result.text);
 } catch (error) {
   console.error(FrameworkError.ensure(error).dump());
+} finally {
+  reader.close();
 }

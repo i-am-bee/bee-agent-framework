@@ -52,24 +52,22 @@ The [granite_bee](/examples/agents/granite/granite_bee.ts) example agent is set 
       OLLAMA_HOST={http://0.0.0.0:11434}
       ```
 
-1. Run the [granite_bee](/examples/agents/granite/granite_bee.ts) example:
+1. Run the [granite_bee](/examples/agents/granite/granite_bee.ts) agent:
 
    ```shell
-   yarn run start examples/agents/granite/granite_bee.ts
+   yarn run start examples/agents/granite/granite_bee.ts <<< "What is the current weather in London?"
    ```
 
-   This will show the various stages of the agent running and ultimately deliver an answer similar to the following:
+   This will show the various stages of the agent running (reasoning, tool calling etc.) and ultimately deliver an answer similar to the following:
 
    > Agent 🤖 : The current weather in London is 13.3°C with no rain. The maximum temperature for today is expected to be 13.5°C.
 
-   The default prompt is the question `What is the current weather in London?`
-
-   You can provide other prompts as follows:
+   You can try out other prompts as follows:
 
    ```shell
-    yarn run start examples/agents/granite/granite_bee.ts <<< 'Who is the president of the USA?'
-    yarn run start examples/agents/granite/granite_bee.ts <<< 'What is the spanish word for dog?'
-    yarn run start examples/agents/granite/granite_bee.ts <<< 'What does the alias command do in the BASH shell?'
+    yarn run start examples/agents/granite/granite_bee.ts <<< "Who is the current CEO of IBM?"
+    yarn run start examples/agents/granite/granite_bee.ts <<< "What is the spanish and french word for dog?"
+    yarn run start examples/agents/granite/granite_bee.ts <<< "What does the alias command do in the BASH shell?"
     yarn run start examples/agents/granite/granite_bee.ts <<< "What’s the largest technology company by market capitalization right now?"
     yarn run start examples/agents/granite/granite_bee.ts <<< "What’s the weather going to be like tomorrow in Sydney?"
    ```
@@ -94,24 +92,22 @@ ollama pull nomic-embed-text
 ollama serve
 ```
 
-Run the [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) example:
+Run the [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) agent:
 
 ```shell
-yarn run start examples/agents/granite/granite_wiki_bee.ts
+yarn run start examples/agents/granite/granite_wiki_bee.ts <<< "Who were the authors of the paper 'Attention is all you need' and how many citations does it have?"
 ```
 
-You will see the agent running a react pattern and producing a final answer similar to the following:
+You will see the agent reasoning, calling the WikipediaTool and producing a final answer similar to the following:
 
 > Agent 🤖 : The authors of the paper 'Attention is all you need' are Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan Gomez, Lukasz Kaiser, and Illia Polosukhin. The paper has been cited more than 100,000 times as of 2024.
 
-The default prompt is the question `Who were the authors of the paper 'Attention is all you need' and how many citations does it have?`
-
-You can provide other prompts as follows:
+You can try out other prompts in the following manner:
 
 ```shell
-yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'When was the collapse of the Roman Empire?'
-yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'What is the Great Barrier Reef?'
-yarn run start examples/agents/granite/granite_wiki_bee.ts <<< 'Where is IBM headquartered?'
+yarn run start examples/agents/granite/granite_wiki_bee.ts <<< "When was the collapse of the Roman Empire?"
+yarn run start examples/agents/granite/granite_wiki_bee.ts <<< "What is the Great Barrier Reef?"
+yarn run start examples/agents/granite/granite_wiki_bee.ts <<< "Where is IBM headquartered?"
 ```
 
 > [!NOTE]

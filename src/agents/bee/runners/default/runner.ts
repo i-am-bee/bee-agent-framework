@@ -295,7 +295,7 @@ export class DefaultRunner extends BaseRunner {
             text: this.templates.system.render({
               tools: await self.system.variables.tools(),
               instructions: undefined,
-              createdAt: undefined,
+              createdAt: new Date().toISOString(),
             }),
             meta: {
               createdAt: new Date(),

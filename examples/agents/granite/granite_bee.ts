@@ -15,8 +15,7 @@ import { Ollama } from "ollama";
 import OpenAI from "openai";
 import { z } from "zod";
 import * as process from "node:process";
-import fs from "node:fs";
-import pc from "picocolors";
+import { createConsoleReader } from "examples/helpers/io.js";
 
 const Providers = {
   WATSONX: "watsonx",
@@ -75,13 +74,6 @@ function getChatLLM(provider?: Provider): ChatLLM<ChatLLMOutput> {
   return factory();
 }
 
-function getPrompt(fallback: string) {
-  if (process.stdin.isTTY) {
-    return fallback;
-  }
-  return fs.readFileSync(process.stdin.fd).toString().trim() || fallback;
-}
-
 const llm = getChatLLM();
 const agent = new BeeAgent({
   llm,
@@ -89,10 +81,10 @@ const agent = new BeeAgent({
   tools: [new OpenMeteoTool(), new DuckDuckGoSearchTool({ maxResults: 3 })],
 });
 
-try {
-  const prompt = getPrompt(`What is the current weather in London?`);
-  console.log(pc.blue(`User 👤:`), prompt);
+const reader = createConsoleReader();
 
+try {
+  const prompt = await reader.prompt();
   const response = await agent
     .run(
       { prompt },
@@ -106,10 +98,10 @@ try {
     )
     .observe((emitter) => {
       emitter.on("update", (data) => {
-        console.log(pc.gray(`Agent 🤖 (${data.update.key}): ${data.update.value.trim()}`));
+        reader.write(`Agent (${data.update.key}) 🤖 : `, data.update.value.trim());
       });
     });
-  console.log(pc.red(`Agent 🤖:`), response.result.text);
+  reader.write(`Agent 🤖: `, response.result.text);
 } catch (error) {
   console.error(FrameworkError.ensure(error).dump());
 } finally {
