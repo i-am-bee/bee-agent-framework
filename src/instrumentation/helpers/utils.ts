@@ -22,8 +22,8 @@ export function assertLLMWithMessagesToPromptFn(instance: object): instance is B
   messagesToPrompt: BAMChatLLMInputConfig["messagesToPrompt"];
 } {
   return Boolean(
-    "messagesToPrompt" in instance &&
-      isFunction(instance.messagesToPrompt) &&
-      instance instanceof BaseLLM,
+    instance instanceof BaseLLM &&
+      "messagesToPrompt" in instance &&
+      isFunction(instance.messagesToPrompt),
   );
 }
