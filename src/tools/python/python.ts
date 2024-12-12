@@ -49,7 +49,7 @@ export interface PythonToolOptions extends BaseToolOptions {
 export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
   name = "Python";
   description = [
-    "Run Python and/or shell code and return the console output. Use for isolated calculations, computations, data or file manipulation but still prefer assistant's capabilities and NEVER use for text summarization.",
+    "Run Python and/or shell code and return the console output. Use for isolated calculations, computations, data or file manipulation but still prefer assistant's capabilities (IMPORTANT: Do not use for text analysis or summarization).",
     "Files provided by the user, or created in a previous run, will be accessible if and only if they are specified in the input. It is necessary to always print() results.",
     "The following shell commands are available:",
     "Use ffmpeg to convert videos.",
