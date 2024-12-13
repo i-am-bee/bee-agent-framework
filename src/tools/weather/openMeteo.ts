@@ -179,7 +179,7 @@ export class OpenMeteoTool extends Tool<OpenMeteoToolOutput, ToolOptions, ToolRu
           const end = new Date(endDateStr);
           if (end < start) {
             throw new ToolInputValidationError(
-              `The 'end_date' (${endDateStr}) must be occur on or after the 'start_date' (${startDateStr}).`,
+              `The 'end_date' (${endDateStr}) has to occur on or after the 'start_date' (${startDateStr}).`,
             );
           }
           return { start: start, end: end };
