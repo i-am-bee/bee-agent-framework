@@ -30,6 +30,7 @@ export const BeeSystemPrompt = new PromptTemplate({
         })
         .passthrough(),
     ),
+    createdAt: z.string().datetime().nullish(),
   }),
   template: `# Available functions
 {{#tools.length}}

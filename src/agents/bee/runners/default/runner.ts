@@ -295,6 +295,7 @@ export class DefaultRunner extends BaseRunner {
             text: this.templates.system.render({
               tools: await self.system.variables.tools(),
               instructions: undefined,
+              createdAt: new Date().toISOString(),
             }),
             meta: {
               createdAt: new Date(),
@@ -306,7 +307,7 @@ export class DefaultRunner extends BaseRunner {
   }
 
   protected async initMemory({ prompt }: BeeRunInput): Promise<BaseMemory> {
-    const { templates, memory: history, llm } = this.input;
+    const { memory: history, llm } = this.input;
 
     const prevConversation = [...history.messages, this.renderers.user.message({ prompt })]
       .filter(isTruthy)
@@ -314,8 +315,8 @@ export class DefaultRunner extends BaseRunner {
         if (message.role === Role.USER) {
           const isEmpty = !message.text.trim();
           const text = isEmpty
-            ? (templates?.userEmpty ?? BeeUserEmptyPrompt).render({})
-            : (templates?.user ?? BeeUserPrompt).render({
+            ? (this.templates?.userEmpty ?? BeeUserEmptyPrompt).render({})
+            : (this.templates?.user ?? BeeUserPrompt).render({
                 input: message.text,
                 meta: {
                   ...message?.meta,
