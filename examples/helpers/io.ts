@@ -27,16 +27,26 @@ export function createConsoleReader({
           .concat("\n"),
       );
     },
+
     async prompt(): Promise<string> {
+      // This uses the async iterator below. If it's exhausted, return empty string.
       for await (const { prompt } of this) {
         return prompt;
       }
-      process.exit(0);
+      return "";
     },
+
+    // New method: Asks a single question without consuming the async iterator.
+    async askSingleQuestion(queryMessage: string): Promise<string> {
+      const answer = await rl.question(R.piped(picocolors.cyan, picocolors.bold)(queryMessage));
+      return stripAnsi(answer.trim());
+    },
+
     close() {
       stdin.pause();
       rl.close();
     },
+
     async *[Symbol.asyncIterator]() {
       if (!isActive) {
         return;
@@ -64,7 +74,7 @@ export function createConsoleReader({
           }
           yield { prompt, iteration };
         }
-      } catch (e) {
+      } catch (e: any) {
         if (e.code === "ERR_USE_AFTER_CLOSE") {
           return;
         }
