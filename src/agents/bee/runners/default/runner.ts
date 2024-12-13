@@ -44,6 +44,7 @@ import { TokenMemory } from "@/memory/tokenMemory.js";
 import { getProp } from "@/internals/helpers/object.js";
 import { BaseMemory } from "@/memory/base.js";
 import { Cache } from "@/cache/decoratorCache.js";
+import { shallowCopy } from "@/serializer/utils.js";
 
 export class DefaultRunner extends BaseRunner {
   static {
@@ -85,9 +86,10 @@ export class DefaultRunner extends BaseRunner {
         }
       },
       executor: async () => {
-        await emitter.emit("start", { meta });
+        const tools = this.input.tools.slice();
+        await emitter.emit("start", { meta, tools, memory: this.memory });
 
-        const { parser, parserRegex } = this.createParser(this.input.tools);
+        const { parser, parserRegex } = this.createParser(tools);
         const llmOutput = await this.input.llm
           .generate(this.memory.messages.slice(), {
             signal,
@@ -184,24 +186,26 @@ export class DefaultRunner extends BaseRunner {
         this.failedAttemptsCounter.use(error);
       },
       executor: async () => {
+        const toolOptions = shallowCopy(this.options);
+
         try {
           await emitter.emit("toolStart", {
             data: {
               tool,
               input: state.tool_input,
-              options: this.options,
+              options: toolOptions,
               iteration: state,
             },
             meta,
           });
-          const toolOutput: ToolOutput = await tool.run(state.tool_input, this.options).context({
+          const toolOutput: ToolOutput = await tool.run(state.tool_input, toolOptions).context({
             [Tool.contextKeys.Memory]: this.memory,
           });
           await emitter.emit("toolSuccess", {
             data: {
               tool,
               input: state.tool_input,
-              options: this.options,
+              options: toolOptions,
               result: toolOutput,
               iteration: state,
             },
@@ -221,7 +225,7 @@ export class DefaultRunner extends BaseRunner {
             data: {
               tool,
               input: state.tool_input,
-              options: this.options,
+              options: toolOptions,
               error,
               iteration: state,
             },
