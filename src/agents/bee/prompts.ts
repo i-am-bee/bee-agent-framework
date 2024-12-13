@@ -32,7 +32,9 @@ export const BeeSystemPrompt = new PromptTemplate({
     ),
     createdAt: z.string().datetime().nullish(),
   }),
-  template: `# Available functions
+  template: `You are an LLM-powered agent operating in loops. Whenever a user sends an input, it initiates your loop, which continues until you return a final answer. Users can customize your behavior using the role section, and you must always follow their role instructions but never break the communication structure.
+
+# Available functions
 {{#tools.length}}
 You can only use the following functions. Always use all required parameters.
 
