@@ -22,6 +22,7 @@ import {
   Tool,
   ToolError,
   ToolInput,
+  ToolInputValidationError,
 } from "@/tools/base.js";
 import { z } from "zod";
 import { createURLParams } from "@/internals/fetcher.js";
@@ -165,13 +166,30 @@ export class OpenMeteoTool extends Tool<OpenMeteoToolOutput, ToolOptions, ToolRu
         return location;
       };
 
-      const now = new Date();
-      const start = startDate
-        ? new Date(startDate)
-        : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-      const end = endDate
-        ? new Date(endDate)
-        : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+      function validateAndSetDates(
+        startDateStr: string,
+        endDateStr?: string,
+      ): { start: Date; end: Date } {
+        const now = new Date();
+        const start = startDateStr
+          ? new Date(startDateStr)
+          : new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+
+        if (endDateStr) {
+          const end = new Date(endDateStr);
+          if (end < start) {
+            throw new ToolInputValidationError(
+              `The 'end_date' (${endDateStr}) has to occur on or after the 'start_date' (${startDateStr}).`,
+            );
+          }
+          return { start: start, end: end };
+        } else {
+          // If endDate is undefined, set it to the start date
+          return { start: start, end: new Date(start) };
+        }
+      }
+
+      const { start, end } = validateAndSetDates(startDate, endDate);
 
       const toDateString = (date: Date) => date.toISOString().split("T")[0];
 
