@@ -24,13 +24,17 @@ There are guides available for running Granite with Ollama on [Linux](https://ww
 
 In order to use IBM [watsonx.ai](https://www.ibm.com/products/watsonx-ai) you can follow the [IBM watsonx as a Service](https://www.ibm.com/docs/en/watsonx/saas) documentation and in particular their [getting started tutorials](https://www.ibm.com/docs/en/watsonx/saas?topic=getting-started-tutorials).
 
+## 🐝 Download and install bee-agent-framework
+
+Before getting started you will need to install the bee-agent-framework.
+
+Follow the [Local Installation](https://github.com/i-am-bee/bee-agent-framework?tab=readme-ov-file#local-installation) section of our main README to [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the Bee Agent Framework git repository and install its dependencies. Return to this guide when you have completed these steps and are ready to configure environment variables.
+
 ## 🛠️ Getting Started
 
-Before getting started, ensure you have access to an IBM Granite model and have followed any other requirements in the [prerequisites](#prerequisites) above.
+Ensure you have access to an IBM Granite model and have followed any other requirements in the [prerequisites](#prerequisites) above.
 
 The [granite_bee](/examples/agents/granite/granite_bee.ts) example agent is set up to demonstrate how to use IBM Granite with the Bee Agent Framework. In order to run this example, take the following steps:
-
-1. Follow the [Local Installation](https://github.com/i-am-bee/bee-agent-framework?tab=readme-ov-file#local-installation) section of our main README to [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the Bee Agent Framework git repository and install its dependencies. Return to this guide when you have completed these steps and are ready to configure environment variables.
 
 1. Copy the [.env.template](/.env.template) file to a new file called `.env` and fill out the required details within the `.env` file (replace the values shown in braces), as follows
 
@@ -84,7 +88,7 @@ In this example the wikipedia tool interface is extended so that the agent can s
 
 This example uses Ollama exclusively.
 
-To get started you will need to pull `granite3-dense:8b` and `nomic-embed-text` (to perform text embedding). If you are unfamilar with using Ollama then check out instructions for getting up and running at the the [Ollama Gitgub repo](https://github.com/ollama/ollama).
+To get started you will need to pull `granite3-dense:8b` and `nomic-embed-text` (to perform text embedding). If you are unfamiliar with using Ollama then check out instructions for getting up and running at the the [Ollama Github repo](https://github.com/ollama/ollama).
 
 ```shell
 ollama pull granite3-dense:8b
@@ -111,4 +115,4 @@ yarn run start examples/agents/granite/granite_wiki_bee.ts <<< "Where is IBM hea
 ```
 
 > [!NOTE]
-> The peformance of the [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) is dependent on wikipedia as an information source, as well as the retrieval settings included in the example. If you are encountering performance issues with a particular example, try to experiment with the retirval setting i.e. passageSize, overlap and maxResults. You can also try other emnedding models via Ollama.
+> The peformance of the [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) is dependent on wikipedia as an information source as well as the retrieval settings included in the example. If you are encountering performance issues with a particular example, try to experiment with the retreival settings i.e. passageSize, overlap and maxResults. You can also try other embedding models via Ollama.
