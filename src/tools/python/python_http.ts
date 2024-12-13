@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import { BaseToolOptions, BaseToolRunOptions, Tool, ToolError, ToolInput } from "@/tools/base.js";
+import {
+  BaseToolOptions,
+  BaseToolRunOptions,
+  ToolEmitter,
+  Tool,
+  ToolError,
+  ToolInput,
+} from "@/tools/base.js";
 import { z } from "zod";
 import { BaseLLMOutput } from "@/llms/base.js";
 import { LLM } from "@/llms/llm.js";
@@ -26,6 +33,7 @@ import { ValidationError } from "ajv";
 import { ConnectionOptions } from "node:tls";
 import { RunContext } from "@/context.js";
 import { hasMinLength } from "@/internals/helpers/array.js";
+import { Emitter } from "@/emitter/emitter.js";
 
 export interface CodeInterpreterOptions {
   url: string;
@@ -45,8 +53,8 @@ export interface PythonToolOptions extends BaseToolOptions {
 export class PythonHttpTool extends Tool<PythonToolOutput, PythonToolOptions> {
   name = "Python";
   description = [
-    "Run Python and/or shell code and return the console output. Use for isolated calculations, computations, data or file manipulation.",
-    "Files provided by the user, or created in a previous run, will be accesible if and only if they are specified in the input. It is necessary to always print() results.",
+    "Run Python and/or shell code and return the console output. Use for isolated calculations, computations, data or file manipulation but still prefer assistant's capabilities (IMPORTANT: Do not use for text analysis or summarization).",
+    "Files provided by the user, or created in a previous run, will be accessible if and only if they are specified in the input. It is necessary to always print() results.",
     "The following shell commands are available:",
     "Use ffmpeg to convert videos.",
     "Use yt-dlp to download videos, and unless specified otherwise use `-S vcodec:h264,res,acodec:m4a` for video and `-x --audio-format mp3` for audio-only.",
@@ -67,6 +75,11 @@ export class PythonHttpTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
   public readonly storage: PythonStorage;
   protected files: PythonFile[] = [];
+
+  public readonly emitter: ToolEmitter<ToolInput<this>, PythonToolOutput> = Emitter.root.child({
+    namespace: ["tool", "python"],
+    creator: this,
+  });
 
   async inputSchema() {
     this.files = await this.storage.list();
@@ -109,7 +122,7 @@ export class PythonHttpTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
   protected async _run(
     input: ToolInput<this>,
-    _options: BaseToolRunOptions | undefined,
+    _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>,
   ) {
     const inputFiles = await pipe(
