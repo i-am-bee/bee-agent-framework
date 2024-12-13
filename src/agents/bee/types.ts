@@ -69,7 +69,7 @@ export interface BeeUpdateMeta extends BeeMeta {
 }
 
 export interface BeeCallbacks {
-  start?: Callback<{ meta: BeeMeta }>;
+  start?: Callback<{ meta: BeeMeta; tools: AnyTool[]; memory: BaseMemory }>;
   error?: Callback<{ error: Error; meta: BeeMeta }>;
   retry?: Callback<{ meta: BeeMeta }>;
   success?: Callback<{

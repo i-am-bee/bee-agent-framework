@@ -1,0 +1,248 @@
+/**
+ * Copyright 2024 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Source: https://github.com/IBM/vllm/blob/main/proto/caikit_runtime_Nlp.proto
+
+/*------------------------------------------------------------------------------
+ * AUTO GENERATED
+ *----------------------------------------------------------------------------*/
+
+syntax = "proto3";
+package caikit.runtime.Nlp;
+import "google/protobuf/struct.proto";
+import "caikit_data_model_caikit_nlp.proto";
+import "caikit_data_model_common.proto";
+import "caikit_data_model_nlp.proto";
+import "caikit_data_model_runtime.proto";
+
+
+/*-- MESSAGES ----------------------------------------------------------------*/
+
+message BidiStreamingTokenClassificationTaskRequest {
+
+  /*-- fields --*/
+  string text_stream = 1;
+  optional double threshold = 2;
+}
+
+message DataStreamSourceGenerationTrainRecord {
+
+  /*-- fields --*/
+
+  /*-- oneofs --*/
+  oneof data_stream {
+    caikit.runtime.Nlp.DataStreamSourceGenerationTrainRecordJsonData jsondata = 1;
+    caikit_data_model.common.FileReference file = 2;
+    caikit_data_model.common.ListOfFileReferences list_of_files = 3;
+    caikit_data_model.common.Directory directory = 4;
+    caikit_data_model.common.S3Files s3files = 5;
+  }
+}
+
+message DataStreamSourceGenerationTrainRecordJsonData {
+
+  /*-- fields --*/
+  repeated caikit_data_model.caikit_nlp.GenerationTrainRecord data = 1;
+}
+
+message EmbeddingTaskRequest {
+
+  /*-- fields --*/
+  string text = 1;
+  optional int64 truncate_input_tokens = 2;
+}
+
+message EmbeddingTasksRequest {
+
+  /*-- fields --*/
+  repeated string texts = 1;
+  optional int64 truncate_input_tokens = 2;
+}
+
+message RerankTaskRequest {
+
+  /*-- fields --*/
+  string query = 1;
+  repeated google.protobuf.Struct documents = 2;
+  optional int64 top_n = 3;
+  optional int64 truncate_input_tokens = 4;
+  optional bool return_documents = 5;
+  optional bool return_query = 6;
+  optional bool return_text = 7;
+}
+
+message RerankTasksRequest {
+
+  /*-- fields --*/
+  repeated string queries = 1;
+  repeated google.protobuf.Struct documents = 2;
+  optional int64 top_n = 3;
+  optional int64 truncate_input_tokens = 4;
+  optional bool return_documents = 5;
+  optional bool return_queries = 6;
+  optional bool return_text = 7;
+}
+
+message SentenceSimilarityTaskRequest {
+
+  /*-- fields --*/
+  string source_sentence = 1;
+  repeated string sentences = 2;
+  optional int64 truncate_input_tokens = 3;
+}
+
+message SentenceSimilarityTasksRequest {
+
+  /*-- fields --*/
+  repeated string source_sentences = 1;
+  repeated string sentences = 2;
+  optional int64 truncate_input_tokens = 3;
+}
+
+message ServerStreamingTextGenerationTaskRequest {
+
+  /*-- fields --*/
+  string text = 1;
+  optional int64 max_new_tokens = 2;
+  optional int64 min_new_tokens = 3;
+  optional int64 truncate_input_tokens = 4;
+  optional string decoding_method = 5;
+  optional int64 top_k = 6;
+  optional double top_p = 7;
+  optional double typical_p = 8;
+  optional double temperature = 9;
+  optional double repetition_penalty = 10;
+  optional double max_time = 11;
+  optional caikit_data_model.caikit_nlp.ExponentialDecayLengthPenalty exponential_decay_length_penalty = 12;
+  repeated string stop_sequences = 13;
+  optional uint64 seed = 14;
+  optional bool preserve_input_text = 15;
+}
+
+message TextClassificationTaskRequest {
+
+  /*-- fields --*/
+  string text = 1;
+}
+
+message TextGenerationTaskPeftPromptTuningTrainParameters {
+
+  /*-- fields --*/
+  string base_model = 1;
+  caikit.runtime.Nlp.DataStreamSourceGenerationTrainRecord train_stream = 2;
+  caikit_data_model.caikit_nlp.TuningConfig tuning_config = 3;
+  optional caikit.runtime.Nlp.DataStreamSourceGenerationTrainRecord val_stream = 4;
+  optional string device = 5;
+  optional string tuning_type = 6;
+  optional int64 num_epochs = 7;
+  optional double learning_rate = 8;
+  optional string verbalizer = 9;
+  optional int64 batch_size = 10;
+  optional int64 max_source_length = 11;
+  optional int64 max_target_length = 12;
+  optional int64 accumulate_steps = 13;
+  optional string torch_dtype = 14;
+  optional bool silence_progress_bars = 15;
+  optional int64 seed = 16;
+}
+
+message TextGenerationTaskPeftPromptTuningTrainRequest {
+
+  /*-- fields --*/
+  string model_name = 1;
+  caikit_data_model.common.S3Path output_path = 2;
+  caikit.runtime.Nlp.TextGenerationTaskPeftPromptTuningTrainParameters parameters = 3;
+}
+
+message TextGenerationTaskRequest {
+
+  /*-- fields --*/
+  string text = 1;
+  optional int64 max_new_tokens = 2;
+  optional int64 min_new_tokens = 3;
+  optional int64 truncate_input_tokens = 4;
+  optional string decoding_method = 5;
+  optional int64 top_k = 6;
+  optional double top_p = 7;
+  optional double typical_p = 8;
+  optional double temperature = 9;
+  optional double repetition_penalty = 10;
+  optional double max_time = 11;
+  optional caikit_data_model.caikit_nlp.ExponentialDecayLengthPenalty exponential_decay_length_penalty = 12;
+  repeated string stop_sequences = 13;
+  optional uint64 seed = 14;
+  optional bool preserve_input_text = 15;
+}
+
+message TextGenerationTaskTextGenerationTrainParameters {
+
+  /*-- fields --*/
+  string base_model = 1;
+  caikit.runtime.Nlp.DataStreamSourceGenerationTrainRecord train_stream = 2;
+  optional string torch_dtype = 3;
+  optional int64 max_source_length = 4;
+  optional int64 max_target_length = 5;
+  optional int64 batch_size = 6;
+  optional int64 num_epochs = 7;
+  optional int64 accumulate_steps = 8;
+  optional int64 random_seed = 9;
+  optional double lr = 10;
+  optional bool use_iterable_dataset = 11;
+}
+
+message TextGenerationTaskTextGenerationTrainRequest {
+
+  /*-- fields --*/
+  string model_name = 1;
+  caikit_data_model.common.S3Path output_path = 2;
+  caikit.runtime.Nlp.TextGenerationTaskTextGenerationTrainParameters parameters = 3;
+}
+
+message TokenClassificationTaskRequest {
+
+  /*-- fields --*/
+  string text = 1;
+  optional double threshold = 2;
+}
+
+message TokenizationTaskRequest {
+
+  /*-- fields --*/
+  string text = 1;
+}
+
+
+/*-- SERVICES ----------------------------------------------------------------*/
+
+service NlpService {
+  rpc BidiStreamingTokenClassificationTaskPredict(stream caikit.runtime.Nlp.BidiStreamingTokenClassificationTaskRequest) returns (stream caikit_data_model.nlp.TokenClassificationStreamResult);
+  rpc EmbeddingTaskPredict(caikit.runtime.Nlp.EmbeddingTaskRequest) returns (caikit_data_model.caikit_nlp.EmbeddingResult);
+  rpc EmbeddingTasksPredict(caikit.runtime.Nlp.EmbeddingTasksRequest) returns (caikit_data_model.caikit_nlp.EmbeddingResults);
+  rpc RerankTaskPredict(caikit.runtime.Nlp.RerankTaskRequest) returns (caikit_data_model.caikit_nlp.RerankResult);
+  rpc RerankTasksPredict(caikit.runtime.Nlp.RerankTasksRequest) returns (caikit_data_model.caikit_nlp.RerankResults);
+  rpc SentenceSimilarityTaskPredict(caikit.runtime.Nlp.SentenceSimilarityTaskRequest) returns (caikit_data_model.caikit_nlp.SentenceSimilarityResult);
+  rpc SentenceSimilarityTasksPredict(caikit.runtime.Nlp.SentenceSimilarityTasksRequest) returns (caikit_data_model.caikit_nlp.SentenceSimilarityResults);
+  rpc ServerStreamingTextGenerationTaskPredict(caikit.runtime.Nlp.ServerStreamingTextGenerationTaskRequest) returns (stream caikit_data_model.nlp.GeneratedTextStreamResult);
+  rpc TextClassificationTaskPredict(caikit.runtime.Nlp.TextClassificationTaskRequest) returns (caikit_data_model.nlp.ClassificationResults);
+  rpc TextGenerationTaskPredict(caikit.runtime.Nlp.TextGenerationTaskRequest) returns (caikit_data_model.nlp.GeneratedTextResult);
+  rpc TokenClassificationTaskPredict(caikit.runtime.Nlp.TokenClassificationTaskRequest) returns (caikit_data_model.nlp.TokenClassificationResults);
+  rpc TokenizationTaskPredict(caikit.runtime.Nlp.TokenizationTaskRequest) returns (caikit_data_model.nlp.TokenizationResults);
+}
+
+service NlpTrainingService {
+  rpc TextGenerationTaskPeftPromptTuningTrain(caikit.runtime.Nlp.TextGenerationTaskPeftPromptTuningTrainRequest) returns (caikit_data_model.runtime.TrainingJob);
+  rpc TextGenerationTaskTextGenerationTrain(caikit.runtime.Nlp.TextGenerationTaskTextGenerationTrainRequest) returns (caikit_data_model.runtime.TrainingJob);
+}

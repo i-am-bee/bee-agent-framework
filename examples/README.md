@@ -21,7 +21,8 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 - [`bee_advanced.ts`](agents/bee_advanced.ts): Advanced Bee Agent with custom configurations
 - [`bee_reusable.ts`](agents/bee_reusable.ts): Demonstration of serializing and reusing Bee Agents
 - [`custom_agent.ts`](agents/custom_agent.ts): Example of creating a custom agent
-- [`ibm_granite_bee.ts`](agents/ibm_granite_bee.ts): Basic Bee Agent using an IBM Granite LLM
+- [`granite_bee.ts`](agents/granite/granite_bee.ts): Basic Bee Agent using an IBM Granite LLM
+- [`granite_wiki_bee.ts`](agents/granite/granite_wiki_bee.ts): Advanced Bee Agent using an IBM Granite LLM with wikipedia retrieval
 - [`simple.ts`](agents/simple.ts): Simple agent implementation
 - [`sql.ts`](agents/sql.ts): Agent for SQL-related tasks
 

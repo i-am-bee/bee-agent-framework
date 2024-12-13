@@ -1,6 +1,6 @@
 {
   "name": "bee-agent-framework",
-  "version": "0.0.52",
+  "version": "0.0.53",
   "license": "Apache-2.0",
   "description": "Bee - LLM Agent Framework",
   "author": "IBM Corp.",
@@ -76,7 +76,7 @@
     },
     "hooks": {
       "before:init": [
-        "yarn docs:check",
+        "[ \"$RELEASE_SKIP_DOCS\" = \"true\" ] && echo 'Skipping docs check.' || yarn docs:check",
         "yarn lint",
         "yarn ts:check",
         "yarn test:all"
@@ -179,7 +179,7 @@
     "mathjs": "^14.0.0",
     "mustache": "^4.2.0",
     "object-hash": "^3.0.0",
-    "p-queue": "^8.0.1",
+    "p-queue-compat": "^1.0.227",
     "p-throttle": "^7.0.0",
     "pino": "^9.5.0",
     "promise-based-task": "^3.1.1",

@@ -30,6 +30,10 @@ import {
   GraniteBeeAssistantPrompt,
   GraniteBeeSchemaErrorPrompt,
   GraniteBeeSystemPrompt,
+  GraniteBeeToolErrorPrompt,
+  GraniteBeeToolInputErrorPrompt,
+  GraniteBeeToolNotFoundPrompt,
+  GraniteBeeUserPrompt,
 } from "@/agents/bee/runners/granite/prompts.js";
 import { Cache } from "@/cache/decoratorCache.js";
 
@@ -68,12 +72,19 @@ export class GraniteRunner extends DefaultRunner {
       await memory.add(
         BaseMessage.of({
           role: "available_tools",
-          text: JSON.stringify(await this.renderers.system.variables.tools(), null, 4),
+          text: JSON.stringify(
+            (await this.renderers.system.variables.tools()).map((tool) => ({
+              name: tool.name,
+              description: tool.description,
+              schema: JSON.parse(tool.schema),
+            })),
+            null,
+            4,
+          ),
         }),
         index,
       );
     }
-
     return memory;
   }
 
@@ -83,9 +94,13 @@ export class GraniteRunner extends DefaultRunner {
 
     return {
       ...super.templates,
+      user: customTemplates.user ?? GraniteBeeUserPrompt,
       system: customTemplates.system ?? GraniteBeeSystemPrompt,
       assistant: customTemplates.assistant ?? GraniteBeeAssistantPrompt,
       schemaError: customTemplates.schemaError ?? GraniteBeeSchemaErrorPrompt,
+      toolNotFoundError: customTemplates.toolNotFoundError ?? GraniteBeeToolNotFoundPrompt,
+      toolError: customTemplates.toolError ?? GraniteBeeToolErrorPrompt,
+      toolInputError: customTemplates.toolInputError ?? GraniteBeeToolInputErrorPrompt,
     };
   }
 

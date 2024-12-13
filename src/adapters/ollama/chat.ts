@@ -17,7 +17,6 @@
 import {
   AsyncStream,
   BaseLLMTokenizeOutput,
-  EmbeddingOptions,
   EmbeddingOutput,
   ExecutionOptions,
   GenerateOptions,
@@ -42,6 +41,7 @@ import {
   retrieveVersion,
 } from "@/adapters/ollama/shared.js";
 import { getEnv } from "@/internals/env.js";
+import { OllamaEmbeddingOptions } from "@/adapters/ollama/llm.js";
 
 export class OllamaChatLLMOutput extends ChatLLMOutput {
   public readonly results: ChatResponse[];
@@ -160,11 +160,15 @@ export class OllamaChatLLM extends ChatLLM<OllamaChatLLMOutput> {
     return extractModelMeta(model);
   }
 
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+  async embed(
+    input: BaseMessage[][],
+    options: OllamaEmbeddingOptions = {},
+  ): Promise<EmbeddingOutput> {
     const response = await this.client.embed({
       model: this.modelId,
       input: input.flatMap((messages) => messages).flatMap((msg) => msg.text),
+      options: options?.options,
+      truncate: options?.truncate,
     });
     return { embeddings: response.embeddings };
   }

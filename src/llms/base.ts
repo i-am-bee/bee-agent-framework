@@ -234,12 +234,40 @@ export abstract class BaseLLM<
         async (run) => {
           const cacheEntry = await this.createCacheAccessor(input, options);
 
-          const tokens: TOutput[] = [];
-          for await (const token of cacheEntry.value || this._stream(input, options ?? {}, run)) {
-            tokens.push(token);
-            emit(token);
+          try {
+            await run.emitter.emit("start", { input, options });
+
+            const tokenEmitter = run.emitter.child({ groupId: "tokens" });
+            const chunks: TOutput[] = [];
+            const controller = createAbortController(options?.signal);
+
+            for await (const chunk of cacheEntry.value ||
+              this._stream(input, { ...options, signal: controller.signal }, run)) {
+              if (controller.signal.aborted) {
+                continue;
+              }
+
+              chunks.push(chunk);
+              await tokenEmitter.emit("newToken", {
+                value: chunk,
+                callbacks: { abort: () => controller.abort() },
+              });
+              emit(chunk);
+            }
+            const result = this._mergeChunks(chunks);
+            await run.emitter.emit("success", { value: result });
+            cacheEntry.resolve(chunks);
+          } catch (error) {
+            await run.emitter.emit("error", { input, error, options });
+            await cacheEntry.reject(error);
+            if (error instanceof LLMError) {
+              throw error;
+            } else {
+              throw new LLMError(`LLM has occurred an error.`, [error]);
+            }
+          } finally {
+            await run.emitter.emit("finish", null);
           }
-          cacheEntry.resolve(tokens);
         },
       ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
     });

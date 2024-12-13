@@ -134,4 +134,23 @@ describe("OpenMeteo", () => {
       }),
     ).rejects.toThrowErrorMatchingInlineSnapshot(`ToolError: Location 'ABCDEFGH' was not found.`);
   });
+
+  it("Throws on bad end_date < start_date", async () => {
+    await expect(
+      instance.run(
+        {
+          location: {
+            name: "Boston",
+          },
+          start_date: "2024-11-06",
+          end_date: "2024-11-05",
+          temperature_unit: "celsius",
+        },
+        {
+          signal: AbortSignal.timeout(60 * 1000),
+          retryOptions: {},
+        },
+      ),
+    ).rejects.toThrowError(ToolInputValidationError);
+  });
 });

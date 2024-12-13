@@ -58,6 +58,11 @@ interface Input {
   cache?: LLMCache<OllamaLLMOutput>;
 }
 
+export interface OllamaEmbeddingOptions extends EmbeddingOptions {
+  options?: Partial<Parameters>;
+  truncate?: boolean;
+}
+
 export class OllamaLLMOutput extends BaseLLMOutput {
   public readonly results: GenerateResponse[];
 
@@ -187,9 +192,13 @@ export class OllamaLLM extends LLM<OllamaLLMOutput> {
     return extractModelMeta(model);
   }
 
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    const response = await this.client.embed({ model: this.modelId, input: input });
+  async embed(input: LLMInput[], options: OllamaEmbeddingOptions = {}): Promise<EmbeddingOutput> {
+    const response = await this.client.embed({
+      model: this.modelId,
+      input: input,
+      options: options?.options,
+      truncate: options?.truncate,
+    });
     return { embeddings: response.embeddings };
   }
 
