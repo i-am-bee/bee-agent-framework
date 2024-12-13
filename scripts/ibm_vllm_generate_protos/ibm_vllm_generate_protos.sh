@@ -19,8 +19,8 @@ GRPC_PROTO_PATH="./src/adapters/ibm-vllm/proto"
 GRPC_TYPES_PATH="./src/adapters/ibm-vllm/types.ts"
 
 SCRIPT_DIR="$(dirname "$0")"
-OUTPUT_RELATIVE_PATH="dist/generation.d.ts"
-GRPC_TYPES_TMP_PATH=types
+OUTPUT_RELATIVE_PATH="dist/merged.d.ts"
+GRPC_TYPES_TMP_PATH="types"
 
 rm -f "$GRPC_TYPES_PATH"
 
@@ -39,7 +39,7 @@ yarn run proto-loader-gen-types \
 
 
 cd "$SCRIPT_DIR"
-  tsup --dts-only
+  ENTRY="$(basename "$OUTPUT_RELATIVE_PATH" ".d.ts")" tsup --dts-only
   sed -i.bak '$ d' "$OUTPUT_RELATIVE_PATH"
   sed -i.bak -E "s/^interface/export interface/" "$OUTPUT_RELATIVE_PATH"
   sed -i.bak -E "s/^type/export type/" "$OUTPUT_RELATIVE_PATH"
@@ -50,4 +50,4 @@ rm -rf "${SCRIPT_DIR}"/{dist,dts,types}
 
 yarn run lint:fix "${GRPC_TYPES_PATH}"
 yarn prettier --write "${GRPC_TYPES_PATH}"
-yarn copyright
+TARGETS="$GRPC_TYPES_PATH" yarn copyright

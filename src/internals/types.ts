@@ -113,3 +113,7 @@ export type OneOf<T extends any[]> = T extends [infer Only]
     : never;
 
 export type AnyVoid = Promise<unknown> | unknown;
+
+export type OmitPrivateKeys<T> = {
+  [K in keyof T as K extends `_${string}` ? never : K]: T[K];
+};

@@ -1,0 +1,123 @@
+/**
+ * Copyright 2024 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Source: https://github.com/IBM/vllm/blob/main/proto/caikit_data_model_caikit_nlp.proto
+
+/*------------------------------------------------------------------------------
+ * AUTO GENERATED
+ *----------------------------------------------------------------------------*/
+
+syntax = "proto3";
+package caikit_data_model.caikit_nlp;
+import "google/protobuf/struct.proto";
+import "caikit_data_model_common.proto";
+
+
+/*-- MESSAGES ----------------------------------------------------------------*/
+
+message EmbeddingResult {
+
+  /*-- fields --*/
+  caikit_data_model.common.Vector1D result = 1;
+  caikit_data_model.common.ProducerId producer_id = 2;
+  int64 input_token_count = 3;
+}
+
+message EmbeddingResults {
+
+  /*-- fields --*/
+  caikit_data_model.common.ListOfVector1D results = 1;
+  caikit_data_model.common.ProducerId producer_id = 2;
+  int64 input_token_count = 3;
+}
+
+message ExponentialDecayLengthPenalty {
+
+  /*-- fields --*/
+  int64 start_index = 1;
+  double decay_factor = 2;
+}
+
+message GenerationTrainRecord {
+
+  /*-- fields --*/
+  string input = 1;
+  string output = 2;
+}
+
+message RerankResult {
+
+  /*-- fields --*/
+  caikit_data_model.caikit_nlp.RerankScores result = 1;
+  caikit_data_model.common.ProducerId producer_id = 2;
+  int64 input_token_count = 3;
+}
+
+message RerankResults {
+
+  /*-- fields --*/
+  repeated caikit_data_model.caikit_nlp.RerankScores results = 1;
+  caikit_data_model.common.ProducerId producer_id = 2;
+  int64 input_token_count = 3;
+}
+
+message RerankScore {
+
+  /*-- fields --*/
+  google.protobuf.Struct document = 1;
+  int64 index = 2;
+  double score = 3;
+  string text = 4;
+}
+
+message RerankScores {
+
+  /*-- fields --*/
+  string query = 1;
+  repeated caikit_data_model.caikit_nlp.RerankScore scores = 2;
+}
+
+message SentenceSimilarityResult {
+
+  /*-- fields --*/
+  caikit_data_model.caikit_nlp.SentenceSimilarityScores result = 1;
+  caikit_data_model.common.ProducerId producer_id = 2;
+  int64 input_token_count = 3;
+}
+
+message SentenceSimilarityResults {
+
+  /*-- fields --*/
+  repeated caikit_data_model.caikit_nlp.SentenceSimilarityScores results = 1;
+  caikit_data_model.common.ProducerId producer_id = 2;
+  int64 input_token_count = 3;
+}
+
+message SentenceSimilarityScores {
+
+  /*-- fields --*/
+  repeated double scores = 1;
+}
+
+message TuningConfig {
+
+  /*-- fields --*/
+  int64 num_virtual_tokens = 1;
+  string prompt_tuning_init_text = 2;
+  string prompt_tuning_init_method = 3;
+  string prompt_tuning_init_source_model = 4;
+  repeated string output_model_types = 5;
+}

@@ -15,14 +15,27 @@
  */
 
 import { defineConfig } from "tsup";
+import fs from "node:fs";
+
+if (!process.env.ENTRY) {
+  throw new Error(`Entry file was not provided!`);
+}
+const target = `types/${process.env.ENTRY}.ts`;
+await fs.promises.writeFile(
+  target,
+  [
+    `export { ProtoGrpcType as A } from "./caikit_runtime_Nlp.js"`,
+    `export { ProtoGrpcType as B } from "./generation.js"`,
+  ].join("\n"),
+);
 
 export default defineConfig({
-  entry: ["types/generation.ts"],
+  entry: [target],
   tsconfig: "./tsconfig.proto.json",
   sourcemap: false,
   dts: true,
   format: ["esm"],
-  treeshake: false,
+  treeshake: true,
   legacyOutput: false,
   skipNodeModulesBundle: true,
   bundle: true,

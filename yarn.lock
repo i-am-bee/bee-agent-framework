@@ -4868,7 +4868,7 @@ __metadata:
     openai-chat-tokens: "npm:^0.2.8"
     openapi-fetch: "npm:^0.13.3"
     openapi-typescript: "npm:^7.4.4"
-    p-queue: "npm:^8.0.1"
+    p-queue-compat: "npm:^1.0.227"
     p-throttle: "npm:^7.0.0"
     picocolors: "npm:^1.1.1"
     pino: "npm:^9.5.0"
@@ -11326,6 +11326,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"p-queue-compat@npm:^1.0.227":
+  version: 1.0.227
+  resolution: "p-queue-compat@npm:1.0.227"
+  dependencies:
+    eventemitter3: "npm:5.x"
+    p-timeout-compat: "npm:^1.0.3"
+  checksum: 10c0/4b1d241e0734f2dad9669b2d71e28c62218f2f8d29bd575080975154ebf2f9aba9b47ce11714e16763f7c55e89bcf2213ea7a7cd7b90cce5d0246f34fbc8ac8d
+  languageName: node
+  linkType: hard
+
 "p-queue@npm:^6.6.2":
   version: 6.6.2
   resolution: "p-queue@npm:6.6.2"
@@ -11333,16 +11343,6 @@ __metadata:
     eventemitter3: "npm:^4.0.4"
     p-timeout: "npm:^3.2.0"
   checksum: 10c0/5739ecf5806bbeadf8e463793d5e3004d08bb3f6177bd1a44a005da8fd81bb90f80e4633e1fb6f1dfd35ee663a5c0229abe26aebb36f547ad5a858347c7b0d3e
-  languageName: node
-  linkType: hard
-
-"p-queue@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "p-queue@npm:8.0.1"
-  dependencies:
-    eventemitter3: "npm:^5.0.1"
-    p-timeout: "npm:^6.1.2"
-  checksum: 10c0/fe185bc8bbd32d17a5f6dba090077b1bb326b008b4ec9b0646c57a32a6984035aa8ece909a6d0de7f6c4640296dc288197f430e7394cdc76a26d862339494616
   languageName: node
   linkType: hard
 
@@ -11376,13 +11376,6 @@ __metadata:
   dependencies:
     p-finally: "npm:^1.0.0"
   checksum: 10c0/524b393711a6ba8e1d48137c5924749f29c93d70b671e6db761afa784726572ca06149c715632da8f70c090073afb2af1c05730303f915604fd38ee207b70a61
-  languageName: node
-  linkType: hard
-
-"p-timeout@npm:^6.1.2":
-  version: 6.1.2
-  resolution: "p-timeout@npm:6.1.2"
-  checksum: 10c0/d46b90a9a5fb7c650a5c56dd5cf7102ea9ab6ce998defa2b3d4672789aaec4e2f45b3b0b5a4a3e17a0fb94301ad5dd26da7d8728402e48db2022ad1847594d19
   languageName: node
   linkType: hard
 

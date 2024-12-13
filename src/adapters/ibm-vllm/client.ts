@@ -25,25 +25,31 @@ import * as R from "remeda";
 // eslint-disable-next-line no-restricted-imports
 import { UnaryCallback } from "@grpc/grpc-js/build/src/client.js";
 import { FrameworkError, ValueError } from "@/errors.js";
-import protoLoader from "@grpc/proto-loader";
+import protoLoader, { Options } from "@grpc/proto-loader";
 
 import {
   BatchedGenerationRequest,
   BatchedGenerationResponse__Output,
   BatchedTokenizeRequest,
   BatchedTokenizeResponse__Output,
+  type EmbeddingTasksRequest,
   GenerationRequest__Output,
   ModelInfoRequest,
   ModelInfoResponse__Output,
   ProtoGrpcType as GenerationProtoGentypes,
+  ProtoGrpcType$1 as CaikitProtoGentypes,
   SingleGenerationRequest,
+  EmbeddingResults__Output,
+  type SubtypeConstructor,
 } from "@/adapters/ibm-vllm/types.js";
 import { parseEnv } from "@/internals/env.js";
 import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
 import { Serializable } from "@/internals/serializable.js";
+import PQueue from "p-queue-compat";
 
 const GENERATION_PROTO_PATH = new URL("./proto/generation.proto", import.meta.url);
+const NLP_PROTO_PATH = new URL("./proto/caikit_runtime_Nlp.proto", import.meta.url);
 
 interface ClientOptions {
   modelRouterSubdomain?: string;
@@ -55,6 +61,11 @@ interface ClientOptions {
   };
   grpcClientOptions: GRPCClientOptions;
   clientShutdownDelay: number;
+  limits?: {
+    concurrency?: {
+      embeddings?: number;
+    };
+  };
 }
 
 const defaultOptions = {
@@ -66,17 +77,23 @@ const defaultOptions = {
   },
 };
 
-const generationPackageObject = grpc.loadPackageDefinition(
-  protoLoader.loadSync([GENERATION_PROTO_PATH.pathname], {
-    longs: Number,
-    enums: String,
-    arrays: true,
-    objects: true,
-    oneofs: true,
-    keepCase: true,
-    defaults: true,
-  }),
+const grpcConfig: Options = {
+  longs: Number,
+  enums: String,
+  arrays: true,
+  objects: true,
+  oneofs: true,
+  keepCase: true,
+  defaults: true,
+};
+
+const generationPackage = grpc.loadPackageDefinition(
+  protoLoader.loadSync([GENERATION_PROTO_PATH.pathname], grpcConfig),
 ) as unknown as GenerationProtoGentypes;
+
+const embeddingsPackage = grpc.loadPackageDefinition(
+  protoLoader.loadSync([NLP_PROTO_PATH.pathname], grpcConfig),
+) as unknown as CaikitProtoGentypes;
 
 const GRPC_CLIENT_TTL = 15 * 60 * 1000;
 
@@ -88,9 +105,12 @@ export class Client extends Serializable {
   private usedDefaultCredentials = false;
 
   @Cache({ ttl: GRPC_CLIENT_TTL })
-  protected getClient(modelId: string) {
+  protected getClient<T extends { close: () => void }>(
+    modelId: string,
+    factory: SubtypeConstructor<typeof grpc.Client, T>,
+  ): T {
     const modelSpecificUrl = this.options.url.replace(/{model_id}/, modelId.replaceAll("/", "--"));
-    const client = new generationPackageObject.fmaas.GenerationService(
+    const client = new factory(
       modelSpecificUrl,
       grpc.credentials.createSsl(
         Buffer.from(this.options.credentials.rootCert),
@@ -129,31 +149,45 @@ export class Client extends Serializable {
   }
 
   async modelInfo(request: RequiredModel<ModelInfoRequest>, options?: CallOptions) {
-    const client = this.getClient(request.model_id);
+    const client = this.getClient(request.model_id, generationPackage.fmaas.GenerationService);
     return this.wrapGrpcCall<ModelInfoRequest, ModelInfoResponse__Output>(
       client.modelInfo.bind(client),
     )(request, options);
   }
 
   async generate(request: RequiredModel<BatchedGenerationRequest>, options?: CallOptions) {
-    const client = this.getClient(request.model_id);
+    const client = this.getClient(request.model_id, generationPackage.fmaas.GenerationService);
     return this.wrapGrpcCall<BatchedGenerationRequest, BatchedGenerationResponse__Output>(
       client.generate.bind(client),
     )(request, options);
   }
 
   async generateStream(request: RequiredModel<SingleGenerationRequest>, options?: CallOptions) {
-    const client = this.getClient(request.model_id);
+    const client = this.getClient(request.model_id, generationPackage.fmaas.GenerationService);
     return this.wrapGrpcStream<SingleGenerationRequest, GenerationRequest__Output>(
       client.generateStream.bind(client),
     )(request, options);
   }
 
   async tokenize(request: RequiredModel<BatchedTokenizeRequest>, options?: CallOptions) {
-    const client = this.getClient(request.model_id);
+    const client = this.getClient(request.model_id, generationPackage.fmaas.GenerationService);
     return this.wrapGrpcCall<BatchedTokenizeRequest, BatchedTokenizeResponse__Output>(
       client.tokenize.bind(client),
     )(request, options);
+  }
+
+  async embed(request: RequiredModel<EmbeddingTasksRequest>, options?: CallOptions) {
+    const client = this.getClient(
+      request.model_id,
+      embeddingsPackage.caikit.runtime.Nlp.NlpService,
+    );
+    return this.queues.embeddings.add(
+      () =>
+        this.wrapGrpcCall<EmbeddingTasksRequest, EmbeddingResults__Output>(
+          client.embeddingTasksPredict.bind(client),
+        )(request, options),
+      { throwOnTimeout: true },
+    );
   }
 
   protected wrapGrpcCall<TRequest, TResponse>(
@@ -212,5 +246,15 @@ export class Client extends Serializable {
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
     Object.assign(this, snapshot);
     this.options.credentials = this.getDefaultCredentials();
+  }
+
+  @Cache({ enumerable: false })
+  protected get queues() {
+    return {
+      embeddings: new PQueue({
+        concurrency: this.options.limits?.concurrency?.embeddings ?? 5,
+        throwOnTimeout: true,
+      }),
+    };
   }
 }
