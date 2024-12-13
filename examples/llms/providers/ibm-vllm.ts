@@ -34,3 +34,11 @@ const client = new Client();
   ]);
   console.info(response.messages);
 }
+
+{
+  console.info("===EMBEDDING===");
+  const llm = new IBMvLLM({ client, modelId: "baai/bge-large-en-v1.5" });
+
+  const response = await llm.embed([`Hello world!`, `Hello family!`]);
+  console.info(response);
+}

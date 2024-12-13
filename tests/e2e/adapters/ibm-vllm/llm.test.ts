@@ -26,8 +26,8 @@ describe.runIf(
     process.env.IBM_VLLM_CERT_CHAIN,
   ].every((env) => Boolean(env)),
 )("IBM vLLM", () => {
-  const createLLM = () => {
-    return new IBMvLLM({ modelId: IBMVllmModel.LLAMA_3_1_70B_INSTRUCT });
+  const createLLM = (modelId: string = IBMVllmModel.LLAMA_3_1_70B_INSTRUCT) => {
+    return new IBMvLLM({ modelId });
   };
 
   it("Meta", async () => {
@@ -48,6 +48,14 @@ describe.runIf(
       expect(chunk).toBeInstanceOf(IBMvLLMOutput);
       expect(chunk.text).toBeTruthy();
     }
+  });
+
+  it("Embeds", async () => {
+    const llm = createLLM("baai/bge-large-en-v1.5");
+    const response = await llm.embed([`Hello world!`, `Hello family!`]);
+    expect(response.embeddings.length).toBe(2);
+    expect(response.embeddings[0].length).toBe(1024);
+    expect(response.embeddings[1].length).toBe(1024);
   });
 
   it("Serializes", () => {

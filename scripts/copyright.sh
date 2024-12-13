@@ -15,6 +15,8 @@
 
 set -e
 
+TARGETS=(${TARGETS:-src dist tests scripts})
+
 # Path to the package.json file
 PACKAGE_JSON_PATH="./package.json"
 
@@ -42,9 +44,9 @@ if ! command -v nwa &> /dev/null && command -v go &> /dev/null; then
 fi
 
 if command -v nwa &> /dev/null; then
-  nwa add -l apache -c "$AUTHOR" src dist tests scripts
+  nwa add -l apache -c "$AUTHOR" "${TARGETS[@]}"
 elif command -v docker &> /dev/null; then
-  docker run --rm -v "${PWD}:/src" ghcr.io/b1nary-gr0up/nwa:main add -l apache -c "$AUTHOR" src dist tests scripts
+  docker run --rm -v "${PWD}:/src" ghcr.io/b1nary-gr0up/nwa:main add -l apache -c "$AUTHOR" "${TARGETS[@]}"
 else
   echo "Error: 'nwa' is not available. Either install it manually or install go/docker."
   exit 1

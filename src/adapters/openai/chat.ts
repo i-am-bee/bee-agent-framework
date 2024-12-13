@@ -43,6 +43,7 @@ import type {
   ChatCompletionUserMessageParam,
   ChatCompletionAssistantMessageParam,
   ChatModel,
+  EmbeddingCreateParams,
 } from "openai/resources/index";
 
 type Parameters = Omit<ChatCompletionCreateParams, "stream" | "messages" | "model">;
@@ -104,6 +105,9 @@ interface Input {
 }
 
 export type OpenAIChatLLMEvents = ChatLLMGenerateEvents<OpenAIChatLLMOutput>;
+export interface OpenAIEmbeddingOptions
+  extends EmbeddingOptions,
+    Omit<EmbeddingCreateParams, "input" | "model"> {}
 
 export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
   public readonly emitter = Emitter.root.child<OpenAIChatLLMEvents>({
@@ -165,9 +169,13 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
     };
   }
 
-  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
+  async embed(
+    input: BaseMessage[][],
+    options: OpenAIEmbeddingOptions = {},
+  ): Promise<EmbeddingOutput> {
     const response = await this.client.embeddings.create(
       {
+        ...options,
         model: this.modelId,
         input: input.flatMap((messages) => messages).flatMap((msg) => msg.text),
       },

@@ -16,7 +16,13 @@
 
 import { isFunction, isObjectType } from "remeda";
 
-import { IBMvLLM, IBMvLLMGenerateOptions, IBMvLLMOutput, IBMvLLMParameters } from "./llm.js";
+import {
+  IBMvLLM,
+  IBMvLLMEmbeddingOptions,
+  IBMvLLMGenerateOptions,
+  IBMvLLMOutput,
+  IBMvLLMParameters,
+} from "./llm.js";
 
 import { Cache } from "@/cache/decoratorCache.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
@@ -25,7 +31,6 @@ import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import {
   AsyncStream,
   BaseLLMTokenizeOutput,
-  EmbeddingOptions,
   EmbeddingOutput,
   LLMCache,
   LLMError,
@@ -36,7 +41,6 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { IBMVllmChatLLMPreset, IBMVllmChatLLMPresetModel } from "@/adapters/ibm-vllm/chatPreset.js";
 import { Client } from "./client.js";
 import { GetRunContext } from "@/context.js";
-import { NotImplementedError } from "@/errors.js";
 
 export class GrpcChatLLMOutput extends ChatLLMOutput {
   public readonly raw: IBMvLLMOutput;
@@ -118,9 +122,9 @@ export class IBMVllmChatLLM extends ChatLLM<GrpcChatLLMOutput> {
     return this.llm.meta();
   }
 
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new NotImplementedError();
+  async embed(input: BaseMessage[][], options?: IBMvLLMEmbeddingOptions): Promise<EmbeddingOutput> {
+    const inputs = input.map((messages) => this.messagesToPrompt(messages));
+    return this.llm.embed(inputs, options);
   }
 
   createSnapshot() {

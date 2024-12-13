@@ -268,7 +268,7 @@ export class DefaultRunner extends BaseRunner {
           prompt !== null || this.input.memory.isEmpty()
             ? BaseMessage.of({
                 role: Role.USER,
-                text: prompt ?? "",
+                text: prompt || this.templates.userEmpty.render({}),
                 meta: {
                   createdAt: new Date(),
                 },

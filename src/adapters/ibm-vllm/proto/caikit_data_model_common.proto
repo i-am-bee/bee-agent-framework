@@ -1,0 +1,199 @@
+/**
+ * Copyright 2024 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Source: https://github.com/IBM/vllm/blob/main/proto/caikit_data_model_common.proto
+
+/*------------------------------------------------------------------------------
+ * AUTO GENERATED
+ *----------------------------------------------------------------------------*/
+
+syntax = "proto3";
+package caikit_data_model.common;
+
+
+/*-- ENUMS -------------------------------------------------------------------*/
+
+enum TrainingStatus {
+  PLACEHOLDER_UNSET = 0;
+  QUEUED = 1;
+  RUNNING = 2;
+  COMPLETED = 3;
+  CANCELED = 4;
+  ERRORED = 5;
+}
+
+
+/*-- MESSAGES ----------------------------------------------------------------*/
+
+message BoolSequence {
+
+  /*-- fields --*/
+  repeated bool values = 1;
+}
+
+message ConnectionInfo {
+
+  /*-- nested messages --*/
+
+  /*-- fields --*/
+  string hostname = 1;
+  optional int64 port = 2;
+  optional caikit_data_model.common.ConnectionTlsInfo tls = 3;
+  optional int64 timeout = 4;
+  map<string, string> options = 5;
+}
+
+message ConnectionTlsInfo {
+
+  /*-- fields --*/
+  optional bool enabled = 1;
+  optional bool insecure_verify = 2;
+  optional string ca_file = 3;
+  optional string cert_file = 4;
+  optional string key_file = 5;
+}
+
+message Directory {
+
+  /*-- fields --*/
+  string dirname = 1;
+  string extension = 2;
+}
+
+message File {
+
+  /*-- fields --*/
+  bytes data = 1;
+  string filename = 2;
+  string type = 3;
+}
+
+message FileReference {
+
+  /*-- fields --*/
+  string filename = 1;
+}
+
+message FloatSequence {
+
+  /*-- fields --*/
+  repeated double values = 1;
+}
+
+message IntSequence {
+
+  /*-- fields --*/
+  repeated int64 values = 1;
+}
+
+message ListOfFileReferences {
+
+  /*-- fields --*/
+  repeated string files = 1;
+}
+
+message ListOfVector1D {
+
+  /*-- fields --*/
+  repeated caikit_data_model.common.Vector1D vectors = 1;
+}
+
+message NpFloat32Sequence {
+
+  /*-- fields --*/
+  repeated float values = 1;
+}
+
+message NpFloat64Sequence {
+
+  /*-- fields --*/
+  repeated double values = 1;
+}
+
+message ProducerId {
+
+  /*-- fields --*/
+  string name = 1;
+  string version = 2;
+}
+
+message ProducerPriority {
+
+  /*-- fields --*/
+  repeated caikit_data_model.common.ProducerId producers = 1;
+}
+
+message PyFloatSequence {
+
+  /*-- fields --*/
+  repeated double values = 1;
+}
+
+message S3Base {
+
+  /*-- fields --*/
+  string endpoint = 2;
+  string region = 3;
+  string bucket = 4;
+  string accessKey = 5;
+  string secretKey = 6;
+  string IAM_id = 7;
+  string IAM_api_key = 8;
+}
+
+message S3Files {
+
+  /*-- fields --*/
+  string endpoint = 2;
+  string region = 3;
+  string bucket = 4;
+  string accessKey = 5;
+  string secretKey = 6;
+  string IAM_id = 7;
+  string IAM_api_key = 8;
+  repeated string files = 1;
+}
+
+message S3Path {
+
+  /*-- fields --*/
+  string endpoint = 2;
+  string region = 3;
+  string bucket = 4;
+  string accessKey = 5;
+  string secretKey = 6;
+  string IAM_id = 7;
+  string IAM_api_key = 8;
+  string path = 1;
+}
+
+message StrSequence {
+
+  /*-- fields --*/
+  repeated string values = 1;
+}
+
+message Vector1D {
+
+  /*-- fields --*/
+
+  /*-- oneofs --*/
+  oneof data {
+    caikit_data_model.common.PyFloatSequence data_pyfloatsequence = 1;
+    caikit_data_model.common.NpFloat32Sequence data_npfloat32sequence = 2;
+    caikit_data_model.common.NpFloat64Sequence data_npfloat64sequence = 3;
+  }
+}
