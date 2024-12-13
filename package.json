@@ -76,7 +76,7 @@
     },
     "hooks": {
       "before:init": [
-        "yarn docs:check",
+        "[ \"$RELEASE_SKIP_DOCS\" = \"true\" ] && echo 'Skipping docs check.' || yarn docs:check",
         "yarn lint",
         "yarn ts:check",
         "yarn test:all"
