@@ -15,7 +15,7 @@
  */
 
 import { expect } from "vitest";
-import { PythonHttpTool } from "@/tools/python/python_http.js";
+import { PythonTool } from "@/tools/python/python.js";
 import { LocalPythonStorage } from "@/tools/python/storage.js";
 
 import { ToolError } from "@/tools/base.js";
@@ -23,7 +23,7 @@ import { ToolError } from "@/tools/base.js";
 const codeInterpreterUrl = process.env.CODE_INTERPRETER_URL || "http://localhost:50081";
 
 const getPythonTool = () =>
-  new PythonHttpTool({
+  new PythonTool({
     codeInterpreter: { url: codeInterpreterUrl },
     storage: new LocalPythonStorage({
       interpreterWorkingDir: "/tmp/code-interpreter-storage",

@@ -15,14 +15,14 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { PythonHttpTool } from "@/tools/python/python_http.js";
+import { PythonTool } from "@/tools/python/python.js";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { LocalPythonStorage } from "@/tools/python/storage.js";
 
 const codeInterpreterUrl = process.env.CODE_INTERPRETER_URL || "http://localhost:50081";
 
 const getPythonTool = () =>
-  new PythonHttpTool({
+  new PythonTool({
     codeInterpreter: { url: codeInterpreterUrl },
     storage: new LocalPythonStorage({
       interpreterWorkingDir: "/tmp/code-interpreter-storage",
@@ -30,11 +30,11 @@ const getPythonTool = () =>
     }),
   });
 
-describe("PythonHttpTool", () => {
+describe("PythonTool", () => {
   it("Is the expected tool", () => {
     const tool = getPythonTool();
-    expect(tool).toBeInstanceOf(PythonHttpTool);
-    expect(PythonHttpTool.isTool(tool)).toBe(true);
+    expect(tool).toBeInstanceOf(PythonTool);
+    expect(PythonTool.isTool(tool)).toBe(true);
     expect(tool.name).toBe("Python");
     expect(tool.description).toMatch("Run Python and/or shell code");
   });
@@ -69,7 +69,7 @@ describe("PythonHttpTool", () => {
   it("serializes", async () => {
     const tool = getPythonTool();
     const serialized = tool.serialize();
-    const deserializedTool = PythonHttpTool.fromSerialized(serialized);
+    const deserializedTool = PythonTool.fromSerialized(serialized);
     verifyDeserialization(tool, deserializedTool);
   });
 });

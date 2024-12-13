@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import { BaseToolOptions, BaseToolRunOptions, ToolEmitter, Tool, ToolInput } from "@/tools/base.js";
-import { createGrpcTransport } from "@connectrpc/connect-node";
-import { PromiseClient, createPromiseClient } from "@connectrpc/connect";
-import { CodeInterpreterService } from "bee-proto/code_interpreter/v1/code_interpreter_service_connect";
+import {
+  BaseToolOptions,
+  BaseToolRunOptions,
+  ToolEmitter,
+  Tool,
+  ToolError,
+  ToolInput,
+} from "@/tools/base.js";
 import { z } from "zod";
 import { BaseLLMOutput } from "@/llms/base.js";
 import { LLM } from "@/llms/llm.js";
@@ -95,7 +99,6 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
     });
   }
 
-  protected readonly client: PromiseClient<typeof CodeInterpreterService>;
   protected readonly preprocess;
 
   public constructor(options: PythonToolOptions) {
@@ -109,24 +112,12 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
         },
       ]);
     }
-    this.client = this._createClient();
     this.preprocess = options.preprocess;
     this.storage = options.storage;
   }
 
   static {
     this.register();
-  }
-
-  protected _createClient(): PromiseClient<typeof CodeInterpreterService> {
-    return createPromiseClient(
-      CodeInterpreterService,
-      createGrpcTransport({
-        baseUrl: this.options.codeInterpreter.url,
-        httpVersion: "2",
-        nodeOptions: this.options.codeInterpreter.connectionOptions,
-      }),
-    );
   }
 
   protected async _run(
@@ -156,21 +147,42 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
     const prefix = "/workspace/";
 
-    const result = await this.client.execute(
-      {
-        sourceCode: await getSourceCode(),
-        executorId: this.options.executorId ?? "default",
-        files: Object.fromEntries(
-          inputFiles.map((file) => [`${prefix}${file.filename}`, file.pythonId]),
-        ),
-      },
-      { signal: run.signal },
-    );
+    let response;
+    const httpUrl = this.options.codeInterpreter.url + "/v1/execute";
+    try {
+      response = await fetch(httpUrl, {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          source_code: await getSourceCode(),
+          executorId: this.options.executorId ?? "default",
+          files: Object.fromEntries(
+            inputFiles.map((file) => [`${prefix}${file.filename}`, file.pythonId]),
+          ),
+        }),
+      });
+    } catch (error) {
+      if (error.cause.name == "HTTPParserError") {
+        throw new ToolError("Python tool over HTTP failed -- not using HTTP endpoint!", [error]);
+      } else {
+        throw new ToolError("Python tool over HTTP failed!", [error]);
+      }
+    }
+
+    if (!response?.ok) {
+      throw new ToolError("HTTP request failed!", [new Error(await response.text())]);
+    }
+
+    const result = await response.json();
 
     // replace absolute paths in "files" with relative paths by removing "/workspace/"
     // skip files that are not in "/workspace"
     // skip entries that are also entries in filesInput
     const filesOutput = await this.storage.download(
+      // @ts-ignore
       Object.entries(result.files)
         .map(([k, v]) => {
           const file = { path: k, pythonId: v };
@@ -194,12 +206,13 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
         })
         .filter(isTruthy),
     );
-    return new PythonToolOutput(result.stdout, result.stderr, result.exitCode, filesOutput);
+    return new PythonToolOutput(result.stdout, result.stderr, result.exit_code, filesOutput);
   }
 
   createSnapshot() {
     return {
       ...super.createSnapshot(),
+      files: this.files,
       storage: this.storage,
       preprocess: this.preprocess,
     };
@@ -207,6 +220,5 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {
     super.loadSnapshot(snapshot);
-    Object.assign(this, { client: this._createClient() });
   }
 }
