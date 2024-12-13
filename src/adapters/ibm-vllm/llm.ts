@@ -27,8 +27,12 @@ import {
   LLMError,
   LLMMeta,
 } from "@/llms/base.js";
-import { isEmpty, isString } from "remeda";
-import type { DecodingParameters, SingleGenerationRequest } from "@/adapters/ibm-vllm/types.js";
+import { chunk, isEmpty, isString } from "remeda";
+import type {
+  DecodingParameters,
+  SingleGenerationRequest,
+  EmbeddingTasksRequest,
+} from "@/adapters/ibm-vllm/types.js";
 import { LLM, LLMEvents, LLMInput } from "@/llms/llm.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GenerationResponse__Output } from "@/adapters/ibm-vllm/types.js";
@@ -39,6 +43,7 @@ import { ServiceError } from "@grpc/grpc-js";
 import { Client } from "@/adapters/ibm-vllm/client.js";
 import { GetRunContext } from "@/context.js";
 import { BatchedGenerationRequest } from "./types.js";
+import { OmitPrivateKeys } from "@/internals/types.js";
 
 function isGrpcServiceError(err: unknown): err is ServiceError {
   return (
@@ -100,6 +105,12 @@ export type IBMvLLMParameters = NonNullable<
 
 export interface IBMvLLMGenerateOptions extends GenerateOptions {}
 
+export interface IBMvLLMEmbeddingOptions
+  extends EmbeddingOptions,
+    Omit<OmitPrivateKeys<EmbeddingTasksRequest>, "texts"> {
+  chunkSize?: number;
+}
+
 export type IBMvLLMEvents = LLMEvents<IBMvLLMOutput>;
 
 export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
@@ -128,9 +139,36 @@ export class IBMvLLM extends LLM<IBMvLLMOutput, IBMvLLMGenerateOptions> {
     };
   }
 
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  async embed(input: LLMInput[], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new NotImplementedError();
+  async embed(
+    input: LLMInput[],
+    { chunkSize, signal, ...options }: IBMvLLMEmbeddingOptions = {},
+  ): Promise<EmbeddingOutput> {
+    const results = await Promise.all(
+      chunk(input, chunkSize ?? 100).map(async (texts) => {
+        const response = await this.client.embed(
+          {
+            model_id: this.modelId,
+            truncate_input_tokens: options?.truncate_input_tokens ?? 512,
+            texts,
+          },
+          {
+            signal,
+          },
+        );
+        const embeddings = response.results?.vectors.map((vector) => {
+          const embedding = vector[vector.data]?.values;
+          if (!embedding) {
+            throw new LLMError("Missing embedding");
+          }
+          return embedding;
+        });
+        if (embeddings?.length !== texts.length) {
+          throw new LLMError("Missing embedding");
+        }
+        return embeddings;
+      }),
+    );
+    return { embeddings: results.flat() };
   }
 
   async tokenize(input: LLMInput): Promise<BaseLLMTokenizeOutput> {
