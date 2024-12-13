@@ -15,12 +15,15 @@
  */
 
 import { BAMChatLLMInputConfig } from "@/adapters/bam/chat.js";
-import { getProp } from "@/internals/helpers/object.js";
 import { BaseLLM } from "@/llms/base.js";
 import { isFunction } from "remeda";
 
 export function assertLLMWithMessagesToPromptFn(instance: object): instance is BaseLLM<any, any> & {
   messagesToPrompt: BAMChatLLMInputConfig["messagesToPrompt"];
 } {
-  return isFunction(getProp(instance, ["messagesToPrompt"])) && instance instanceof BaseLLM;
+  return Boolean(
+    instance instanceof BaseLLM &&
+      "messagesToPrompt" in instance &&
+      isFunction(instance.messagesToPrompt),
+  );
 }

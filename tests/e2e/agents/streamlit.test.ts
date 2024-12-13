@@ -43,7 +43,9 @@ describe("Streamlit Agent", () => {
     let response: Awaited<ReturnType<typeof agent.run>>;
     try {
       response = await agent
-        .run({ prompt: `Generate me a minimalistic "Hello World" app.` })
+        .run({
+          prompt: `Generate a minimalistic "Hello World" app and provide some short explanation.`,
+        })
         .observe((emitter) => {
           emitter.registerCallbacks({
             newToken: callbacks.create("newToken", {
