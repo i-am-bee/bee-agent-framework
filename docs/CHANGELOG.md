@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.0.53](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.52...v0.0.53) (2024-12-13)
+
+### Features
+
+- **agents:** improve parsing in Streamlit agent ([686b59b](https://github.com/i-am-bee/bee-agent-framework/commit/686b59be497e6ee94a67d3763f876451410d09a5))
+- **agents:** update Bee system prompt ([#249](https://github.com/i-am-bee/bee-agent-framework/issues/249)) ([4fff94a](https://github.com/i-am-bee/bee-agent-framework/commit/4fff94a26ee36a188a4df5cb2abde758fd10119f))
+- **tools:** prevent python tool use for summarization ([#247](https://github.com/i-am-bee/bee-agent-framework/issues/247)) ([0e69d11](https://github.com/i-am-bee/bee-agent-framework/commit/0e69d117c216327659fdd2ae29521e7644083343))
+- **tools:** propagate agent's runner memory to tools ([#242](https://github.com/i-am-bee/bee-agent-framework/issues/242)) ([0407c66](https://github.com/i-am-bee/bee-agent-framework/commit/0407c66eccc64430ef3248f3ac2ab99ea55db22d))
+
+### Bug Fixes
+
+- **agents:** granite runner fixes, docs and examples updates ([#243](https://github.com/i-am-bee/bee-agent-framework/issues/243)) ([6d0c7c5](https://github.com/i-am-bee/bee-agent-framework/commit/6d0c7c593fc35e650eb075b8649a2624fd71b83c))
+- **agents:** use the userEmpty template for an empty input in Bee ([637368d](https://github.com/i-am-bee/bee-agent-framework/commit/637368d5f2ffc2f32c17aac7d0d5e3b92381818d))
+- **instrumentation:** assert raw prompt ([#248](https://github.com/i-am-bee/bee-agent-framework/issues/248)) ([24546c9](https://github.com/i-am-bee/bee-agent-framework/commit/24546c9a897d9147ebe9fafec5eb1c3d5898e49f))
+- **llms:** add missing events for stream method ([9a82d29](https://github.com/i-am-bee/bee-agent-framework/commit/9a82d29331635977475ba925cdbacda68edd0472))
+- **tools:** verify that the end date is later than the start date in OpenMeteo tool ([#244](https://github.com/i-am-bee/bee-agent-framework/issues/244)) ([eee4cb5](https://github.com/i-am-bee/bee-agent-framework/commit/eee4cb5c7a0199e2fc67f3af054982bfc0eafe05))
+
 ## [0.0.52](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.51...v0.0.52) (2024-12-10)
 
 ### Features
