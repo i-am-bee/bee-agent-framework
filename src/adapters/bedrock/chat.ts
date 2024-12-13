@@ -32,6 +32,7 @@ import { Emitter } from "@/emitter/emitter.js";
 import type { AwsCredentialIdentity, Provider } from "@aws-sdk/types";
 import {
   BedrockRuntimeClient as Client,
+  InvokeModelCommand,
   ConverseCommand,
   ConverseCommandOutput,
   ConverseStreamCommand,
@@ -42,9 +43,12 @@ import {
 } from "@aws-sdk/client-bedrock-runtime";
 import { GetRunContext } from "@/context.js";
 import { Serializer } from "@/serializer/serializer.js";
-import { NotImplementedError } from "@/errors.js";
 
 type Response = ContentBlockDeltaEvent | ConverseCommandOutput;
+
+export interface BedrockEmbeddingOptions extends EmbeddingOptions {
+  body?: Record<string, any>;
+}
 
 export class ChatBedrockOutput extends ChatLLMOutput {
   public readonly responses: Response[];
@@ -204,9 +208,24 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
     };
   }
 
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new NotImplementedError();
+  async embed(
+    input: BaseMessage[][],
+    options: BedrockEmbeddingOptions = {},
+  ): Promise<EmbeddingOutput> {
+    const command = new InvokeModelCommand({
+      modelId: this.modelId,
+      contentType: "application/json",
+      accept: "application/json",
+      body: JSON.stringify({
+        texts: input.map((msgs) => msgs.map((msg) => msg.text)),
+        input_type: "search_document",
+        ...options?.body,
+      }),
+    });
+
+    const response = await this.client.send(command, { abortSignal: options?.signal });
+    const jsonString = new TextDecoder().decode(response.body);
+    return JSON.parse(jsonString);
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {
