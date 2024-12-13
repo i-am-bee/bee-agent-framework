@@ -19,6 +19,7 @@ import grpc, {
   ClientOptions as GRPCClientOptions,
   ClientReadableStream,
   ClientUnaryCall,
+  Metadata,
 } from "@grpc/grpc-js";
 
 import * as R from "remeda";
@@ -47,6 +48,7 @@ import { z } from "zod";
 import { Cache } from "@/cache/decoratorCache.js";
 import { Serializable } from "@/internals/serializable.js";
 import PQueue from "p-queue-compat";
+import { getProp } from "@/internals/helpers/object.js";
 
 const GENERATION_PROTO_PATH = new URL("./proto/generation.proto", import.meta.url);
 const NLP_PROTO_PATH = new URL("./proto/caikit_runtime_Nlp.proto", import.meta.url);
@@ -193,13 +195,20 @@ export class Client extends Serializable {
   protected wrapGrpcCall<TRequest, TResponse>(
     fn: (
       request: TRequest,
+      metadata: Metadata,
       options: CallOptions,
       callback: UnaryCallback<TResponse>,
     ) => ClientUnaryCall,
   ) {
     return (request: TRequest, { signal, ...options }: CallOptions = {}): Promise<TResponse> => {
+      const metadata = new Metadata();
+      const modelId = getProp(request, ["model_id"]);
+      if (modelId) {
+        metadata.add("mm-model-id", modelId);
+      }
+
       return new Promise<TResponse>((resolve, reject) => {
-        const call = fn(request, options, (err, response) => {
+        const call = fn(request, metadata, options, (err, response) => {
           signal?.removeEventListener("abort", abortHandler);
           if (err) {
             reject(err);
