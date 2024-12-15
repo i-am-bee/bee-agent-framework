@@ -34,7 +34,6 @@ import { GetRunContext } from "@/context.js";
 import { Serializer } from "@/serializer/serializer.js";
 import { getPropStrict } from "@/internals/helpers/object.js";
 import { ChatCompletionCreateParams } from "groq-sdk/resources/chat/completions";
-import { NotImplementedError } from "@/errors.js";
 
 type Parameters = Omit<ChatCompletionCreateParams, "stream" | "messages" | "model">;
 type Response = Omit<Client.Chat.ChatCompletionChunk, "object">;
@@ -148,9 +147,19 @@ export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
     };
   }
 
-  // eslint-disable-next-line unused-imports/no-unused-vars
   async embed(input: BaseMessage[][], options?: EmbeddingOptions): Promise<EmbeddingOutput> {
-    throw new NotImplementedError();
+    const { data } = await this.client.embeddings.create(
+      {
+        model: this.modelId,
+        input: input.flatMap((msgs) => msgs.map((msg) => msg.text)) as string[],
+        encoding_format: "float",
+      },
+      {
+        signal: options?.signal,
+        stream: false,
+      },
+    );
+    return { embeddings: data.map(({ embedding }) => embedding as number[]) };
   }
 
   async tokenize(input: BaseMessage[]): Promise<BaseLLMTokenizeOutput> {
