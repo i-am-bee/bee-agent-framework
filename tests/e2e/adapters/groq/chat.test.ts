@@ -20,9 +20,9 @@ import { GroqChatLLM } from "@/adapters/groq/chat.js";
 const apiKey = process.env.GROQ_API_KEY;
 
 describe.runIf(Boolean(apiKey))("Adapter Groq Chat LLM", () => {
-  const createChatLLM = () => {
+  const createChatLLM = (modelId = "llama3-8b-8192") => {
     const model = new GroqChatLLM({
-      modelId: "llama3-8b-8192",
+      modelId,
       parameters: {
         temperature: 0,
         max_tokens: 1024,
@@ -68,5 +68,17 @@ describe.runIf(Boolean(apiKey))("Adapter Groq Chat LLM", () => {
         }),
       );
     }
+  });
+
+  // Embedding model does not available right now
+  it.skip("Embeds", async () => {
+    const llm = createChatLLM("nomic-embed-text-v1_5");
+    const response = await llm.embed([
+      [BaseMessage.of({ role: "user", text: `Hello world!` })],
+      [BaseMessage.of({ role: "user", text: `Hello family!` })],
+    ]);
+    expect(response.embeddings.length).toBe(2);
+    expect(response.embeddings[0].length).toBe(1024);
+    expect(response.embeddings[1].length).toBe(1024);
   });
 });
