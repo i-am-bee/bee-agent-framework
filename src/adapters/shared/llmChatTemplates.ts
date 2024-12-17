@@ -128,9 +128,9 @@ const granite31Instruct: LLMChatTemplate = {
     ] as const),
     template: `{{#messages}}{{#system}}<|start_of_role|>system<|end_of_role|>
 {{system}}<|end_of_text|>
-{{ end }}{{/system}}{{#available_tools}}<|start_of_role|>tools<|end_of_role|>
-{{available_tools}}<|end_of_text|>
-{{ end }}{{/available_tools}}{{#user}}<|start_of_role|>user<|end_of_role|>
+{{ end }}{{/system}}{{#tools}}<|start_of_role|>tools<|end_of_role|>
+{{tools}}<|end_of_text|>
+{{ end }}{{/tools}}{{#user}}<|start_of_role|>user<|end_of_role|>
 {{user}}<|end_of_text|>
 {{ end }}{{/user}}{{#assistant}}<|start_of_role|>assistant<|end_of_role|>
 {{assistant}}<|end_of_text|>
