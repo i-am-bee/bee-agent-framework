@@ -76,7 +76,7 @@ function wikipediaRetrivalTool(passageSize: number, overlap: number, maxResults:
 
 // Agent LLM
 const llm = new OllamaChatLLM({
-  modelId: "granite3-dense:8b",
+  modelId: "granite3.1-dense:8b",
   parameters: {
     temperature: 0,
     num_ctx: 4096,
@@ -87,7 +87,7 @@ const llm = new OllamaChatLLM({
 const agent = new BeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
-  tools: [wikipediaRetrivalTool(200, 50, 3)],
+  tools: [wikipediaRetrivalTool(400, 50, 3)],
 });
 
 const reader = createConsoleReader();
