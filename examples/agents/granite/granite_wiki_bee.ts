@@ -79,8 +79,7 @@ const llm = new OllamaChatLLM({
   modelId: "granite3.1-dense:8b",
   parameters: {
     temperature: 0,
-    num_ctx: 4096,
-    num_predict: 512,
+    num_predict: 2048,
   },
 });
 

@@ -99,7 +99,7 @@ ollama serve
 Run the [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) agent:
 
 ```shell
-yarn run start examples/agents/granite/granite_wiki_bee.ts <<< "Who were the authors of the paper 'Attention is all you need' and how many citations does it have?"
+yarn run start examples/agents/granite/granite_wiki_bee.ts <<< "Who were the authors of the research paper 'Attention is all you need', how many citations does it have?"
 ```
 
 You will see the agent reasoning, calling the WikipediaTool and producing a final answer similar to the following:
