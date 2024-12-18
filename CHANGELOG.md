@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.0.54](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.53...v0.0.54) (2024-12-18)
+
+### Features
+
+- **adapters:** add embedding support for Groq ([4673b5e](https://github.com/i-am-bee/bee-agent-framework/commit/4673b5efd98adce398da46e883458a5e9d5a9673)), closes [#176](https://github.com/i-am-bee/bee-agent-framework/issues/176)
+- **adapters:** add embedding support for IBM vLLM ([#251](https://github.com/i-am-bee/bee-agent-framework/issues/251)) ([2925dfc](https://github.com/i-am-bee/bee-agent-framework/commit/2925dfc2baf2de5ada7dac9ae17edd0eb5d58351))
+- **adapters:** add presets for Granite 3.1 in WatsonX and IBM vLLM ([#250](https://github.com/i-am-bee/bee-agent-framework/issues/250)) ([972681f](https://github.com/i-am-bee/bee-agent-framework/commit/972681ffcf6cfdfa8d176649adc3197a97bcd118))
+- **adapters:** extends Ollama embedding options ([d3c9364](https://github.com/i-am-bee/bee-agent-framework/commit/d3c9364d11b9b717c296373ca02c85d548e7fb4c)), closes [#176](https://github.com/i-am-bee/bee-agent-framework/issues/176)
+- **adapters:** extends OpenAI embedding options ([ff96251](https://github.com/i-am-bee/bee-agent-framework/commit/ff96251357609efb652bde1563da9e49dcd59e32)), closes [#176](https://github.com/i-am-bee/bee-agent-framework/issues/176)
+- **agents:** extend bee start event ([#224](https://github.com/i-am-bee/bee-agent-framework/issues/224)) ([368aa2a](https://github.com/i-am-bee/bee-agent-framework/commit/368aa2a6ceda30a5e1934feac7351db275f5ab0e))
+- **agents:** granite 3.1 support ([#257](https://github.com/i-am-bee/bee-agent-framework/issues/257)) ([56045d6](https://github.com/i-am-bee/bee-agent-framework/commit/56045d6ddcb21edcd6d00c6f83e462262f3173a9))
+- **agents:** improve streamlit agent prompt ([#256](https://github.com/i-am-bee/bee-agent-framework/issues/256)) ([747a052](https://github.com/i-am-bee/bee-agent-framework/commit/747a052157d3530475ac0302070f00d7e877daf7))
+
+### Bug Fixes
+
+- modify params on ollama granite cookbook ([#260](https://github.com/i-am-bee/bee-agent-framework/issues/260)) ([f6e42a7](https://github.com/i-am-bee/bee-agent-framework/commit/f6e42a77299334c36316a5a01b78dac7fdc9fa96))
+
 ## [0.0.53](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.52...v0.0.53) (2024-12-13)
 
 ### Features
