@@ -71,7 +71,7 @@ export class GraniteRunner extends DefaultRunner {
       const index = memory.messages.findIndex((msg) => msg.role === Role.SYSTEM) + 1;
       await memory.add(
         BaseMessage.of({
-          role: "available_tools",
+          role: "tools",
           text: JSON.stringify(
             (await this.renderers.system.variables.tools()).map((tool) => ({
               name: tool.name,

@@ -2,23 +2,23 @@
 
 The [IBM Granite](https://www.ibm.com/granite) family of models can be used as the underlying LLM within Bee Agents. Granite™ is IBM's family of open, performant, and trusted AI models tailored for business and optimized to scale your AI applications.
 
-This guide and the associated examples will help you get started with creating Bee Agents using Granite.
+This guide and the associated examples will help you get started with creating Bee Agents using Granite 3.1.
 
 ## 📦 Prerequisites
 
 ### LLM Services
 
-IBM Granite is supported by [watsonx.ai](https://www.ibm.com/products/watsonx-ai) and [Ollama](https://ollama.com/). Watsonx.ai will allow you to run models in the cloud. Ollama will allow you to download and run models locally.
+IBM Granite 3.1 is supported by [watsonx.ai](https://www.ibm.com/products/watsonx-ai) and [Ollama](https://ollama.com/). Watsonx.ai will allow you to run models in the cloud. Ollama will allow you to download and run models locally.
 
 > [!TIP]
 > Better performance will be achieved by using larger Granite models.
 
 > [!NOTE]
-> If you work for IBM there are additional options to run IBM Granite models with VLLM or RITS.
+> If you work for IBM there are additional options to run IBM Granite 3.1 models with VLLM or RITS.
 
 #### Ollama
 
-There are guides available for running Granite with Ollama on [Linux](https://www.ibm.com/granite/docs/run/granite-on-linux/granite/), [Mac](https://www.ibm.com/granite/docs/run/granite-on-mac/granite/) or [Windows](https://www.ibm.com/granite/docs/run/granite-on-windows/granite/).
+There are guides available for running Granite 3.1 with Ollama on [Linux](https://www.ibm.com/granite/docs/run/granite-on-linux/granite/), [Mac](https://www.ibm.com/granite/docs/run/granite-on-mac/granite/) or [Windows](https://www.ibm.com/granite/docs/run/granite-on-windows/granite/).
 
 #### Watsonx
 
@@ -88,10 +88,10 @@ In this example the wikipedia tool interface is extended so that the agent can s
 
 This example uses Ollama exclusively.
 
-To get started you will need to pull `granite3-dense:8b` and `nomic-embed-text` (to perform text embedding). If you are unfamiliar with using Ollama then check out instructions for getting up and running at the the [Ollama Github repo](https://github.com/ollama/ollama).
+To get started you will need to pull `granite3.1-dense:8b` and `nomic-embed-text` (to perform text embedding). If you are unfamiliar with using Ollama then check out instructions for getting up and running at the the [Ollama Github repo](https://github.com/ollama/ollama).
 
 ```shell
-ollama pull granite3-dense:8b
+ollama pull granite3.1-dense:8b
 ollama pull nomic-embed-text
 ollama serve
 ```
@@ -99,7 +99,7 @@ ollama serve
 Run the [granite_wiki_bee](/examples/agents/granite/granite_wiki_bee.ts) agent:
 
 ```shell
-yarn run start examples/agents/granite/granite_wiki_bee.ts <<< "Who were the authors of the paper 'Attention is all you need' and how many citations does it have?"
+yarn run start examples/agents/granite/granite_wiki_bee.ts <<< "Who were the authors of the research paper 'Attention is all you need', how many citations does it have?"
 ```
 
 You will see the agent reasoning, calling the WikipediaTool and producing a final answer similar to the following:

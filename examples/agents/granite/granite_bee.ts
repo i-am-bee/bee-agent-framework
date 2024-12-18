@@ -29,7 +29,7 @@ function getChatLLM(provider?: Provider): ChatLLM<ChatLLMOutput> {
   const LLMFactories: Record<Provider, () => ChatLLM<ChatLLMOutput>> = {
     [Providers.OLLAMA]: () =>
       new OllamaChatLLM({
-        modelId: getEnv("OLLAMA_MODEL") || "granite3-dense:8b",
+        modelId: getEnv("OLLAMA_MODEL") || "granite3.1-dense:8b",
         parameters: {
           temperature: 0,
           repeat_penalty: 1,
@@ -45,7 +45,7 @@ function getChatLLM(provider?: Provider): ChatLLM<ChatLLMOutput> {
         projectId: getEnv("WATSONX_PROJECT_ID"),
         region: getEnv("WATSONX_REGION"),
       }),
-    [Providers.IBMVLLM]: () => IBMVllmChatLLM.fromPreset(IBMVllmModel.GRANITE_3_0_8B_INSTRUCT),
+    [Providers.IBMVLLM]: () => IBMVllmChatLLM.fromPreset(IBMVllmModel.GRANITE_3_1_8B_INSTRUCT),
     [Providers.IBMRITS]: () =>
       new OpenAIChatLLM({
         client: new OpenAI({
@@ -55,7 +55,7 @@ function getChatLLM(provider?: Provider): ChatLLM<ChatLLMOutput> {
             RITS_API_KEY: process.env.IBM_RITS_API_KEY,
           },
         }),
-        modelId: getEnv("IBM_RITS_MODEL") || "ibm-granite/granite-3.0-8b-instruct",
+        modelId: getEnv("IBM_RITS_MODEL") || "ibm-granite/granite-3.1-8b-instruct",
         parameters: {
           temperature: 0,
           max_tokens: 2048,

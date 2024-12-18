@@ -116,21 +116,21 @@ const llama3: LLMChatTemplate = {
   },
 };
 
-const granite3Instruct: LLMChatTemplate = {
+const granite31Instruct: LLMChatTemplate = {
   template: new PromptTemplate({
     schema: templateSchemaFactory([
       "system",
       "user",
       "assistant",
-      "available_tools",
+      "tools",
       "tool_call",
       "tool_response",
     ] as const),
     template: `{{#messages}}{{#system}}<|start_of_role|>system<|end_of_role|>
 {{system}}<|end_of_text|>
-{{ end }}{{/system}}{{#available_tools}}<|start_of_role|>available_tools<|end_of_role|>
-{{available_tools}}<|end_of_text|>
-{{ end }}{{/available_tools}}{{#user}}<|start_of_role|>user<|end_of_role|>
+{{ end }}{{/system}}{{#tools}}<|start_of_role|>tools<|end_of_role|>
+{{tools}}<|end_of_text|>
+{{ end }}{{/tools}}{{#user}}<|start_of_role|>user<|end_of_role|>
 {{user}}<|end_of_text|>
 {{ end }}{{/user}}{{#assistant}}<|start_of_role|>assistant<|end_of_role|>
 {{assistant}}<|end_of_text|>
@@ -142,7 +142,7 @@ const granite3Instruct: LLMChatTemplate = {
 `,
   }),
   messagesToPrompt: messagesToPromptFactory({
-    available_tools: "available_tools",
+    tools: "tools",
     tool_response: "tool_response",
     tool_call: "tool_call",
   }),
@@ -156,7 +156,7 @@ export class LLMChatTemplates {
     "llama3.3": llama33,
     "llama3.1": llama31,
     "llama3": llama3,
-    "granite3Instruct": granite3Instruct,
+    "granite3.1-Instruct": granite31Instruct,
   };
 
   static register(model: string, template: LLMChatTemplate, override = false) {
