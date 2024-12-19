@@ -1,5 +1,5 @@
-import "dotenv/config.js";
-import { Flow } from "bee-agent-framework/flows";
+import "dotenv/config";
+import { Flow } from "bee-agent-framework/experimental/flows";
 import { z } from "zod";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
