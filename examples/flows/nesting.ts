@@ -2,6 +2,7 @@ import { Flow } from "bee-agent-framework/experimental/flows";
 import { z } from "zod";
 
 const schema = z.object({
+  threshold: z.number().min(0).max(1),
   counter: z.number().default(0),
 });
 
@@ -18,16 +19,13 @@ const subtractFlow = new Flow({
 }));
 
 const flow = new Flow({
-  schema: z.object({
-    threshold: z.number().min(0).max(1),
-    counter: z.number().default(0),
-  }),
+  schema,
 })
   .addStep("start", (state) => ({
-    next: Math.random() > state.threshold ? "addFlow" : "subtractFlow",
+    next: Math.random() > state.threshold ? "delegateAdd" : "delegateSubtract",
   }))
-  .addStep("addFlow", addFlow.asStep({ next: Flow.END }))
-  .addStep("subtractFlow", subtractFlow);
+  .addStep("delegateAdd", addFlow.asStep({ next: Flow.END }))
+  .addStep("delegateSubtract", subtractFlow.asStep({ next: Flow.END }));
 
 const response = await flow.run({ threshold: 0.5 }).observe((emitter) => {
   emitter.on("start", (data, event) =>
