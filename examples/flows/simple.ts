@@ -1,4 +1,4 @@
-import { Flow } from "bee-agent-framework/flows";
+import { Flow } from "bee-agent-framework/experimental/flows";
 import { z } from "zod";
 
 const schema = z.object({
@@ -6,14 +6,11 @@ const schema = z.object({
 });
 
 const flow = new Flow({ schema })
-  .addStep("a", async (state) => ({})) // does nothing
-  .addStep("b", async (state) => ({
-    // adds one and moves to b
+  .addStep("a", async (state) => ({
     update: { hops: state.hops + 1 },
   }))
-  .addStep("c", async (state) => ({
-    update: { hops: state.hops + 1 },
-    next: Math.random() > 0.5 ? "b" : Flow.END,
+  .addStep("b", () => ({
+    next: Math.random() > 0.5 ? Flow.PREV : Flow.END,
   }));
 
 const response = await flow.run({ hops: 0 }).observe((emitter) => {
