@@ -249,12 +249,12 @@ export class Flow<
               next = run.steps.at(0)?.name!;
             } else if (response.next === Flow.PREV) {
               next = run.steps.at(-2)?.name!;
-            } else if (response.next === Flow.NEXT) {
-              next = this.findStep(next).next;
             } else if (response.next === Flow.SELF) {
               next = run.steps.at(-1)?.name!;
+            } else if (!response.next || response.next === Flow.NEXT) {
+              next = this.findStep(next).next || Flow.END;
             } else {
-              next = response.next || Flow.END;
+              next = response.next;
             }
           } catch (error) {
             await runContext.emitter.emit("error", {
@@ -266,7 +266,14 @@ export class Flow<
           }
         }
 
-        run.result = (this.input.outputSchema ?? this.input.schema).parse(run.state);
+        run.result = (this.input.outputSchema ?? this.input.schema)
+          .parseAsync(run.state)
+          .catch((err) => {
+            throw new FlowError(
+              `Flow has ended but it's state does not adhere to the flow's output schema.`,
+              { run: shallowCopy(run), errors: [err] },
+            );
+          });
         return run;
       },
     );
