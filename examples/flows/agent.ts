@@ -31,7 +31,7 @@ const workflow = new Flow({ schema: schema })
       next: "critique",
     };
   })
-  .addStep("critique", schema.required(), async (state) => {
+  .addStrictStep("critique", schema.required(), async (state) => {
     const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
     const { parsed: critiqueResponse } = await new JsonDriver(llm).generate(
       z.object({ score: z.number().int().min(0).max(100) }),

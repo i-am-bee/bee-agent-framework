@@ -59,7 +59,7 @@ const flow = new Flow({
       ? { update: { output: parsed.error }, next: Flow.END }
       : { update: pick(parsed, ["notes", "topic"]) };
   })
-  .addStep("planner", schema.required({ topic: true }), async (state) => {
+  .addStrictStep("planner", schema.required({ topic: true }), async (state) => {
     const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
     const agent = new BeeAgent({
       llm,
@@ -86,15 +86,13 @@ const flow = new Flow({
       ].join("\n"),
     });
 
-    console.info(result.text);
-
     return {
       update: {
         plan: result.text,
       },
     };
   })
-  .addStep("writer", schema.required({ plan: true }), async (state) => {
+  .addStrictStep("writer", schema.required({ plan: true }), async (state) => {
     const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
     const output = await llm.generate([
       BaseMessage.of({
@@ -122,7 +120,7 @@ const flow = new Flow({
       update: { draft: output.getTextContent() },
     };
   })
-  .addStep("editor", schema.required({ draft: true }), async (state) => {
+  .addStrictStep("editor", schema.required({ draft: true }), async (state) => {
     const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
     const output = await llm.generate([
       BaseMessage.of({
