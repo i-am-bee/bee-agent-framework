@@ -1,10 +1,10 @@
-import { ZodSchema, z } from "zod";
+import { z, ZodSchema } from "zod";
 import { Serializable } from "@/internals/serializable.js";
 import { Callback, Emitter } from "@/emitter/emitter.js";
 import { RunContext } from "@/context.js";
 import { omit, pick, toCamelCase } from "remeda";
 import { shallowCopy } from "@/serializer/utils.js";
-import { FrameworkError } from "@/errors.js";
+import { FrameworkError, ValueError } from "@/errors.js";
 
 export interface FlowStepResponse<T extends ZodSchema, K extends string> {
   update?: Partial<z.output<T>>;
@@ -17,7 +17,8 @@ export interface FlowRun<T extends ZodSchema, T2 extends ZodSchema, K extends st
   state: z.output<T>;
 }
 
-export interface FlowRunOptions {
+export interface FlowRunOptions<K extends string> {
+  start?: K;
   signal?: AbortSignal;
 }
 
@@ -103,35 +104,44 @@ export class Flow<
 
   addStep<L extends string>(
     name: L,
-    step: FlowStepHandler<TInput, TKeys>,
-  ): Flow<TInput, TOutput, L | TKeys>;
-  addStep<L extends string, TI2 extends ZodSchema>(
+    step: FlowStepHandler<TInput, TKeys> | Flow<TInput, TInput, TKeys>,
+  ): Flow<TInput, TOutput, L | TKeys> {
+    return this._addStep(name, step);
+  }
+
+  addStrictStep<L extends string, TI2 extends ZodSchema>(
     name: L,
     schema: TI2,
-    step: FlowStepHandler<TI2, TKeys>,
-  ): Flow<TInput, TOutput, L | TKeys>;
-  addStep<L extends string, TI2 extends ZodSchema = TInput>(
-    name: L,
-    schemaOrStep: TI2 | FlowStepHandler<TInput, TKeys>,
-    step?: FlowStepHandler<TI2, TKeys>,
+    step: FlowStepHandler<TI2, TKeys> | Flow<TInput, TInput, TKeys>,
   ): Flow<TInput, TOutput, L | TKeys> {
+    return this._addStep(name, schema, step);
+  }
+
+  protected _addStep<TI2 extends ZodSchema = TInput, L extends string = TKeys>(
+    name: L,
+    schemaOrStep: TI2 | FlowStepHandler<TInput, TKeys> | Flow<TInput, TInput, TKeys>,
+    stepOrEmpty?: FlowStepHandler<TI2, TKeys> | Flow<TInput, TInput, TKeys>,
+    next?: FlowNextStep<TKeys>,
+  ): Flow<TInput, TOutput, L | TKeys> {
+    if (!name.trim()) {
+      throw new ValueError(`Step name cannot be empty!`);
+    }
     if (this.steps.has(name)) {
-      throw new FlowError(`Step '${name}' already exists!`);
+      throw new ValueError(`Step '${name}' already exists!`);
     }
     if (name === Flow.END) {
-      throw new FlowError(`The name '${name}' cannot be used!`);
+      throw new ValueError(`The name '${name}' cannot be used!`);
     }
 
-    if (schemaOrStep && step) {
-      // @ts-expect-error
-      this.steps.set(name, { handler: step, schema: schemaOrStep });
-    } else if (typeof schemaOrStep === "function") {
-      this.steps.set(name, { handler: schemaOrStep, schema: this.input.schema });
-    } else {
-      throw new FlowError(`Wrong parameters provided. Neither 'schema' nor 'node' were provided.`);
-    }
+    const schema = (schemaOrStep && stepOrEmpty ? schemaOrStep : this.input.schema) as TInput;
+    const stepOrFlow = stepOrEmpty || schemaOrStep;
 
-    return this as Flow<TInput, TOutput, L | TKeys>;
+    this.steps.set(name, {
+      schema,
+      handler: stepOrFlow instanceof Flow ? stepOrFlow.asStep({ next }) : stepOrFlow,
+    } as FlowStepDef<TInput, TKeys>);
+
+    return this as unknown as Flow<TInput, TOutput, L | TKeys>;
   }
 
   setStart(name: TKeys) {
@@ -139,7 +149,7 @@ export class Flow<
     return this;
   }
 
-  run(state: z.input<TInput>, options: FlowRunOptions = {}) {
+  run(state: z.input<TInput>, options: FlowRunOptions<TKeys> = {}) {
     return RunContext.enter(
       this,
       { signal: options?.signal, params: [state, options] as const },
@@ -155,7 +165,7 @@ export class Flow<
           abort: (reason) => runContext.abort(reason),
         };
 
-        let stepName = this.startStep ?? this.findNextStep();
+        let stepName = options?.start || this.startStep || this.findNextStep();
         while (stepName !== Flow.END) {
           const step = this.steps.get(stepName);
           if (!step) {
@@ -202,6 +212,28 @@ export class Flow<
     }
     this.steps.delete(name);
     return this as unknown as Flow<TInput, TOutput, Exclude<TKeys, L>>;
+  }
+
+  asStep<
+    TInput2 extends ZodSchema = TInput,
+    TOutput2 extends ZodSchema = TOutput,
+    TKeys2 extends string = TKeys,
+  >(overrides: {
+    input?: (input: z.output<TInput2>) => z.output<TInput> | z.input<TInput>;
+    output?: (output: z.output<TOutput>) => z.output<TOutput2> | z.input<TOutput2>;
+    start?: TKeys;
+    next?: FlowNextStep<TKeys2>;
+  }): FlowStepHandler<TInput2, TKeys | TKeys2> {
+    return async (input, ctx) => {
+      const mappedInput = overrides?.input ? overrides.input(input) : input;
+      const result = await this.run(mappedInput, { start: overrides?.start, signal: ctx.signal });
+      const mappedOutput = overrides?.output ? overrides.output(result.state) : result.state;
+
+      return {
+        update: mappedOutput,
+        next: overrides?.next,
+      };
+    };
   }
 
   protected findNextStep(start: TKeys | null = null): FlowNextStep<TKeys> {
