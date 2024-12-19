@@ -208,7 +208,8 @@
     "ollama": "^0.5.11",
     "openai": "^4.67.3",
     "openai-chat-tokens": "^0.2.8",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "yaml": "^2.6.1"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/client-bedrock-runtime": {
@@ -257,6 +258,9 @@
       "optional": true
     },
     "sequelize": {
+      "optional": true
+    },
+    "yaml": {
       "optional": true
     }
   },
