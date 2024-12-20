@@ -50,4 +50,4 @@ rm -rf "${SCRIPT_DIR}"/{dist,dts,types}
 
 yarn run lint:fix "${GRPC_TYPES_PATH}"
 yarn prettier --write "${GRPC_TYPES_PATH}"
-TARGETS="$GRPC_TYPES_PATH" yarn copyright
+yarn copyright "${GRPC_TYPES_PATH}"
