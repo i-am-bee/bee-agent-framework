@@ -1,4 +1,4 @@
-import { Flow } from "bee-agent-framework/experimental/flows";
+import { Flow } from "bee-agent-framework/experimental/flows/flow";
 import { z } from "zod";
 
 const schema = z.object({

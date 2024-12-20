@@ -236,14 +236,14 @@ export class Flow<
               );
             });
             const response = await step.handler(stepInput, handlers);
+            if (response.update) {
+              run.state = { ...run.state, ...response.update };
+            }
             await runContext.emitter.emit("success", {
               run: shallowCopy(run),
               response,
               step: next,
             });
-            if (response.update) {
-              run.state = { ...run.state, ...response.update };
-            }
 
             if (response.next === Flow.START) {
               next = run.steps.at(0)?.name!;
@@ -266,7 +266,7 @@ export class Flow<
           }
         }
 
-        run.result = (this.input.outputSchema ?? this.input.schema)
+        run.result = await (this.input.outputSchema ?? this.input.schema)
           .parseAsync(run.state)
           .catch((err) => {
             throw new FlowError(
