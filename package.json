@@ -46,7 +46,8 @@
   },
   "lint-staged": {
     "*.{ts,js}": "eslint --fix",
-    "*": "prettier --ignore-unknown --write"
+    "*": ["prettier --ignore-unknown --write", "yarn copyright"],
+    "docs/**/*.md": "yarn docs:links"
   },
   "prettier": {
     "printWidth": 100,
@@ -76,7 +77,8 @@
     },
     "hooks": {
       "before:init": [
-        "[ \"$RELEASE_SKIP_DOCS\" = \"true\" ] && echo 'Skipping docs check.' || yarn docs:check",
+        "yarn docs:check",
+        "[ \"$RELEASE_SKIP_DOCS_LINKS\" = \"true\" ] && echo 'Skipping docs links check.' || yarn docs:links:all",
         "yarn lint",
         "yarn ts:check",
         "yarn test:all"
@@ -140,8 +142,9 @@
     "start:bee": "yarn start -- examples/agents/bee.ts",
     "start:telemetry": "BEE_FRAMEWORK_INSTRUMENTATION_ENABLED=true yarn start --import ./examples/helpers/telemetry.ts",
     "docs:build": "embedme --source-root=. docs/**/*.md && cp *.md docs/ && yarn lint:fix docs/ && yarn prettier --write docs/",
-    "docs:check": "embedme --source-root=. docs/**/*.md --verify && yarn docs:links",
-    "docs:links": "linkinator \"**/*.md\" --timeout=10000 --retry --markdown --directory-listing --skip node_modules --skip \"https://ai.meta.com/blog/meta-llama-3-1/\" ",
+    "docs:check": "embedme --source-root=. docs/**/*.md --verify",
+    "docs:links": "linkinator . --timeout=10000 --retry --markdown --directory-listing --skip node_modules --skip CHANGELOG.md --skip docs/CHANGELOG.md --skip \"https://ai.meta.com/blog/meta-llama-3-1/\" --include",
+    "docs:links:all": "yarn docs:links docs/**/*.md",
     "docs:watch": "docsify serve ./docs --open",
     "lint": "yarn eslint",
     "lint:fix": "yarn eslint --fix",
