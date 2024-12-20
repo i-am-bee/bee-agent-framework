@@ -1,0 +1,49 @@
+import "dotenv/config";
+import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
+import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
+import { createConsoleReader } from "examples/helpers/io.js";
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
+import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
+import { AgentFlow } from "bee-agent-framework/experimental/flows/agent";
+import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
+
+const flow = new AgentFlow();
+flow.addAgent({
+  name: "WeatherAgent",
+  instructions: "You are a weather assistant. Respond only if you can provide a useful answer.",
+  tools: [new OpenMeteoTool()],
+  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+});
+flow.addAgent({
+  name: "ResearchAgent",
+  instructions: "You are a researcher assistant. Respond only if you can provide a useful answer.",
+  tools: [new WikipediaTool()],
+  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+});
+flow.addAgent({
+  name: "FinalAgent",
+  instructions:
+    "You are a helpful assistant. Your task is to make a final answer from the current conversation, starting with the last user message, that provides all useful information.",
+  tools: [],
+  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+});
+
+const reader = createConsoleReader();
+const memory = new UnconstrainedMemory();
+
+for await (const { prompt } of reader) {
+  await memory.add(
+    BaseMessage.of({
+      role: Role.USER,
+      text: prompt,
+    }),
+  );
+
+  const { result } = await flow.run(memory.messages).observe((emitter) => {
+    emitter.on("success", (data) => {
+      reader.write(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
+    });
+  });
+  await memory.addMany(result.newMessages);
+  reader.write(`Agent 🤖`, result.finalAnswer);
+}

@@ -8,7 +8,7 @@ import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { ReadOnlyMemory } from "bee-agent-framework/memory/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { Flow } from "bee-agent-framework/experimental/flows";
+import { Flow } from "bee-agent-framework/experimental/flows/flow";
 import { createConsoleReader } from "examples/helpers/io.js";
 
 const schema = z.object({

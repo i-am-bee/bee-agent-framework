@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { Flow } from "bee-agent-framework/experimental/flows";
 import { z } from "zod";
+import { Flow } from "bee-agent-framework/experimental/flows/flow";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
