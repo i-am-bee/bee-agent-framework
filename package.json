@@ -39,7 +39,8 @@
           "serializer",
           "infra",
           "deps",
-          "instrumentation"
+          "instrumentation",
+          "flows"
         ]
       ]
     }
