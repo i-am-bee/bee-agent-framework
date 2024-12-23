@@ -5,6 +5,7 @@ import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 import unusedImports from "eslint-plugin-unused-imports";
 import markdown from "@eslint/markdown";
+import stylisticJs from "@stylistic/eslint-plugin-js";
 
 export default tseslint.config(
   {
@@ -40,6 +41,8 @@ export default tseslint.config(
     },
     plugins: {
       "unused-imports": unusedImports,
+      // @ts-expect-error wrong types
+      "@stylistic/js": stylisticJs,
     },
     rules: {
       "no-console": ["error"],
@@ -74,6 +77,16 @@ export default tseslint.config(
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/no-empty-object-type": "off",
       "quote-props": ["error", "consistent"],
+      // Force a new line after the copyright header; otherwise, nwa reports them as incorrectly formatted
+      "@stylistic/js/lines-around-comment": [
+        "error",
+        {
+          applyDefaultIgnorePatterns: false,
+          afterBlockComment: true,
+          beforeBlockComment: false,
+          ignorePattern: /^(?![\s\S]*Copyright \d+ IBM Corp.)[\s\S]+$/u.source,
+        },
+      ],
     },
   },
   {

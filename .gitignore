@@ -137,3 +137,4 @@ dist
 .idea
 /experiments
 .npmrc
+.DS_Store
