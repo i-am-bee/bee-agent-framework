@@ -18,7 +18,7 @@ set -e
 if [ "$#" -eq 0 ]; then
   TARGETS=('src/**/*.{js,ts,proto}' "dist/**/*.js" "tests/**/*.{js,ts}" "scripts/**/*.{sh,ts,js}")
 else
-  TARGETS=("$@")
+  TARGETS=("${@/#$PWD\//}")
 fi
 
 # Path to the package.json file
