@@ -78,7 +78,7 @@
     "hooks": {
       "before:init": [
         "yarn docs:check",
-        "[ \"$RELEASE_SKIP_DOCS_LINKS\" = \"true\" ] && echo 'Skipping docs links check.' || yarn docs:links:all",
+        "[ \"$RELEASE_SKIP_DOCS_LINKS\" = \"true\" ] && echo 'Skipping docs links check.' || yarn docs:links:check",
         "yarn lint",
         "yarn ts:check",
         "yarn test:all"
@@ -144,7 +144,7 @@
     "docs:build": "embedme --source-root=. docs/**/*.md && cp *.md docs/ && yarn lint:fix docs/ && yarn prettier --write docs/",
     "docs:check": "embedme --source-root=. docs/**/*.md --verify",
     "docs:links": "linkinator . --timeout=10000 --retry --markdown --directory-listing --skip node_modules --skip CHANGELOG.md --skip docs/CHANGELOG.md --skip \"https://ai.meta.com/blog/meta-llama-3-1/\" --include",
-    "docs:links:all": "yarn docs:links docs/**/*.md",
+    "docs:links:check": "yarn docs:links docs/**/*.md",
     "docs:watch": "docsify serve ./docs --open",
     "lint": "yarn eslint",
     "lint:fix": "yarn eslint --fix",
