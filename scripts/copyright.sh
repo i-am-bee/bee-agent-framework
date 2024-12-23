@@ -16,7 +16,7 @@
 set -e
 
 if [ "$#" -eq 0 ]; then
-  TARGETS=("src" "dist" "tests" "scripts")
+  TARGETS=('src/**/*.{js,ts,proto}' "dist/**/*.js" "tests/**/*.{js,ts}" "scripts/**/*.{sh,ts,js}")
 else
   TARGETS=("$@")
 fi
@@ -50,6 +50,7 @@ fi
 TYPE=${TYPE:-add}
 
 if command -v nwa &> /dev/null; then
+  echo "Running 'nwa' version $(nwa --version)"
   nwa "${TYPE}" -l apache -c "$AUTHOR" "${TARGETS[@]}"
 elif command -v docker &> /dev/null; then
   docker run --rm -v "${PWD}:/src" ghcr.io/b1nary-gr0up/nwa:main "${TYPE}" -l apache -c "$AUTHOR" "${TARGETS[@]}"
