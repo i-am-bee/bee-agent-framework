@@ -45,11 +45,11 @@
     }
   },
   "lint-staged": {
-    "*.{ts,js}": "eslint --fix",
     "*": [
-      "prettier --ignore-unknown --write",
-      "yarn copyright"
+      "yarn copyright",
+      "prettier --ignore-unknown --write"
     ],
+    "*.{ts,js}": "eslint --fix",
     "docs/**/*.md": "yarn docs:links"
   },
   "prettier": {

@@ -77,6 +77,7 @@ export default tseslint.config(
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/no-empty-object-type": "off",
       "quote-props": ["error", "consistent"],
+      // Force a new line after the copyright header; otherwise, nwa reports them as incorrectly formatted
       "@stylistic/js/lines-around-comment": [
         "error",
         {
