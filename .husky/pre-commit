@@ -1,2 +1,2 @@
 yarn lint-staged
-CI=true yarn docs:check && yarn lint && yarn format && yarn ts:check && yarn run test:unit && yarn copyright
+CI=true yarn copyright:check && yarn docs:check && yarn lint && yarn format && yarn ts:check && yarn run test:unit
