@@ -38,16 +38,6 @@ const agent = new BeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
   tools: [new OpenMeteoTool(), new HumanTool(reader)],
-  templates: {
-    system: BeeSystemPrompt,
-    assistant: BeeAssistantPrompt,
-    user: BeeUserPrompt,
-    userEmpty: BeeUserEmptyPrompt,
-    toolError: BeeToolErrorPrompt,
-    toolInputError: BeeToolInputErrorPrompt,
-    toolNoResultError: BeeToolNoResultsPrompt,
-    toolNotFoundError: BeeToolNotFoundPrompt,
-  },
 });
 
 // Main loop
