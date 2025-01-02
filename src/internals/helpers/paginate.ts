@@ -40,3 +40,35 @@ export async function paginate<T>(input: PaginateInput<T>): Promise<T[]> {
 
   return acc;
 }
+
+export interface PaginateWithCursorInput<T, C> {
+  size: number;
+  handler: (data: {
+    cursor: C | undefined;
+    limit: number;
+  }) => Promise<{ data: T[]; done: true } | { data: T[]; done: false; nextCursor: C }>;
+}
+
+export async function paginateWithCursor<T, C>(input: PaginateWithCursorInput<T, C>): Promise<T[]> {
+  const acc: T[] = [];
+  let cursor: C | undefined;
+  while (acc.length < input.size) {
+    const result = await input.handler({
+      cursor,
+      limit: input.size - acc.length,
+    });
+    acc.push(...result.data);
+
+    if (result.done || result.data.length === 0) {
+      break;
+    } else {
+      cursor = result.nextCursor;
+    }
+  }
+
+  if (acc.length > input.size) {
+    acc.length = input.size;
+  }
+
+  return acc;
+}
