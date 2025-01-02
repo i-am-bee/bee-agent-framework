@@ -217,8 +217,7 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
       contentType: "application/json",
       accept: "application/json",
       body: JSON.stringify({
-        texts: input.map((msgs) => msgs.map((msg) => msg.text)),
-        input_type: "search_document",
+        texts: input.flat().map((msg) => msg.text),
         ...options?.body,
       }),
     });
