@@ -17,7 +17,7 @@
 import { ToolEmitter, ToolInput } from "@/tools/base.js";
 import { z } from "zod";
 import { Emitter } from "@/emitter/emitter.js";
-import { ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
+import { ErrorCode, McpError, ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
 import { MCPTool, MCPToolInput, MCPToolOutput } from "./base.js";
 
 export interface MCPResourceToolInput extends MCPToolInput {
@@ -42,7 +42,12 @@ export class MCPResourceTool extends MCPTool<ReadResourceResult> {
   }
 
   async inputSchema() {
-    const resources = await this.listResources().catch(() => []); // ignore errors, e.g. MCP server might not have resource capability
+    const resources = await this.listResources().catch((err) => {
+      if (err instanceof McpError && err.code === ErrorCode.MethodNotFound) {
+        return [];
+      }
+      throw err;
+    });
     return z.object({
       uri: z
         .string()
