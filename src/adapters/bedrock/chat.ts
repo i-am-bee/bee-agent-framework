@@ -43,6 +43,7 @@ import {
 } from "@aws-sdk/client-bedrock-runtime";
 import { GetRunContext } from "@/context.js";
 import { Serializer } from "@/serializer/serializer.js";
+import { omitUndefined } from "@/internals/helpers/object.js";
 
 type Response = ContentBlockDeltaEvent | ConverseCommandOutput;
 
@@ -216,10 +217,12 @@ export class BedrockChatLLM extends ChatLLM<ChatBedrockOutput> {
       modelId: this.modelId,
       contentType: "application/json",
       accept: "application/json",
-      body: JSON.stringify({
-        texts: input.flat().map((msg) => msg.text),
-        ...options?.body,
-      }),
+      body: JSON.stringify(
+        omitUndefined({
+          inputText: input.flat().map((msg) => msg.text),
+          ...options?.body,
+        }),
+      ),
     });
 
     const response = await this.client.send(command, { abortSignal: options?.signal });
