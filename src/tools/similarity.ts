@@ -100,7 +100,7 @@ export class SimilarityTool<TProviderOptions> extends Tool<
         documentIndex: idx,
         score,
       })),
-      filter(({ score }) => score >= (options.minScore ?? 0)),
+      filter(({ score }) => score >= (options.minScore ?? -Infinity)),
       sortBy([prop("score"), "desc"]),
       take(options?.maxResults ?? this.options.maxResults ?? Infinity),
       (data) =>
