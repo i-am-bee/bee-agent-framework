@@ -24,7 +24,7 @@ import {
 } from "./base.js";
 import { string, z } from "zod";
 import { RunContext } from "@/context.js";
-import { map, pipe, prop, sortBy, take } from "remeda";
+import { filter, map, pipe, prop, sortBy, take } from "remeda";
 import { Emitter } from "@/emitter/emitter.js";
 
 const documentSchema = z.object({ text: string() }).passthrough();
@@ -50,6 +50,7 @@ export interface SimilarityToolOptions<TProviderOptions = unknown> extends BaseT
 export interface SimilarityToolRunOptions<TProviderOptions = unknown> extends BaseToolRunOptions {
   provider?: TProviderOptions;
   maxResults?: number;
+  minScore?: number;
 }
 
 export interface SimilarityToolResult {
@@ -99,6 +100,7 @@ export class SimilarityTool<TProviderOptions> extends Tool<
         documentIndex: idx,
         score,
       })),
+      filter(({ score }) => score >= (options.minScore ?? -Infinity)),
       sortBy([prop("score"), "desc"]),
       take(options?.maxResults ?? this.options.maxResults ?? Infinity),
       (data) =>
