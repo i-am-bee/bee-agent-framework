@@ -32,7 +32,7 @@ export function createConsoleReader({
       for await (const { prompt } of this) {
         return prompt;
       }
-      return "";
+      process.exit(0);
     },
 
     async askSingleQuestion(queryMessage: string): Promise<string> {
