@@ -72,8 +72,8 @@ export function createConsoleReader({
           }
           yield { prompt, iteration };
         }
-      } catch (e: any) {
-        if (e.code === "ERR_USE_AFTER_CLOSE") {
+      } catch (e: unknown) {
+        if (e instanceof Error && 'code' in e && e.code === "ERR_USE_AFTER_CLOSE") {
           return;
         }
       } finally {
