@@ -29,14 +29,12 @@ export function createConsoleReader({
     },
 
     async prompt(): Promise<string> {
-      // This uses the async iterator below. If it's exhausted, return empty string.
       for await (const { prompt } of this) {
         return prompt;
       }
       return "";
     },
 
-    // New method: Asks a single question without consuming the async iterator.
     async askSingleQuestion(queryMessage: string): Promise<string> {
       const answer = await rl.question(R.piped(picocolors.cyan, picocolors.bold)(queryMessage));
       return stripAnsi(answer.trim());
