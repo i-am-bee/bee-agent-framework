@@ -4,7 +4,7 @@ import {
   BaseToolRunOptions,
   StringToolOutput,
   ToolInput,
-  ToolEvents,
+  ToolEmitter,
 } from "bee-agent-framework/tools/base";
 import { z } from "zod";
 
@@ -46,7 +46,7 @@ export class HumanTool extends Tool<StringToolOutput> {
   Note: Do NOT attempt to guess or provide incomplete responses. Always use this tool when in doubt to ensure accurate and meaningful interactions.
 `;
 
-  public readonly emitter: Emitter<ToolEvents<ToolInput<this>, StringToolOutput>> =
+public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> =
     Emitter.root.child({
       namespace: ["tool", "human"],
       creator: this,
