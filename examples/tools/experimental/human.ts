@@ -59,10 +59,11 @@ public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> =
     this.reader = reader;
   }
 
-  inputSchema = () =>
-    z.object({
+  inputSchema() {
+    return z.object({
       message: z.string().min(1, "Message cannot be empty"),
     });
+  }
 
   async _run(
     input: z.infer<ReturnType<typeof this.inputSchema>>,
