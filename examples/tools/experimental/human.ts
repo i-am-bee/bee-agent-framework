@@ -6,6 +6,7 @@ import {
   ToolInput,
   ToolEmitter,
 } from "bee-agent-framework/tools/base";
+import { RunContext } from "bee-agent-framework/context";
 import { z } from "zod";
 
 export class HumanTool extends Tool<StringToolOutput> {
@@ -66,20 +67,21 @@ public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> =
   }
 
   async _run(
-    input: z.infer<ReturnType<typeof this.inputSchema>>,
-    _options: BaseToolRunOptions,
+    input: ToolInput<this>,
+    _options: Partial<BaseToolRunOptions>,
+    run: RunContext<this>
   ): Promise<StringToolOutput> {
     // Use the shared reader instance provided to the constructor
     this.reader.write("HumanTool", input.message);
-
-    // Use askSingleQuestion instead of prompt to avoid interfering with main loop iterator
-    const userInput = await this.reader.askSingleQuestion("User 👤 : ");
-
+  
+    // Use askSingleQuestion with the signal
+    const userInput = await this.reader.askSingleQuestion("User 👤 : ", { signal: run.signal });
+  
     // Format the output as required
     const formattedOutput = `{
       "clarification": "${userInput.trim()}"
     }`;
-
+  
     return new StringToolOutput(formattedOutput);
   }
 }
