@@ -95,6 +95,8 @@ export type PromiseOrPlain<T, Decider extends AnyFn> =
 
 export type NoPromise<T> = T extends Promise<unknown> ? never : T;
 
+export type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+
 export type TypedFn<P extends any[], R> = (...args: P) => R;
 
 export function narrowTo<T>(value: unknown, fn: boolean | ((value: T) => boolean)): value is T {
