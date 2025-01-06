@@ -9,7 +9,6 @@ import {
 } from "bee-agent-framework/tools/base";
 import { RunContext } from "bee-agent-framework/context";
 import { z } from "zod";
-import { PromptTemplate } from "bee-agent-framework/template";
 
 interface HumanToolOutput {
   clarification: string;
@@ -24,7 +23,6 @@ export interface HumanToolInput extends BaseToolOptions {
   reader: Reader;
   name?: string;
   description?: string;
-  template?: typeof HumanTool.template;
 }
 
 export class HumanTool extends Tool<JSONToolOutput<HumanToolOutput>, HumanToolInput> {
@@ -64,15 +62,6 @@ export class HumanTool extends Tool<JSONToolOutput<HumanToolOutput>, HumanToolIn
 
   Note: Do NOT attempt to guess or provide incomplete responses. Always use this tool when in doubt to ensure accurate and meaningful interactions.
 `;
-
-  static readonly template = new PromptTemplate({
-    schema: z.object({
-      clarification: z.string(),
-    }),
-    template: `{
-      "clarification": "{clarification}"
-    }`,
-  });
 
   public readonly emitter: ToolEmitter<ToolInput<this>, JSONToolOutput<HumanToolOutput>> =
     Emitter.root.child({
