@@ -2,14 +2,19 @@ import { Emitter } from "bee-agent-framework/emitter/emitter";
 import {
   Tool,
   BaseToolRunOptions,
-  StringToolOutput,
+  JSONToolOutput,
   ToolInput,
   ToolEmitter,
 } from "bee-agent-framework/tools/base";
 import { RunContext } from "bee-agent-framework/context";
 import { z } from "zod";
+import { PromptTemplate } from "bee-agent-framework/template";
 
-export class HumanTool extends Tool<StringToolOutput> {
+interface HumanToolOutput {
+  clarification: string;
+}
+
+export class HumanTool extends Tool<JSONToolOutput<HumanToolOutput>> {
   name = "HumanTool";
   description = `
   This tool is used whenever the user's input is unclear, ambiguous, or incomplete. 
@@ -47,7 +52,16 @@ export class HumanTool extends Tool<StringToolOutput> {
   Note: Do NOT attempt to guess or provide incomplete responses. Always use this tool when in doubt to ensure accurate and meaningful interactions.
 `;
 
-public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> =
+  static readonly template = new PromptTemplate({
+    schema: z.object({
+      clarification: z.string(),
+    }),
+    template: `{
+      "clarification": "{clarification}"
+    }`,
+  });
+
+  public readonly emitter: ToolEmitter<ToolInput<this>, JSONToolOutput<HumanToolOutput>> =
     Emitter.root.child({
       namespace: ["tool", "human"],
       creator: this,
@@ -55,7 +69,10 @@ public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> =
 
   private reader: ReturnType<typeof import("../../helpers/io.js").createConsoleReader>;
 
-  constructor(reader: ReturnType<typeof import("../../helpers/io.js").createConsoleReader>) {
+  constructor(
+    reader: ReturnType<typeof import("../../helpers/io.js").createConsoleReader>,
+    private readonly template: typeof HumanTool.template = HumanTool.template
+  ) {
     super();
     this.reader = reader;
   }
@@ -70,18 +87,16 @@ public readonly emitter: ToolEmitter<ToolInput<this>, StringToolOutput> =
     input: ToolInput<this>,
     _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>
-  ): Promise<StringToolOutput> {
+  ): Promise<JSONToolOutput<HumanToolOutput>> {
     // Use the shared reader instance provided to the constructor
     this.reader.write("HumanTool", input.message);
   
     // Use askSingleQuestion with the signal
     const userInput = await this.reader.askSingleQuestion("User 👤 : ", { signal: run.signal });
   
-    // Format the output as required
-    const formattedOutput = `{
-      "clarification": "${userInput.trim()}"
-    }`;
-  
-    return new StringToolOutput(formattedOutput);
+    // Return JSONToolOutput with the clarification
+    return new JSONToolOutput({
+      clarification: userInput.trim()
+    });
   }
 }
