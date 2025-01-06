@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { BedrockChatLLM } from "@/adapters/bedrock/chat.js";
-import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
+import { BaseMessage } from "@/llms/primitives/message.js";
 
-describe("Bedrock ChatLLM", () => {
-  const getInstance = () => {
-    return new BedrockChatLLM({
-      modelId: "amazon.titan-text-lite-v1",
-      client: new BedrockRuntimeClient({ region: "us-east-1" }),
+describe.runIf([process.env.AWS_REGION].every((env) => Boolean(env)))("Bedrock Chat LLM", () => {
+  it("Embeds", async () => {
+    const llm = new BedrockChatLLM({
+      region: process.env.AWS_REGION,
+      modelId: "amazon.titan-embed-text-v1",
     });
-  };
 
-  it("Serializes", async () => {
-    const instance = getInstance();
-    const serialized = instance.serialize();
-    const deserialized = BedrockChatLLM.fromSerialized(serialized);
-    verifyDeserialization(instance, deserialized);
+    const response = await llm.embed([
+      [BaseMessage.of({ role: "user", text: `Hello world!` })],
+      [BaseMessage.of({ role: "user", text: `Hello family!` })],
+    ]);
+    expect(response.embeddings.length).toBe(2);
+    expect(response.embeddings[0].length).toBe(512);
+    expect(response.embeddings[1].length).toBe(512);
   });
 });
