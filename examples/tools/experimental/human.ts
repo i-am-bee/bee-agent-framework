@@ -1,6 +1,7 @@
 import { Emitter } from "bee-agent-framework/emitter/emitter";
 import {
   Tool,
+  BaseToolOptions,
   BaseToolRunOptions,
   JSONToolOutput,
   ToolInput,
@@ -14,7 +15,19 @@ interface HumanToolOutput {
   clarification: string;
 }
 
-export class HumanTool extends Tool<JSONToolOutput<HumanToolOutput>> {
+export interface Reader {
+  write(prefix: string, message: string): void;
+  askSingleQuestion(prompt: string, options?: { signal?: AbortSignal }): Promise<string>;
+}
+
+export interface HumanToolInput extends BaseToolOptions {
+  reader: Reader;
+  name?: string;
+  description?: string;
+  template?: typeof HumanTool.template;
+}
+
+export class HumanTool extends Tool<JSONToolOutput<HumanToolOutput>, HumanToolInput> {
   name = "HumanTool";
   description = `
   This tool is used whenever the user's input is unclear, ambiguous, or incomplete. 
@@ -67,14 +80,10 @@ export class HumanTool extends Tool<JSONToolOutput<HumanToolOutput>> {
       creator: this,
     });
 
-  private reader: ReturnType<typeof import("../../helpers/io.js").createConsoleReader>;
-
-  constructor(
-    reader: ReturnType<typeof import("../../helpers/io.js").createConsoleReader>,
-    private readonly template: typeof HumanTool.template = HumanTool.template
-  ) {
-    super();
-    this.reader = reader;
+  constructor(protected readonly input: HumanToolInput) {
+    super(input);
+    this.name = input?.name || this.name;
+    this.description = input?.description || this.description;
   }
 
   inputSchema() {
@@ -88,11 +97,11 @@ export class HumanTool extends Tool<JSONToolOutput<HumanToolOutput>> {
     _options: Partial<BaseToolRunOptions>,
     run: RunContext<this>
   ): Promise<JSONToolOutput<HumanToolOutput>> {
-    // Use the shared reader instance provided to the constructor
-    this.reader.write("HumanTool", input.message);
+    // Use the reader from input
+    this.input.reader.write("HumanTool", input.message);
   
     // Use askSingleQuestion with the signal
-    const userInput = await this.reader.askSingleQuestion("User 👤 : ", { signal: run.signal });
+    const userInput = await this.input.reader.askSingleQuestion("User 👤 : ", { signal: run.signal });
   
     // Return JSONToolOutput with the clarification
     return new JSONToolOutput({

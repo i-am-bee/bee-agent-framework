@@ -9,17 +9,6 @@ import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 // Import the HumanTool from the updated file
 import { HumanTool } from "../../tools/experimental/human.js";
 
-import {
-  BeeSystemPrompt,
-  BeeAssistantPrompt,
-  BeeUserPrompt,
-  BeeUserEmptyPrompt,
-  BeeToolErrorPrompt,
-  BeeToolInputErrorPrompt,
-  BeeToolNoResultsPrompt,
-  BeeToolNotFoundPrompt,
-} from "bee-agent-framework/agents/bee/prompts";
-
 // Set up logger
 Logger.root.level = "silent"; // Disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
@@ -37,7 +26,12 @@ const reader = createConsoleReader();
 const agent = new BeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
-  tools: [new OpenMeteoTool(), new HumanTool(reader)],
+  tools: [
+    new OpenMeteoTool(), 
+    new HumanTool({
+      reader: reader,
+    })
+  ],
 });
 
 // Main loop
