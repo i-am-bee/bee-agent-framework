@@ -16,7 +16,6 @@
 
 import { isFunction, isPromise } from "remeda";
 import { getProp } from "@/internals/helpers/object.js";
-import { UnwrapPromise } from "@/internals/types.js";
 
 export function isPromiseLike<T>(value: unknown): value is PromiseLike<T> {
   return isPromise(value) || isFunction(getProp(value, ["then"]));
@@ -70,7 +69,7 @@ export async function* emitterToGenerator<T, R>(fn: EmitterToGeneratorFn<T, R>) 
 
 export async function asyncProperties<T extends NonNullable<unknown>>(
   obj: T,
-): Promise<{ [K in keyof T]: UnwrapPromise<T[K]> }> {
+): Promise<{ [K in keyof T]: Awaited<T[K]> }> {
   return Object.fromEntries(
     await Promise.all(Object.entries(obj).map(async ([key, value]) => [key, await value])),
   );
