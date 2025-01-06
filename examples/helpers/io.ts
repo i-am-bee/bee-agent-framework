@@ -58,11 +58,11 @@ export function createConsoleReader({
         rl.write(
           `${picocolors.dim(`Interactive session has started. To escape, input 'q' and submit.\n`)}`,
         );
-
+      
         for (let iteration = 1, prompt = ""; isActive; iteration++) {
           prompt = await rl.question(R.piped(picocolors.cyan, picocolors.bold)(input));
           prompt = stripAnsi(prompt);
-
+      
           if (prompt === "q") {
             break;
           }
@@ -75,10 +75,6 @@ export function createConsoleReader({
             continue;
           }
           yield { prompt, iteration };
-        }
-      } catch (e: unknown) {
-        if (e instanceof Error && 'code' in e && e.code === "ERR_USE_AFTER_CLOSE") {
-          return;
         }
       } finally {
         isActive = false;
