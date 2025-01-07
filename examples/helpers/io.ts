@@ -3,7 +3,7 @@ import { stdin, stdout } from "node:process";
 import picocolors from "picocolors";
 import * as R from "remeda";
 import stripAnsi from "strip-ansi";
-import type { Abortable } from 'node:events';
+import type { Abortable } from "node:events";
 
 interface ReadFromConsoleInput {
   fallback?: string;
@@ -39,7 +39,7 @@ export function createConsoleReader({
     async askSingleQuestion(queryMessage: string, options?: Abortable): Promise<string> {
       const answer = await rl.question(
         R.piped(picocolors.cyan, picocolors.bold)(queryMessage),
-        options ?? { signal: undefined }
+        options ?? { signal: undefined },
       );
       return stripAnsi(answer.trim());
     },
@@ -58,11 +58,11 @@ export function createConsoleReader({
         rl.write(
           `${picocolors.dim(`Interactive session has started. To escape, input 'q' and submit.\n`)}`,
         );
-      
+
         for (let iteration = 1, prompt = ""; isActive; iteration++) {
           prompt = await rl.question(R.piped(picocolors.cyan, picocolors.bold)(input));
           prompt = stripAnsi(prompt);
-      
+
           if (prompt === "q") {
             break;
           }

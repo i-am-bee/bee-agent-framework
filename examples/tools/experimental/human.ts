@@ -84,17 +84,19 @@ export class HumanTool extends Tool<JSONToolOutput<HumanToolOutput>, HumanToolIn
   async _run(
     input: ToolInput<this>,
     _options: Partial<BaseToolRunOptions>,
-    run: RunContext<this>
+    run: RunContext<this>,
   ): Promise<JSONToolOutput<HumanToolOutput>> {
     // Use the reader from input
     this.input.reader.write("HumanTool", input.message);
-  
+
     // Use askSingleQuestion with the signal
-    const userInput = await this.input.reader.askSingleQuestion("User 👤 : ", { signal: run.signal });
-  
+    const userInput = await this.input.reader.askSingleQuestion("User 👤 : ", {
+      signal: run.signal,
+    });
+
     // Return JSONToolOutput with the clarification
     return new JSONToolOutput({
-      clarification: userInput.trim()
+      clarification: userInput.trim(),
     });
   }
 }

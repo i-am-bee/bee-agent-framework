@@ -27,10 +27,10 @@ const agent = new BeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
   tools: [
-    new OpenMeteoTool(), 
+    new OpenMeteoTool(),
     new HumanTool({
       reader: reader,
-    })
+    }),
   ],
 });
 
