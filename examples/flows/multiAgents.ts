@@ -9,23 +9,28 @@ import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
 
 const flow = new AgentFlow();
 flow.addAgent({
-  name: "WeatherAgent",
+  name: "WeatherForecaster",
   instructions: "You are a weather assistant. Respond only if you can provide a useful answer.",
   tools: [new OpenMeteoTool()],
   llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
 });
 flow.addAgent({
-  name: "ResearchAgent",
+  name: "Researcher",
   instructions: "You are a researcher assistant. Respond only if you can provide a useful answer.",
   tools: [new WikipediaTool()],
   llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
 });
+
+const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
+llm.emitter.on("start", (x) => {
+  console.info(llm.messagesToPrompt(x.input));
+});
 flow.addAgent({
-  name: "FinalAgent",
+  name: "Solver",
   instructions:
-    "You are a helpful assistant. Your task is to make a final answer from the current conversation, starting with the last user message, that provides all useful information.",
+    "Your task is to provide the most useful final answer based on the assistants' responses which all are relevant. Ignore those where assistant do not know.",
   tools: [],
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm,
 });
 
 const reader = createConsoleReader();
