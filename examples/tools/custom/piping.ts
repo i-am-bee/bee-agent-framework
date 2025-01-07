@@ -26,7 +26,7 @@ const wikipediaWithSimilarity = wikipedia
   .pipe(similarity, (input, output) => ({
     query: input.query,
     documents: output.results.flatMap((document) =>
-      Array.from(splitString(document.fields.markdown as string, { size: 1000, overlap: 50 })).map(
+      Array.from(splitString(document.fields.markdown ?? "", { size: 1000, overlap: 50 })).map(
         (chunk) => ({
           text: chunk,
           source: document,

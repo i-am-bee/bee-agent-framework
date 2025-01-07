@@ -63,7 +63,7 @@ function wikipediaRetrivalTool(passageSize: number, overlap: number, maxResults:
       query: input.query,
       documents: output.results.flatMap((document) =>
         Array.from(
-          splitString(document.fields.markdown as string, {
+          splitString(document.fields.markdown ?? "", {
             size: passageSize * charsPerToken,
             overlap: overlap * charsPerToken,
           }),

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { Page, pageFunctions, searchOptions } from "wikipedia";
 import wiki from "wikipedia";
 import { Cache } from "@/cache/decoratorCache.js";
 import * as R from "remeda";
-import type { Page, pageFunctions, searchOptions } from "wikipedia";
+import { keys, mapValues } from "remeda";
 import { ArrayKeys, Common } from "@/internals/types.js";
 import {
   SearchToolOptions,
@@ -27,11 +28,10 @@ import {
 } from "./base.js";
 import { asyncProperties } from "@/internals/helpers/promise.js";
 import { z } from "zod";
-import { ToolEmitter, Tool, ToolInput } from "@/tools/base.js";
+import { Tool, ToolEmitter, ToolInput } from "@/tools/base.js";
 import Turndown from "turndown";
 // @ts-expect-error missing types
 import turndownPlugin from "joplin-turndown-plugin-gfm";
-import { keys, mapValues } from "remeda";
 import stringComparison from "string-comparison";
 import { pageResult } from "wikipedia/dist/resultTypes.js";
 import { Emitter } from "@/emitter/emitter.js";
@@ -80,8 +80,12 @@ export interface WikipediaToolRunOptions extends SearchToolRunOptions {
   output?: OutputOptions;
 }
 
+type PageWithMarkdown = Page & { markdown: () => Promise<string> };
+
+type ResultFields = { [K in keyof PageFunctions]: Awaited<ReturnType<PageWithMarkdown[K]>> };
+
 export interface WikipediaToolResult extends SearchToolResult {
-  fields: Partial<Record<keyof PageFunctions, unknown>>;
+  fields: Partial<ResultFields>;
 }
 
 export class WikipediaToolOutput extends SearchToolOutput<WikipediaToolResult> {
@@ -382,7 +386,7 @@ export class WikipediaTool extends Tool<
             mapValues(runOptions?.extraction?.fields ?? {}, (value, key) =>
               this._mappers[key](page, runOptions)
                 .then((response) => (value.transform ? value.transform(response) : response))
-                .catch(() => null),
+                .catch(() => undefined),
             ),
           ),
         });

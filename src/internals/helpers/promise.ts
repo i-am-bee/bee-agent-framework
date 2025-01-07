@@ -69,7 +69,7 @@ export async function* emitterToGenerator<T, R>(fn: EmitterToGeneratorFn<T, R>) 
 
 export async function asyncProperties<T extends NonNullable<unknown>>(
   obj: T,
-): Promise<{ [K in keyof T]: T[K] extends Promise<infer P> ? P : T[K] }> {
+): Promise<{ [K in keyof T]: Awaited<T[K]> }> {
   return Object.fromEntries(
     await Promise.all(Object.entries(obj).map(async ([key, value]) => [key, await value])),
   );
