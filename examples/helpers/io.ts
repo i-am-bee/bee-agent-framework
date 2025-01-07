@@ -3,6 +3,7 @@ import { stdin, stdout } from "node:process";
 import picocolors from "picocolors";
 import * as R from "remeda";
 import stripAnsi from "strip-ansi";
+import type { Abortable } from "node:events";
 
 interface ReadFromConsoleInput {
   fallback?: string;
@@ -27,16 +28,27 @@ export function createConsoleReader({
           .concat("\n"),
       );
     },
+
     async prompt(): Promise<string> {
       for await (const { prompt } of this) {
         return prompt;
       }
       process.exit(0);
     },
+
+    async askSingleQuestion(queryMessage: string, options?: Abortable): Promise<string> {
+      const answer = await rl.question(
+        R.piped(picocolors.cyan, picocolors.bold)(queryMessage),
+        options ?? { signal: undefined },
+      );
+      return stripAnsi(answer.trim());
+    },
+
     close() {
       stdin.pause();
       rl.close();
     },
+
     async *[Symbol.asyncIterator]() {
       if (!isActive) {
         return;
@@ -63,10 +75,6 @@ export function createConsoleReader({
             continue;
           }
           yield { prompt, iteration };
-        }
-      } catch (e) {
-        if (e.code === "ERR_USE_AFTER_CLOSE") {
-          return;
         }
       } finally {
         isActive = false;
