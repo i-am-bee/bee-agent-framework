@@ -29,6 +29,7 @@ workflow.addAgent({
   instructions: "You are a weather assistant. Respond only if you can provide a useful answer.",
   tools: [new OpenMeteoTool()],
   llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  execution: { maxIterations: 3 },
 });
 workflow.addAgent({
   name: "Researcher",
@@ -40,7 +41,6 @@ workflow.addAgent({
   name: "Solver",
   instructions:
     "Your task is to provide the most useful final answer based on the assistants' responses which all are relevant. Ignore those where assistant do not know.",
-  tools: [],
   llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
 });
 
@@ -56,12 +56,8 @@ for await (const { prompt } of reader) {
   );
 
   const { result } = await workflow.run(memory.messages).observe((emitter) => {
-    //emitter.on("success", (data) => {
-    //  reader.write(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
-    //});
-    emitter.match("*.*", (_, event) => {
-      console.info(event.path);
-      // TODO
+    emitter.on("success", (data) => {
+      reader.write(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
     });
   });
   await memory.addMany(result.newMessages);

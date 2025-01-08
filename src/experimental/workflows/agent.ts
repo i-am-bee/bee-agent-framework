@@ -126,10 +126,7 @@ export class AgentWorkflow {
           newMessages: state.newMessages.concat(
             BaseMessage.of({
               ...result,
-              text: [
-                `Assistant Name: ${agent.meta.name}`,
-                `Assistant Response: ${result.text}`,
-              ].join("\n"),
+              text: [`Assistant Name: ${name}`, `Assistant Response: ${result.text}`].join("\n"),
             }),
           ),
         },
