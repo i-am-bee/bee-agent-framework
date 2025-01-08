@@ -163,6 +163,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
             inputFiles.map((file) => [`${prefix}${file.filename}`, file.pythonId]),
           ),
         }),
+        signal: run.signal,
       });
     } catch (error) {
       if (error.cause.name == "HTTPParserError") {

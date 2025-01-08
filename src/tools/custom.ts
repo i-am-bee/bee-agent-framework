@@ -22,12 +22,9 @@ import {
   Tool,
   ToolInput,
 } from "@/tools/base.js";
-import { createGrpcTransport } from "@connectrpc/connect-node";
-import { PromiseClient, createPromiseClient } from "@connectrpc/connect";
 import { FrameworkError } from "@/errors.js";
 import { z } from "zod";
 import { validate } from "@/internals/helpers/general.js";
-import { CodeInterpreterService } from "bee-proto/code_interpreter/v1/code_interpreter_service_connect";
 import { CodeInterpreterOptions } from "./python/python.js";
 import { RunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
@@ -51,17 +48,6 @@ const toolOptionsSchema = z
 
 export type CustomToolOptions = z.output<typeof toolOptionsSchema> & BaseToolOptions;
 
-function createCodeInterpreterClient(codeInterpreter: CodeInterpreterOptions) {
-  return createPromiseClient(
-    CodeInterpreterService,
-    createGrpcTransport({
-      baseUrl: codeInterpreter.url,
-      httpVersion: "2",
-      nodeOptions: codeInterpreter.connectionOptions,
-    }),
-  );
-}
-
 export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
   name: string;
   description: string;
@@ -75,19 +61,13 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     return this.options.inputSchema;
   }
 
-  protected client: PromiseClient<typeof CodeInterpreterService>;
-
   static {
     this.register();
   }
 
-  public constructor(
-    options: CustomToolOptions,
-    client?: PromiseClient<typeof CodeInterpreterService>,
-  ) {
+  public constructor(options: CustomToolOptions) {
     validate(options, toolOptionsSchema);
     super(options);
-    this.client = client || createCodeInterpreterClient(options.codeInterpreter);
     this.name = options.name;
     this.description = options.description;
   }
@@ -97,25 +77,52 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     _options: Partial<BaseToolRunOptions>,
     run: RunContext<typeof this>,
   ) {
-    const { response } = await this.client.executeCustomTool(
-      {
-        executorId: this.options.executorId || "default",
-        toolSourceCode: this.options.sourceCode,
-        toolInputJson: JSON.stringify(input),
-      },
-      { signal: run.signal },
-    );
+    // Execute custom tool
+    const httpUrl = this.options.codeInterpreter.url + "/v1/execute-custom-tool";
+    const response = await this.customFetch(httpUrl, input, run);
 
-    if (response.case === "error") {
-      throw new CustomToolExecuteError(response.value.stderr);
+    if (!response?.ok) {
+      throw new CustomToolExecuteError("HTTP request failed!", [new Error(await response.text())]);
     }
 
-    return new StringToolOutput(response.value!.toolOutputJson);
+    const result = await response.json();
+
+    if (result?.exit_code) {
+      throw new CustomToolExecuteError(`Custom tool {tool_name} execution error!`);
+    }
+
+    return new StringToolOutput(result.tool_output_json);
+  }
+
+  private async customFetch(httpUrl: string, input: any, run: RunContext<typeof this>) {
+    try {
+      return await fetch(httpUrl, {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tool_source_code: this.options.sourceCode,
+          executorId: this.options.executorId ?? "default",
+          tool_input_json: JSON.stringify(input),
+        }),
+        signal: run.signal,
+      });
+    } catch (error) {
+      if (error.cause.name == "HTTPParserError") {
+        throw new CustomToolExecuteError(
+          "Custom tool over HTTP failed -- not using HTTP endpoint!",
+          [error],
+        );
+      } else {
+        throw new CustomToolExecuteError("Custom tool over HTTP failed!", [error]);
+      }
+    }
   }
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {
     super.loadSnapshot(snapshot);
-    this.client = createCodeInterpreterClient(this.options.codeInterpreter);
   }
 
   static async fromSourceCode(
@@ -123,25 +130,48 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     sourceCode: string,
     executorId?: string,
   ) {
-    const client = createCodeInterpreterClient(codeInterpreter);
-    const response = await client.parseCustomTool({ toolSourceCode: sourceCode });
-
-    if (response.response.case === "error") {
-      throw new CustomToolCreateError(response.response.value.errorMessages.join("\n"));
+    // Parse custom tool
+    let response;
+    const httpUrl = codeInterpreter.url + "/v1/parse-custom-tool";
+    try {
+      response = await fetch(httpUrl, {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tool_source_code: sourceCode,
+          executorId: executorId ?? "default",
+        }),
+      });
+    } catch (error) {
+      if (error.cause.name == "HTTPParserError") {
+        throw new CustomToolCreateError("Custom tool parse error -- not using HTTP endpoint!", [
+          error,
+        ]);
+      } else {
+        throw new CustomToolCreateError("Custom tool parse error!", [error]);
+      }
     }
 
-    const { toolName, toolDescription, toolInputSchemaJson } = response.response.value!;
+    if (!response?.ok) {
+      throw new CustomToolCreateError("Error parsing custom tool!", [
+        new Error(await response.text()),
+      ]);
+    }
 
-    return new CustomTool(
-      {
-        codeInterpreter,
-        sourceCode,
-        name: toolName,
-        description: toolDescription,
-        inputSchema: JSON.parse(toolInputSchemaJson),
-        executorId,
-      },
-      client,
-    );
+    const result = await response.json();
+
+    const { tool_name, tool_description, tool_input_schema_json } = result;
+
+    return new CustomTool({
+      codeInterpreter,
+      sourceCode,
+      name: tool_name,
+      description: tool_description,
+      inputSchema: JSON.parse(tool_input_schema_json),
+      executorId,
+    });
   }
 }
