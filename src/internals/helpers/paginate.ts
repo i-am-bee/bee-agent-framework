@@ -29,7 +29,7 @@ export async function paginate<T, C = number>(input: PaginateInput<T, C>): Promi
     });
     acc.push(...data);
 
-    if (nextCursor === undefined) {
+    if (nextCursor === undefined || data.length === 0) {
       break;
     }
     cursor = nextCursor;
