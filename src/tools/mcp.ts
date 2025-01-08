@@ -20,7 +20,7 @@ import { GetRunContext } from "@/context.js";
 import { Client as MCPClient } from "@modelcontextprotocol/sdk/client/index.js";
 import { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import { SchemaObject } from "ajv";
-import { paginateWithCursor } from "@/internals/helpers/paginate.js";
+import { paginate } from "@/internals/helpers/paginate.js";
 
 export interface MCPToolInput {
   client: MCPClient;
@@ -66,20 +66,11 @@ export class MCPTool extends Tool<MCPToolOutput> {
   }
 
   public static async fromClient(client: MCPClient): Promise<MCPTool[]> {
-    const tools = await paginateWithCursor({
+    const tools = await paginate({
       size: Infinity,
-      handler: async ({ cursor }: { cursor: string | undefined }) => {
+      handler: async ({ cursor }: { cursor?: string }) => {
         const { tools, nextCursor } = await client.listTools({ cursor });
-        return nextCursor
-          ? ({
-              data: tools,
-              done: false,
-              nextCursor,
-            } as const)
-          : ({
-              data: tools,
-              done: true,
-            } as const);
+        return { data: tools, nextCursor } as const;
       },
     });
     return tools.map((tool) => new MCPTool({ client, tool }));
