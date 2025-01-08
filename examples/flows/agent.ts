@@ -1,3 +1,19 @@
+/**
+ * Copyright 2025 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import "dotenv/config";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
@@ -8,7 +24,7 @@ import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { ReadOnlyMemory } from "bee-agent-framework/memory/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { Flow } from "bee-agent-framework/experimental/flows/flow";
+import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
 import { createConsoleReader } from "examples/helpers/io.js";
 
 const schema = z.object({
@@ -16,7 +32,7 @@ const schema = z.object({
   memory: z.instanceof(ReadOnlyMemory),
 });
 
-const workflow = new Flow({ schema: schema })
+const workflow = new Workflow({ schema: schema })
   .addStep("simpleAgent", async (state) => {
     const simpleAgent = new BeeAgent({
       llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
@@ -47,7 +63,7 @@ const workflow = new Flow({ schema: schema })
     reader.write("🧠 Score", critiqueResponse.score.toString());
 
     return {
-      next: critiqueResponse.score < 75 ? "complexAgent" : Flow.END,
+      next: critiqueResponse.score < 75 ? "complexAgent" : Workflow.END,
     };
   })
   .addStep("complexAgent", async (state) => {

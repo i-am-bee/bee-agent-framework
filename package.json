@@ -40,7 +40,7 @@
           "infra",
           "deps",
           "instrumentation",
-          "flows"
+          "workflows"
         ]
       ]
     }

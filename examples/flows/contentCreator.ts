@@ -1,6 +1,22 @@
+/**
+ * Copyright 2025 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import "dotenv/config";
 import { z } from "zod";
-import { Flow } from "bee-agent-framework/experimental/flows/flow";
+import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
@@ -21,7 +37,7 @@ const schema = z.object({
   draft: z.string().optional(),
 });
 
-const flow = new Flow({
+const workflow = new Workflow({
   schema,
   outputSchema: schema.required({ output: true }),
 })
@@ -56,7 +72,7 @@ const flow = new Flow({
     );
 
     return "error" in parsed
-      ? { update: { output: parsed.error }, next: Flow.END }
+      ? { update: { output: parsed.error }, next: Workflow.END }
       : { update: pick(parsed, ["notes", "topic"]) };
   })
   .addStrictStep("planner", schema.required({ topic: true }), async (state) => {
@@ -147,10 +163,10 @@ const flow = new Flow({
     };
   });
 
-let lastResult = {} as Flow.output<typeof flow>;
+let lastResult = {} as Workflow.output<typeof workflow>;
 const reader = createConsoleReader();
 for await (const { prompt } of reader) {
-  const { result } = await flow
+  const { result } = await workflow
     .run({
       input: prompt,
       notes: lastResult?.notes,

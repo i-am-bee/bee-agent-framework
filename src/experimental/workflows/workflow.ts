@@ -22,54 +22,54 @@ import { omit, pick, toCamelCase } from "remeda";
 import { shallowCopy } from "@/serializer/utils.js";
 import { FrameworkError, ValueError } from "@/errors.js";
 
-export interface FlowStepResponse<T extends ZodSchema, K extends string> {
+export interface WorkflowStepResponse<T extends ZodSchema, K extends string> {
   update?: Partial<z.output<T>>;
   next?: FlowStepName<K>;
 }
 
-export interface FlowRun<T extends ZodSchema, T2 extends ZodSchema, K extends string> {
+export interface WorkflowRun<T extends ZodSchema, T2 extends ZodSchema, K extends string> {
   result: z.output<T2>;
-  steps: FlowStepRes<T, K>[];
+  steps: WorkflowStepRes<T, K>[];
   state: z.output<T>;
 }
 
-export interface FlowRunOptions<K extends string> {
+export interface WorkflowRunOptions<K extends string> {
   start?: K;
   signal?: AbortSignal;
 }
 
-export interface FlowStepDef<T extends ZodSchema, K extends string> {
+export interface WorkflowStepDef<T extends ZodSchema, K extends string> {
   schema: T;
-  handler: FlowStepHandler<T, K>;
+  handler: WorkflowStepHandler<T, K>;
 }
 
-export interface FlowStepRes<T extends ZodSchema, K extends string> {
+export interface WorkflowStepRes<T extends ZodSchema, K extends string> {
   name: K;
   state: z.output<T>;
 }
 
-export interface FlowRunContext<T extends ZodSchema, K extends string> {
-  steps: FlowStepRes<T, K>[];
+export interface WorkflowRunContext<T extends ZodSchema, K extends string> {
+  steps: WorkflowStepRes<T, K>[];
   signal: AbortSignal;
   abort: (reason?: Error) => void;
 }
 
-export type FlowStepHandler<T extends ZodSchema, K extends string> = (
+export type WorkflowStepHandler<T extends ZodSchema, K extends string> = (
   state: z.output<T>,
-  context: FlowRunContext<T, K>,
-) => Promise<FlowStepResponse<T, K>> | FlowStepResponse<T, K>;
+  context: WorkflowRunContext<T, K>,
+) => Promise<WorkflowStepResponse<T, K>> | WorkflowStepResponse<T, K>;
 
-export interface FlowEvents<T extends ZodSchema, T2 extends ZodSchema, K extends string> {
-  start: Callback<{ step: K; run: FlowRun<T, T2, K> }>;
+export interface WorkflowEvents<T extends ZodSchema, T2 extends ZodSchema, K extends string> {
+  start: Callback<{ step: K; run: WorkflowRun<T, T2, K> }>;
   error: Callback<{
     step: K;
     error: Error;
-    run: FlowRun<T, T2, K>;
+    run: WorkflowRun<T, T2, K>;
   }>;
   success: Callback<{
     step: K;
-    response: FlowStepResponse<T, K>;
-    run: FlowRun<T, T2, K>;
+    response: WorkflowStepResponse<T, K>;
+    run: WorkflowRun<T, T2, K>;
   }>;
 }
 
@@ -79,21 +79,21 @@ interface FlowInput<TS extends ZodSchema, TS2 extends ZodSchema = TS> {
   outputSchema?: TS2;
 }
 
-type RunStep<K extends string> = K | typeof Flow.END;
+type RunStep<K extends string> = K | typeof Workflow.END;
 type ReservedStep =
-  | typeof Flow.START
-  | typeof Flow.NEXT
-  | typeof Flow.PREV
-  | typeof Flow.END
-  | typeof Flow.SELF;
+  | typeof Workflow.START
+  | typeof Workflow.NEXT
+  | typeof Workflow.PREV
+  | typeof Workflow.END
+  | typeof Workflow.SELF;
 export type FlowStepName<K extends string> = K | ReservedStep;
 
-export class FlowError<
+export class WorkflowError<
   T extends ZodSchema,
   T2 extends ZodSchema,
   K extends string,
 > extends FrameworkError {
-  constructor(message: string, extra?: { run?: FlowRun<T, T2, K>; errors?: Error[] }) {
+  constructor(message: string, extra?: { run?: WorkflowRun<T, T2, K>; errors?: Error[] }) {
     super(message, extra?.errors, {
       context: extra?.run ?? {},
       isRetryable: false,
@@ -102,7 +102,7 @@ export class FlowError<
   }
 }
 
-export class Flow<
+export class Workflow<
   TInput extends ZodSchema,
   TOutput extends ZodSchema = TInput,
   TKeys extends string = string,
@@ -113,15 +113,15 @@ export class Flow<
   public static readonly NEXT = "__next__";
   public static readonly END = "__end__";
 
-  public readonly emitter: Emitter<FlowEvents<TInput, TOutput, TKeys>>;
+  public readonly emitter: Emitter<WorkflowEvents<TInput, TOutput, TKeys>>;
 
-  protected readonly steps = new Map<string, FlowStepDef<TInput, TKeys>>();
+  protected readonly steps = new Map<string, WorkflowStepDef<TInput, TKeys>>();
   protected startStep: TKeys | undefined = undefined;
 
   constructor(protected readonly input: FlowInput<TInput, TOutput>) {
     super();
     this.emitter = Emitter.root.child({
-      namespace: ["flow", toCamelCase(input?.name ?? "")].filter(Boolean),
+      namespace: ["workflow", toCamelCase(input?.name ?? "")].filter(Boolean),
       creator: this,
     });
   }
@@ -140,49 +140,49 @@ export class Flow<
 
   addStep<L extends string>(
     name: L,
-    handler: FlowStepHandler<TInput, TKeys>,
-  ): Flow<TInput, TOutput, L | TKeys>;
-  addStep<L extends string, TFlow extends AnyFlow>(
+    handler: WorkflowStepHandler<TInput, TKeys>,
+  ): Workflow<TInput, TOutput, L | TKeys>;
+  addStep<L extends string, TFlow extends AnyWorkflowFlow>(
     name: L,
-    flow: Flow.pipeable<this, TFlow>,
-  ): Flow<TInput, TOutput, L | TKeys>;
+    flow: Workflow.pipeable<this, TFlow>,
+  ): Workflow<TInput, TOutput, L | TKeys>;
   addStep<L extends string>(
     name: L,
-    step: FlowStepHandler<TInput, TKeys> | AnyFlow,
-  ): Flow<TInput, TOutput, L | TKeys> {
+    step: WorkflowStepHandler<TInput, TKeys> | AnyWorkflowFlow,
+  ): Workflow<TInput, TOutput, L | TKeys> {
     return this._addStep(name, step);
   }
 
   addStrictStep<L extends string, TI2 extends ZodSchema>(
     name: L,
     schema: TI2,
-    handler: FlowStepHandler<TI2, TKeys>,
-  ): Flow<TInput, TOutput, L | TKeys>;
-  addStrictStep<L extends string, TI2 extends ZodSchema, TFlow extends AnyFlow>(
+    handler: WorkflowStepHandler<TI2, TKeys>,
+  ): Workflow<TInput, TOutput, L | TKeys>;
+  addStrictStep<L extends string, TI2 extends ZodSchema, TFlow extends AnyWorkflowFlow>(
     name: L,
     schema: TI2,
-    flow: Flow.pipeable<Flow<TI2, TOutput, TKeys>, TFlow>,
-  ): Flow<TInput, TOutput, L | TKeys>;
+    flow: Workflow.pipeable<Workflow<TI2, TOutput, TKeys>, TFlow>,
+  ): Workflow<TInput, TOutput, L | TKeys>;
   addStrictStep<L extends string, TI2 extends ZodSchema>(
     name: L,
     schema: TI2,
-    step: FlowStepHandler<TI2, TKeys> | AnyFlow,
-  ): Flow<TInput, TOutput, L | TKeys> {
+    step: WorkflowStepHandler<TI2, TKeys> | AnyWorkflowFlow,
+  ): Workflow<TInput, TOutput, L | TKeys> {
     return this._addStep(name, schema, step);
   }
 
   protected _addStep<TI2 extends ZodSchema = TInput, L extends string = TKeys>(
     name: L,
-    schemaOrStep: TI2 | FlowStepHandler<TInput, TKeys> | AnyFlow,
-    stepOrEmpty?: FlowStepHandler<TI2, TKeys> | AnyFlow,
-  ): Flow<TInput, TOutput, L | TKeys> {
+    schemaOrStep: TI2 | WorkflowStepHandler<TInput, TKeys> | AnyWorkflowFlow,
+    stepOrEmpty?: WorkflowStepHandler<TI2, TKeys> | AnyWorkflowFlow,
+  ): Workflow<TInput, TOutput, L | TKeys> {
     if (!name.trim()) {
       throw new ValueError(`Step name cannot be empty!`);
     }
     if (this.steps.has(name)) {
       throw new ValueError(`Step '${name}' already exists!`);
     }
-    if (name === Flow.END) {
+    if (name === Workflow.END) {
       throw new ValueError(`The name '${name}' cannot be used!`);
     }
 
@@ -191,10 +191,10 @@ export class Flow<
 
     this.steps.set(name, {
       schema,
-      handler: stepOrFlow instanceof Flow ? stepOrFlow.asStep({}) : stepOrFlow,
-    } as FlowStepDef<TInput, TKeys>);
+      handler: stepOrFlow instanceof Workflow ? stepOrFlow.asStep({}) : stepOrFlow,
+    } as WorkflowStepDef<TInput, TKeys>);
 
-    return this as unknown as Flow<TInput, TOutput, L | TKeys>;
+    return this as unknown as Workflow<TInput, TOutput, L | TKeys>;
   }
 
   setStart(name: TKeys) {
@@ -202,35 +202,36 @@ export class Flow<
     return this;
   }
 
-  run(state: z.input<TInput>, options: FlowRunOptions<TKeys> = {}) {
+  run(state: z.input<TInput>, options: WorkflowRunOptions<TKeys> = {}) {
     return RunContext.enter(
       this,
       { signal: options?.signal, params: [state, options] as const },
-      async (runContext): Promise<FlowRun<TInput, TOutput, TKeys>> => {
-        const run: FlowRun<TInput, TOutput, TKeys> = {
+      async (runContext): Promise<WorkflowRun<TInput, TOutput, TKeys>> => {
+        const run: WorkflowRun<TInput, TOutput, TKeys> = {
           steps: [],
           state: this.input.schema.parse(state),
           result: undefined as z.output<TOutput>,
         };
-        const handlers: FlowRunContext<TInput, TKeys> = {
+        const handlers: WorkflowRunContext<TInput, TKeys> = {
           steps: run.steps,
           signal: runContext.signal,
           abort: (reason) => runContext.abort(reason),
         };
 
         let next: RunStep<TKeys> =
-          this.findStep(options?.start || this.startStep || this.getSteps()[0]).current ?? Flow.END;
+          this.findStep(options?.start || this.startStep || this.getSteps()[0]).current ??
+          Workflow.END;
 
-        while (next && next !== Flow.END) {
+        while (next && next !== Workflow.END) {
           const step = this.steps.get(next);
           if (!step) {
-            throw new FlowError(`Step '${next}' was not found.`, { run });
+            throw new WorkflowError(`Step '${next}' was not found.`, { run });
           }
           run.steps.push({ name: next, state: run.state });
           await runContext.emitter.emit("start", { run, step: next });
           try {
             const stepInput = await step.schema.parseAsync(run.state).catch((err: Error) => {
-              throw new FlowError(
+              throw new WorkflowError(
                 `Step '${next}' cannot be executed because the provided input doesn't adhere to the step's schema.`,
                 { run: shallowCopy(run), errors: [err] },
               );
@@ -245,14 +246,14 @@ export class Flow<
               step: next,
             });
 
-            if (response.next === Flow.START) {
+            if (response.next === Workflow.START) {
               next = run.steps.at(0)?.name!;
-            } else if (response.next === Flow.PREV) {
+            } else if (response.next === Workflow.PREV) {
               next = run.steps.at(-2)?.name!;
-            } else if (response.next === Flow.SELF) {
+            } else if (response.next === Workflow.SELF) {
               next = run.steps.at(-1)?.name!;
-            } else if (!response.next || response.next === Flow.NEXT) {
-              next = this.findStep(next).next || Flow.END;
+            } else if (!response.next || response.next === Workflow.NEXT) {
+              next = this.findStep(next).next || Workflow.END;
             } else {
               next = response.next;
             }
@@ -269,7 +270,7 @@ export class Flow<
         run.result = await (this.input.outputSchema ?? this.input.schema)
           .parseAsync(run.state)
           .catch((err) => {
-            throw new FlowError(
+            throw new WorkflowError(
               `Flow has ended but it's state does not adhere to the flow's output schema.`,
               { run: shallowCopy(run), errors: [err] },
             );
@@ -279,12 +280,12 @@ export class Flow<
     );
   }
 
-  delStep<L extends TKeys>(name: L): Flow<TInput, TOutput, Exclude<TKeys, L>> {
+  delStep<L extends TKeys>(name: L): Workflow<TInput, TOutput, Exclude<TKeys, L>> {
     if (this.startStep === name) {
       this.startStep = undefined;
     }
     this.steps.delete(name);
-    return this as unknown as Flow<TInput, TOutput, Exclude<TKeys, L>>;
+    return this as unknown as Workflow<TInput, TOutput, Exclude<TKeys, L>>;
   }
 
   asStep<
@@ -296,7 +297,7 @@ export class Flow<
     output?: (output: z.output<TOutput>) => z.output<TOutput2> | z.input<TOutput2>;
     start?: TKeys;
     next?: FlowStepName<TKeys2>;
-  }): FlowStepHandler<TInput2, TKeys | TKeys2> {
+  }): WorkflowStepHandler<TInput2, TKeys | TKeys2> {
     return async (input, ctx) => {
       const mappedInput = overrides?.input ? overrides.input(input) : input;
       const result = await this.run(mappedInput, { start: overrides?.start, signal: ctx.signal });
@@ -336,13 +337,13 @@ export class Flow<
 }
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace Flow {
-  export type pipeable<T extends AnyFlow, T2 extends AnyFlow> =
-    Flow.state<T> extends Flow.input<T2> ? T2 : never;
-  export type input<T> = T extends Flow<infer A, any, any> ? z.input<A> : never;
-  export type state<T> = T extends Flow<infer A, any, any> ? z.output<A> : never;
-  export type output<T> = T extends Flow<any, infer A, any> ? z.output<A> : never;
-  export type run<T> = T extends Flow<infer A, infer B, infer C> ? FlowRun<A, B, C> : never;
+export namespace Workflow {
+  export type pipeable<T extends AnyWorkflowFlow, T2 extends AnyWorkflowFlow> =
+    Workflow.state<T> extends Workflow.input<T2> ? T2 : never;
+  export type input<T> = T extends Workflow<infer A, any, any> ? z.input<A> : never;
+  export type state<T> = T extends Workflow<infer A, any, any> ? z.output<A> : never;
+  export type output<T> = T extends Workflow<any, infer A, any> ? z.output<A> : never;
+  export type run<T> = T extends Workflow<infer A, infer B, infer C> ? WorkflowRun<A, B, C> : never;
 }
 
-export type AnyFlow = Flow<any, any, any>;
+export type AnyWorkflowFlow = Workflow<any, any, any>;

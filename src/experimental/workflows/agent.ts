@@ -15,7 +15,7 @@
  */
 
 import { BeeAgent } from "@/agents/bee/agent.js";
-import { Flow } from "@/experimental/flows/flow.js";
+import { Workflow } from "@/experimental/workflows/workflow.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { AnyTool } from "@/tools/base.js";
 import { AnyChatLLM } from "@/llms/chat.js";
@@ -24,8 +24,8 @@ import { ReadOnlyMemory } from "@/memory/base.js";
 import { z } from "zod";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
 
-export class AgentFlow {
-  protected readonly flow;
+export class AgentWorkflow {
+  protected readonly workflow;
 
   static readonly schema = z.object({
     messages: z.array(z.instanceof(BaseMessage)).min(1),
@@ -34,11 +34,11 @@ export class AgentFlow {
     newMessages: z.array(z.instanceof(BaseMessage)).default([]),
   });
 
-  constructor(name = "AgentFlow") {
-    this.flow = new Flow({
+  constructor(name = "AgentWorkflow") {
+    this.workflow = new Workflow({
       name,
-      schema: AgentFlow.schema,
-      outputSchema: AgentFlow.schema.required(),
+      schema: AgentWorkflow.schema,
+      outputSchema: AgentWorkflow.schema.required(),
     });
   }
 
@@ -66,11 +66,11 @@ export class AgentFlow {
   }
 
   delAgent(name: string) {
-    return this.flow.delStep(name);
+    return this.workflow.delStep(name);
   }
 
   addRawAgent(name: string, factory: (memory: ReadOnlyMemory) => BeeAgent) {
-    this.flow.addStep(name, async (state, ctx) => {
+    this.workflow.addStep(name, async (state, ctx) => {
       const memory = new UnconstrainedMemory();
       await memory.addMany([...state.messages, ...state.newMessages]);
 
@@ -95,7 +95,7 @@ export class AgentFlow {
   }
 
   run(messages: BaseMessage[]) {
-    return this.flow.run({
+    return this.workflow.run({
       messages,
     });
   }
