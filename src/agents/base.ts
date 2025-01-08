@@ -78,6 +78,7 @@ export abstract class BaseAgent<
     this.emitter.destroy();
   }
 
+  public abstract set memory(memory: BaseMemory);
   public abstract get memory(): BaseMemory;
 
   public get meta(): AgentMeta {

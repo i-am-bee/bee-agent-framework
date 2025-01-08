@@ -67,7 +67,11 @@ export abstract class BaseRunner extends Serializable {
       throw new AgentError(
         `Agent was not able to resolve the task in ${maxIterations} iterations.`,
         [],
-        { isFatal: true },
+        {
+          isFatal: true,
+          isRetryable: false,
+          context: { iterations: this.iterations.map((iteration) => iteration.state) },
+        },
       );
     }
 
