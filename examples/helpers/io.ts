@@ -76,6 +76,11 @@ export function createConsoleReader({
           }
           yield { prompt, iteration };
         }
+      } catch (e) {
+        if (e.code === "ERR_USE_AFTER_CLOSE") {
+          return;
+        }
+        throw e;
       } finally {
         isActive = false;
         rl.close();

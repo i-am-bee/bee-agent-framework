@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.55](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.54...v0.0.55) (2025-01-08)
+
+### Features
+
+- **adapters:** add embedding support for Bedrock ([#253](https://github.com/i-am-bee/bee-agent-framework/issues/253)) ([c989e27](https://github.com/i-am-bee/bee-agent-framework/commit/c989e273aca3663ab6b5d7224573b009b3149768)), closes [#176](https://github.com/i-am-bee/bee-agent-framework/issues/176)
+- **tools:** add minScore filter condition for SimilarityTool ([#266](https://github.com/i-am-bee/bee-agent-framework/issues/266)) ([e9d5d4f](https://github.com/i-am-bee/bee-agent-framework/commit/e9d5d4f2ad712560ff9ac0490f4603561072d39b)), closes [#144](https://github.com/i-am-bee/bee-agent-framework/issues/144)
+- **tools:** add OpenAPI tool ([#246](https://github.com/i-am-bee/bee-agent-framework/issues/246)) ([e10b053](https://github.com/i-am-bee/bee-agent-framework/commit/e10b0530a97ab24806726e1ee160598f3fb05d33)), closes [#105](https://github.com/i-am-bee/bee-agent-framework/issues/105)
+
+### Bug Fixes
+
+- **tools:** add proper wikipedia result types ([#267](https://github.com/i-am-bee/bee-agent-framework/issues/267)) ([873b38d](https://github.com/i-am-bee/bee-agent-framework/commit/873b38d270360e8eb4912ceea752ff716d163c3e))
+
 ## [0.0.54](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.53...v0.0.54) (2024-12-18)
 
 ### Features

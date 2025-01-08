@@ -37,6 +37,8 @@ const excludePattern = process.env.EXCLUDE_PATTERN || ``;
 
 const exclude: string[] = [
   "examples/playground/**/*.ts",
+  // TODO: bug (https://github.com/Snazzah/duck-duck-scrape/pull/142)
+  "examples/tools/custom/extending.ts",
   // prevents 'Too many requests' error on Free Tier
   "examples/llms/providers/watsonx_verbose.ts",
   !getEnv("WATSONX_API_KEY") && [
