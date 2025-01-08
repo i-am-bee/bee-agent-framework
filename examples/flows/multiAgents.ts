@@ -52,6 +52,7 @@ for await (const { prompt } of reader) {
     BaseMessage.of({
       role: Role.USER,
       text: prompt,
+      meta: { createdAt: new Date() },
     }),
   );
 

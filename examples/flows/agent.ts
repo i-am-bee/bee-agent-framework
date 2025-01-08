@@ -18,7 +18,7 @@ import "dotenv/config";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
 import { z } from "zod";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
 import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
@@ -82,7 +82,11 @@ const reader = createConsoleReader();
 const memory = new UnconstrainedMemory();
 
 for await (const { prompt } of reader) {
-  const userMessage = BaseMessage.of({ role: "user", text: prompt });
+  const userMessage = BaseMessage.of({
+    role: Role.USER,
+    text: prompt,
+    meta: { createdAt: new Date() },
+  });
   await memory.add(userMessage);
 
   const response = await workflow.run({
