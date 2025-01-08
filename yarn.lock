@@ -1511,7 +1511,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grpc/grpc-js@npm:^1.12.1":
+"@grpc/grpc-js@npm:^1.12.1, @grpc/grpc-js@npm:^1.12.4":
   version: 1.12.5
   resolution: "@grpc/grpc-js@npm:1.12.5"
   dependencies:
@@ -4882,6 +4882,8 @@ __metadata:
     "@eslint/markdown": "npm:^6.2.1"
     "@google-cloud/vertexai": "npm:^1.9.2"
     "@googleapis/customsearch": "npm:^3.2.0"
+    "@grpc/grpc-js": "npm:^1.12.4"
+    "@grpc/proto-loader": "npm:^0.7.13"
     "@ibm-generative-ai/node-sdk": "npm:~3.2.4"
     "@langchain/community": "npm:~0.3.17"
     "@langchain/core": "npm:~0.3.22"
@@ -4973,6 +4975,8 @@ __metadata:
     "@elastic/elasticsearch": ^8.0.0
     "@google-cloud/vertexai": "*"
     "@googleapis/customsearch": ^3.2.0
+    "@grpc/grpc-js": ^1.11.3
+    "@grpc/proto-loader": ^0.7.13
     "@ibm-generative-ai/node-sdk": ~3.2.4
     "@langchain/community": ">=0.2.28"
     "@langchain/core": ">=0.2.27"
@@ -4993,6 +4997,10 @@ __metadata:
     "@google-cloud/vertexai":
       optional: true
     "@googleapis/customsearch":
+      optional: true
+    "@grpc/grpc-js":
+      optional: true
+    "@grpc/proto-loader":
       optional: true
     "@ibm-generative-ai/node-sdk":
       optional: true
@@ -11134,8 +11142,8 @@ __metadata:
   linkType: hard
 
 "openai@npm:^4.76.0":
-  version: 4.77.3
-  resolution: "openai@npm:4.77.3"
+  version: 4.77.4
+  resolution: "openai@npm:4.77.4"
   dependencies:
     "@types/node": "npm:^18.11.18"
     "@types/node-fetch": "npm:^2.6.4"
@@ -11151,7 +11159,7 @@ __metadata:
       optional: true
   bin:
     openai: bin/cli
-  checksum: 10c0/b90a4071cc1a8257339e3001377396226422519d168ae3c05b5abc662bbac2009c5ccd37f0112c431b0ce45d83e616305ee264846ddb2f2129f186faf9b5a8cc
+  checksum: 10c0/cd63a98ce77fb528d12745962b66b229d0ec5243c19d2796933df540b0732a3c323c205575fcfa096ecfa8e39d84e058f8942c45b5655df571bece1d7ffa7301
   languageName: node
   linkType: hard
 
