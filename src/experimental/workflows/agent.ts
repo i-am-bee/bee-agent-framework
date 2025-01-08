@@ -15,14 +15,32 @@
  */
 
 import { BeeAgent } from "@/agents/bee/agent.js";
-import { Workflow } from "@/experimental/workflows/workflow.js";
+import { Workflow, WorkflowRunOptions } from "@/experimental/workflows/workflow.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { AnyTool } from "@/tools/base.js";
 import { AnyChatLLM } from "@/llms/chat.js";
 import { BeeSystemPrompt } from "@/agents/bee/prompts.js";
-import { ReadOnlyMemory } from "@/memory/base.js";
+import { BaseMemory, ReadOnlyMemory } from "@/memory/base.js";
 import { z } from "zod";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
+import { BaseAgent } from "@/agents/base.js";
+import {
+  BeeAgentExecutionConfig,
+  BeeRunInput,
+  BeeRunOptions,
+  BeeRunOutput,
+} from "@/agents/bee/types.js";
+import { isFunction, randomString } from "remeda";
+
+type AgentInstance = BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions>;
+type AgentFactory = (memory: ReadOnlyMemory) => AgentInstance | Promise<AgentInstance>;
+interface AgentFactoryInput {
+  name: string;
+  llm: AnyChatLLM;
+  instructions?: string;
+  tools?: AnyTool[];
+  execution?: BeeAgentExecutionConfig;
+}
 
 export class AgentWorkflow {
   protected readonly workflow;
@@ -42,39 +60,64 @@ export class AgentWorkflow {
     });
   }
 
-  addAgent(agent: { name: string; instructions?: string; tools: AnyTool[]; llm: AnyChatLLM }) {
-    return this.addRawAgent(agent.name, (memory) => {
-      return new BeeAgent({
-        llm: agent.llm,
-        tools: agent.tools,
-        memory,
-        meta: {
-          name: agent.name,
-          description: agent.instructions ?? "",
-        },
-        templates: {
-          system: BeeSystemPrompt.fork((config) => ({
-            ...config,
-            defaults: {
-              ...config.defaults,
-              instructions: agent.instructions || config.defaults.instructions,
-            },
-          })),
-        },
-      });
-    });
+  run(messages: BaseMessage[], options: WorkflowRunOptions<string> = {}) {
+    return this.workflow.run(
+      {
+        messages,
+      },
+      options,
+    );
+  }
+
+  addAgent(agent: AgentInstance | AgentFactory | AgentFactoryInput) {
+    if (agent instanceof BaseAgent) {
+      const clone = agent.clone();
+      const factory: AgentFactory = (memory) => {
+        clone.memory = memory;
+        return clone;
+      };
+      return this._add(clone.meta.name, factory);
+    }
+
+    const name = agent.name || `Agent${randomString(4)}`;
+    return this._add(name, isFunction(agent) ? agent : this._createFactory(agent));
   }
 
   delAgent(name: string) {
     return this.workflow.delStep(name);
   }
 
-  addRawAgent(name: string, factory: (memory: ReadOnlyMemory) => BeeAgent) {
+  protected _createFactory(input: AgentFactoryInput): AgentFactory {
+    return (memory: BaseMemory) =>
+      new BeeAgent({
+        llm: input.llm,
+        tools: input.tools ?? [],
+        memory,
+        meta: {
+          name: input.name,
+          description: input.instructions ?? "",
+        },
+        execution: input.execution,
+        ...(input.instructions && {
+          templates: {
+            system: BeeSystemPrompt.fork((config) => ({
+              ...config,
+              defaults: {
+                ...config.defaults,
+                instructions: input.instructions || config.defaults.instructions,
+              },
+            })),
+          },
+        }),
+      });
+  }
+
+  protected _add(name: string, factory: AgentFactory) {
     this.workflow.addStep(name, async (state, ctx) => {
       const memory = new UnconstrainedMemory();
       await memory.addMany([...state.messages, ...state.newMessages]);
 
-      const agent = factory(memory.asReadOnly());
+      const agent = await factory(memory.asReadOnly());
       const { result } = await agent.run({ prompt: null }, { signal: ctx.signal });
 
       return {
@@ -92,11 +135,6 @@ export class AgentWorkflow {
         },
       };
     });
-  }
-
-  run(messages: BaseMessage[]) {
-    return this.workflow.run({
-      messages,
-    });
+    return this;
   }
 }

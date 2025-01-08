@@ -170,4 +170,8 @@ export class RePlanAgent extends BaseAgent<RePlanRunInput, RePlanRunOutput> {
   get memory() {
     return this.input.memory;
   }
+
+  set memory(memory: BaseMemory) {
+    this.input.memory = memory;
+  }
 }

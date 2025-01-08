@@ -36,17 +36,12 @@ workflow.addAgent({
   tools: [new WikipediaTool()],
   llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
 });
-
-const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
-llm.emitter.on("start", (x) => {
-  console.info(llm.messagesToPrompt(x.input));
-});
 workflow.addAgent({
   name: "Solver",
   instructions:
     "Your task is to provide the most useful final answer based on the assistants' responses which all are relevant. Ignore those where assistant do not know.",
   tools: [],
-  llm,
+  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
 });
 
 const reader = createConsoleReader();
@@ -61,8 +56,12 @@ for await (const { prompt } of reader) {
   );
 
   const { result } = await workflow.run(memory.messages).observe((emitter) => {
-    emitter.on("success", (data) => {
-      reader.write(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
+    //emitter.on("success", (data) => {
+    //  reader.write(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
+    //});
+    emitter.match("*.*", (_, event) => {
+      console.info(event.path);
+      // TODO
     });
   });
   await memory.addMany(result.newMessages);

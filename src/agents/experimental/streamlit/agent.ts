@@ -86,6 +86,10 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
     };
   }
 
+  set memory(memory: BaseMemory) {
+    this.input.memory = memory;
+  }
+
   public get memory() {
     return this.input.memory;
   }

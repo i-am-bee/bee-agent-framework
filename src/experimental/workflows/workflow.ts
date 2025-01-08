@@ -271,7 +271,7 @@ export class Workflow<
           .parseAsync(run.state)
           .catch((err) => {
             throw new WorkflowError(
-              `Flow has ended but it's state does not adhere to the flow's output schema.`,
+              `Workflow has ended but it's state does not adhere to the workflow's output schema.`,
               { run: shallowCopy(run), errors: [err] },
             );
           });
