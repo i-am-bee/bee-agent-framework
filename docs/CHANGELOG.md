@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.56](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.55...v0.0.56) (2025-01-09)
+
+### Features
+
+- **instrumentation:** trace id for each span ([#269](https://github.com/i-am-bee/bee-agent-framework/issues/269)) ([f205f18](https://github.com/i-am-bee/bee-agent-framework/commit/f205f184e721ee10bad97ca53b83437579b8317e))
+- introduce workflows ([#262](https://github.com/i-am-bee/bee-agent-framework/issues/262)) ([693e899](https://github.com/i-am-bee/bee-agent-framework/commit/693e8995d20ceb0d57bb9651e009c5c95f33ce56))
+- **tools:** add Model Context Protocol Tool ([#265](https://github.com/i-am-bee/bee-agent-framework/issues/265)) ([077f105](https://github.com/i-am-bee/bee-agent-framework/commit/077f1056974dca13f676f019f5c90ed170d4a207)), closes [#238](https://github.com/i-am-bee/bee-agent-framework/issues/238)
+
+### Bug Fixes
+
+- **tools:** ddg bump dependency ([0fb62ae](https://github.com/i-am-bee/bee-agent-framework/commit/0fb62aed7200cc2348247dcf89463686acf5d216))
+
 ## [0.0.55](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.54...v0.0.55) (2025-01-08)
 
 ### Features
