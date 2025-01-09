@@ -46,10 +46,8 @@
     }
   },
   "lint-staged": {
-    "*": [
-      "yarn copyright",
-      "prettier --ignore-unknown --write"
-    ],
+    "{src,tests,scripts}/**/*": "yarn copyright",
+    "*": "prettier --ignore-unknown --write",
     "*.{ts,js}": "eslint --fix",
     "docs/**/*.md": "yarn docs:links"
   },
