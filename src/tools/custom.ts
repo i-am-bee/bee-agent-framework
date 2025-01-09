@@ -77,48 +77,43 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     _options: Partial<BaseToolRunOptions>,
     run: RunContext<typeof this>,
   ) {
-    // Execute custom tool
-    const httpUrl = this.options.codeInterpreter.url + "/v1/execute-custom-tool";
-    const response = await this.customFetch(httpUrl, input, run);
+    const response = await fetch(`${this.options.codeInterpreter.url}/v1/execute-custom-tool`, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        tool_source_code: this.options.sourceCode,
+        executorId: this.options.executorId ?? "default",
+        tool_input_json: JSON.stringify(input),
+      }),
+      signal: run.signal,
+    }).catch((error) => {
+      if (error.cause.name == "HTTPParserError") {
+        throw new CustomToolExecuteError(
+          "Request to bee-code-interpreter has failed -- ensure that CODE_INTERPRETER_URL points to the new HTTP endpoint (default port: 50081).",
+          [error],
+        );
+      } else {
+        throw new CustomToolExecuteError("Request to bee-code-interpreter has failed.", [error]);
+      }
+    });
 
     if (!response?.ok) {
-      throw new CustomToolExecuteError("HTTP request failed!", [new Error(await response.text())]);
+      throw new CustomToolExecuteError(
+        `Request to bee-code-interpreter has failed with HTTP status code ${response.status}.`,
+        [new Error(await response.text())],
+      );
     }
 
     const result = await response.json();
 
     if (result?.exit_code) {
-      throw new CustomToolExecuteError(`Custom tool {tool_name} execution error!`);
+      throw new CustomToolExecuteError(`Custom tool ${result.tool_name} execution error!`);
     }
 
     return new StringToolOutput(result.tool_output_json);
-  }
-
-  private async customFetch(httpUrl: string, input: any, run: RunContext<typeof this>) {
-    try {
-      return await fetch(httpUrl, {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          tool_source_code: this.options.sourceCode,
-          executorId: this.options.executorId ?? "default",
-          tool_input_json: JSON.stringify(input),
-        }),
-        signal: run.signal,
-      });
-    } catch (error) {
-      if (error.cause.name == "HTTPParserError") {
-        throw new CustomToolExecuteError(
-          "Custom tool over HTTP failed -- not using HTTP endpoint!",
-          [error],
-        );
-      } else {
-        throw new CustomToolExecuteError("Custom tool over HTTP failed!", [error]);
-      }
-    }
   }
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {
@@ -130,47 +125,42 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     sourceCode: string,
     executorId?: string,
   ) {
-    // Parse custom tool
-    let response;
-    const httpUrl = codeInterpreter.url + "/v1/parse-custom-tool";
-    try {
-      response = await fetch(httpUrl, {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          tool_source_code: sourceCode,
-          executorId: executorId ?? "default",
-        }),
-      });
-    } catch (error) {
+    const response = await fetch(`${codeInterpreter.url}/v1/parse-custom-tool`, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        tool_source_code: sourceCode,
+        executorId: executorId ?? "default",
+      }),
+    }).catch((error) => {
       if (error.cause.name == "HTTPParserError") {
-        throw new CustomToolCreateError("Custom tool parse error -- not using HTTP endpoint!", [
-          error,
-        ]);
+        throw new CustomToolCreateError(
+          "Request to bee-code-interpreter has failed -- ensure that CODE_INTERPRETER_URL points to the new HTTP endpoint (default port: 50081).",
+          [error],
+        );
       } else {
-        throw new CustomToolCreateError("Custom tool parse error!", [error]);
+        throw new CustomToolCreateError("Request to bee-code-interpreter has failed.", [error]);
       }
-    }
+    });
 
     if (!response?.ok) {
-      throw new CustomToolCreateError("Error parsing custom tool!", [
-        new Error(await response.text()),
-      ]);
+      throw new CustomToolCreateError(
+        `Request to bee-code-interpreter has failed with HTTP status code ${response.status}.`,
+        [new Error(await response.text())],
+      );
     }
 
     const result = await response.json();
 
-    const { tool_name, tool_description, tool_input_schema_json } = result;
-
     return new CustomTool({
       codeInterpreter,
       sourceCode,
-      name: tool_name,
-      description: tool_description,
-      inputSchema: JSON.parse(tool_input_schema_json),
+      name: result.tool_name,
+      description: result.tool_description,
+      inputSchema: JSON.parse(result.tool_input_schema_json),
       executorId,
     });
   }
