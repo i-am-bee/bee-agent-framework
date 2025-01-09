@@ -37,10 +37,11 @@ interface ComputeTreeProps {
 
 interface BuildSpansForParentProps {
   spans: FrameworkSpan[];
+  traceId: string;
   parentId: string | undefined;
 }
 
-function buildSpansForParent({ spans, parentId }: BuildSpansForParentProps) {
+function buildSpansForParent({ spans, parentId, traceId }: BuildSpansForParentProps) {
   spans
     .filter((fwSpan) => fwSpan.parent_id === parentId)
     .forEach((fwSpan) => {
@@ -53,6 +54,7 @@ function buildSpansForParent({ spans, parentId }: BuildSpansForParentProps) {
           attributes: {
             target: fwSpan.attributes.target,
             name: fwSpan.name,
+            traceId,
             ...(fwSpan.attributes.data && { data: JSON.stringify(fwSpan.attributes.data) }),
             ...(fwSpan.attributes.ctx && { ctx: JSON.stringify(fwSpan.attributes.ctx) }),
           },
@@ -62,7 +64,7 @@ function buildSpansForParent({ spans, parentId }: BuildSpansForParentProps) {
           activeSpan.setStatus(fwSpan.status);
 
           // set nested spans
-          buildSpansForParent({ spans, parentId: fwSpan.context.span_id });
+          buildSpansForParent({ spans, traceId, parentId: fwSpan.context.span_id });
 
           // finish the span
           activeSpan.end(fwSpan.end_time);
@@ -107,7 +109,7 @@ export function buildTraceTree({
       }
 
       // set nested spans
-      buildSpansForParent({ spans, parentId: undefined });
+      buildSpansForParent({ spans, traceId, parentId: undefined });
 
       // finish the main span with custom end time
       activeSpan.end(endTime);
