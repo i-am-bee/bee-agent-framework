@@ -17,13 +17,12 @@
 import { FrameworkError } from "@/errors.js";
 import { ObjectLike, PlainObject } from "@/internals/types.js";
 import * as R from "remeda";
+import { pickBy } from "remeda";
 import Mustache from "mustache";
 import { Serializable } from "@/internals/serializable.js";
 import { z, ZodType } from "zod";
 import { createSchemaValidator, toJsonSchema } from "@/internals/helpers/schema.js";
 import type { SchemaObject, ValidateFunction } from "ajv";
-import { shallowCopy } from "@/serializer/utils.js";
-import { pickBy } from "remeda";
 import { getProp } from "@/internals/helpers/object.js";
 
 type PostInfer<T> = T extends PlainObject
@@ -55,9 +54,9 @@ type PromptTemplateConstructor<T extends ZodType, N> = N extends ZodType
     }
   : Omit<PromptTemplateInput<T>, "schema"> & { schema: T | SchemaObject };
 
-type Customizer<T extends ZodType, N> = (
-  config: Required<PromptTemplateInput<T>>,
-) => PromptTemplateConstructor<T, N>;
+type Customizer<T extends ZodType, N> =
+  | ((config: Required<PromptTemplateInput<T>>) => PromptTemplateConstructor<T, N>)
+  | ((config: Required<PromptTemplateInput<T>>) => void);
 
 export class PromptTemplateError<T extends ZodType> extends FrameworkError {
   template: PromptTemplate<T>;
@@ -122,7 +121,7 @@ export class PromptTemplate<T extends ZodType> extends Serializable {
   fork<R extends ZodType>(
     customizer: Customizer<T, SchemaObject> | Customizer<T, R>,
   ): PromptTemplate<T | R> {
-    const config = shallowCopy(this.config);
+    const config = R.clone(this.config);
     const newConfig = customizer?.(config) ?? config;
     return new PromptTemplate(newConfig);
   }

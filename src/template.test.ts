@@ -15,7 +15,7 @@
  */
 
 import { PromptTemplateError, PromptTemplate, ValidationPromptTemplateError } from "@/template.js";
-import { z } from "zod";
+import { z, ZodType } from "zod";
 
 describe("Prompt Template", () => {
   describe("Rendering", () => {
@@ -187,7 +187,21 @@ describe("Prompt Template", () => {
       expect(cloned).toEqual(template);
     });
 
-    it("Forks", () => {
+    it.each([
+      <T extends ZodType>(template: PromptTemplate<T>) =>
+        template.fork((config) => ({
+          ...config,
+          template: "Hello {{name}}!",
+          customTags: ["{{", "}}"],
+          functions: { formatDate: () => "Today" },
+        })),
+      <T extends ZodType>(template: PromptTemplate<T>) =>
+        template.fork((config) => {
+          config.template = "Hello {{name}}!";
+          config.customTags = ["{{", "}}"];
+          config.functions.formatDate = () => "Today";
+        }),
+    ])("Forks", (forkFn) => {
       const template = new PromptTemplate({
         template: `Hello <<name>>!`,
         schema: z.object({
@@ -196,13 +210,14 @@ describe("Prompt Template", () => {
         customTags: ["<<", ">>"],
         escape: false,
       });
-      const forked = template.fork((config) => ({
-        ...config,
-        template: "Hello {{name}}!",
-        customTags: ["{{", "}}"],
-      }));
-
+      const forked = forkFn(template);
       expect(template.render({ name: "Tomas" })).toEqual(forked.render({ name: "Tomas" }));
+      // Configs are deeply copied
+      // @ts-expect-error protected property
+      const [templateConfig, forkedConfig] = [template.config, forked.config];
+      expect(templateConfig.template).not.toEqual(forkedConfig.template);
+      expect(templateConfig.functions).not.toEqual(forkedConfig.functions);
+      expect(templateConfig).not.toEqual(forkedConfig);
     });
   });
   test("Custom function", () => {

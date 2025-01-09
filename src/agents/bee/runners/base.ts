@@ -31,6 +31,8 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { BaseMemory } from "@/memory/base.js";
 import { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
+import * as R from "remeda";
+import { PromptTemplate } from "@/template.js";
 
 export interface BeeRunnerLLMInput {
   meta: BeeMeta;
@@ -50,6 +52,8 @@ export abstract class BaseRunner extends Serializable {
   public readonly iterations: BeeAgentRunIteration[] = [];
   protected readonly failedAttemptsCounter: RetryCounter;
 
+  public templates: BeeAgentTemplates;
+
   constructor(
     protected readonly input: BeeInput,
     protected readonly options: BeeRunOptions,
@@ -57,6 +61,7 @@ export abstract class BaseRunner extends Serializable {
   ) {
     super();
     this.failedAttemptsCounter = new RetryCounter(options?.execution?.totalMaxRetries, AgentError);
+    this.templates = this.resolveTemplates();
   }
 
   async createIteration() {
@@ -95,7 +100,24 @@ export abstract class BaseRunner extends Serializable {
 
   abstract tool(input: BeeRunnerToolInput): Promise<{ output: string; success: boolean }>;
 
-  abstract get templates(): BeeAgentTemplates;
+  protected abstract get _defaultTemplates(): BeeAgentTemplates;
+
+  protected resolveInputTemplate<T extends BeeAgentTemplates[keyof BeeAgentTemplates]>(
+    defaultTemplate: T,
+    update?: T | ((oldTemplate: T) => T),
+  ): T {
+    if (!update) {
+      return defaultTemplate;
+    }
+    return update instanceof PromptTemplate ? update : update(defaultTemplate);
+  }
+
+  protected resolveTemplates(): BeeAgentTemplates {
+    const templatesUpdate = this.input.templates ?? {};
+    return R.mapValues(this._defaultTemplates, (template, key) =>
+      this.resolveInputTemplate(template, templatesUpdate[key] as typeof template | undefined),
+    ) as BeeAgentTemplates;
+  }
 
   protected abstract initMemory(input: BeeRunInput): Promise<BaseMemory>;
 

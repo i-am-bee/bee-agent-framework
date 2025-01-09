@@ -42,7 +42,11 @@ export interface BeeInput {
   tools: AnyTool[];
   memory: BaseMemory;
   meta?: Omit<AgentMeta, "tools">;
-  templates?: Partial<BeeAgentTemplates>;
+  templates?: Partial<{
+    [K in keyof BeeAgentTemplates]:
+      | BeeAgentTemplates[K]
+      | ((oldTemplate: BeeAgentTemplates[K]) => BeeAgentTemplates[K]);
+  }>;
   execution?: BeeAgentExecutionConfig;
 }
 

@@ -19,7 +19,6 @@ import { Workflow, WorkflowRunOptions } from "@/experimental/workflows/workflow.
 import { BaseMessage } from "@/llms/primitives/message.js";
 import { AnyTool } from "@/tools/base.js";
 import { AnyChatLLM } from "@/llms/chat.js";
-import { BeeSystemPrompt } from "@/agents/bee/prompts.js";
 import { BaseMemory, ReadOnlyMemory } from "@/memory/base.js";
 import { z } from "zod";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
@@ -100,13 +99,10 @@ export class AgentWorkflow {
         execution: input.execution,
         ...(input.instructions && {
           templates: {
-            system: BeeSystemPrompt.fork((config) => ({
-              ...config,
-              defaults: {
-                ...config.defaults,
-                instructions: input.instructions || config.defaults.instructions,
-              },
-            })),
+            system: (template) =>
+              template.fork((config) => {
+                config.defaults.instructions = input.instructions || config.defaults.instructions;
+              }),
           },
         }),
       });
