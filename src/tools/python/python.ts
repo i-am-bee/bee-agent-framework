@@ -42,7 +42,6 @@ export interface CodeInterpreterOptions {
 
 export interface PythonToolOptions extends BaseToolOptions {
   codeInterpreter: CodeInterpreterOptions;
-  executorId?: string;
   preprocess?: {
     llm: LLM<BaseLLMOutput>;
     promptTemplate: PromptTemplate.infer<{ input: string }>;
@@ -154,7 +153,6 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
       },
       body: JSON.stringify({
         source_code: await getSourceCode(),
-        executorId: this.options.executorId ?? "default",
         files: Object.fromEntries(
           inputFiles.map((file) => [`${prefix}${file.filename}`, file.pythonId]),
         ),

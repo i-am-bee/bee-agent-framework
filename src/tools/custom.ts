@@ -42,7 +42,6 @@ const toolOptionsSchema = z
     name: z.string().min(1),
     description: z.string().min(1),
     inputSchema: z.any(),
-    executorId: z.string().nullable().optional(),
   })
   .passthrough();
 
@@ -85,7 +84,6 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
       },
       body: JSON.stringify({
         tool_source_code: this.options.sourceCode,
-        executorId: this.options.executorId ?? "default",
         tool_input_json: JSON.stringify(input),
       }),
       signal: run.signal,
@@ -120,11 +118,7 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     super.loadSnapshot(snapshot);
   }
 
-  static async fromSourceCode(
-    codeInterpreter: CodeInterpreterOptions,
-    sourceCode: string,
-    executorId?: string,
-  ) {
+  static async fromSourceCode(codeInterpreter: CodeInterpreterOptions, sourceCode: string) {
     const response = await fetch(`${codeInterpreter.url}/v1/parse-custom-tool`, {
       method: "POST",
       headers: {
@@ -133,7 +127,6 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
       },
       body: JSON.stringify({
         tool_source_code: sourceCode,
-        executorId: executorId ?? "default",
       }),
     }).catch((error) => {
       if (error.cause.name == "HTTPParserError") {
@@ -161,7 +154,6 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
       name: result.tool_name,
       description: result.tool_description,
       inputSchema: JSON.parse(result.tool_input_schema_json),
-      executorId,
     });
   }
 }
