@@ -87,15 +87,17 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
         signal: run.signal,
       });
 
-      if(result.stderr)
-        throw new CustomToolExecuteError(result.stderr)
-  
+      if (result.stderr) {
+        throw new CustomToolExecuteError(result.stderr);
+      }
+
       return new StringToolOutput(result.tool_output_json);
-    } catch(e) {
-      if(e instanceof ToolError)
+    } catch (e) {
+      if (e instanceof ToolError) {
         throw new CustomToolExecuteError(e.message, [e]);
-      else
+      } else {
         throw e;
+      }
     }
   }
 
@@ -123,11 +125,12 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
         description: result.tool_description,
         inputSchema: JSON.parse(result.tool_input_schema_json),
       });
-    } catch(e) {
-      if(e instanceof ToolError)
+    } catch (e) {
+      if (e instanceof ToolError) {
         throw new CustomToolCreateError(e.message, [e]);
-      else
+      } else {
         throw e;
+      }
     }
   }
 }
