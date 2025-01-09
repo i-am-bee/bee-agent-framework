@@ -146,37 +146,6 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
     const prefix = "/workspace/";
 
-    const response = await fetch(`${this.options.codeInterpreter.url}/v1/execute`, {
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        source_code: await getSourceCode(),
-        files: Object.fromEntries(
-          inputFiles.map((file) => [`${prefix}${file.filename}`, file.pythonId]),
-        ),
-      }),
-      signal: run.signal,
-    }).catch((error) => {
-      if (error.cause.name == "HTTPParserError") {
-        throw new ToolError(
-          "Request to bee-code-interpreter has failed -- ensure that CODE_INTERPRETER_URL points to the new HTTP endpoint (default port: 50081).",
-          [error],
-        );
-      } else {
-        throw new ToolError("Request to bee-code-interpreter has failed.", [error]);
-      }
-    });
-
-    if (!response?.ok) {
-      throw new ToolError(
-        `Request to bee-code-interpreter has failed with HTTP status code ${response.status}.`,
-        [new Error(await response.text())],
-      );
-    }
-
     const result = await callCodeInterpreter({
       url: `${this.options.codeInterpreter.url}/v1/execute`,
       body: {
