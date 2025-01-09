@@ -123,14 +123,14 @@ export class DuckDuckGoSearchTool extends Tool<
 
     const results = await paginate({
       size: this.options.maxResults,
-      handler: async ({ offset }) => {
+      handler: async ({ cursor = 0 }) => {
         const { results: data, noResults: done } = await this.client(
           input,
           {
             safeSearch: SafeSearchType.MODERATE,
             ...this.options.search,
             ...options?.search,
-            offset,
+            offset: cursor,
           },
           {
             headers,
@@ -148,7 +148,7 @@ export class DuckDuckGoSearchTool extends Tool<
 
         return {
           data,
-          done,
+          nextCursor: done ? undefined : cursor + data.length,
         };
       },
     });

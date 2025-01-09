@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-export interface PaginateInput<T> {
+export interface PaginateInput<T, C> {
   size: number;
-  handler: (data: { offset: number; limit: number }) => Promise<{ data: T[]; done: boolean }>;
+  handler: (data: { cursor?: C; limit: number }) => Promise<{ data: T[]; nextCursor?: C }>;
 }
 
-export async function paginate<T>(input: PaginateInput<T>): Promise<T[]> {
+export async function paginate<T, C = number>(input: PaginateInput<T, C>): Promise<T[]> {
   const acc: T[] = [];
-
+  let cursor: C | undefined = undefined;
   while (acc.length < input.size) {
-    const { data, done } = await input.handler({
-      offset: acc.length,
+    const { data, nextCursor } = await input.handler({
+      cursor,
       limit: input.size - acc.length,
     });
     acc.push(...data);
 
-    if (done || data.length === 0) {
+    if (nextCursor === undefined || data.length === 0) {
       break;
     }
+    cursor = nextCursor;
   }
 
   if (acc.length > input.size) {

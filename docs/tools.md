@@ -26,6 +26,7 @@ These tools extend the agent's abilities, allowing it to interact with external 
 | `OpenMeteoTool`                                                           | Retrieve current, previous, or upcoming weather for a given destination.                                      |
 | `MilvusDatabaseTool`                                                      | Perform retrieval queries (search, insert, delete, manage collections) against a MilvusDatabaseTool database. |
 | `OpenAPITool`                                                             | Send requests to and receive responses from API server.                                                       |
+| `MCPTool`                                                                 | Discover and use tools exposed by arbitrary [MCP Server](https://modelcontextprotocol.io/examples).           |
 | ➕ [Request](https://github.com/i-am-bee/bee-agent-framework/discussions) |                                                                                                               |
 
 All examples can be found [here](/examples/tools).

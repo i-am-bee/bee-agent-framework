@@ -17,7 +17,7 @@
 import { paginate, PaginateInput } from "@/internals/helpers/paginate.js";
 
 describe("paginate", () => {
-  it.each([
+  const mockSetup = [
     {
       size: 1,
       chunkSize: 1,
@@ -38,23 +38,31 @@ describe("paginate", () => {
       chunkSize: 1,
       items: Array(20).fill(1),
     },
-  ])("Works %#", async ({ size, items, chunkSize }) => {
-    const fn: PaginateInput<number>["handler"] = vi.fn().mockImplementation(async ({ offset }) => {
-      const chunk = items.slice(offset, offset + chunkSize);
-      return { done: offset + chunk.length >= items.length, data: chunk };
-    });
+  ] as const;
 
-    const results = await paginate({
-      size,
-      handler: fn,
-    });
+  describe("paginate", () => {
+    it.each(mockSetup)("Works %#", async ({ size, items, chunkSize }) => {
+      const fn: PaginateInput<number, number>["handler"] = vi
+        .fn()
+        .mockImplementation(async ({ cursor = 0 }) => {
+          const chunk = items.slice(cursor, cursor + chunkSize);
+          const nextCursor = cursor + chunk.length;
+          const done = nextCursor >= items.length;
+          return { nextCursor: done ? undefined : nextCursor, data: chunk };
+        });
 
-    const maxItemsToBeRetrieved = Math.min(size, items.length);
-    let expectedCalls = Math.ceil(maxItemsToBeRetrieved / chunkSize);
-    if (expectedCalls === 0 && size > 0) {
-      expectedCalls = 1;
-    }
-    expect(fn).toBeCalledTimes(expectedCalls);
-    expect(results).toHaveLength(maxItemsToBeRetrieved);
+      const results = await paginate({
+        size,
+        handler: fn,
+      });
+
+      const maxItemsToBeRetrieved = Math.min(size, items.length);
+      let expectedCalls = Math.ceil(maxItemsToBeRetrieved / chunkSize);
+      if (expectedCalls === 0 && size > 0) {
+        expectedCalls = 1;
+      }
+      expect(fn).toBeCalledTimes(expectedCalls);
+      expect(results).toHaveLength(maxItemsToBeRetrieved);
+    });
   });
 });

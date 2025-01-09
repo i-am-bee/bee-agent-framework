@@ -128,7 +128,7 @@ export class GoogleSearchTool extends Tool<
   ) {
     const results = await paginate({
       size: this.options.maxResults,
-      handler: async ({ offset, limit }) => {
+      handler: async ({ cursor = 0, limit }) => {
         const maxChunkSize = 10;
 
         const {
@@ -137,7 +137,7 @@ export class GoogleSearchTool extends Tool<
           {
             cx: this.cseId,
             q: input,
-            start: offset,
+            start: cursor,
             num: Math.min(limit, maxChunkSize),
             safe: "active",
           },
@@ -148,7 +148,7 @@ export class GoogleSearchTool extends Tool<
 
         return {
           data: items,
-          done: items.length < maxChunkSize,
+          nextCursor: items.length < maxChunkSize ? undefined : cursor + items.length,
         };
       },
     });
