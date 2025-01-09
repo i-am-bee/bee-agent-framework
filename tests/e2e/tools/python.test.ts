@@ -20,18 +20,16 @@ import { LocalPythonStorage } from "@/tools/python/storage.js";
 
 import { ToolError } from "@/tools/base.js";
 
-const codeInterpreterUrl = process.env.CODE_INTERPRETER_URL || "http://localhost:50081";
-
 const getPythonTool = () =>
   new PythonTool({
-    codeInterpreter: { url: codeInterpreterUrl },
+    codeInterpreter: { url: process.env.CODE_INTERPRETER_URL! },
     storage: new LocalPythonStorage({
       interpreterWorkingDir: "/tmp/code-interpreter-storage",
       localWorkingDir: "./test_dir/",
     }),
   });
 
-describe("PythonTool", () => {
+describe.runIf(process.env.CODE_INTERPRETER_URL)("PythonTool", () => {
   it("Returns zero exitCode and stdout results", async () => {
     const result = await getPythonTool().run({
       language: "python",

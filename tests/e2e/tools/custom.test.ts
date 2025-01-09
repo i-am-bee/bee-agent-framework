@@ -18,7 +18,7 @@ import { describe, it, expect } from "vitest";
 import { CustomTool } from "@/tools/custom.js";
 import { StringToolOutput } from "@/tools/base.js";
 
-describe("CustomTool", () => {
+describe.runIf(process.env.CODE_INTERPRETER_URL)("CustomTool", () => {
   it("should instantiate correctly", async () => {
     const customTool = await CustomTool.fromSourceCode(
       { url: process.env.CODE_INTERPRETER_URL! },
