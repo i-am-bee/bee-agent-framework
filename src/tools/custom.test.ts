@@ -137,8 +137,7 @@ describe("CustomTool", () => {
       ok: true,
       json: () =>
         Promise.resolve({
-          exit_code: 1,
-          tool_name: "test",
+          stderr: "Oh no, it does not work",
         }),
     });
 

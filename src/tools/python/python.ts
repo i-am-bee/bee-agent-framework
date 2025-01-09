@@ -34,6 +34,7 @@ import { ConnectionOptions } from "node:tls";
 import { RunContext } from "@/context.js";
 import { hasMinLength } from "@/internals/helpers/array.js";
 import { Emitter } from "@/emitter/emitter.js";
+import { shallowCopy } from "@/serializer/utils.js";
 
 export interface CodeInterpreterOptions {
   url: string;
@@ -176,12 +177,21 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
       );
     }
 
-    const result = await response.json();
+    const result = await callCodeInterpreter({
+      url: `${this.options.codeInterpreter.url}/v1/execute`,
+      body: {
+        source_code: await getSourceCode(),
+        files: Object.fromEntries(
+          inputFiles.map((file) => [`${prefix}${file.filename}`, file.pythonId]),
+        ),
+      },
+      signal: run.signal,
+    });
 
     const filesOutput = await this.storage.download(
       Object.entries(result.files)
+        .filter(([path, _]) => path.startsWith(prefix))
         .map(([path, pythonId]) => ({ path: path, pythonId: String(pythonId) }))
-        .filter((file) => file.path.startsWith(prefix))
         .map((file) => ({ filename: file.path.slice(prefix.length), pythonId: file.pythonId }))
         .filter((file) =>
           inputFiles.every(
@@ -196,7 +206,7 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
   createSnapshot() {
     return {
       ...super.createSnapshot(),
-      files: this.files,
+      files: shallowCopy(this.files),
       storage: this.storage,
       preprocess: this.preprocess,
     };
@@ -205,4 +215,42 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {
     super.loadSnapshot(snapshot);
   }
+}
+
+export async function callCodeInterpreter({
+  url,
+  body,
+  signal,
+}: {
+  url: string;
+  body: unknown;
+  signal?: AbortSignal;
+}) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal,
+  }).catch((error) => {
+    if (error.cause.name == "HTTPParserError") {
+      throw new ToolError(
+        "Request to bee-code-interpreter has failed -- ensure that CODE_INTERPRETER_URL points to the new HTTP endpoint (default port: 50081).",
+        [error],
+      );
+    } else {
+      throw new ToolError("Request to bee-code-interpreter has failed.", [error]);
+    }
+  });
+
+  if (!response?.ok) {
+    throw new ToolError(
+      `Request to bee-code-interpreter has failed with HTTP status code ${response.status}.`,
+      [new Error(await response.text())],
+    );
+  }
+
+  return await response.json();
 }
