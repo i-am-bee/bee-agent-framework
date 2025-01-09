@@ -63,6 +63,7 @@ const exclude: string[] = [
   !getEnv("ELASTICSEARCH_NODE") && ["examples/agents/elasticsearch.ts"],
   !getEnv("AWS_REGION") && ["examples/llms/providers/bedrock.ts"],
   !getEnv("GOOGLE_APPLICATION_CREDENTIALS") && ["examples/llms/providers/vertexai.ts"],
+  !getEnv("GENAI_API_KEY") && ["examples/flows/*"],
 ]
   .filter(isTruthy)
   .flat(); // list of examples that are excluded

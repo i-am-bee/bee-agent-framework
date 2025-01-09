@@ -22,6 +22,7 @@ import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { AgentMeta } from "@/agents/types.js";
 import { Emitter } from "@/emitter/emitter.js";
 import {
+  BeeAgentExecutionConfig,
   BeeAgentTemplates,
   BeeCallbacks,
   BeeRunInput,
@@ -42,6 +43,7 @@ export interface BeeInput {
   memory: BaseMemory;
   meta?: Omit<AgentMeta, "tools">;
   templates?: Partial<BeeAgentTemplates>;
+  execution?: BeeAgentExecutionConfig;
 }
 
 export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions> {
@@ -69,6 +71,10 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
 
   static {
     this.register();
+  }
+
+  set memory(memory: BaseMemory) {
+    this.input.memory = memory;
   }
 
   get memory() {
@@ -105,11 +111,12 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       this.input,
       {
         ...options,
-        execution: options?.execution ?? {
-          maxRetriesPerStep: 3,
-          totalMaxRetries: 20,
-          maxIterations: 10,
-        },
+        execution: this.input.execution ??
+          options?.execution ?? {
+            maxRetriesPerStep: 3,
+            totalMaxRetries: 20,
+            maxIterations: 10,
+          },
       },
       run,
     );

@@ -97,8 +97,8 @@ export class RunContext<T extends RunInstance, P = any> extends Serializable {
     return this.controller.signal;
   }
 
-  abort() {
-    this.controller.abort();
+  abort(reason?: Error) {
+    this.controller.abort(reason);
   }
 
   constructor(

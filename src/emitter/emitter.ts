@@ -62,6 +62,7 @@ export class Emitter<T = Record<keyof any, Callback<unknown>>> extends Serializa
   public readonly creator?: object;
   public readonly context: object;
   public readonly trace?: EventTrace;
+  protected readonly cleanups: CleanupFn[] = [];
 
   constructor(input: EmitterInput = {}) {
     super();
@@ -93,7 +94,9 @@ export class Emitter<T = Record<keyof any, Callback<unknown>>> extends Serializa
         : this.namespace.slice(),
     });
 
-    child.pipe(this);
+    const cleanup = child.pipe(this);
+    this.cleanups.push(cleanup);
+
     return child;
   }
 
@@ -116,6 +119,8 @@ export class Emitter<T = Record<keyof any, Callback<unknown>>> extends Serializa
 
   destroy() {
     this.listeners.clear();
+    this.cleanups.forEach((child) => child());
+    this.cleanups.length = 0;
   }
 
   reset() {
@@ -228,6 +233,7 @@ export class Emitter<T = Record<keyof any, Callback<unknown>>> extends Serializa
       context: this.context,
       trace: this.trace,
       listeners: Array.from(this.listeners).map(pick(["raw", "options", "callback"])),
+      cleanups: this.cleanups,
     };
   }
 
