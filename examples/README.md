@@ -110,7 +110,7 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 - [`advanced.ts`](tools/advanced.ts): Advanced tool usage
 - [`agent.ts`](tools/agent.ts): Agent-specific tools
 - [`base.ts`](tools/base.ts): Basic tool implementation
-- [`mcp.ts](tools/mcp.ts): MCP tool usage
+- [`mcp.ts`](tools/mcp.ts): MCP tool usage
 
 ### Custom Tools
 
