@@ -6,6 +6,7 @@
 - Modules
 
   - [Agents](agents.md)
+  - [Workflows](workflows.md)
   - [LLMs](llms.md)
   - [Templates](templates.md)
   - [Memory](memory.md)
