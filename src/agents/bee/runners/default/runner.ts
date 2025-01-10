@@ -44,7 +44,7 @@ import { shallowCopy } from "@/serializer/utils.js";
 
 export class DefaultRunner extends BaseRunner {
   @Cache({ enumerable: false })
-  protected get defaultTemplates() {
+  public get defaultTemplates() {
     return {
       system: BeeSystemPrompt,
       assistant: BeeAssistantPrompt,

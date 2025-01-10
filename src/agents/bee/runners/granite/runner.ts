@@ -36,7 +36,7 @@ import { Cache } from "@/cache/decoratorCache.js";
 
 export class GraniteRunner extends DefaultRunner {
   @Cache({ enumerable: false })
-  protected get defaultTemplates() {
+  public get defaultTemplates() {
     return {
       system: GraniteBeeSystemPrompt,
       assistant: GraniteBeeAssistantPrompt,

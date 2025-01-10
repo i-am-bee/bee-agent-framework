@@ -98,24 +98,22 @@ export abstract class BaseRunner extends Serializable {
 
   abstract tool(input: BeeRunnerToolInput): Promise<{ output: string; success: boolean }>;
 
-  protected abstract get defaultTemplates(): BeeAgentTemplates;
-
-  protected resolveInputTemplate<T extends BeeAgentTemplates[keyof BeeAgentTemplates]>(
-    defaultTemplate: T,
-    update?: T | ((oldTemplate: T) => T),
-  ): T {
-    if (!update) {
-      return defaultTemplate;
-    }
-    return update instanceof PromptTemplate ? update : update(defaultTemplate);
-  }
+  public abstract get defaultTemplates(): BeeAgentTemplates;
 
   @Cache({ enumerable: false })
   public get templates(): BeeAgentTemplates {
     const templatesUpdate = this.input.templates ?? {};
-    return mapValues(this.defaultTemplates, (template, key) =>
-      this.resolveInputTemplate(template, templatesUpdate[key] as typeof template | undefined),
-    ) as BeeAgentTemplates;
+
+    return mapValues(this.defaultTemplates, (defaultTemplate, key) => {
+      if (!templatesUpdate[key]) {
+        return defaultTemplate;
+      }
+      if (templatesUpdate[key] instanceof PromptTemplate) {
+        return templatesUpdate[key];
+      }
+      const update = templatesUpdate[key] as (template: typeof defaultTemplate) => typeof template;
+      return update(defaultTemplate);
+    }) as BeeAgentTemplates;
   }
 
   protected abstract initMemory(input: BeeRunInput): Promise<BaseMemory>;
