@@ -109,7 +109,7 @@ The source directory (`src`) provides numerous modules that one can use.
 | Name                                             | Description                                                                                 |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------- |
 | [**agents**](/docs/agents.md)                    | Base classes defining the common interface for agent.                                       |
-| [**workflows**](/docs/workflows.md)              | Base classes defining the common interface for agent.                                       |
+| [**workflows**](/docs/workflows.md)              | Build agentic applications in a declarative way via [workflows](/docs/workflows.md).        |
 | [**llms**](/docs/llms.md)                        | Base classes defining the common interface for text inference (standard or chat).           |
 | [**template**](/docs/templates.md)               | Prompt Templating system based on `Mustache` with various improvements.                     |
 | [**memory**](/docs/memory.md)                    | Various types of memories to use with agent.                                                |
