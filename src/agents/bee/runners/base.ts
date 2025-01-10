@@ -15,9 +15,9 @@
  */
 
 import { Serializable } from "@/internals/serializable.js";
+import type { BeeAgentTemplates } from "@/agents/bee/types.js";
 import {
   BeeAgentRunIteration,
-  BeeAgentTemplates,
   BeeCallbacks,
   BeeIterationToolResult,
   BeeMeta,
@@ -31,6 +31,9 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { BaseMemory } from "@/memory/base.js";
 import { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
+import { Cache } from "@/cache/decoratorCache.js";
+import { getProp, mapObj } from "@/internals/helpers/object.js";
+import { PromptTemplate } from "@/template.js";
 
 export interface BeeRunnerLLMInput {
   meta: BeeMeta;
@@ -95,7 +98,18 @@ export abstract class BaseRunner extends Serializable {
 
   abstract tool(input: BeeRunnerToolInput): Promise<{ output: string; success: boolean }>;
 
-  abstract get templates(): BeeAgentTemplates;
+  public abstract get defaultTemplates(): BeeAgentTemplates;
+
+  @Cache({ enumerable: false })
+  public get templates(): BeeAgentTemplates {
+    return mapObj(this.defaultTemplates)((key, defaultTemplate) => {
+      const override = getProp(this.input.templates, [key], defaultTemplate);
+      if (override instanceof PromptTemplate) {
+        return override;
+      }
+      return override(defaultTemplate) ?? defaultTemplate;
+    });
+  }
 
   protected abstract initMemory(input: BeeRunInput): Promise<BaseMemory>;
 

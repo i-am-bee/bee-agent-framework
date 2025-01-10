@@ -8,16 +8,6 @@ import {
   DuckDuckGoSearchToolSearchType,
 } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
-import {
-  BeeAssistantPrompt,
-  BeeSchemaErrorPrompt,
-  BeeSystemPrompt,
-  BeeToolErrorPrompt,
-  BeeToolInputErrorPrompt,
-  BeeToolNoResultsPrompt,
-  BeeUserEmptyPrompt,
-} from "bee-agent-framework/agents/bee/prompts";
-import { PromptTemplate } from "bee-agent-framework/template";
 import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { z } from "zod";
@@ -32,40 +22,30 @@ const agent = new BeeAgent({
   memory: new UnconstrainedMemory(),
   // You can override internal templates
   templates: {
-    user: new PromptTemplate({
-      schema: z
-        .object({
-          input: z.string(),
-        })
-        .passthrough(),
-      template: `User: {{input}}`,
-    }),
-    system: BeeSystemPrompt.fork((old) => ({
-      ...old,
-      defaults: {
-        instructions: "You are a helpful assistant that uses tools to answer questions.",
-      },
-    })),
-    toolError: BeeToolErrorPrompt,
-    toolInputError: BeeToolInputErrorPrompt,
-    toolNoResultError: BeeToolNoResultsPrompt.fork((old) => ({
-      ...old,
-      template: `${old.template}\nPlease reformat your input.`,
-    })),
-    toolNotFoundError: new PromptTemplate({
-      schema: z
-        .object({
-          tools: z.array(z.object({ name: z.string() }).passthrough()),
-        })
-        .passthrough(),
-      template: `Tool does not exist!
+    user: (template) =>
+      template.fork((config) => {
+        config.schema = z.object({ input: z.string() }).passthrough();
+        config.template = `User: {{input}}`;
+      }),
+    system: (template) =>
+      template.fork((config) => {
+        config.defaults.instructions =
+          "You are a helpful assistant that uses tools to answer questions.";
+      }),
+    toolNoResultError: (template) =>
+      template.fork((config) => {
+        config.template += `\nPlease reformat your input.`;
+      }),
+    toolNotFoundError: (template) =>
+      template.fork((config) => {
+        config.schema = z
+          .object({ tools: z.array(z.object({ name: z.string() }).passthrough()) })
+          .passthrough();
+        config.template = `Tool does not exist!
 {{#tools.length}}
 Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
-{{/tools.length}}`,
-    }),
-    schemaError: BeeSchemaErrorPrompt,
-    assistant: BeeAssistantPrompt,
-    userEmpty: BeeUserEmptyPrompt,
+{{/tools.length}}`;
+      }),
   },
   tools: [
     new DuckDuckGoSearchTool({

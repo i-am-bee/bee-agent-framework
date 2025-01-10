@@ -15,7 +15,7 @@
  */
 
 import { PromptTemplateError, PromptTemplate, ValidationPromptTemplateError } from "@/template.js";
-import { z } from "zod";
+import { z, ZodType } from "zod";
 
 describe("Prompt Template", () => {
   describe("Rendering", () => {
@@ -187,7 +187,20 @@ describe("Prompt Template", () => {
       expect(cloned).toEqual(template);
     });
 
-    it("Forks", () => {
+    it.each([
+      <T extends ZodType>(template: PromptTemplate<T>) =>
+        template.fork((config) => ({
+          ...config,
+          template: "Hi {{name}}!",
+          customTags: ["{{", "}}"],
+          functions: { formatDate: () => "Today" },
+        })),
+      <T extends ZodType>(template: PromptTemplate<T>) =>
+        template.fork((config) => {
+          config.template = "Hi {{name}}!";
+          config.customTags = ["{{", "}}"];
+        }),
+    ])("Forks", (forkFn) => {
       const template = new PromptTemplate({
         template: `Hello <<name>>!`,
         schema: z.object({
@@ -196,13 +209,9 @@ describe("Prompt Template", () => {
         customTags: ["<<", ">>"],
         escape: false,
       });
-      const forked = template.fork((config) => ({
-        ...config,
-        template: "Hello {{name}}!",
-        customTags: ["{{", "}}"],
-      }));
-
-      expect(template.render({ name: "Tomas" })).toEqual(forked.render({ name: "Tomas" }));
+      const forked = forkFn(template);
+      expect(template.render({ name: "Tomas" })).toEqual("Hello Tomas!");
+      expect(forked.render({ name: "Tomas" })).toEqual("Hi Tomas!");
     });
   });
   test("Custom function", () => {

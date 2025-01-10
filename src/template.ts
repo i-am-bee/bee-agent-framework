@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import { FrameworkError } from "@/errors.js";
+import { FrameworkError, ValueError } from "@/errors.js";
 import { ObjectLike, PlainObject } from "@/internals/types.js";
-import * as R from "remeda";
+import { clone, identity, isPlainObject, pickBy } from "remeda";
 import Mustache from "mustache";
 import { Serializable } from "@/internals/serializable.js";
 import { z, ZodType } from "zod";
 import { createSchemaValidator, toJsonSchema } from "@/internals/helpers/schema.js";
 import type { SchemaObject, ValidateFunction } from "ajv";
-import { shallowCopy } from "@/serializer/utils.js";
-import { pickBy } from "remeda";
 import { getProp } from "@/internals/helpers/object.js";
 
 type PostInfer<T> = T extends PlainObject
@@ -55,9 +53,9 @@ type PromptTemplateConstructor<T extends ZodType, N> = N extends ZodType
     }
   : Omit<PromptTemplateInput<T>, "schema"> & { schema: T | SchemaObject };
 
-type Customizer<T extends ZodType, N> = (
-  config: Required<PromptTemplateInput<T>>,
-) => PromptTemplateConstructor<T, N>;
+type Customizer<T extends ZodType, N> =
+  | ((config: Required<PromptTemplateInput<T>>) => PromptTemplateConstructor<T, N>)
+  | ((config: Required<PromptTemplateInput<T>>) => void);
 
 export class PromptTemplateError<T extends ZodType> extends FrameworkError {
   template: PromptTemplate<T>;
@@ -122,8 +120,11 @@ export class PromptTemplate<T extends ZodType> extends Serializable {
   fork<R extends ZodType>(
     customizer: Customizer<T, SchemaObject> | Customizer<T, R>,
   ): PromptTemplate<T | R> {
-    const config = shallowCopy(this.config);
+    const config = clone(this.config);
     const newConfig = customizer?.(config) ?? config;
+    if (!isPlainObject(newConfig)) {
+      throw new ValueError("Return type from customizer must be a config or nothing.");
+    }
     return new PromptTemplate(newConfig);
   }
 
@@ -147,7 +148,7 @@ export class PromptTemplate<T extends ZodType> extends Serializable {
       {
         tags: this.config.customTags,
         ...(!this.config.escape && {
-          escape: R.identity(),
+          escape: identity(),
         }),
       },
     );

@@ -15,16 +15,11 @@
  */
 
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
-import type { AnyTool } from "@/tools/base.js";
 import { isEmpty } from "remeda";
+import type { AnyTool } from "@/tools/base.js";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import { BaseMemory } from "@/memory/base.js";
-import type {
-  BeeAgentTemplates,
-  BeeParserInput,
-  BeeRunInput,
-  BeeRunOptions,
-} from "@/agents/bee/types.js";
+import type { BeeParserInput, BeeRunInput, BeeRunOptions } from "@/agents/bee/types.js";
 import { BeeAgent, BeeInput } from "@/agents/bee/agent.js";
 import type { GetRunContext } from "@/context.js";
 import {
@@ -36,9 +31,26 @@ import {
   GraniteBeeToolNotFoundPrompt,
   GraniteBeeUserPrompt,
 } from "@/agents/bee/runners/granite/prompts.js";
+import { BeeToolNoResultsPrompt, BeeUserEmptyPrompt } from "@/agents/bee/prompts.js";
 import { Cache } from "@/cache/decoratorCache.js";
 
 export class GraniteRunner extends DefaultRunner {
+  @Cache({ enumerable: false })
+  public get defaultTemplates() {
+    return {
+      system: GraniteBeeSystemPrompt,
+      assistant: GraniteBeeAssistantPrompt,
+      user: GraniteBeeUserPrompt,
+      schemaError: GraniteBeeSchemaErrorPrompt,
+      toolNotFoundError: GraniteBeeToolNotFoundPrompt,
+      toolError: GraniteBeeToolErrorPrompt,
+      toolInputError: GraniteBeeToolInputErrorPrompt,
+      // Note: These are from bee
+      userEmpty: BeeUserEmptyPrompt,
+      toolNoResultError: BeeToolNoResultsPrompt,
+    };
+  }
+
   static {
     this.register();
   }
@@ -87,22 +99,6 @@ export class GraniteRunner extends DefaultRunner {
       );
     }
     return memory;
-  }
-
-  @Cache({ enumerable: false })
-  get templates(): BeeAgentTemplates {
-    const customTemplates = this.input.templates ?? {};
-
-    return {
-      ...super.templates,
-      user: customTemplates.user ?? GraniteBeeUserPrompt,
-      system: customTemplates.system ?? GraniteBeeSystemPrompt,
-      assistant: customTemplates.assistant ?? GraniteBeeAssistantPrompt,
-      schemaError: customTemplates.schemaError ?? GraniteBeeSchemaErrorPrompt,
-      toolNotFoundError: customTemplates.toolNotFoundError ?? GraniteBeeToolNotFoundPrompt,
-      toolError: customTemplates.toolError ?? GraniteBeeToolErrorPrompt,
-      toolInputError: customTemplates.toolInputError ?? GraniteBeeToolInputErrorPrompt,
-    };
   }
 
   protected createParser(tools: AnyTool[]) {

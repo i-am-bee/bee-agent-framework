@@ -24,28 +24,20 @@ import {
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
 
-export const GraniteBeeAssistantPrompt = BeeAssistantPrompt.fork((config) => ({
-  ...config,
-  template: `{{#thought}}Thought: {{.}}\n{{/thought}}{{#toolName}}Tool Name: {{.}}\n{{/toolName}}{{#toolInput}}Tool Input: {{.}}\n{{/toolInput}}{{#finalAnswer}}Final Answer: {{.}}{{/finalAnswer}}`,
-}));
+export const GraniteBeeAssistantPrompt = BeeAssistantPrompt.fork((config) => {
+  config.template = `{{#thought}}Thought: {{.}}\n{{/thought}}{{#toolName}}Tool Name: {{.}}\n{{/toolName}}{{#toolInput}}Tool Input: {{.}}\n{{/toolInput}}{{#finalAnswer}}Final Answer: {{.}}{{/finalAnswer}}`;
+});
 
-export const GraniteBeeSystemPrompt = BeeSystemPrompt.fork((config) => ({
-  ...config,
-  defaults: {
-    ...config.defaults,
-    instructions: "",
-  },
-  functions: {
-    ...config.functions,
-    formatDate: function () {
-      const date = this.createdAt ? new Date(this.createdAt) : new Date();
-      return new Intl.DateTimeFormat("en-US", {
-        dateStyle: "full",
-        timeStyle: "medium",
-      }).format(date);
-    },
-  },
-  template: `You are an AI assistant.
+export const GraniteBeeSystemPrompt = BeeSystemPrompt.fork((config) => {
+  config.defaults.instructions = "";
+  config.functions.formatDate = function () {
+    const date = this.createdAt ? new Date(this.createdAt) : new Date();
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "full",
+      timeStyle: "medium",
+    }).format(date);
+  };
+  config.template = `You are an AI assistant.
 When the user sends a message figure out a solution and provide a final answer.
 {{#tools.length}}
 You have access to a set of tools that can be used to retrieve information and perform actions.
@@ -85,38 +77,33 @@ You do not need a tool to get the current Date and Time. Use the information ava
 # Additional instructions
 {{.}} 
 {{/instructions}}
-`,
-}));
+`;
+});
 
-export const GraniteBeeSchemaErrorPrompt = BeeSchemaErrorPrompt.fork((config) => ({
-  ...config,
-  template: `Error: The generated response does not adhere to the communication structure mentioned in the system prompt.
-You communicate only in instruction lines. Valid instruction lines are 'Thought' followed by 'Tool Name' and then 'Tool Input' or 'Thought' followed by 'Final Answer'.`,
-}));
+export const GraniteBeeSchemaErrorPrompt = BeeSchemaErrorPrompt.fork((config) => {
+  config.template = `Error: The generated response does not adhere to the communication structure mentioned in the system prompt.
+You communicate only in instruction lines. Valid instruction lines are 'Thought' followed by 'Tool Name' and then 'Tool Input' or 'Thought' followed by 'Final Answer'.`;
+});
 
-export const GraniteBeeUserPrompt = BeeUserPrompt.fork((config) => ({
-  ...config,
-  template: `{{input}}`,
-}));
+export const GraniteBeeUserPrompt = BeeUserPrompt.fork((config) => {
+  config.template = `{{input}}`;
+});
 
-export const GraniteBeeToolNotFoundPrompt = BeeToolNotFoundPrompt.fork((config) => ({
-  ...config,
-  template: `Tool does not exist!
+export const GraniteBeeToolNotFoundPrompt = BeeToolNotFoundPrompt.fork((config) => {
+  config.template = `Tool does not exist!
 {{#tools.length}}
 Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
-{{/tools.length}}`,
-}));
+{{/tools.length}}`;
+});
 
-export const GraniteBeeToolErrorPrompt = BeeToolErrorPrompt.fork((config) => ({
-  ...config,
-  template: `The tool has failed; the error log is shown below. If the tool cannot accomplish what you want, use a different tool or explain why you can't use it.
+export const GraniteBeeToolErrorPrompt = BeeToolErrorPrompt.fork((config) => {
+  config.template = `The tool has failed; the error log is shown below. If the tool cannot accomplish what you want, use a different tool or explain why you can't use it.
 
-{{reason}}`,
-}));
+{{reason}}`;
+});
 
-export const GraniteBeeToolInputErrorPrompt = BeeToolInputErrorPrompt.fork((config) => ({
-  ...config,
-  template: `{{reason}}
+export const GraniteBeeToolInputErrorPrompt = BeeToolInputErrorPrompt.fork((config) => {
+  config.template = `{{reason}}
 
-HINT: If you're convinced that the input was correct but the tool cannot process it then use a different tool or say I don't know.`,
-}));
+HINT: If you're convinced that the input was correct but the tool cannot process it then use a different tool or say I don't know.`;
+});

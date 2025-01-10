@@ -15,12 +15,7 @@
  */
 
 import { BaseRunner, BeeRunnerLLMInput, BeeRunnerToolInput } from "@/agents/bee/runners/base.js";
-import type {
-  BeeAgentRunIteration,
-  BeeAgentTemplates,
-  BeeParserInput,
-  BeeRunInput,
-} from "@/agents/bee/types.js";
+import type { BeeAgentRunIteration, BeeParserInput, BeeRunInput } from "@/agents/bee/types.js";
 import { Retryable } from "@/internals/helpers/retryable.js";
 import { AgentError } from "@/agents/base.js";
 import {
@@ -48,6 +43,21 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { shallowCopy } from "@/serializer/utils.js";
 
 export class DefaultRunner extends BaseRunner {
+  @Cache({ enumerable: false })
+  public get defaultTemplates() {
+    return {
+      system: BeeSystemPrompt,
+      assistant: BeeAssistantPrompt,
+      user: BeeUserPrompt,
+      schemaError: BeeSchemaErrorPrompt,
+      toolNotFoundError: BeeToolNotFoundPrompt,
+      toolError: BeeToolErrorPrompt,
+      toolInputError: BeeToolInputErrorPrompt,
+      userEmpty: BeeUserEmptyPrompt,
+      toolNoResultError: BeeToolNoResultsPrompt,
+    };
+  }
+
   static {
     this.register();
   }
@@ -367,23 +377,6 @@ export class DefaultRunner extends BaseRunner {
     });
     await memory.addMany([await this.renderers.system.message(), ...prevConversation]);
     return memory;
-  }
-
-  @Cache({ enumerable: false })
-  get templates(): BeeAgentTemplates {
-    const customTemplates = this.input.templates ?? {};
-
-    return {
-      system: customTemplates.system ?? BeeSystemPrompt,
-      assistant: customTemplates.assistant ?? BeeAssistantPrompt,
-      user: customTemplates.user ?? BeeUserPrompt,
-      userEmpty: customTemplates.userEmpty ?? BeeUserEmptyPrompt,
-      toolError: customTemplates.toolError ?? BeeToolErrorPrompt,
-      toolInputError: customTemplates.toolInputError ?? BeeToolInputErrorPrompt,
-      toolNoResultError: customTemplates.toolNoResultError ?? BeeToolNoResultsPrompt,
-      toolNotFoundError: customTemplates.toolNotFoundError ?? BeeToolNotFoundPrompt,
-      schemaError: customTemplates.schemaError ?? BeeSchemaErrorPrompt,
-    };
   }
 
   protected createParser(tools: AnyTool[]) {
