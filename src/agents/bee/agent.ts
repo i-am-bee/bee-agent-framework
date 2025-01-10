@@ -37,15 +37,17 @@ import { GraniteRunner } from "@/agents/bee/runners/granite/runner.js";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import { ValueError } from "@/errors.js";
 
+export type BeeTemplateFactory<K extends keyof BeeAgentTemplates> = (
+  template: BeeAgentTemplates[K],
+) => BeeAgentTemplates[K];
+
 export interface BeeInput {
   llm: ChatLLM<ChatLLMOutput>;
   tools: AnyTool[];
   memory: BaseMemory;
   meta?: Omit<AgentMeta, "tools">;
   templates?: Partial<{
-    [K in keyof BeeAgentTemplates]:
-      | BeeAgentTemplates[K]
-      | ((oldTemplate: BeeAgentTemplates[K]) => BeeAgentTemplates[K]);
+    [K in keyof BeeAgentTemplates]: BeeAgentTemplates[K] | BeeTemplateFactory<K>;
   }>;
   execution?: BeeAgentExecutionConfig;
 }

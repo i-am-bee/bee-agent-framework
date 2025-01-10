@@ -31,9 +31,9 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { BaseMemory } from "@/memory/base.js";
 import { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { PromptTemplate } from "@/template.js";
 import { Cache } from "@/cache/decoratorCache.js";
-import { mapValues } from "remeda";
+import { getProp, mapObj } from "@/internals/helpers/object.js";
+import { PromptTemplate } from "@/template.js";
 
 export interface BeeRunnerLLMInput {
   meta: BeeMeta;
@@ -102,18 +102,13 @@ export abstract class BaseRunner extends Serializable {
 
   @Cache({ enumerable: false })
   public get templates(): BeeAgentTemplates {
-    const templatesUpdate = this.input.templates ?? {};
-
-    return mapValues(this.defaultTemplates, (defaultTemplate, key) => {
-      if (!templatesUpdate[key]) {
-        return defaultTemplate;
+    return mapObj(this.defaultTemplates)((key, defaultTemplate) => {
+      const override = getProp(this.input.templates, [key], defaultTemplate);
+      if (override instanceof PromptTemplate) {
+        return override;
       }
-      if (templatesUpdate[key] instanceof PromptTemplate) {
-        return templatesUpdate[key];
-      }
-      const update = templatesUpdate[key] as (template: typeof defaultTemplate) => typeof template;
-      return update(defaultTemplate);
-    }) as BeeAgentTemplates;
+      return override(defaultTemplate) ?? defaultTemplate;
+    });
   }
 
   protected abstract initMemory(input: BeeRunInput): Promise<BaseMemory>;
