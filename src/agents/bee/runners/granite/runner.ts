@@ -32,9 +32,11 @@ import {
   GraniteBeeUserPrompt,
 } from "@/agents/bee/runners/granite/prompts.js";
 import { BeeToolNoResultsPrompt, BeeUserEmptyPrompt } from "@/agents/bee/prompts.js";
+import { Cache } from "@/cache/decoratorCache.js";
 
 export class GraniteRunner extends DefaultRunner {
-  protected get _defaultTemplates() {
+  @Cache({ enumerable: false })
+  protected get defaultTemplates() {
     return {
       system: GraniteBeeSystemPrompt,
       assistant: GraniteBeeAssistantPrompt,

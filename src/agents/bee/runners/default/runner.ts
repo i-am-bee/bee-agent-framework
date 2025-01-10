@@ -43,7 +43,8 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { shallowCopy } from "@/serializer/utils.js";
 
 export class DefaultRunner extends BaseRunner {
-  protected get _defaultTemplates() {
+  @Cache({ enumerable: false })
+  protected get defaultTemplates() {
     return {
       system: BeeSystemPrompt,
       assistant: BeeAssistantPrompt,

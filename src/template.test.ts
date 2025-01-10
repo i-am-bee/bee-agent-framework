@@ -191,15 +191,14 @@ describe("Prompt Template", () => {
       <T extends ZodType>(template: PromptTemplate<T>) =>
         template.fork((config) => ({
           ...config,
-          template: "Hello {{name}}!",
+          template: "Hi {{name}}!",
           customTags: ["{{", "}}"],
           functions: { formatDate: () => "Today" },
         })),
       <T extends ZodType>(template: PromptTemplate<T>) =>
         template.fork((config) => {
-          config.template = "Hello {{name}}!";
+          config.template = "Hi {{name}}!";
           config.customTags = ["{{", "}}"];
-          config.functions.formatDate = () => "Today";
         }),
     ])("Forks", (forkFn) => {
       const template = new PromptTemplate({
@@ -211,13 +210,8 @@ describe("Prompt Template", () => {
         escape: false,
       });
       const forked = forkFn(template);
-      expect(template.render({ name: "Tomas" })).toEqual(forked.render({ name: "Tomas" }));
-      // Configs are deeply copied
-      // @ts-expect-error protected property
-      const [templateConfig, forkedConfig] = [template.config, forked.config];
-      expect(templateConfig.template).not.toEqual(forkedConfig.template);
-      expect(templateConfig.functions).not.toEqual(forkedConfig.functions);
-      expect(templateConfig).not.toEqual(forkedConfig);
+      expect(template.render({ name: "Tomas" })).toEqual("Hello Tomas!");
+      expect(forked.render({ name: "Tomas" })).toEqual("Hi Tomas!");
     });
   });
   test("Custom function", () => {

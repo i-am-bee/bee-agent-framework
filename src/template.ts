@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { FrameworkError } from "@/errors.js";
+import { FrameworkError, ValueError } from "@/errors.js";
 import { ObjectLike, PlainObject } from "@/internals/types.js";
-import * as R from "remeda";
-import { pickBy } from "remeda";
+import { clone, identity, isPlainObject, pickBy } from "remeda";
 import Mustache from "mustache";
 import { Serializable } from "@/internals/serializable.js";
 import { z, ZodType } from "zod";
@@ -121,8 +120,11 @@ export class PromptTemplate<T extends ZodType> extends Serializable {
   fork<R extends ZodType>(
     customizer: Customizer<T, SchemaObject> | Customizer<T, R>,
   ): PromptTemplate<T | R> {
-    const config = R.clone(this.config);
+    const config = clone(this.config);
     const newConfig = customizer?.(config) ?? config;
+    if (!isPlainObject(newConfig)) {
+      throw new ValueError("Return type from customizer must be a config or nothing.");
+    }
     return new PromptTemplate(newConfig);
   }
 
@@ -146,7 +148,7 @@ export class PromptTemplate<T extends ZodType> extends Serializable {
       {
         tags: this.config.customTags,
         ...(!this.config.escape && {
-          escape: R.identity(),
+          escape: identity(),
         }),
       },
     );
