@@ -14,6 +14,7 @@ The Bee Agent Framework makes it easy to build scalable agent-based workflows wi
 ## Key Features
 
 - 🤖 **AI agents**: Use our powerful [Bee agent](/docs/agents.md) refined for Llama 3.1 and Granite 3.0, or [build your own](/docs/agents.md).
+- ▶️‍ **Workflows**: Build agentic applications in a declarative way via [workflows](/docs/workflows.md).
 - 🛠️ **Tools**: Use our [built-in tools](/docs/tools.md) or [create your own](/docs/tools.md) in Javascript/Python.
 - 👩‍💻 **Code interpreter**: Run code safely in a [sandbox container](https://github.com/i-am-bee/bee-code-interpreter).
 - 💾 **Memory**: Multiple [strategies](/docs/memory.md) to optimize token spend.
@@ -108,6 +109,7 @@ The source directory (`src`) provides numerous modules that one can use.
 | Name                                             | Description                                                                                 |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------- |
 | [**agents**](/docs/agents.md)                    | Base classes defining the common interface for agent.                                       |
+| [**workflows**](/docs/workflows.md)              | Base classes defining the common interface for agent.                                       |
 | [**llms**](/docs/llms.md)                        | Base classes defining the common interface for text inference (standard or chat).           |
 | [**template**](/docs/templates.md)               | Prompt Templating system based on `Mustache` with various improvements.                     |
 | [**memory**](/docs/memory.md)                    | Various types of memories to use with agent.                                                |
