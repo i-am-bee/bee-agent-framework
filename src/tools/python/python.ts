@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import { BaseToolOptions, BaseToolRunOptions, ToolEmitter, Tool, ToolInput } from "@/tools/base.js";
-import { createGrpcTransport } from "@connectrpc/connect-node";
-import { PromiseClient, createPromiseClient } from "@connectrpc/connect";
-import { CodeInterpreterService } from "bee-proto/code_interpreter/v1/code_interpreter_service_connect";
+import {
+  BaseToolOptions,
+  BaseToolRunOptions,
+  ToolEmitter,
+  Tool,
+  ToolError,
+  ToolInput,
+} from "@/tools/base.js";
 import { z } from "zod";
 import { BaseLLMOutput } from "@/llms/base.js";
 import { LLM } from "@/llms/llm.js";
 import { PromptTemplate } from "@/template.js";
-import { filter, isIncludedIn, isTruthy, map, pipe, unique, uniqueBy } from "remeda";
+import { filter, isIncludedIn, map, pipe, unique, uniqueBy } from "remeda";
 import { PythonFile, PythonStorage } from "@/tools/python/storage.js";
 import { PythonToolOutput } from "@/tools/python/output.js";
 import { ValidationError } from "ajv";
@@ -30,6 +34,7 @@ import { ConnectionOptions } from "node:tls";
 import { RunContext } from "@/context.js";
 import { hasMinLength } from "@/internals/helpers/array.js";
 import { Emitter } from "@/emitter/emitter.js";
+import { shallowCopy } from "@/serializer/utils.js";
 
 export interface CodeInterpreterOptions {
   url: string;
@@ -38,7 +43,6 @@ export interface CodeInterpreterOptions {
 
 export interface PythonToolOptions extends BaseToolOptions {
   codeInterpreter: CodeInterpreterOptions;
-  executorId?: string;
   preprocess?: {
     llm: LLM<BaseLLMOutput>;
     promptTemplate: PromptTemplate.infer<{ input: string }>;
@@ -95,7 +99,6 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
     });
   }
 
-  protected readonly client: PromiseClient<typeof CodeInterpreterService>;
   protected readonly preprocess;
 
   public constructor(options: PythonToolOptions) {
@@ -109,24 +112,12 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
         },
       ]);
     }
-    this.client = this._createClient();
     this.preprocess = options.preprocess;
     this.storage = options.storage;
   }
 
   static {
     this.register();
-  }
-
-  protected _createClient(): PromiseClient<typeof CodeInterpreterService> {
-    return createPromiseClient(
-      CodeInterpreterService,
-      createGrpcTransport({
-        baseUrl: this.options.codeInterpreter.url,
-        httpVersion: "2",
-        nodeOptions: this.options.codeInterpreter.connectionOptions,
-      }),
-    );
   }
 
   protected async _run(
@@ -141,7 +132,6 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
       (files) => this.storage.upload(files),
     );
 
-    // replace relative paths in "files" with absolute paths by prepending "/workspace"
     const getSourceCode = async () => {
       if (this.preprocess) {
         const { llm, promptTemplate } = this.preprocess;
@@ -156,50 +146,36 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
     const prefix = "/workspace/";
 
-    const result = await this.client.execute(
-      {
-        sourceCode: await getSourceCode(),
-        executorId: this.options.executorId ?? "default",
+    const result = await callCodeInterpreter({
+      url: `${this.options.codeInterpreter.url}/v1/execute`,
+      body: {
+        source_code: await getSourceCode(),
         files: Object.fromEntries(
           inputFiles.map((file) => [`${prefix}${file.filename}`, file.pythonId]),
         ),
       },
-      { signal: run.signal },
-    );
+      signal: run.signal,
+    });
 
-    // replace absolute paths in "files" with relative paths by removing "/workspace/"
-    // skip files that are not in "/workspace"
-    // skip entries that are also entries in filesInput
     const filesOutput = await this.storage.download(
       Object.entries(result.files)
-        .map(([k, v]) => {
-          const file = { path: k, pythonId: v };
-          if (!file.path.startsWith(prefix)) {
-            return;
-          }
-
-          const filename = file.path.slice(prefix.length);
-          if (
-            inputFiles.some(
-              (input) => input.filename === filename && input.pythonId === file.pythonId,
-            )
-          ) {
-            return;
-          }
-
-          return {
-            pythonId: file.pythonId,
-            filename,
-          };
-        })
-        .filter(isTruthy),
+        .filter(([path, _]) => path.startsWith(prefix))
+        .map(([path, pythonId]) => ({ path: path, pythonId: String(pythonId) }))
+        .map((file) => ({ filename: file.path.slice(prefix.length), pythonId: file.pythonId }))
+        .filter((file) =>
+          inputFiles.every(
+            (input) => input.filename !== file.filename || input.pythonId !== file.pythonId,
+          ),
+        ),
     );
-    return new PythonToolOutput(result.stdout, result.stderr, result.exitCode, filesOutput);
+
+    return new PythonToolOutput(result.stdout, result.stderr, result.exit_code, filesOutput);
   }
 
   createSnapshot() {
     return {
       ...super.createSnapshot(),
+      files: shallowCopy(this.files),
       storage: this.storage,
       preprocess: this.preprocess,
     };
@@ -207,6 +183,43 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {
     super.loadSnapshot(snapshot);
-    Object.assign(this, { client: this._createClient() });
   }
+}
+
+export async function callCodeInterpreter({
+  url,
+  body,
+  signal,
+}: {
+  url: string;
+  body: unknown;
+  signal?: AbortSignal;
+}) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal,
+  }).catch((error) => {
+    if (error.cause.name == "HTTPParserError") {
+      throw new ToolError(
+        "Request to bee-code-interpreter has failed -- ensure that CODE_INTERPRETER_URL points to the new HTTP endpoint (default port: 50081).",
+        [error],
+      );
+    } else {
+      throw new ToolError("Request to bee-code-interpreter has failed.", [error]);
+    }
+  });
+
+  if (!response?.ok) {
+    throw new ToolError(
+      `Request to bee-code-interpreter has failed with HTTP status code ${response.status}.`,
+      [new Error(await response.text())],
+    );
+  }
+
+  return await response.json();
 }

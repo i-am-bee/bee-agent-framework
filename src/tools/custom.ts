@@ -22,15 +22,13 @@ import {
   Tool,
   ToolInput,
 } from "@/tools/base.js";
-import { createGrpcTransport } from "@connectrpc/connect-node";
-import { PromiseClient, createPromiseClient } from "@connectrpc/connect";
 import { FrameworkError } from "@/errors.js";
 import { z } from "zod";
 import { validate } from "@/internals/helpers/general.js";
-import { CodeInterpreterService } from "bee-proto/code_interpreter/v1/code_interpreter_service_connect";
-import { CodeInterpreterOptions } from "./python/python.js";
+import { callCodeInterpreter, CodeInterpreterOptions } from "./python/python.js";
 import { RunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
+import { ToolError } from "@/tools/base.js";
 
 export class CustomToolCreateError extends FrameworkError {}
 export class CustomToolExecuteError extends FrameworkError {}
@@ -45,22 +43,10 @@ const toolOptionsSchema = z
     name: z.string().min(1),
     description: z.string().min(1),
     inputSchema: z.any(),
-    executorId: z.string().nullable().optional(),
   })
   .passthrough();
 
 export type CustomToolOptions = z.output<typeof toolOptionsSchema> & BaseToolOptions;
-
-function createCodeInterpreterClient(codeInterpreter: CodeInterpreterOptions) {
-  return createPromiseClient(
-    CodeInterpreterService,
-    createGrpcTransport({
-      baseUrl: codeInterpreter.url,
-      httpVersion: "2",
-      nodeOptions: codeInterpreter.connectionOptions,
-    }),
-  );
-}
 
 export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
   name: string;
@@ -75,19 +61,13 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     return this.options.inputSchema;
   }
 
-  protected client: PromiseClient<typeof CodeInterpreterService>;
-
   static {
     this.register();
   }
 
-  public constructor(
-    options: CustomToolOptions,
-    client?: PromiseClient<typeof CodeInterpreterService>,
-  ) {
+  public constructor(options: CustomToolOptions) {
     validate(options, toolOptionsSchema);
     super(options);
-    this.client = client || createCodeInterpreterClient(options.codeInterpreter);
     this.name = options.name;
     this.description = options.description;
   }
@@ -97,51 +77,60 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     _options: Partial<BaseToolRunOptions>,
     run: RunContext<typeof this>,
   ) {
-    const { response } = await this.client.executeCustomTool(
-      {
-        executorId: this.options.executorId || "default",
-        toolSourceCode: this.options.sourceCode,
-        toolInputJson: JSON.stringify(input),
-      },
-      { signal: run.signal },
-    );
+    try {
+      const result = await callCodeInterpreter({
+        url: `${this.options.codeInterpreter.url}/v1/execute-custom-tool`,
+        body: {
+          tool_source_code: this.options.sourceCode,
+          tool_input_json: JSON.stringify(input),
+        },
+        signal: run.signal,
+      });
 
-    if (response.case === "error") {
-      throw new CustomToolExecuteError(response.value.stderr);
+      if (result.stderr) {
+        throw new CustomToolExecuteError(result.stderr);
+      }
+
+      return new StringToolOutput(result.tool_output_json);
+    } catch (e) {
+      if (e instanceof ToolError) {
+        throw new CustomToolExecuteError(e.message, [e]);
+      } else {
+        throw e;
+      }
     }
-
-    return new StringToolOutput(response.value!.toolOutputJson);
   }
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {
     super.loadSnapshot(snapshot);
-    this.client = createCodeInterpreterClient(this.options.codeInterpreter);
   }
 
-  static async fromSourceCode(
-    codeInterpreter: CodeInterpreterOptions,
-    sourceCode: string,
-    executorId?: string,
-  ) {
-    const client = createCodeInterpreterClient(codeInterpreter);
-    const response = await client.parseCustomTool({ toolSourceCode: sourceCode });
+  static async fromSourceCode(codeInterpreter: CodeInterpreterOptions, sourceCode: string) {
+    try {
+      const result = await callCodeInterpreter({
+        url: `${codeInterpreter.url}/v1/parse-custom-tool`,
+        body: {
+          tool_source_code: sourceCode,
+        },
+      });
 
-    if (response.response.case === "error") {
-      throw new CustomToolCreateError(response.response.value.errorMessages.join("\n"));
-    }
+      if (result.error_messages) {
+        throw new CustomToolCreateError(result.errorMessages.join("\n"));
+      }
 
-    const { toolName, toolDescription, toolInputSchemaJson } = response.response.value!;
-
-    return new CustomTool(
-      {
+      return new CustomTool({
         codeInterpreter,
         sourceCode,
-        name: toolName,
-        description: toolDescription,
-        inputSchema: JSON.parse(toolInputSchemaJson),
-        executorId,
-      },
-      client,
-    );
+        name: result.tool_name,
+        description: result.tool_description,
+        inputSchema: JSON.parse(result.tool_input_schema_json),
+      });
+    } catch (e) {
+      if (e instanceof ToolError) {
+        throw new CustomToolCreateError(e.message, [e]);
+      } else {
+        throw e;
+      }
+    }
   }
 }
