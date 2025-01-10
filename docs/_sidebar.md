@@ -2,6 +2,7 @@
 
   - [Home](/)
   - [Overview](overview.md)
+  - [Examples](examples.md)
 
 - Modules
 
