@@ -172,7 +172,7 @@
     "@streamparser/json": "^0.0.21",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
-    "duck-duck-scrape": "^2.2.6",
+    "duck-duck-scrape": "^2.2.7",
     "fast-xml-parser": "^4.5.0",
     "header-generator": "^2.1.57",
     "joplin-turndown-plugin-gfm": "^1.0.12",
