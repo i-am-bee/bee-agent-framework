@@ -32,7 +32,7 @@ import { BaseMemory } from "@/memory/base.js";
 import { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { Cache } from "@/cache/decoratorCache.js";
-import { getProp, mapObj } from "@/internals/helpers/object.js";
+import { mapObj } from "@/internals/helpers/object.js";
 import { PromptTemplate } from "@/template.js";
 
 export interface BeeRunnerLLMInput {
@@ -102,8 +102,10 @@ export abstract class BaseRunner extends Serializable {
 
   @Cache({ enumerable: false })
   public get templates(): BeeAgentTemplates {
-    return mapObj(this.defaultTemplates)((key, defaultTemplate) => {
-      const override = getProp(this.input.templates, [key], defaultTemplate);
+    const overrides = this.input.templates ?? {};
+
+    return mapObj(this.defaultTemplates)((key, defaultTemplate: BeeAgentTemplates[typeof key]) => {
+      const override = overrides[key] ?? defaultTemplate;
       if (override instanceof PromptTemplate) {
         return override;
       }
