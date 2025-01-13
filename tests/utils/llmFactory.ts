@@ -26,6 +26,8 @@ import { Agent, Dispatcher } from "undici";
 export function createChatLLM(): ChatLLM<ChatLLMOutput> {
   if (process.env.OPENAI_API_KEY) {
     return new OpenAIChatLLM({ modelId: "gpt-4o" });
+  } else if (process.env.AZURE_OPENAI_API_KEY) {
+    return new OpenAIChatLLM({ modelId: "gpt-4o", azure: true });
   } else if (process.env.WATSONX_API_KEY && process.env.WATSONX_PROJECT_ID) {
     return WatsonXChatLLM.fromPreset("meta-llama/llama-3-70b-instruct", {
       projectId: process.env.WATSONX_PROJECT_ID,

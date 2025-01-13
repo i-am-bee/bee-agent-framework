@@ -123,7 +123,12 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
     if (client) {
       this.client = client;
     } else if (azure) {
-      this.client = new AzureOpenAI();
+      this.client = new AzureOpenAI({
+        baseURL: process.env.AZURE_OPENAI_API_BASE_URL,
+        endpoint: process.env.AZURE_OPENAI_API_ENDPOINT,
+        apiVersion: process.env.AZURE_OPENAI_API_VERSION,
+        deployment: process.env.AZURE_OPENAI_API_DEPLOYMENT,
+      });
     } else {
       this.client = new OpenAI();
     }
