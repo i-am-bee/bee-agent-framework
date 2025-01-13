@@ -29,6 +29,63 @@ For a full changelog, see the [releases page](https://github.com/i-am-bee/bee-ag
 - 😢 **Bee cares about the sad path too.** Real-world applications encounter errors and failures. Bee lets you observe the full agent workflow through [events](/docs/emitter.md), collect [telemetry](/docs/instrumentation.md), [log](/docs/logger.md) diagnostic data, and throws clear and well-defined [exceptions](/docs/errors.md). Bees may be insects, but not bugs!
 - 🌳 **A part of something greater.** Bee isn't just a framework, but a full ecosystem. Use [Bee UI](https://github.com/i-am-bee/bee-ui) to chat with your agents visually. [Bee Observe](https://github.com/i-am-bee/bee-observe) collects and manages telemetry. [Bee Code Interpreter](https://github.com/i-am-bee/bee-code-interpreter) runs generated code safely in a secure sandbox. Or skip the framework altogether: create a chat assistant in our hosted app, [BeeAI](https://iambee.ai) (or [deploy your own instance](https://github.com/i-am-bee/bee-api)), and use it through the HTTP API or our OpenAI-compatible [Python SDK](https://github.com/i-am-bee/bee-python-sdk).
 
+## Quick example
+
+This example demonstrates how to build a multi-agent workflow using Bee Agent Framework:
+
+```ts
+import "dotenv/config";
+import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
+import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
+import { createConsoleReader } from "examples/helpers/io.js";
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
+import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
+import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
+import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
+
+const workflow = new AgentWorkflow();
+
+workflow.addAgent({
+  name: "WeatherForecaster",
+  instructions: "You are a weather assistant. Respond only if you can provide a useful answer.",
+  tools: [new OpenMeteoTool()],
+  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  execution: { maxIterations: 3 },
+});
+
+workflow.addAgent({
+  name: "Researcher",
+  instructions: "You are a researcher assistant. Respond only if you can provide a useful answer.",
+  tools: [new WikipediaTool()],
+  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+});
+
+workflow.addAgent({
+  name: "Solver",
+  instructions:
+    "Your task is to provide the most useful final answer based on the assistants' responses which all are relevant. Ignore those where assistant do not know.",
+  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+});
+
+const memory = new UnconstrainedMemory();
+
+await memory.add(
+  BaseMessage.of({
+    role: Role.USER,
+    text: "What is the capital of France and what is the current weather there?",
+    meta: { createdAt: new Date() },
+  }),
+);
+
+const { result } = await workflow.run(memory.messages).observe((emitter) => {
+  emitter.on("success", (data) => {
+    console.log(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
+  });
+});
+
+console.log(`Agent 🤖`, result.finalAnswer);
+```
+
 ## Getting started
 
 > [!TIP]
