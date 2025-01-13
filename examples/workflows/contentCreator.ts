@@ -9,7 +9,7 @@ import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
 import { isEmpty, pick } from "remeda";
 import { LLMTool } from "bee-agent-framework/tools/llm";
 import { GoogleSearchTool } from "bee-agent-framework/tools/search/googleSearch";
-import { GroqChatLLM } from "@/adapters/groq/chat.js";
+import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
 
 const schema = z.object({
   input: z.string(),

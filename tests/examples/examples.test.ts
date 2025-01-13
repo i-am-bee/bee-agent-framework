@@ -36,6 +36,7 @@ const includePattern = process.env.INCLUDE_PATTERN || `./examples/**/*.ts`;
 const excludePattern = process.env.EXCLUDE_PATTERN || ``;
 
 const exclude: string[] = [
+  "examples/workflows/contentCreator.ts",
   "examples/playground/**/*.ts",
   // prevents 'Too many requests' error on Free Tier
   "examples/llms/providers/watsonx_verbose.ts",
@@ -48,7 +49,7 @@ const exclude: string[] = [
   !getEnv("GROQ_API_KEY") && [
     "examples/agents/sql.ts",
     "examples/llms/providers/groq.ts",
-    "examples/flows/*",
+    "examples/workflows/*",
   ],
   !getEnv("OPENAI_API_KEY") && [
     "examples/agents/bee_reusable.ts",
