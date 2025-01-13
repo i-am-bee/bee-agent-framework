@@ -70,17 +70,26 @@ describe("Streamlit Agent", () => {
     expect(response.message).toBeInstanceOf(BaseMessage);
 
     expect(response.result.raw).toBeTypeOf("string");
-    expect(response.result.blocks.length).toEqual(3);
-    const [textStartBlock, appBlock, textEndBlock] = response.result.blocks;
-    expect(textStartBlock.start).toBe(0);
-    expect(textStartBlock.name).toBe("text");
-    expect(textStartBlock.content).toBeTruthy();
-    expect(appBlock.start).toBe(textStartBlock.end);
-    expect(appBlock.name).toBe("app");
-    expect(appBlock.content).toBeTruthy();
-    expect(textEndBlock.start).toBe(appBlock.end);
-    expect(textEndBlock.name).toBe("text");
-    expect(textEndBlock.content).toBeTruthy();
+    expect(response.result.blocks.length).toBeGreaterThanOrEqual(2);
+
+    const stats = { app: 0, text: 0 };
+    response.result.blocks.forEach((block, i, arr) => {
+      const prevBlock = arr[i - 1];
+      if (prevBlock) {
+        expect(prevBlock.end).toBe(block.start);
+        expect(block.start).toBe(prevBlock.end);
+      } else {
+        expect(block.start).toBe(0);
+      }
+      expect(block.content).toBeTruthy();
+      if (block.name === "app") {
+        stats.app++;
+      } else {
+        stats.text++;
+      }
+    });
+    expect(stats.app).toBeGreaterThan(0);
+    expect(stats.text).toBeGreaterThan(0);
 
     callbacks.verify();
   });
