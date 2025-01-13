@@ -70,8 +70,6 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 
 ### LLM Providers
 
-- [`bam.ts`](/examples/llms/providers/bam.ts): BAM language model integration
-- [`bam_verbose.ts`](/examples/llms/providers/bam_verbose.ts): Verbose BAM model usage
 - [`customChatProvider.ts`](/examples/llms/providers/customChatProvider.ts): Custom chat provider implementation
 - [`customProvider.ts`](/examples/llms/providers/customProvider.ts): Custom language model provider
 - [`groq.ts`](/examples/llms/providers/groq.ts): Groq language model integration

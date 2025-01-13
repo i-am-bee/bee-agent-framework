@@ -1,31 +1,31 @@
 import "dotenv/config";
-import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
+import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
 
 const workflow = new AgentWorkflow();
 workflow.addAgent({
   name: "WeatherForecaster",
   instructions: "You are a weather assistant. Respond only if you can provide a useful answer.",
   tools: [new OpenMeteoTool()],
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm: new GroqChatLLM(),
   execution: { maxIterations: 3 },
 });
 workflow.addAgent({
   name: "Researcher",
   instructions: "You are a researcher assistant. Respond only if you can provide a useful answer.",
   tools: [new WikipediaTool()],
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm: new GroqChatLLM(),
 });
 workflow.addAgent({
   name: "Solver",
   instructions:
     "Your task is to provide the most useful final answer based on the assistants' responses which all are relevant. Ignore those where assistant do not know.",
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm: new GroqChatLLM(),
 });
 
 const reader = createConsoleReader();

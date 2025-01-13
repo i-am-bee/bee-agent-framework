@@ -63,7 +63,6 @@ yarn prepare
 
 ```bash
 # At least one provider API key or an OLLAMA_HOST must be defined!
-GENAI_API_KEY=""
 OPENAI_API_KEY=""
 GROQ_API_KEY=""
 WATSONX_API_KEY=""

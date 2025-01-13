@@ -16,17 +16,13 @@
 
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { StreamlitAgent } from "@/agents/experimental/streamlit/agent.js";
-import { BAMChatLLM } from "@/adapters/bam/chat.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
+import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
 
 describe("Streamlit agent", () => {
-  beforeEach(() => {
-    vi.stubEnv("GENAI_API_KEY", "123");
-  });
-
   it("Serializes", async () => {
     const instance = new StreamlitAgent({
-      llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+      llm: new OllamaChatLLM(),
       memory: new UnconstrainedMemory(),
     });
     const serialized = instance.serialize();

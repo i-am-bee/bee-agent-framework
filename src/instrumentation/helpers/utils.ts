@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { BAMChatLLMInputConfig } from "@/adapters/bam/chat.js";
 import { BaseLLM } from "@/llms/base.js";
 import { isFunction } from "remeda";
+import type { LLMChatTemplate } from "@/adapters/shared/llmChatTemplates.js";
 
 export function assertLLMWithMessagesToPromptFn(instance: object): instance is BaseLLM<any, any> & {
-  messagesToPrompt: BAMChatLLMInputConfig["messagesToPrompt"];
+  messagesToPrompt: LLMChatTemplate["messagesToPrompt"];
 } {
   return Boolean(
     instance instanceof BaseLLM &&

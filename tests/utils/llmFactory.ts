@@ -16,7 +16,6 @@
 
 import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import process from "node:process";
-import { BAMChatLLM } from "@/adapters/bam/chat.js";
 import { OpenAIChatLLM } from "@/adapters/openai/chat.js";
 import { WatsonXChatLLM } from "@/adapters/watsonx/chat.js";
 import { GroqChatLLM } from "@/adapters/groq/chat.js";
@@ -25,9 +24,7 @@ import { Ollama } from "ollama";
 import { Agent, Dispatcher } from "undici";
 
 export function createChatLLM(): ChatLLM<ChatLLMOutput> {
-  if (process.env.GENAI_API_KEY) {
-    return BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
-  } else if (process.env.OPENAI_API_KEY) {
+  if (process.env.OPENAI_API_KEY) {
     return new OpenAIChatLLM({ modelId: "gpt-4o" });
   } else if (process.env.WATSONX_API_KEY && process.env.WATSONX_PROJECT_ID) {
     return WatsonXChatLLM.fromPreset("meta-llama/llama-3-70b-instruct", {

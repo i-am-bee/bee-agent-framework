@@ -28,7 +28,6 @@ import {
   LLMMeta,
   StreamGenerateOptions,
 } from "@/llms/base.js";
-import { load } from "@langchain/core/load";
 import { assign } from "@/internals/helpers/object.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { Emitter } from "@/emitter/emitter.js";
@@ -149,19 +148,5 @@ export class LangChainLLM extends LLM<LangChainLLMOutput> {
       executionOptions: shallowCopy(this.executionOptions),
       lcLLM: JSON.stringify(this.lcLLM.toJSON()),
     };
-  }
-
-  async loadSnapshot({ lcLLM, ...state }: ReturnType<typeof this.createSnapshot>) {
-    super.loadSnapshot(state);
-    Object.assign(this, state, {
-      lcLLM: await (async () => {
-        if (lcLLM.includes("@ibm-generative-ai/node-sdk")) {
-          const { GenAIModel } = await import("@ibm-generative-ai/node-sdk/langchain");
-          return GenAIModel.fromJSON(lcLLM);
-        }
-
-        return await load(lcLLM);
-      })(),
-    });
   }
 }

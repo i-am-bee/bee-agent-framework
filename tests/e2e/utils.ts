@@ -17,7 +17,6 @@
 import { Mock } from "vitest";
 import * as R from "remeda";
 import { Serializer } from "@/serializer/serializer.js";
-import { Client } from "@ibm-generative-ai/node-sdk";
 import { ClassConstructor } from "@/internals/types.js";
 import { Logger } from "@/logger/logger.js";
 import { pino } from "pino";
@@ -125,7 +124,6 @@ export function verifyDeserialization(
 verifyDeserialization.ignoredKeys = new Set<string>([LangChainTool.serializedSchemaKey]);
 verifyDeserialization.ignoredClasses = [
   Logger,
-  Client,
   customsearch_v1.Customsearch,
   LCBaseLLM,
   RunContext,

@@ -5,12 +5,12 @@ import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { RePlanAgent } from "bee-agent-framework/agents/experimental/replan/agent";
-import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
+import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
 
 const reader = createConsoleReader();
 
 const agent = new RePlanAgent({
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm: new GroqChatLLM(),
   memory: new UnconstrainedMemory(),
   tools: [new DuckDuckGoSearchTool(), new OpenMeteoTool()],
 });

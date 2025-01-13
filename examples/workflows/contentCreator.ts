@@ -3,13 +3,13 @@ import { z } from "zod";
 import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
 import { isEmpty, pick } from "remeda";
 import { LLMTool } from "bee-agent-framework/tools/llm";
 import { GoogleSearchTool } from "bee-agent-framework/tools/search/googleSearch";
+import { GroqChatLLM } from "@/adapters/groq/chat.js";
 
 const schema = z.object({
   input: z.string(),
@@ -26,7 +26,7 @@ const workflow = new Workflow({
   outputSchema: schema.required({ output: true }),
 })
   .addStep("preprocess", async (state) => {
-    const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
+    const llm = new GroqChatLLM();
     const driver = new JsonDriver(llm);
 
     const { parsed } = await driver.generate(
@@ -60,7 +60,7 @@ const workflow = new Workflow({
       : { update: pick(parsed, ["notes", "topic"]) };
   })
   .addStrictStep("planner", schema.required({ topic: true }), async (state) => {
-    const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
+    const llm = new GroqChatLLM();
     const agent = new BeeAgent({
       llm,
       memory: new UnconstrainedMemory(),
@@ -93,7 +93,7 @@ const workflow = new Workflow({
     };
   })
   .addStrictStep("writer", schema.required({ plan: true }), async (state) => {
-    const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
+    const llm = new GroqChatLLM();
     const output = await llm.generate([
       BaseMessage.of({
         role: `system`,
@@ -121,7 +121,7 @@ const workflow = new Workflow({
     };
   })
   .addStrictStep("editor", schema.required({ draft: true }), async (state) => {
-    const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
+    const llm = new GroqChatLLM();
     const output = await llm.generate([
       BaseMessage.of({
         role: `system`,

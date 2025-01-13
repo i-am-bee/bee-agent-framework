@@ -25,7 +25,6 @@ import {
   LLMMeta,
 } from "@/llms/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
-import { load } from "@langchain/core/load";
 import {
   BaseChatModel,
   BaseChatModelCallOptions,
@@ -218,19 +217,5 @@ export class LangChainChatLLM<
       executionOptions: shallowCopy(this.executionOptions),
       lcLLM: JSON.stringify(this.lcLLM.toJSON()),
     };
-  }
-
-  async loadSnapshot({ lcLLM, ...state }: ReturnType<typeof this.createSnapshot>) {
-    super.loadSnapshot(state);
-    Object.assign(this, state, {
-      lcLLM: await (async () => {
-        if (lcLLM.includes("@ibm-generative-ai/node-sdk")) {
-          const { GenAIChatModel } = await import("@ibm-generative-ai/node-sdk/langchain");
-          return GenAIChatModel.fromJSON(lcLLM);
-        }
-
-        return await load(lcLLM);
-      })(),
-    });
   }
 }

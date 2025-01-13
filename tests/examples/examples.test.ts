@@ -45,7 +45,11 @@ const exclude: string[] = [
     "examples/agents/granite/*.ts",
     "examples/agents/granite/single_turn.ts",
   ],
-  !getEnv("GROQ_API_KEY") && ["examples/agents/sql.ts", "examples/llms/providers/groq.ts"],
+  !getEnv("GROQ_API_KEY") && [
+    "examples/agents/sql.ts",
+    "examples/llms/providers/groq.ts",
+    "examples/flows/*",
+  ],
   !getEnv("OPENAI_API_KEY") && [
     "examples/agents/bee_reusable.ts",
     "examples/llms/providers/openai.ts",
@@ -57,11 +61,9 @@ const exclude: string[] = [
   ],
   !getEnv("COHERE_API_KEY") && ["examples/llms/providers/langchain.ts"],
   !getEnv("CODE_INTERPRETER_URL") && ["examples/tools/custom/python.ts"],
-  ["examples/llms/providers/bam.ts", "examples/llms/providers/bam_verbose.ts"],
   !getEnv("ELASTICSEARCH_NODE") && ["examples/agents/elasticsearch.ts"],
   !getEnv("AWS_REGION") && ["examples/llms/providers/bedrock.ts"],
   !getEnv("GOOGLE_APPLICATION_CREDENTIALS") && ["examples/llms/providers/vertexai.ts"],
-  !getEnv("GENAI_API_KEY") && ["examples/flows/*"],
 ]
   .filter(isTruthy)
   .flat(); // list of examples that are excluded

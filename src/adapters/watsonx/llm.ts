@@ -29,13 +29,12 @@ import {
   LLMMeta,
   LLMOutputError,
 } from "@/llms/base.js";
-import { HttpError } from "@ibm-generative-ai/node-sdk";
 import * as R from "remeda";
 import { FrameworkError, ValueError } from "@/errors.js";
 import { Cache, CacheFn } from "@/cache/decoratorCache.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { safeSum } from "@/internals/helpers/number.js";
-import { omitUndefined } from "@/internals/helpers/object.js";
+import { getProp, omitUndefined } from "@/internals/helpers/object.js";
 import { createURLParams, RestfulClient, RestfulClientError } from "@/internals/fetcher.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
@@ -380,9 +379,9 @@ export class WatsonXLLM extends LLM<WatsonXLLMOutput, WatsonXLLMGenerateOptions>
     if (error instanceof FrameworkError) {
       throw error;
     }
-    if (error instanceof HttpError) {
+    if (error?.name === "HttpError") {
       throw new LLMError("LLM has occurred an error!", [error], {
-        isRetryable: [408, 425, 429, 500, 503].includes(error.status_code),
+        isRetryable: [408, 425, 429, 500, 503].includes(getProp(error, ["status_code", 500])),
       });
     }
     return new LLMError("LLM has occurred an error!", [error]);

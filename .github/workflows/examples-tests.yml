@@ -45,7 +45,6 @@ jobs:
           curl -d '{"model": "llama3.1:latest", "stream": false, "prompt":"Whatever I say, asnwer with Yes"}' http://localhost:11434/api/generate
       - name: Example Tests
         env:
-          GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
           GOOGLE_CSE_ID: ${{ secrets.GOOGLE_SEARCH_CSE_ID }}

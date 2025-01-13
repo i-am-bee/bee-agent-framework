@@ -8,14 +8,14 @@ import {
   DuckDuckGoSearchToolSearchType,
 } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
-import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { z } from "zod";
+import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
 
 Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
-const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
+const llm = new GroqChatLLM();
 
 const agent = new BeeAgent({
   llm,

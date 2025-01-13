@@ -15,34 +15,19 @@
  */
 
 import { TokenMemory } from "@/memory/tokenMemory.js";
-import { BAMLLM } from "@/adapters/bam/llm.js";
-import { Client } from "@ibm-generative-ai/node-sdk";
-import { BAMChatLLM } from "@/adapters/bam/chat.js";
 import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import * as R from "remeda";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
+import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
 
 describe("Token Memory", () => {
-  beforeEach(() => {
-    vi.stubEnv("GENAI_API_KEY", "123");
-  });
-
   const getInstance = (config: {
     llmFactor: number;
     localFactor: number;
     syncThreshold: number;
     maxTokens: number;
   }) => {
-    const llm = new BAMChatLLM({
-      llm: new BAMLLM({
-        client: new Client(),
-        modelId: "google/flan-ul2",
-      }),
-      config: {
-        messagesToPrompt: (messages) =>
-          messages.map((msg) => `${msg.role}: ${msg.text}`).join("\n\n"),
-      },
-    });
+    const llm = new OllamaChatLLM();
 
     const estimateLLM = (msg: BaseMessage) => Math.ceil(msg.text.length * config.llmFactor);
     const estimateLocal = (msg: BaseMessage) => Math.ceil(msg.text.length * config.localFactor);

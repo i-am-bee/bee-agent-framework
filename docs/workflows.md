@@ -96,7 +96,6 @@ _Source: [examples/workflows/nesting.ts](/examples/workflows/nesting.ts)_
 ```ts
 import "dotenv/config";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
 import { z } from "zod";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
 import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
@@ -106,6 +105,7 @@ import { ReadOnlyMemory } from "bee-agent-framework/memory/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
 import { createConsoleReader } from "examples/helpers/io.js";
+import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
 
 const schema = z.object({
   answer: z.instanceof(BaseMessage).optional(),
@@ -115,7 +115,7 @@ const schema = z.object({
 const workflow = new Workflow({ schema: schema })
   .addStep("simpleAgent", async (state) => {
     const simpleAgent = new BeeAgent({
-      llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+      llm: new GroqChatLLM(),
       tools: [],
       memory: state.memory,
     });
@@ -128,7 +128,7 @@ const workflow = new Workflow({ schema: schema })
     };
   })
   .addStrictStep("critique", schema.required(), async (state) => {
-    const llm = BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct");
+    const llm = new GroqChatLLM();
     const { parsed: critiqueResponse } = await new JsonDriver(llm).generate(
       z.object({ score: z.number().int().min(0).max(100) }),
       [
@@ -148,7 +148,7 @@ const workflow = new Workflow({ schema: schema })
   })
   .addStep("complexAgent", async (state) => {
     const complexAgent = new BeeAgent({
-      llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+      llm: new GroqChatLLM(),
       tools: [new WikipediaTool(), new OpenMeteoTool()],
       memory: state.memory,
     });
@@ -186,33 +186,33 @@ _Source: [examples/workflows/agent.ts](/examples/workflows/agent.ts)_
 
 ```ts
 import "dotenv/config";
-import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
+import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
 
 const workflow = new AgentWorkflow();
 workflow.addAgent({
   name: "WeatherForecaster",
   instructions: "You are a weather assistant. Respond only if you can provide a useful answer.",
   tools: [new OpenMeteoTool()],
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm: new GroqChatLLM(),
   execution: { maxIterations: 3 },
 });
 workflow.addAgent({
   name: "Researcher",
   instructions: "You are a researcher assistant. Respond only if you can provide a useful answer.",
   tools: [new WikipediaTool()],
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm: new GroqChatLLM(),
 });
 workflow.addAgent({
   name: "Solver",
   instructions:
     "Your task is to provide the most useful final answer based on the assistants' responses which all are relevant. Ignore those where assistant do not know.",
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm: new GroqChatLLM(),
 });
 
 const reader = createConsoleReader();
