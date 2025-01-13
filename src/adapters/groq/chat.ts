@@ -105,7 +105,7 @@ export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
 
   constructor({
     client,
-    modelId = "llama-3.1-70b-versatile",
+    modelId = "llama-3.3-70b-versatile",
     parameters = {
       temperature: 0,
     },
@@ -131,12 +131,18 @@ export class GroqChatLLM extends ChatLLM<ChatGroqOutput> {
     if (
       this.modelId.includes("gemma") ||
       this.modelId.includes("llama3") ||
-      this.modelId.includes("llama-guard")
+      this.modelId.includes("llama-guard") ||
+      this.modelId.includes("-preview") ||
+      this.modelId.includes("-specdec")
     ) {
       return { tokenLimit: 8 * 1024 };
     } else if (this.modelId.includes("llava-v1.5")) {
       return { tokenLimit: 4 * 1024 };
-    } else if (this.modelId.includes("llama-3.1-70b") || this.modelId.includes("llama-3.1-8b")) {
+    } else if (
+      this.modelId.includes("llama-3.1-70b") ||
+      this.modelId.includes("llama-3.1-8b") ||
+      this.modelId.includes("llama-3.3-70b")
+    ) {
       return { tokenLimit: 128 * 1024 };
     } else if (this.modelId.includes("mixtral-8x7b")) {
       return { tokenLimit: 32 * 1024 };
