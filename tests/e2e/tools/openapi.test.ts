@@ -75,8 +75,6 @@ describe("OpenAPITool", () => {
 
   beforeEach(() => {
     instance = new OpenAPITool({
-      name: "Cat Facts",
-      description: "A simple API for cat facts",
       openApiSchema: cat_spec,
     });
   });

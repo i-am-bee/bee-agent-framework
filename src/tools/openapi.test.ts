@@ -72,7 +72,7 @@ describe("Base Tool", () => {
 
   describe("OpenAPITool", () => {
     it("Serializes", () => {
-      const tool = new OpenAPITool({ name: "OpenAPITool", openApiSchema: cat_spec });
+      const tool = new OpenAPITool({ openApiSchema: cat_spec });
 
       const serialized = tool.serialize();
       const deserialized = OpenAPITool.fromSerialized(serialized);
