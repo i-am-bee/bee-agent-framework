@@ -10,7 +10,7 @@
 </p>
 
 🐝 **Bee Agent Framework** is an open-source TypeScript library for building **production-ready multi-agent systems**. Pick from a variety of [🌐 LLM providers](/docs/llms.md#providers-adapters), customize the [📜 prompt templates](/docs/templates.md), create [🤖 agents](/docs/agents.md), equip agents with pre-made [🛠️ tools](/docs/tools.md), join agents into [🤖🤝🤖 multi-agent workflows](/docs/workflows.md), and **make amazing AI-driven apps**! 🪄
- 
+
 ## Latest updates
 
 - 🚀 **2025-01-09**:
@@ -23,7 +23,7 @@ For a full changelog, see the [releases page](https://github.com/i-am-bee/bee-ag
 
 ## Why pick Bee?
 
-- ⚔️  **Battle-tested.** Bee Agent Framework is at the core of [BeeAI](https://iambee.ai), a powerful platform for building chat assistants and custom AI-powered apps. BeeAI is in a closed beta, but already used by hundreds of users. And it's [fully open-source](https://github.com/i-am-bee/bee-ui) too!
+- ⚔️ **Battle-tested.** Bee Agent Framework is at the core of [BeeAI](https://iambee.ai), a powerful platform for building chat assistants and custom AI-powered apps. BeeAI is in a closed beta, but already used by hundreds of users. And it's [fully open-source](https://github.com/i-am-bee/bee-ui) too!
 - 🔋 **Batteries included.** Not everything about developing AI apps is exciting. In an actual product, you have to reduce token spend through [memory strategies](/docs/memory.md), store and restore the agent state through [(de)serialization](/docs/serialization.md), generate [structured output](/examples/llms/structured.ts), or execute generated code in a [sandboxed environment](https://github.com/i-am-bee/bee-code-interpreter). Leave all that to Bee and focus on building your app!
 - 🤗 **Built for open-source models.** Pick any LLM you want – including small and open-source models. The framework is designed to perform robustly with [Granite](https://www.ibm.com/granite/docs/) and [Llama 3.x](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct). A full agentic workflow can run on your laptop!
 - 😢 **Bee cares about the sad path too.** Real-world applications encounter errors and failures. Bee lets you observe the full agent workflow through [events](/docs/emitter.md), collect [telemetry](/docs/instrumentation.md), [log](/docs/logger.md) diagnostic data, and throws clear and well-defined [exceptions](/docs/errors.md). Bees may be insects, but not bugs!
