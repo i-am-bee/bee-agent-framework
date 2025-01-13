@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.0.57](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.56...v0.0.57) (2025-01-13)
+
+### ⚠ BREAKING CHANGES
+
+- **adapters:** change groq default model from llama3.1 to llama3.3
+- **adapters:** remove BAM
+- **tools:** switch PythonTool and CustomTool to HTTP API (#195)
+
+### Features
+
+- **adapters:** change groq default model from llama3.1 to llama3.3 ([0639bdb](https://github.com/i-am-bee/bee-agent-framework/commit/0639bdb6b767b34296bb0f8455b332645731b467))
+- **adapters:** remove BAM ([ddecf7f](https://github.com/i-am-bee/bee-agent-framework/commit/ddecf7f58fa9e839b62909f9a530e6f4074dae7d))
+- **agents:** improve template overriding ([#270](https://github.com/i-am-bee/bee-agent-framework/issues/270)) ([fbf0003](https://github.com/i-am-bee/bee-agent-framework/commit/fbf0003c58b47bb168392487a6b779a31157cd53))
+- **tools:** switch PythonTool and CustomTool to HTTP API ([#195](https://github.com/i-am-bee/bee-agent-framework/issues/195)) ([d48f0a9](https://github.com/i-am-bee/bee-agent-framework/commit/d48f0a9b9a1696dff4623c8406e3b44dac5c0102))
+
+### Bug Fixes
+
+- **agents:** improve template overriding ([6548b3b](https://github.com/i-am-bee/bee-agent-framework/commit/6548b3bf4e97b713a1076d84a7463c2d7b9a9dd6))
+
 ## [0.0.56](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.55...v0.0.56) (2025-01-09)
 
 ### Features
