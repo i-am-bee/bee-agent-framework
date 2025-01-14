@@ -29,7 +29,7 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { ChatLLM, ChatLLMGenerateEvents, ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMessage, RoleType } from "@/llms/primitives/message.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { ClientOptions, OpenAI, AzureOpenAI } from "openai";
+import { ClientOptions, OpenAI, AzureOpenAI, AzureClientOptions } from "openai";
 import { GetRunContext } from "@/context.js";
 import { promptTokensEstimate } from "openai-chat-tokens";
 import { Serializer } from "@/serializer/serializer.js";
@@ -98,6 +98,7 @@ export class OpenAIChatLLMOutput extends ChatLLMOutput {
 interface Input {
   modelId?: ChatModel;
   client?: OpenAI | AzureOpenAI;
+  clientOptions?: ClientOptions | AzureClientOptions;
   parameters?: Partial<Parameters>;
   executionOptions?: ExecutionOptions;
   cache?: LLMCache<OpenAIChatLLMOutput>;
@@ -118,7 +119,15 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
   public readonly client: OpenAI | AzureOpenAI;
   public readonly parameters: Partial<Parameters>;
 
-  constructor({ client, modelId, parameters, executionOptions = {}, cache, azure }: Input = {}) {
+  constructor({
+    client,
+    modelId,
+    parameters,
+    executionOptions = {},
+    clientOptions = {},
+    cache,
+    azure,
+  }: Input = {}) {
     super(modelId || "gpt-4o-mini", executionOptions, cache);
     if (client) {
       this.client = client;
@@ -128,9 +137,10 @@ export class OpenAIChatLLM extends ChatLLM<OpenAIChatLLMOutput> {
         endpoint: process.env.AZURE_OPENAI_API_ENDPOINT,
         apiVersion: process.env.AZURE_OPENAI_API_VERSION,
         deployment: process.env.AZURE_OPENAI_API_DEPLOYMENT,
+        ...clientOptions,
       });
     } else {
-      this.client = new OpenAI();
+      this.client = new OpenAI(clientOptions);
     }
     this.parameters = parameters ?? { temperature: 0 };
   }
