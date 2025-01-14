@@ -38,13 +38,12 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
           GOOGLE_CSE_ID: ${{ secrets.GOOGLE_SEARCH_CSE_ID }}
-          AZURE_OPENAI_API_ENDPOINT: ${{ secrets.AZURE_OPENAI_API_ENDPOINT }}
-          AZURE_OPENAI_API_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_API_DEPLOYMENT }}
-          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
-          AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
-          # TODO: enable WatsonX later
-          # WATSONX_API_KEY: ${{ secrets.WATSONX_API_KEY }}
-          # WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
+          # AZURE_OPENAI_API_ENDPOINT: ${{ secrets.AZURE_OPENAI_API_ENDPOINT }}
+          # AZURE_OPENAI_API_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_API_DEPLOYMENT }}
+          # AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          # AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
+          WATSONX_API_KEY: ${{ secrets.WATSONX_API_KEY }}
+          WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
           # WATSONX_SPACE_ID: ${{ secrets.WATSONX_SPACE_ID }}
           # WATSONX_DEPLOYMENT_ID: ${{ secrets.WATSONX_DEPLOYMENT_ID }}
         run: yarn test:e2e
