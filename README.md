@@ -9,7 +9,7 @@
   <h4 align="center">Open-source framework for building, deploying, and serving powerful multi-agent workflows at scale.</h4>
 </p>
 
-🐝 **Bee Agent Framework** is an open-source TypeScript library for building **production-ready multi-agent systems**. Pick from a variety of [🌐 LLM providers](/docs/llms.md#providers-adapters), customize the [📜 prompt templates](/docs/templates.md), create [🤖 agents](/docs/agents.md), equip agents with pre-made [🛠️ tools](/docs/tools.md), join agents into [🤖🤝🤖 multi-agent workflows](/docs/workflows.md), and **make amazing AI-driven apps**! 🪄
+🐝 **Bee Agent Framework** is an open-source TypeScript library for building **production-ready multi-agent systems**. Pick from a variety of [🌐 LLM providers](/docs/llms.md#providers-adapters), customize the [📜 prompt templates](/docs/templates.md), create [🤖 agents](/docs/agents.md), equip agents with pre-made [🛠️ tools](/docs/tools.md), and orchestrate [🤖🤝🤖 multi-agent workflows](/docs/workflows.md)! 🪄
 
 ## Latest updates
 
@@ -24,66 +24,68 @@ For a full changelog, see the [releases page](https://github.com/i-am-bee/bee-ag
 ## Why pick Bee?
 
 - ⚔️ **Battle-tested.** Bee Agent Framework is at the core of [BeeAI](https://iambee.ai), a powerful platform for building chat assistants and custom AI-powered apps. BeeAI is in a closed beta, but already used by hundreds of users. And it's [fully open-source](https://github.com/i-am-bee/bee-ui) too!
-- 🔋 **Batteries included.** Not everything about developing AI apps is exciting. In an actual product, you have to reduce token spend through [memory strategies](/docs/memory.md), store and restore the agent state through [(de)serialization](/docs/serialization.md), generate [structured output](/examples/llms/structured.ts), or execute generated code in a [sandboxed environment](https://github.com/i-am-bee/bee-code-interpreter). Leave all that to Bee and focus on building your app!
+- 🚀 **Production-grade.** In an actual product, you have to reduce token spend through [memory strategies](/docs/memory.md), store and restore the agent state through [(de)serialization](/docs/serialization.md), generate [structured output](/examples/llms/structured.ts), or execute generated code in a [sandboxed environment](https://github.com/i-am-bee/bee-code-interpreter). Leave all that to Bee and focus on building!
 - 🤗 **Built for open-source models.** Pick any LLM you want – including small and open-source models. The framework is designed to perform robustly with [Granite](https://www.ibm.com/granite/docs/) and [Llama 3.x](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct). A full agentic workflow can run on your laptop!
 - 😢 **Bee cares about the sad path too.** Real-world applications encounter errors and failures. Bee lets you observe the full agent workflow through [events](/docs/emitter.md), collect [telemetry](/docs/instrumentation.md), [log](/docs/logger.md) diagnostic data, and throws clear and well-defined [exceptions](/docs/errors.md). Bees may be insects, but not bugs!
-- 🌳 **A part of something greater.** Bee isn't just a framework, but a full ecosystem. Use [Bee UI](https://github.com/i-am-bee/bee-ui) to chat with your agents visually. [Bee Observe](https://github.com/i-am-bee/bee-observe) collects and manages telemetry. [Bee Code Interpreter](https://github.com/i-am-bee/bee-code-interpreter) runs generated code safely in a secure sandbox. Or skip the framework altogether: create a chat assistant in our hosted app, [BeeAI](https://iambee.ai) (or [deploy your own instance](https://github.com/i-am-bee/bee-api)), and use it through the HTTP API or our OpenAI-compatible [Python SDK](https://github.com/i-am-bee/bee-python-sdk).
+- 🌳 **A part of something greater.** Bee isn't just a framework, but a full ecosystem. Use [Bee UI](https://github.com/i-am-bee/bee-ui) to chat with your agents visually. [Bee Observe](https://github.com/i-am-bee/bee-observe) collects and manages telemetry. [Bee Code Interpreter](https://github.com/i-am-bee/bee-code-interpreter) runs generated code safely in a secure sandbox. The Bee ecosystem also integrates with [Model Context Protocol](https://i-am-bee.github.io/bee-agent-framework/#/tools?id=using-the-mcptool-class), allowing interoperability with the wider agent ecosystem!
 
 ## Quick example
 
 This example demonstrates how to build a multi-agent workflow using Bee Agent Framework:
 
+<!-- embedme examples/workflows/multiAgents.ts -->
+
 ```ts
 import "dotenv/config";
-import { BAMChatLLM } from "bee-agent-framework/adapters/bam/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
+import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
 
 const workflow = new AgentWorkflow();
-
 workflow.addAgent({
   name: "WeatherForecaster",
   instructions: "You are a weather assistant. Respond only if you can provide a useful answer.",
   tools: [new OpenMeteoTool()],
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm: new GroqChatLLM(),
   execution: { maxIterations: 3 },
 });
-
 workflow.addAgent({
   name: "Researcher",
   instructions: "You are a researcher assistant. Respond only if you can provide a useful answer.",
   tools: [new WikipediaTool()],
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm: new GroqChatLLM(),
 });
-
 workflow.addAgent({
   name: "Solver",
   instructions:
     "Your task is to provide the most useful final answer based on the assistants' responses which all are relevant. Ignore those where assistant do not know.",
-  llm: BAMChatLLM.fromPreset("meta-llama/llama-3-1-70b-instruct"),
+  llm: new GroqChatLLM(),
 });
 
+const reader = createConsoleReader();
 const memory = new UnconstrainedMemory();
 
-await memory.add(
-  BaseMessage.of({
-    role: Role.USER,
-    text: "What is the capital of France and what is the current weather there?",
-    meta: { createdAt: new Date() },
-  }),
-);
+for await (const { prompt } of reader) {
+  await memory.add(
+    BaseMessage.of({
+      role: Role.USER,
+      text: prompt,
+      meta: { createdAt: new Date() },
+    }),
+  );
 
-const { result } = await workflow.run(memory.messages).observe((emitter) => {
-  emitter.on("success", (data) => {
-    console.log(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
+  const { result } = await workflow.run(memory.messages).observe((emitter) => {
+    emitter.on("success", (data) => {
+      reader.write(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
+    });
   });
-});
-
-console.log(`Agent 🤖`, result.finalAnswer);
+  await memory.addMany(result.newMessages);
+  reader.write(`Agent 🤖`, result.finalAnswer);
+}
 ```
 
 ## Getting started
