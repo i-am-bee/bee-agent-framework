@@ -140,7 +140,7 @@ export class Workflow<
 
   addStep<L extends string>(
     name: L,
-    handler: WorkflowStepHandler<TInput, TKeys>,
+    handler: WorkflowStepHandler<TInput | TOutput, TKeys>,
   ): Workflow<TInput, TOutput, L | TKeys>;
   addStep<L extends string, TFlow extends AnyWorkflowFlow>(
     name: L,
@@ -148,7 +148,7 @@ export class Workflow<
   ): Workflow<TInput, TOutput, L | TKeys>;
   addStep<L extends string>(
     name: L,
-    step: WorkflowStepHandler<TInput, TKeys> | AnyWorkflowFlow,
+    step: WorkflowStepHandler<TInput | TOutput, TKeys> | AnyWorkflowFlow,
   ): Workflow<TInput, TOutput, L | TKeys> {
     return this._addStep(name, step);
   }
