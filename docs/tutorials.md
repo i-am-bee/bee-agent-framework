@@ -8,7 +8,7 @@ This repository contains tutorials demonstrating the usage of the Bee Agent Fram
 
 ## How to Slack with Bee
 
-This tutorial will guide you through integrating the Bee Agent Framework with the Slack API. By the end, the agent will have the cabalitity to post messages to a Slack channel.
+This tutorial will guide you through integrating the Bee Agent Framework with the Slack API. By the end, the agent will be able to post messages to a Slack channel.
 
 ### Prerequisites
 
@@ -29,7 +29,7 @@ git clone https://github.com/i-am-bee/bee-agent-framework-starter.git
 cd bee-agent-framework-starter
 ```
 
-3. Install starter dependencies, include the MCP peer dependency:
+3. Install starter dependencies, including the MCP peer dependency:
 
 ```bash
 npm i @modelcontextprotocol/sdk
@@ -41,14 +41,14 @@ npm i @modelcontextprotocol/sdk
 touch src/agent_slack.ts
 ```
 
-That's it for the setup! We’ll add the necessary code into the module you just created.
+That's it for the setup! We’ll add the necessary code to the module you just created.
 
 ### Slack API
 
 To connect to the Slack API, you will need a set of credentials and some additional setup.
 
-1. Go to https://api.slack.com/apps and create a new app named `Bee` (use "from scratch" option).
-2. Once in the app page, select `OAuth & Permissions` from the menu.
+1. Go to https://api.slack.com/apps and create a new app named `Bee` (use the "from scratch" option).
+2. Once on the app page, select `OAuth & Permissions` from the menu.
 3. Go to `Bot Token Scopes` and add `chat:write` scope, that will suffice for our purposes.
 4. Click `Install to Workspace` and grab the `Bot User OAuth Token`
 5. Grab the `Team ID` by navigating to `https://<your-workspace>.slack.com`, after redirect, your URL will change to `https://app.slack.com/client/TXXXXXXX/CXXXXXXX`, pick the segment starting with `TXXXXXXX`.
@@ -58,16 +58,16 @@ To connect to the Slack API, you will need a set of credentials and some additio
 
 The framework doesn't have any specialized tools for using Slack API. However, it supports tools exposed via Model Context Protocol and performs automatic tool discovery. We will use that to give our agent the capability to post Slack messages.
 
-Now, copy & paste the following code into `agent_slack.ts` module. Then, follow along with the comments for explanation. Do not forget to substitute your Slack credentials while reading through.
+Now, copy and paste the following code into `agent_slack.ts` module. Then, follow along with the comments for an explanation. Do not forget to substitute your Slack credentials while reading through.
 
 ```js
 import { MCPTool } from "bee-agent-framework/tools/mcp";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
-import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
 // Start by creating MCP client
 const client = new Client(
@@ -95,26 +95,32 @@ await client.connect(
   }),
 );
 try {
-  // Perform automatic tool discovery using the client
+  // Discover Slack tools via MCP client
   const slackTools = await MCPTool.fromClient(client);
 
-  // Filter the desired tools (this is not necessary when working with larger LLMs)
+  // Filter for specific Slack tool
   const filteredSlackTools = slackTools.filter((tool) => tool.name === "slack_post_message");
 
   // Create Bee agent
   const agent = new BeeAgent({
-    // We're using phi4 LLM ran locally via Ollama
-    llm: new OllamaChatLLM({ modelId: "phi4" }),
+    // We're using LLM ran locally via Ollama
+    llm: new OllamaChatLLM({ modelId: "llama3.1" }),
     // Besides the Slack tools, we also provide DDG tool for web search
-    tools: [new DuckDuckGoSearchTool({ maxResults: 3 }), ...filteredSlackTools],
+    tools: [new OpenMeteoTool(), ...filteredSlackTools],
     memory: new UnconstrainedMemory(),
+    templates: {
+      system: (template) =>
+        template.fork((config) => {
+          config.defaults.instructions = `You are a helpful assistant. When prompted to post to Slack, send messages to the "bee-playground" channel.`;
+        }),
+    },
   });
 
-  // Run the agent
+  // Execute the agent with prompt
   await agent
     .run({
-      // Ask a question and instruct the agent to send the answer to the Slack channel
-      prompt: "Find out what's the currency in Ireland, send it to the bee-playground channel.",
+      // Instruct the agent to send a weather-related question to the Slack
+      prompt: "Post to Slack the current temperature in LA.",
     })
     .observe((emitter) => {
       // Track agent progress for debugging
