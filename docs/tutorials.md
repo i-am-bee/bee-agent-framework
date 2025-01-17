@@ -13,7 +13,7 @@ This tutorial will guide you through integrating the Bee Agent Framework with th
 ### Prerequisites
 
 - [node.js](https://nodejs.org/) v18 or higher
-- [ollama](https://ollama.com/) with `phi4` model (ensure the model is pulled in advance)
+- [ollama](https://ollama.com/) with `llama3.1` model (ensure the model is pulled in advance)
 
 ### Setup
 
