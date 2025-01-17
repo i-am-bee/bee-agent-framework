@@ -19,3 +19,7 @@
   - [Logger](logger.md)
   - [Version](version.md)
   - [Error Handling](errors.md)
+
+- Others
+
+  - [Integrations](integrations.md)
