@@ -187,10 +187,6 @@ The source directory (`src`) provides numerous modules that one can use.
 
 To see more in-depth explanation see [overview](/docs/overview.md).
 
-## Tutorials
-
-🚧 Coming soon 🚧
-
 ## Roadmap
 
 - Bee agent performance optimization with additional models
