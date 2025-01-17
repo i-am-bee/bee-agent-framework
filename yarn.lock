@@ -2062,6 +2062,55 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@langchain/langgraph-checkpoint@npm:~0.0.13":
+  version: 0.0.13
+  resolution: "@langchain/langgraph-checkpoint@npm:0.0.13"
+  dependencies:
+    uuid: "npm:^10.0.0"
+  peerDependencies:
+    "@langchain/core": ">=0.2.31 <0.4.0"
+  checksum: 10c0/32ca419c76d7e5110230cfc23c2682e2207a862c763ac9a035c7d919a7e02286721dfec8ef03931b43f848943ba9125a1e09eccdbb00c74b06a0408bf6940391
+  languageName: node
+  linkType: hard
+
+"@langchain/langgraph-sdk@npm:~0.0.32":
+  version: 0.0.36
+  resolution: "@langchain/langgraph-sdk@npm:0.0.36"
+  dependencies:
+    "@types/json-schema": "npm:^7.0.15"
+    p-queue: "npm:^6.6.2"
+    p-retry: "npm:4"
+    uuid: "npm:^9.0.0"
+  checksum: 10c0/bf5cadb30c7940de66cb1c756350655826c75e8e89fc491d6c6487009968394a183b99c5b0c04a7752e4fe6f98c3317cbb52dd99afdf09dc05afd455bee05dd7
+  languageName: node
+  linkType: hard
+
+"@langchain/langgraph@npm:^0.2.39":
+  version: 0.2.39
+  resolution: "@langchain/langgraph@npm:0.2.39"
+  dependencies:
+    "@langchain/langgraph-checkpoint": "npm:~0.0.13"
+    "@langchain/langgraph-sdk": "npm:~0.0.32"
+    uuid: "npm:^10.0.0"
+    zod: "npm:^3.23.8"
+  peerDependencies:
+    "@langchain/core": ">=0.2.36 <0.3.0 || >=0.3.9 < 0.4.0"
+  checksum: 10c0/1b6e7774efc929d182b0c19fcc43eb573a9ea0fc7b37d92d9894e186b51290b27a01b0e98f9e406e256271e6b46d16926b83fcfe4de1f045cf8913111d1dcd65
+  languageName: node
+  linkType: hard
+
+"@langchain/ollama@npm:^0.1.4":
+  version: 0.1.4
+  resolution: "@langchain/ollama@npm:0.1.4"
+  dependencies:
+    ollama: "npm:^0.5.9"
+    uuid: "npm:^10.0.0"
+  peerDependencies:
+    "@langchain/core": ">=0.2.21 <0.4.0"
+  checksum: 10c0/713fadb9785255aac8354a92942922294129c590c31a44a843fcf9cd09bd99bef168bbd7a8bfd4bae75af21a2148711b2c7ba0a155864008c6cfd97b31d87185
+  languageName: node
+  linkType: hard
+
 "@langchain/openai@npm:>=0.1.0 <0.4.0, @langchain/openai@npm:>=0.2.0 <0.4.0":
   version: 0.3.11
   resolution: "@langchain/openai@npm:0.3.11"
@@ -4851,6 +4900,8 @@ __metadata:
     "@grpc/proto-loader": "npm:^0.7.13"
     "@langchain/community": "npm:~0.3.17"
     "@langchain/core": "npm:~0.3.22"
+    "@langchain/langgraph": "npm:^0.2.39"
+    "@langchain/ollama": "npm:^0.1.4"
     "@modelcontextprotocol/sdk": "npm:^1.0.4"
     "@opentelemetry/api": "npm:^1.9.0"
     "@opentelemetry/instrumentation": "npm:^0.56.0"
@@ -10952,6 +11003,15 @@ __metadata:
   dependencies:
     whatwg-fetch: "npm:^3.6.20"
   checksum: 10c0/9f8bb6715144fac2d423121f29bf7697e3c2132c6696574e2f2de63de8dfa95ac3ed435f3abf35cece6ef07c309065cbf722cead1bee1eda3541b095745f64bf
+  languageName: node
+  linkType: hard
+
+"ollama@npm:^0.5.9":
+  version: 0.5.12
+  resolution: "ollama@npm:0.5.12"
+  dependencies:
+    whatwg-fetch: "npm:^3.6.20"
+  checksum: 10c0/09944a14b6bd3a92f219ff635b33b14fb4e4095f04208ed9a25d6aceacd63ee9a95b13e2950d162842954c8cd83ec51dc782b4674460f83fb042e045727337b3
   languageName: node
   linkType: hard
 

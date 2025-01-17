@@ -280,6 +280,8 @@
     "@grpc/proto-loader": "^0.7.13",
     "@langchain/community": "~0.3.17",
     "@langchain/core": "~0.3.22",
+    "@langchain/langgraph": "^0.2.39",
+    "@langchain/ollama": "^0.1.4",
     "@modelcontextprotocol/sdk": "^1.0.4",
     "@opentelemetry/instrumentation": "^0.56.0",
     "@opentelemetry/resources": "^1.29.0",
