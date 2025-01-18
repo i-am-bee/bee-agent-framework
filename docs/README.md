@@ -189,10 +189,9 @@ To see more in-depth explanation see [overview](/docs/overview.md).
 
 ## Roadmap
 
-- Bee agent performance optimization with additional models
-- Examples, tutorials, and docs
-- Improvements to building custom agents
-- Multi-agent orchestration
+- Python version
+- Multi-agent orchestration patterns
+- Catalog of agents
 
 ## Contribution guidelines
 
