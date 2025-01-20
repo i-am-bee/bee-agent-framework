@@ -43,6 +43,8 @@ const exclude: string[] = [
   !getEnv("WATSONX_API_KEY") && [
     "examples/llms/text.ts",
     "examples/llms/providers/watson*.ts",
+    "examples/agents/experimental/replan.ts",
+    "examples/agents/experimental/streamlit.ts",
     "examples/agents/granite/*.ts",
     "examples/agents/granite/single_turn.ts",
   ],

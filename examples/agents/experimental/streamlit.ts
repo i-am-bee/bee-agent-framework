@@ -3,9 +3,12 @@ import { FrameworkError } from "bee-agent-framework/errors";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { StreamlitAgent } from "bee-agent-framework/agents/experimental/streamlit/agent";
-import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
+import { WatsonXChatLLM } from "bee-agent-framework/adapters/watsonx/chat";
 
-const llm = new GroqChatLLM();
+const llm = WatsonXChatLLM.fromPreset("meta-llama/llama-3-3-70b-instruct", {
+  apiKey: process.env.WATSONX_API_KEY,
+  projectId: process.env.WATSONX_PROJECT_ID,
+});
 
 const agent = new StreamlitAgent({
   llm,
