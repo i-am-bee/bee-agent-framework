@@ -426,8 +426,10 @@ const customTool = await CustomTool.fromSourceCode(
   {
     // Ensure the env exists
     url: process.env.CODE_INTERPRETER_URL!,
+    env: { API_URL: "https://riddles-api.vercel.app/random" },
   },
   `import requests
+import os
 from typing import Optional, Union, Dict
 
 def get_riddle() -> Optional[Dict[str, str]]:
@@ -442,7 +444,7 @@ def get_riddle() -> Optional[Dict[str, str]]:
           - 'answer' (str): The answer to the riddle.
       Returns None if the request fails.
   """
-  url = 'https://riddles-api.vercel.app/random'
+  url = os.environ.get('API_URL')
   
   try:
       response = requests.get(url)
@@ -454,6 +456,14 @@ def get_riddle() -> Optional[Dict[str, str]]:
 ```
 
 _Source: [examples/tools/custom/python.ts](/examples/tools/custom/python.ts)_
+
+> [!TIP]
+>
+> Environmental variables can be overridden (or defined) in the following ways:
+>
+> 1. During the creation of a `CustomTool`, either via the constructor or the factory function (`CustomTool.fromSourceCode`).
+> 2. By passing them directly as part of the options when invoking: `myTool.run({ ... }, { env: { MY_ENV: 'MY_VALUE' } })`.
+> 3. Dynamically during execution via [`Emitter`](/docs/emitter.md): `myTool.emitter.on("start", ({ options }) => { options.env.MY_ENV = 'MY_VALUE'; })`.
 
 > [!IMPORTANT]
 >

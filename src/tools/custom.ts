@@ -29,6 +29,8 @@ import { callCodeInterpreter, CodeInterpreterOptions } from "./python/python.js"
 import { RunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { ToolError } from "@/tools/base.js";
+import { merge } from "remeda";
+import { omitUndefined } from "@/internals/helpers/object.js";
 
 export class CustomToolCreateError extends FrameworkError {}
 export class CustomToolExecuteError extends FrameworkError {}
@@ -46,9 +48,14 @@ const toolOptionsSchema = z
   })
   .passthrough();
 
-export type CustomToolOptions = z.output<typeof toolOptionsSchema> & BaseToolOptions;
+type CustomToolEnv = Record<string, string | boolean | null | undefined | number>;
 
-export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
+export type CustomToolOptions = z.output<typeof toolOptionsSchema> &
+  BaseToolOptions & { env?: CustomToolEnv };
+
+export type CustomToolRunOptions = Pick<CustomToolOptions, "env"> & BaseToolRunOptions;
+
+export class CustomTool extends Tool<StringToolOutput, CustomToolOptions, CustomToolRunOptions> {
   name: string;
   description: string;
 
@@ -74,7 +81,7 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
 
   protected async _run(
     input: any,
-    _options: Partial<BaseToolRunOptions>,
+    options: Partial<CustomToolRunOptions>,
     run: RunContext<typeof this>,
   ) {
     try {
@@ -83,6 +90,7 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
         body: {
           tool_source_code: this.options.sourceCode,
           tool_input_json: JSON.stringify(input),
+          env: merge(omitUndefined(this.options.env ?? {}), omitUndefined(options.env ?? {})),
         },
         signal: run.signal,
       });
@@ -105,7 +113,10 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
     super.loadSnapshot(snapshot);
   }
 
-  static async fromSourceCode(codeInterpreter: CodeInterpreterOptions, sourceCode: string) {
+  static async fromSourceCode(
+    { env, ...codeInterpreter }: CodeInterpreterOptions & Pick<CustomToolOptions, "env">,
+    sourceCode: string,
+  ) {
     try {
       const result = await callCodeInterpreter({
         url: `${codeInterpreter.url}/v1/parse-custom-tool`,
@@ -124,6 +135,7 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions> {
         name: result.tool_name,
         description: result.tool_description,
         inputSchema: JSON.parse(result.tool_input_schema_json),
+        env,
       });
     } catch (e) {
       if (e instanceof ToolError) {
