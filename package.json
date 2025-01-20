@@ -142,7 +142,7 @@
     "ts:check": "tsc --noEmit && tsc -p tsconfig.examples.json --noEmit",
     "start": "tsx --tsconfig tsconfig.examples.json",
     "start:bee": "yarn start -- examples/agents/bee.ts",
-    "start:telemetry": "BEE_FRAMEWORK_INSTRUMENTATION_ENABLED=true yarn start --import ./examples/helpers/telemetry.ts",
+    "start:telemetry": "BEE_FRAMEWORK_INSTRUMENTATION_ENABLED=true yarn start --import ./examples/helpers/telemetry.js",
     "docs:build": "embedme --source-root=. docs/**/*.md && cp *.md docs/ && cp examples/README.md docs/examples.md && yarn lint:fix docs/ && yarn prettier --write docs/",
     "docs:check": "embedme --source-root=. docs/**/*.md --verify",
     "docs:links": "linkinator . --timeout=10000 --retry --markdown --directory-listing --skip node_modules --skip CHANGELOG.md --skip docs/CHANGELOG.md --skip \"https://ai.meta.com/blog/meta-llama-3-1/\" --include",
