@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.58](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.57...v0.0.58) (2025-01-20)
+
+### Features
+
+- **adapters:** allow passing client options for OpenAI and AzureOpenAI ([bdaa49a](https://github.com/i-am-bee/bee-agent-framework/commit/bdaa49afcfdbf688899c1784c8f152e81e7fa7a7))
+- **adapters:** unify envs naming for Azure ([0eb4448](https://github.com/i-am-bee/bee-agent-framework/commit/0eb44484b183994c33a071dccaae130cd2415e6f))
+- **tools:** add env support for CustomTool ([867fcac](https://github.com/i-am-bee/bee-agent-framework/commit/867fcac99b1c2ebb16c759c2a7345b45e70d4513)), closes [#225](https://github.com/i-am-bee/bee-agent-framework/issues/225)
+
+### Bug Fixes
+
+- **instrumentation:** example script ([91bfdcb](https://github.com/i-am-bee/bee-agent-framework/commit/91bfdcb3fecec481207bb53ca01c9444729a66f1))
+
 ## [0.0.57](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.56...v0.0.57) (2025-01-13)
 
 ### ⚠ BREAKING CHANGES
