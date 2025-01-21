@@ -5,8 +5,10 @@ const customTool = await CustomTool.fromSourceCode(
   {
     // Ensure the env exists
     url: process.env.CODE_INTERPRETER_URL!,
+    env: { API_URL: "https://riddles-api.vercel.app/random" },
   },
   `import requests
+import os
 from typing import Optional, Union, Dict
 
 def get_riddle() -> Optional[Dict[str, str]]:
@@ -21,7 +23,7 @@ def get_riddle() -> Optional[Dict[str, str]]:
           - 'answer' (str): The answer to the riddle.
       Returns None if the request fails.
   """
-  url = 'https://riddles-api.vercel.app/random'
+  url = os.environ.get('API_URL')
   
   try:
       response = requests.get(url)

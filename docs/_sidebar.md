@@ -3,6 +3,7 @@
   - [Home](/)
   - [Overview](overview.md)
   - [Examples](examples.md)
+  - [Tutorials](tutorials.md)
   - [Changelog](CHANGELOG.md)
 
 - Modules

@@ -10,12 +10,14 @@ import {
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { z } from "zod";
-import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 
 Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
-const llm = new GroqChatLLM();
+const llm = new OllamaChatLLM({
+  modelId: "llama3.1", // llama3.1:70b for better performance
+});
 
 const agent = new BeeAgent({
   llm,
