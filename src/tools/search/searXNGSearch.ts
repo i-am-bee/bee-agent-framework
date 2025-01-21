@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ToolEmitter, Tool, ToolInput, BaseToolRunOptions } from "@/tools/base.js";
+import { ToolEmitter, Tool, ToolInput } from "@/tools/base.js";
 import { z } from "zod";
 import { Emitter } from "@/emitter/emitter.js";
 import { createURLParams } from "@/internals/fetcher.js";
@@ -26,21 +26,18 @@ import {
   SearchToolRunOptions,
 } from "@/tools/search/base.js";
 import { ValidationError } from "ajv";
+import { parseEnv } from "@/internals/env.js";
 
-export interface SearxngToolOptions extends SearchToolOptions {
+export interface SearXNGToolOptions extends SearchToolOptions {
   baseUrl?: string;
   maxResults: number;
 }
 
-type SearxngToolRunOptions = SearchToolRunOptions;
+type SearXNGToolRunOptions = SearchToolRunOptions;
 
-export interface SearxngToolResult extends SearchToolResult {}
+export interface SearXNGToolResult extends SearchToolResult {}
 
-export class SearxngToolOutput extends SearchToolOutput<SearxngToolResult> {
-  constructor(public readonly results: SearxngToolResult[]) {
-    super(results);
-  }
-
+export class SearXNGToolOutput extends SearchToolOutput<SearXNGToolResult> {
   static {
     this.register();
   }
@@ -56,16 +53,16 @@ export class SearxngToolOutput extends SearchToolOutput<SearxngToolResult> {
   }
 }
 
-export class SearxngTool extends Tool<
-  SearxngToolOutput,
-  SearxngToolOptions,
-  SearxngToolRunOptions
+export class SearXNGTool extends Tool<
+  SearXNGToolOutput,
+  SearXNGToolOptions,
+  SearXNGToolRunOptions
 > {
   name = "Web Search";
   description = `Search for online trends, news, current events, real-time information, or research topics.`;
 
-  public readonly emitter: ToolEmitter<ToolInput<this>, SearxngToolOutput> = Emitter.root.child({
-    namespace: ["tool", "web", "search"],
+  public readonly emitter: ToolEmitter<ToolInput<this>, SearXNGToolOutput> = Emitter.root.child({
+    namespace: ["tool", "search", "searXNG"],
     creator: this,
   });
 
@@ -77,9 +74,9 @@ export class SearxngTool extends Tool<
 
   protected baseUrl: string;
 
-  public constructor(options: SearxngToolOptions = { maxResults: 10 }) {
+  public constructor(options: SearXNGToolOptions = { maxResults: 10 }) {
     super(options);
-    this.baseUrl = options.baseUrl || "http://127.0.0.1:8888/search";
+    this.baseUrl = options.baseUrl || parseEnv("SEARXNG_BASE_URL", z.string());
 
     if (options.maxResults < 1 || options.maxResults > 100) {
       throw new ValidationError([
@@ -91,36 +88,39 @@ export class SearxngTool extends Tool<
     }
   }
 
-  protected _prepareParams(input: ToolInput<typeof this>) {
-    return createURLParams({
-      q: input.query,
-      format: "json",
-    });
-  }
-
   protected async _run(
     input: ToolInput<this>,
-    _options: Partial<BaseToolRunOptions>,
+    _options: Partial<SearchToolRunOptions>,
     run: RunContext<this>,
   ) {
-    const params = this._prepareParams(input);
+    const params: URLSearchParams = ((input: ToolInput<this>) => {
+      return createURLParams({
+        q: input.query,
+        format: "json",
+      });
+    })(input);
+
     const url = `${this.baseUrl}?${decodeURIComponent(params.toString())}`;
     const response = await fetch(url, {
       signal: run.signal,
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      throw new Error(
+        `The service request was unsuccessful. Code ${response.status} ${response.statusText}." `,
+      );
     }
 
     const data = await response.json();
 
-    return new SearxngToolOutput(
-      data.results.map((result: { url: string; title: string; content: string }) => ({
-        url: result.url || "",
-        title: result.title || "",
-        description: result.content || "",
-      })),
+    return new SearXNGToolOutput(
+      data.results
+        .slice(0, this.options.maxResults)
+        .map((result: { url: string; title: string; content: string }) => ({
+          url: result.url || "",
+          title: result.title || "",
+          description: result.content || "",
+        })),
     );
   }
 
