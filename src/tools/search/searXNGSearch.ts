@@ -72,11 +72,8 @@ export class SearXNGTool extends Tool<
     });
   }
 
-  protected baseUrl: string;
-
   public constructor(options: SearXNGToolOptions = { maxResults: 10 }) {
     super(options);
-    this.baseUrl = options.baseUrl || parseEnv("SEARXNG_BASE_URL", z.string());
 
     if (options.maxResults < 1 || options.maxResults > 100) {
       throw new ValidationError([
@@ -100,7 +97,8 @@ export class SearXNGTool extends Tool<
       });
     })(input);
 
-    const url = `${this.baseUrl}?${decodeURIComponent(params.toString())}`;
+    const baseUrl = this.options.baseUrl || parseEnv("SEARXNG_BASE_URL", z.string());
+    const url = `${baseUrl}?${decodeURIComponent(params.toString())}`;
     const response = await fetch(url, {
       signal: run.signal,
     });
@@ -122,19 +120,5 @@ export class SearXNGTool extends Tool<
           description: result.content || "",
         })),
     );
-  }
-
-  createSnapshot() {
-    return {
-      ...super.createSnapshot(),
-      baseUrl: this.baseUrl,
-    };
-  }
-
-  loadSnapshot({ baseUrl, ...snapshot }: ReturnType<typeof this.createSnapshot>) {
-    super.loadSnapshot(snapshot);
-    Object.assign(this, {
-      baseUrl,
-    });
   }
 }
