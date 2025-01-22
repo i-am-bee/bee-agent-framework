@@ -61,10 +61,11 @@ export class SearXNGTool extends Tool<
   name = "Web Search";
   description = `Search for online trends, news, current events, real-time information, or research topics.`;
 
-  public readonly emitter: ToolEmitter<ToolInput<this>, SearXNGToolOutput> = Emitter.root.child({
-    namespace: ["tool", "search", "searXNG"],
-    creator: this,
-  });
+  public readonly emitter: ToolEmitter<ToolInput<this>, SearchToolOutput<SearXNGToolResult>> =
+    Emitter.root.child({
+      namespace: ["tool", "search", "searXNG"],
+      creator: this,
+    });
 
   inputSchema() {
     return z.object({
@@ -90,12 +91,10 @@ export class SearXNGTool extends Tool<
     _options: Partial<SearchToolRunOptions>,
     run: RunContext<this>,
   ) {
-    const params: URLSearchParams = ((input: ToolInput<this>) => {
-      return createURLParams({
-        q: input.query,
-        format: "json",
-      });
-    })(input);
+    const params = createURLParams({
+      q: input.query,
+      format: "json",
+    });
 
     const baseUrl = this.options.baseUrl || parseEnv("SEARXNG_BASE_URL", z.string());
     const url = `${baseUrl}?${decodeURIComponent(params.toString())}`;
@@ -104,9 +103,7 @@ export class SearXNGTool extends Tool<
     });
 
     if (!response.ok) {
-      throw new Error(
-        `The service request was unsuccessful. Code ${response.status} ${response.statusText}." `,
-      );
+      throw new Error(await response.text());
     }
 
     const data = await response.json();
