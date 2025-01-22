@@ -164,10 +164,12 @@
     "copyright:check": "TYPE=check ./scripts/copyright.sh",
     "release": "release-it",
     "ibm-vllm:generate-types": "./scripts/ibm_vllm_generate_protos/ibm_vllm_generate_protos.sh",
-    "_ensure_env": "cp -n .env.template .env || true"
+    "_ensure_env": "cp -n .env.template .env || true",
+    "server:run": "yarn start src/server/server.ts"
   },
   "dependencies": {
     "@ai-zen/node-fetch-event-source": "^2.1.4",
+    "@modelcontextprotocol/sdk": "https://github.com/i-am-bee/mcp-typescript-sdk.git",
     "@opentelemetry/api": "^1.9.0",
     "@streamparser/json": "^0.0.21",
     "ajv": "^8.17.1",
@@ -193,7 +195,7 @@
     "turndown": "^7.2.0",
     "wikipedia": "^2.1.2",
     "zod": "^3.23.8",
-    "zod-to-json-schema": "^3.23.5"
+    "zod-to-json-schema": "^3.24.1"
   },
   "peerDependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.687.0",
@@ -204,7 +206,6 @@
     "@grpc/proto-loader": "^0.7.13",
     "@langchain/community": ">=0.2.28",
     "@langchain/core": ">=0.2.27",
-    "@modelcontextprotocol/sdk": "^1.0.4",
     "@zilliz/milvus2-sdk-node": "^2.4.9",
     "google-auth-library": "*",
     "groq-sdk": "^0.7.0",
@@ -237,9 +238,6 @@
       "optional": true
     },
     "@langchain/core": {
-      "optional": true
-    },
-    "@modelcontextprotocol/sdk": {
       "optional": true
     },
     "@zilliz/milvus2-sdk-node": {
@@ -282,7 +280,6 @@
     "@langchain/core": "~0.3.22",
     "@langchain/langgraph": "^0.2.39",
     "@langchain/ollama": "^0.1.4",
-    "@modelcontextprotocol/sdk": "^1.0.4",
     "@opentelemetry/instrumentation": "^0.56.0",
     "@opentelemetry/resources": "^1.29.0",
     "@opentelemetry/sdk-node": "^0.56.0",
@@ -338,5 +335,8 @@
     "vite-tsconfig-paths": "^5.1.3",
     "vitest": "^2.1.8",
     "yaml": "^2.6.1"
+  },
+  "resolutions": {
+    "@modelcontextprotocol/sdk": "portal:/Users/tom/Development/bee/mcp-typescript-sdk"
   }
 }

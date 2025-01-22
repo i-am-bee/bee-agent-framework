@@ -2143,16 +2143,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@modelcontextprotocol/sdk@npm:^1.0.4":
-  version: 1.1.0
-  resolution: "@modelcontextprotocol/sdk@npm:1.1.0"
+"@modelcontextprotocol/sdk@portal:/Users/tom/Development/bee/mcp-typescript-sdk::locator=bee-agent-framework%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@modelcontextprotocol/sdk@portal:/Users/tom/Development/bee/mcp-typescript-sdk::locator=bee-agent-framework%40workspace%3A."
   dependencies:
     content-type: "npm:^1.0.5"
     raw-body: "npm:^3.0.0"
     zod: "npm:^3.23.8"
-  checksum: 10c0/1f80a2139a09cb0e7c6af75d7fe57373a554a9d30be54ee093d49dce5ea1266cc0b624a687017b99248c851f125845387897811360abed22d0d57998935ce04a
+    zod-to-json-schema: "npm:^3.24.1"
   languageName: node
-  linkType: hard
+  linkType: soft
 
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
@@ -4902,7 +4902,7 @@ __metadata:
     "@langchain/core": "npm:~0.3.22"
     "@langchain/langgraph": "npm:^0.2.39"
     "@langchain/ollama": "npm:^0.1.4"
-    "@modelcontextprotocol/sdk": "npm:^1.0.4"
+    "@modelcontextprotocol/sdk": "https://github.com/i-am-bee/mcp-typescript-sdk.git"
     "@opentelemetry/api": "npm:^1.9.0"
     "@opentelemetry/instrumentation": "npm:^0.56.0"
     "@opentelemetry/resources": "npm:^1.29.0"
@@ -4983,7 +4983,7 @@ __metadata:
     wikipedia: "npm:^2.1.2"
     yaml: "npm:^2.6.1"
     zod: "npm:^3.23.8"
-    zod-to-json-schema: "npm:^3.23.5"
+    zod-to-json-schema: "npm:^3.24.1"
   peerDependencies:
     "@aws-sdk/client-bedrock-runtime": ^3.687.0
     "@elastic/elasticsearch": ^8.0.0
@@ -4993,7 +4993,6 @@ __metadata:
     "@grpc/proto-loader": ^0.7.13
     "@langchain/community": ">=0.2.28"
     "@langchain/core": ">=0.2.27"
-    "@modelcontextprotocol/sdk": ^1.0.4
     "@zilliz/milvus2-sdk-node": ^2.4.9
     google-auth-library: "*"
     groq-sdk: ^0.7.0
@@ -5018,8 +5017,6 @@ __metadata:
     "@langchain/community":
       optional: true
     "@langchain/core":
-      optional: true
-    "@modelcontextprotocol/sdk":
       optional: true
     "@zilliz/milvus2-sdk-node":
       optional: true
@@ -14768,21 +14765,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod-to-json-schema@npm:^3.22.3, zod-to-json-schema@npm:^3.22.5":
+"zod-to-json-schema@npm:^3.22.3, zod-to-json-schema@npm:^3.22.5, zod-to-json-schema@npm:^3.24.1":
   version: 3.24.1
   resolution: "zod-to-json-schema@npm:3.24.1"
   peerDependencies:
     zod: ^3.24.1
   checksum: 10c0/dd4e72085003e41a3f532bd00061f27041418a4eb176aa6ce33042db08d141bd37707017ee9117d97738ae3f22fc3e1404ea44e6354634ac5da79d7d3173b4ee
-  languageName: node
-  linkType: hard
-
-"zod-to-json-schema@npm:^3.23.5":
-  version: 3.23.5
-  resolution: "zod-to-json-schema@npm:3.23.5"
-  peerDependencies:
-    zod: ^3.23.3
-  checksum: 10c0/bf50455f446c96b9a161476347ebab6e3bcae7fdf1376ce0b74248e79db733590164476dac2fc481a921868f705fefdcafd223a98203a700b3f01ba1cda6aa90
   languageName: node
   linkType: hard
 
