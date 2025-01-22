@@ -16,6 +16,7 @@ These tools extend the agent's abilities, allowing it to interact with external 
 | `WikipediaTool`                                                           | Search for data on Wikipedia.                                                                                 |
 | `GoogleSearchTool`                                                        | Search for data on Google using Custom Search Engine.                                                         |
 | `DuckDuckGoTool`                                                          | Search for data on DuckDuckGo.                                                                                |
+| [`SearXNGTool`](./searxng-tool.md)                                        | Privacy-respecting, hackable metasearch engine.                                                               |
 | [`SQLTool`](./sql-tool.md)                                                | Execute SQL queries against relational databases.                                                             |
 | `ElasticSearchTool`                                                       | Perform search or aggregation queries against an ElasticSearch database.                                      |
 | `CustomTool`                                                              | Run your own Python function in the remote environment.                                                       |
