@@ -1,2 +1,8 @@
 yarn lint-staged
+
+MD_FILES=$(git diff --cached --name-only | grep -E '^docs/.+\.md$' | tr '\n' ' ')
+if [ -n "$MD_FILES" ]; then
+    yarn docs:links -- $MD_FILES
+fi
+
 CI=true yarn copyright:check && yarn docs:check && yarn lint && yarn format && yarn ts:check && yarn run test:unit
