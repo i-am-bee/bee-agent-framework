@@ -48,8 +48,7 @@
   "lint-staged": {
     "{src,tests,scripts}/**/*": "yarn copyright",
     "*": "prettier --ignore-unknown --write",
-    "*.{ts,js}": "eslint --fix",
-    "docs/**/*.md": "yarn docs:links"
+    "*.{ts,js}": "eslint --fix"
   },
   "prettier": {
     "printWidth": 100,
