@@ -24,7 +24,7 @@ describe("OpenAPITool", () => {
   // Assisted by WCA@IBM
   // Latest GenAI contribution: ibm/granite-20b-code-instruct-v2
 
-  const cat_spec =
+  const openApiSchema =
     '{\
     "openapi": "3.0.0",\
     "info": {\
@@ -75,9 +75,7 @@ describe("OpenAPITool", () => {
 
   beforeEach(() => {
     instance = new OpenAPITool({
-      name: "Cat Facts",
-      description: "A simple API for cat facts",
-      openApiSchema: cat_spec,
+      openApiSchema,
     });
   });
 

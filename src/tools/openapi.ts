@@ -29,19 +29,19 @@ import { GetRunContext } from "@/context.js";
 import { ValueError } from "@/errors.js";
 import { SchemaObject } from "ajv";
 import { parse } from "yaml";
-import { isEmpty } from "remeda";
+import { isEmpty, isTruthy, clone, toCamelCase } from "remeda";
 
 export interface OpenAPIToolOptions extends BaseToolOptions {
-  name: string;
+  name?: string;
   description?: string;
   openApiSchema: any;
-  apiKey?: string;
-  httpProxyUrl?: string;
+  url?: string;
+  fetchOptions?: RequestInit;
 }
 
 export interface OpenAPIEvents {
-  beforeFetch: Callback<{ url: URL }>;
-  afterFetch: Callback<{ data: OpenAPIToolOutput }>;
+  beforeFetch: Callback<{ options: RequestInit; url: URL }>;
+  afterFetch: Callback<{ data: OpenAPIToolOutput; url: URL }>;
 }
 
 export class OpenAPIToolOutput extends StringToolOutput {
@@ -58,14 +58,25 @@ export class OpenAPIToolOutput extends StringToolOutput {
 }
 
 export class OpenAPITool extends Tool<OpenAPIToolOutput, OpenAPIToolOptions> {
-  name = "OpenAPI";
-  description = `OpenAPI tool that performs REST API requests to the servers and retrieves the response. The server API interfaces are defined in OpenAPI schema. 
-Only use the OpenAPI tool if you need to communicate to external servers.`;
-  openApiSchema: any;
-  protected apiKey?: string;
-  protected httpProxyUrl?: string;
+  public readonly name: string;
+  public readonly description: string;
+  public readonly url: string;
+
+  public readonly openApiSchema: any;
 
   inputSchema(): SchemaObject {
+    const getReferencedObject = (json: any, refPath: string) => {
+      const pathSegments = refPath.split("/");
+      let currentObject = json;
+      for (const segment of pathSegments) {
+        if (segment === "#") {
+          continue;
+        }
+        currentObject = currentObject[segment];
+      }
+      return currentObject;
+    };
+
     return {
       type: "object",
       required: ["path", "method"],
@@ -93,10 +104,16 @@ Only use the OpenAPI tool if you need to communicate to external servers.`;
                       .filter((p: any) => p.required === true)
                       .map((p: any) => p.name),
                     properties: methodSpec.parameters.reduce(
-                      (acc: any, p: any) => ({
-                        ...acc,
-                        [p.name]: { ...p.schema, description: p.name },
-                      }),
+                      (acc: any, p: any) =>
+                        !p.$ref
+                          ? { ...acc, [p.name]: { ...p.schema, description: p.name } }
+                          : {
+                              ...acc,
+                              [getReferencedObject(this.openApiSchema, p.$ref)?.name]: {
+                                ...getReferencedObject(this.openApiSchema, p.$ref)?.schema,
+                                description: getReferencedObject(this.openApiSchema, p.$ref)?.name,
+                              },
+                            },
                       {},
                     ),
                   },
@@ -108,11 +125,7 @@ Only use the OpenAPI tool if you need to communicate to external servers.`;
     } as const satisfies SchemaObject;
   }
 
-  public readonly emitter: ToolEmitter<Record<string, any>, OpenAPIToolOutput, OpenAPIEvents> =
-    Emitter.root.child({
-      namespace: ["tool", "web", "openAPITool"],
-      creator: this,
-    });
+  public readonly emitter: ToolEmitter<Record<string, any>, OpenAPIToolOutput, OpenAPIEvents>;
 
   static {
     this.register();
@@ -120,9 +133,33 @@ Only use the OpenAPI tool if you need to communicate to external servers.`;
 
   public constructor(options: OpenAPIToolOptions) {
     super(options);
+
     this.openApiSchema = parse(options.openApiSchema);
-    if (!this.openApiSchema?.paths) {
-      throw new ValueError("Server is not specified!");
+
+    this.url = this.options.url || this.openApiSchema.servers?.find((s: any) => s?.url)?.url;
+    if (!this.url) {
+      throw new ValueError(
+        "OpenAPI schema hasn't any server with url specified. Pass it manually.",
+      );
+    }
+
+    this.name = options.name ?? this.openApiSchema?.info?.title?.trim();
+    if (!this.name) {
+      throw new ValueError("OpenAPI schema hasn't 'name' specified. Pass it manually.");
+    }
+    this.emitter = Emitter.root.child({
+      namespace: ["tool", "web", "openAPI", toCamelCase(this.name)],
+      creator: this,
+    });
+
+    this.description =
+      options.description ||
+      this.openApiSchema?.info?.description ||
+      "Performs REST API requests to the servers and retrieves the response. The server API interfaces are defined in OpenAPI schema. \n" +
+        "Only use the OpenAPI tool if you need to communicate to external servers.";
+
+    if (!this.description) {
+      throw new ValueError("OpenAPI schema hasn't 'description' specified. Pass it manually.");
     }
   }
 
@@ -132,7 +169,7 @@ Only use the OpenAPI tool if you need to communicate to external servers.`;
     run: GetRunContext<typeof this>,
   ) {
     let path: string = input.path || "";
-    const url = new URL(this.openApiSchema.servers[0].url);
+    const url = new URL(this.url);
     Object.keys(input.parameters ?? {}).forEach((key) => {
       const value = input.parameters[key];
       const newPath = path.replace(`{${key}}`, value);
@@ -143,22 +180,19 @@ Only use the OpenAPI tool if you need to communicate to external servers.`;
       }
     });
     url.pathname = join(url.pathname, path);
-    // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
-    const headers: { [key: string]: string } = { Accept: "application/json" };
-    if (this.apiKey) {
-      headers["Authorization"] = `Bearer ${this.apiKey}`;
-    }
-    await this.emitter.emit("beforeFetch", { url: url });
+    const options: RequestInit = {
+      ...this.options.fetchOptions,
+      signal: AbortSignal.any([run.signal, this.options.fetchOptions?.signal].filter(isTruthy)),
+      body: !isEmpty(input.body) ? input.body : undefined,
+      method: input.method.toLowerCase(),
+      headers: { Accept: "application/json", ...this.options.fetchOptions?.headers },
+    };
+    await run.emitter.emit("beforeFetch", { options: options, url: url });
     try {
-      const response = await fetch(url.toString(), {
-        body: !isEmpty(input.body) ? input.body : undefined,
-        method: input.method.toLowerCase(),
-        headers: headers,
-        signal: run.signal,
-      });
+      const response = await fetch(url.toString(), options);
       const text = await response.text();
       const output = new OpenAPIToolOutput(response.status, response.statusText, text);
-      await this.emitter.emit("afterFetch", { data: output });
+      await run.emitter.emit("afterFetch", { data: output, url });
       return output;
     } catch (err) {
       throw new ToolError(`Request to ${url} has failed.`, [err]);
@@ -167,9 +201,10 @@ Only use the OpenAPI tool if you need to communicate to external servers.`;
   createSnapshot() {
     return {
       ...super.createSnapshot(),
-      openApiSchema: this.openApiSchema,
-      apiKey: this.apiKey,
-      httpProxyUrl: this.httpProxyUrl,
+      openApiSchema: clone(this.openApiSchema),
+      name: this.name,
+      description: this.description,
+      url: this.url,
     };
   }
 }

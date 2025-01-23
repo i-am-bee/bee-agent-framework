@@ -16,7 +16,8 @@
 
 import { OpenAPITool } from "@/tools/openapi.js";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
-const cat_spec =
+
+const openApiSchema =
   '{\
     "openapi": "3.0.0",\
     "info": {\
@@ -65,18 +66,16 @@ const cat_spec =
     }\
   }';
 
-describe("Base Tool", () => {
+describe("OpenAPI Tool", () => {
   beforeEach(() => {
     vi.clearAllTimers();
   });
 
-  describe("OpenAPITool", () => {
-    it("Serializes", () => {
-      const tool = new OpenAPITool({ name: "OpenAPITool", openApiSchema: cat_spec });
+  it("Serializes", () => {
+    const tool = new OpenAPITool({ openApiSchema });
 
-      const serialized = tool.serialize();
-      const deserialized = OpenAPITool.fromSerialized(serialized);
-      verifyDeserialization(tool, deserialized);
-    });
+    const serialized = tool.serialize();
+    const deserialized = OpenAPITool.fromSerialized(serialized);
+    verifyDeserialization(tool, deserialized);
   });
 });
