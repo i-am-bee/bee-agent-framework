@@ -4,16 +4,23 @@ import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { OpenAPITool } from "bee-agent-framework/tools/openapi";
 import * as fs from "fs";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const spec = await fs.promises.readFile("./examples/tools/github_schema.json", "utf-8");
 const llm = new OllamaChatLLM({
   modelId: "llama3.1", // llama3.1:70b for better performance
 });
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const openApiSchema = await fs.promises.readFile(
+  `${__dirname}/assets/github_openapi.json`,
+  "utf-8",
+);
+
 const agent = new BeeAgent({
   llm,
   memory: new TokenMemory({ llm }),
-  tools: [new OpenAPITool({ openApiSchema: spec })],
+  tools: [new OpenAPITool({ openApiSchema })],
 });
 
 const response = await agent
