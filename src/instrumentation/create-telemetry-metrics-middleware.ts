@@ -20,6 +20,9 @@ import { buildModuleUsageMetric, isMeasurementedInstance } from "./opentelemetry
 import { GenerateCallbacks } from "@/llms/base.js";
 import { createFullPath } from "@/emitter/utils.js";
 import { metricReader } from "./sdk.js";
+import { startMetricNodeSdkReader } from "@/instrumentation/sdk.js";
+
+startMetricNodeSdkReader();
 
 export const activeTracesMap = new Map<string, string>();
 
