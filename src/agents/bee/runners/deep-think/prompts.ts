@@ -25,16 +25,30 @@ import {
 } from "@/agents/bee/prompts.js";
 
 export const DeepThinkBeeAssistantPrompt = BeeAssistantPrompt.fork((config) => {
-  config.template = `{{#thought}}<think>{{.}}</think>\n\n{{/thought}}{{#toolName}}Tool Name: {{.}}\n{{/toolName}}{{#toolInput}}Tool Input: {{.}}\n{{/toolInput}}{{#finalAnswer}}Final Answer: {{.}}{{/finalAnswer}}`;
+  config.template = `{{#thought}}<think>{{.}}</think>\n\n{{/thought}}{{#toolName}}Tool Name: {{.}}\n{{/toolName}}{{#toolInput}}Tool Input: {{.}}\n{{/toolInput}}{{#toolOutput}}Tool Output: {{.}}\n{{/toolOutput}}{{#finalAnswer}}Final Answer: {{.}}{{/finalAnswer}}`;
 });
 
 export const DeepThinkBeeSystemPrompt = BeeSystemPrompt.fork((config) => {
   config.defaults.instructions = "";
+  config.functions.formatDate = function () {
+    const date = this.createdAt ? new Date(this.createdAt) : new Date();
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "full",
+      timeStyle: "medium",
+    }).format(date);
+  };
   config.template = `You are an AI assistant.
 When the user sends a message figure out a solution and provide a final answer.
 {{#tools.length}}
 You have access to a set of tools that can be used to retrieve information and perform actions.
 Pay close attention to the tool description to determine if a tool is useful in a particular context.
+
+{{#tools}}
+Tool Name: {{name}}
+Tool Description: {{description}}
+Tool Parameters: {{schema}}
+
+{{/tools}}
 {{/tools.length}}
 
 # Communication structure

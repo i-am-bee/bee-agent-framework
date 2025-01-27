@@ -28,10 +28,8 @@ import {
 } from "@/agents/bee/runners/deep-think/prompts.js";
 import { BeeToolNoResultsPrompt, BeeUserEmptyPrompt } from "@/agents/bee/prompts.js";
 import { Cache } from "@/cache/decoratorCache.js";
-import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
-import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
+import { ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
-
 
 export class DeepThinkRunner extends DefaultRunner {
   @Cache({ enumerable: false })
@@ -55,76 +53,48 @@ export class DeepThinkRunner extends DefaultRunner {
   }
 
   protected createParser(tools: AnyTool[]) {
+    const { parser } = super.createParser(tools);
+
     const parserRegex = isEmpty(tools)
       ? new RegExp(`<think>.+?</think>\\n\\nFinal Answer: [\\s\\S]+`)
       : new RegExp(
           `<think>.+?</think>\\n\\n(?:Final Answer: [\\s\\S]+|Tool Name: (${tools.map((tool) => tool.name).join("|")})\\nTool Input: \\{.*\\})`,
-        )
-
-    const parser = new LinePrefixParser<any>(
-      {
-        thought: {
-          prefix: "<think>",
-          next: ["dummy_thought_end"],
-          isStart: true,
-          field: new ZodParserField(z.string().min(1).transform(s => s.trim())),
-        },
-        dummy_thought_end: {
-          prefix: "</think>",
-          next: ["tool_name", "final_answer"],
-          field: new ZodParserField(z.string().transform(_ => "")),
-        },
-        tool_name: {
-          prefix: "Tool Name:",
-          next: ["tool_input"],
-          field: new ZodParserField(
-            z.pipeline(
-              z.string().trim(),
-              z.enum(tools.map((tool) => tool.name) as [string, ...string[]]),
-            ),
-          ),
-        },
-        tool_input: {
-          prefix: "Tool Input:",
-          next: ["tool_output"],
-          isEnd: true,
-          field: new JSONParserField({
-            schema: z.object({}).passthrough(),
-            base: {},
-            matchPair: ["{", "}"],
-          }),
-        },
-        tool_output: {
-          prefix: "Tool Output:",
-          next: ["final_answer"],
-          isEnd: true,
-          field: new ZodParserField(z.string()),
-        },
-        final_answer: {
-          prefix: "Final Answer:",
-          next: [],
-          isStart: true,
-          isEnd: true,
-          field: new ZodParserField(z.string().min(1)),
-        },
-      },
-      {
-        waitForStartNode: true,
-        endOnRepeat: true,
-        lazyTransition: true,
-        fallback: (stash) =>
-          stash
-            ? [
-                { key: "thought", value: "I now know the final answer." },
-                { key: "final_answer", value: stash },
-              ]
-            : [],
-      },
-    );
+        );
 
     return {
-      parser,
       parserRegex,
+      parser: parser.fork((nodes, options) => ({
+        options: {
+          ...options,
+          // @ts-expect-error
+          silentNodes: [...(options?.silentNodes ?? []), "dummy_thought_end"],
+        },
+        nodes: {
+          ...nodes,
+          thought: {
+            ...nodes.thought,
+            prefix: "<think>",
+            // @ts-expect-error
+            next: ["dummy_thought_end"] as const,
+            isStart: true,
+            field: new ZodParserField(z.string().min(1)),
+          },
+          dummy_thought_end: {
+            prefix: "</think>",
+            isDummy: true,
+            next: ["tool_name", "final_answer"],
+            field: new ZodParserField(z.string().transform((_) => "")),
+          },
+          tool_name: { ...nodes.tool_name, prefix: "Tool Name:" },
+          tool_input: {
+            ...nodes.tool_input,
+            prefix: "Tool Input:",
+            isEnd: true,
+            next: [],
+          },
+          tool_output: { ...nodes.tool_name, prefix: "Tool Output:" },
+        },
+      })),
     } as const;
   }
 }
