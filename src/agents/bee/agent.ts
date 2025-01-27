@@ -34,6 +34,7 @@ import { assign } from "@/internals/helpers/object.js";
 import * as R from "remeda";
 import { BaseRunner } from "@/agents/bee/runners/base.js";
 import { GraniteRunner } from "@/agents/bee/runners/granite/runner.js";
+import { DeepThinkRunner } from "@/agents/bee/runners/deep-think/runner.js";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import { ValueError } from "@/errors.js";
 
@@ -72,7 +73,11 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       );
     }
 
-    this.runner = this.input.llm.modelId.includes("granite") ? GraniteRunner : DefaultRunner;
+    this.runner = this.input.llm.modelId.includes("granite")
+      ? GraniteRunner
+      : this.input.llm.modelId.includes("DeepSeek-R1")
+        ? DeepThinkRunner
+        : DefaultRunner;
   }
 
   static {

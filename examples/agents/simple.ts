@@ -5,7 +5,10 @@ import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckG
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
-const llm = new OllamaChatLLM();
+const llm = new OllamaChatLLM({
+  modelId: "hf.co/unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF:Q4_K_M",
+});
+
 const agent = new BeeAgent({
   llm,
   memory: new TokenMemory({ llm }),

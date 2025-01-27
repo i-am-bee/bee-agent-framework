@@ -88,6 +88,7 @@ interface Options<T extends NonNullable<unknown>> {
   fallback?: (value: string) => readonly { key: StringKey<T>; value: string }[];
   endOnRepeat?: boolean;
   waitForStartNode?: boolean;
+  lazyTransition?: boolean;
 }
 
 type Input<K extends string = string> = Record<string, ParserNode<K, ParserField<any, any>>>;
@@ -184,7 +185,11 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
       }
       this.lines.shift();
 
-      if (parsedLine && !parsedLine.partial) {
+      if (
+        parsedLine &&
+        !parsedLine.partial &&
+        (!lastNode || (this.options.lazyTransition && lastNode.next.includes(parsedLine.key)))
+      ) {
         if (lastNode) {
           if (!lastNode.next.includes(parsedLine.key)) {
             if (parsedLine.key in this.finalState && this.options.endOnRepeat && lastNode.isEnd) {
