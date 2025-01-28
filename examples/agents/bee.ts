@@ -16,9 +16,10 @@ import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
-const llm = new OllamaChatLLM({
-  modelId: "llama3.1", // llama3.1:70b for better performance
-});
+// Other models to try:
+// "llama3.1:70b"
+// "deepseek-r1:32b"
+const llm = new OllamaChatLLM({ modelId: "llama3.1:8b" });
 
 const codeInterpreterUrl = process.env.CODE_INTERPRETER_URL;
 const __dirname = dirname(fileURLToPath(import.meta.url));

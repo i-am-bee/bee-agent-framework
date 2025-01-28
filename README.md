@@ -13,6 +13,7 @@
 
 ## Latest updates
 
+- 🧠 **2025-01-29**: Added support for [DeepSeek R1](https://api-docs.deepseek.com/news/news250120)
 - 🚀 **2025-01-09**:
   - Introduced [Workflows](/docs/workflows.md), a way of building multi-agent systems.
   - Added support for [Model Context Protocol](https://i-am-bee.github.io/bee-agent-framework/#/tools?id=using-the-mcptool-class), featured on the [official page](https://modelcontextprotocol.io/clients#bee-agent-framework).
