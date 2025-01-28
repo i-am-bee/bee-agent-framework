@@ -88,6 +88,7 @@ interface Options<T extends NonNullable<unknown>> {
   fallback?: (value: string) => readonly { key: StringKey<T>; value: string }[];
   endOnRepeat?: boolean;
   waitForStartNode?: boolean;
+  silentNodes?: StringKey<T>[];
 }
 
 type Input<K extends string = string> = Record<string, ParserNode<K, ParserField<any, any>>>;
@@ -327,7 +328,9 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
       this.partialState[data.key] = "";
     }
     this.partialState[data.key] += data.delta;
-    await this.emitter.emit("partialUpdate", data);
+    if (!this.options.silentNodes?.includes(data.key)) {
+      await this.emitter.emit("partialUpdate", data);
+    }
   }
 
   protected async emitFinalUpdate(key: StringKey<T>, field: ParserField<any, any>) {
@@ -341,11 +344,13 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
     try {
       const value = field.get();
       this.finalState[key] = value;
-      await this.emitter.emit("update", {
-        key,
-        field,
-        value,
-      });
+      if (!this.options.silentNodes?.includes(key)) {
+        await this.emitter.emit("update", {
+          key,
+          field,
+          value,
+        });
+      }
     } catch (e) {
       if (e instanceof ZodError) {
         this.throwWithContext(
