@@ -73,11 +73,11 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       );
     }
 
-    this.runner = this.input.llm.modelId.includes("granite")
-      ? GraniteRunner
-      : this.input.llm.modelId.includes("DeepSeek-R1")
-        ? DeepThinkRunner
-        : DefaultRunner;
+    this.runner = [
+      { tag: "granite", runner: GraniteRunner },
+      { tag: "deepseek-r1", runner: DeepThinkRunner },
+      { tag: "", runner: DefaultRunner },
+    ].filter(({ tag }) => this.input.llm.modelId.toLowerCase().includes(tag))[0].runner
   }
 
   static {
