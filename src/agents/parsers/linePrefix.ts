@@ -431,7 +431,7 @@ export namespace LinePrefixParser {
   export type inferPartialOutput<T> =
     T extends LinePrefixParser<infer P> ? LinePrefixParser.inferPartial<P> : never;
 
-  export type define<T extends Record<string, ParserField<any, any>>, T2 extends string = never> = {
-    [K in StringKey<T>]: ParserNode<StringKey<T> | T2, T[K]>;
+  export type define<T extends Record<string, ParserField<any, any>>> = {
+    [K in StringKey<T>]: ParserNode<StringKey<T>, T[K]>;
   };
 }

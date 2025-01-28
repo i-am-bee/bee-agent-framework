@@ -30,10 +30,10 @@ import { BeeToolNoResultsPrompt, BeeUserEmptyPrompt } from "@/agents/bee/prompts
 import { Cache } from "@/cache/decoratorCache.js";
 import { ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
-import type { GetRunContext } from "dist/context.js";
 import { BeeInput, BeeAgent } from "@/agents/bee/agent.js";
 import { BeeRunOptions } from "@/agents/bee/types.js";
 import { BaseMessage } from "@/llms/primitives/message.js";
+import { GetRunContext } from "@/context.js";
 
 export class DeepThinkRunner extends DefaultRunner {
   @Cache({ enumerable: false })
@@ -53,17 +53,14 @@ export class DeepThinkRunner extends DefaultRunner {
   }
 
   static {
-    // @ts-expect-error
     this.register();
   }
 
   constructor(input: BeeInput, options: BeeRunOptions, run: GetRunContext<BeeAgent>) {
     super(input, options, run);
 
-    // @ts-expect-error
     run.emitter.on(
       "update",
-      // @ts-expect-error
       async ({ update, meta, memory }) => {
         if (update.key === "tool_output") {
           await memory.add(
@@ -122,7 +119,7 @@ export class DeepThinkRunner extends DefaultRunner {
             next: [],
           },
           tool_output: { ...nodes.tool_name, prefix: "Tool Output:" },
-          final_answer: { ...nodes.final_answer, prefix: "Response:" }
+          final_answer: { ...nodes.final_answer, prefix: "Response:" },
         },
       })),
     } as const;

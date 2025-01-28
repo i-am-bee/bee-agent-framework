@@ -35,8 +35,8 @@ import * as R from "remeda";
 import { BaseRunner } from "@/agents/bee/runners/base.js";
 import { GraniteRunner } from "@/agents/bee/runners/granite/runner.js";
 import { DeepThinkRunner } from "@/agents/bee/runners/deep-think/runner.js";
-import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import { ValueError } from "@/errors.js";
+import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 
 export type BeeTemplateFactory<K extends keyof BeeAgentTemplates> = (
   template: BeeAgentTemplates[K],
@@ -73,11 +73,12 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
       );
     }
 
-    this.runner = [
-      { tag: "granite", runner: GraniteRunner },
-      { tag: "deepseek-r1", runner: DeepThinkRunner },
-      { tag: "", runner: DefaultRunner },
-    ].filter(({ tag }) => this.input.llm.modelId.toLowerCase().includes(tag))[0].runner
+    const modelId = this.input.llm.modelId.toLowerCase();
+    this.runner =
+      [
+        { tag: "granite", runner: GraniteRunner },
+        { tag: "deepseek-r1", runner: DeepThinkRunner },
+      ].find(({ tag }) => modelId.includes(tag))?.runner ?? DefaultRunner;
   }
 
   static {
