@@ -24,9 +24,9 @@ export function assertValidNamespace(path: string[]) {
 }
 
 export function assertValidName(name: string) {
-  if (!name || !/(^[a-zA-Z_]+$)/.test(name)) {
+  if (!name || !/(^[a-zA-Z0-9_]+$)/.test(name)) {
     throw new EmitterError(
-      "Event name or a namespace part must contain only letters (optionally underscores).",
+      "Event name or a namespace part must contain only letters, letters and optionally underscores.",
       [],
       {
         context: { value: name },
