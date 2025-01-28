@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.59](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.58...v0.0.59) (2025-01-28)
+
+### Features
+
+- **agents:** support deepseek-r1 ([#300](https://github.com/i-am-bee/bee-agent-framework/issues/300)) ([4ec9bab](https://github.com/i-am-bee/bee-agent-framework/commit/4ec9bab5bfc6a2ad1e6944f0f19509ea1de43a25))
+- **emitter:** allow numbers in event names ([5eb108f](https://github.com/i-am-bee/bee-agent-framework/commit/5eb108fe02f5902f97b1eb8523d5c6fbe2400494))
+- **tools:** searXNG web search tool ([#286](https://github.com/i-am-bee/bee-agent-framework/issues/286)) ([99334ff](https://github.com/i-am-bee/bee-agent-framework/commit/99334ff895550d158749239e9c20b02b98d1b282))
+
+### Bug Fixes
+
+- **tools:** update OpenAPI tool ([#279](https://github.com/i-am-bee/bee-agent-framework/issues/279)) ([66ab5ae](https://github.com/i-am-bee/bee-agent-framework/commit/66ab5aefc0d7d91ab65c0a39a7ddb5ab85ba218b))
+
 ## [0.0.58](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.57...v0.0.58) (2025-01-20)
 
 ### Features
