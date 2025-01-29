@@ -1,0 +1,33 @@
+[project]
+name = "beeai-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Radek Ježek", email = "radek.jezek@ibm.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.11.11",
+    "anyio>=4.8.0",
+    "fastapi[standard]>=0.115.7",
+    "kink>=0.8.1",
+    "orjson>=3.10.15",
+    "pydantic>=2.10.6",
+    "pydantic-settings>=2.7.1",
+    "structlog>=25.1.0",
+    "uvicorn>=0.34.0",
+]
+
+[tool.uv.sources]
+mcp = { workspace = true }
+
+[tool.ruff]
+line-length = 120
+
+[project.scripts]
+beeai-api = "beeai_api.application:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

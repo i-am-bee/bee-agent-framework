@@ -1,0 +1,23 @@
+[project]
+name = "beeai-cli"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Radek Ježek", email = "radek.jezek@ibm.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "asgiref>=3.8.1",
+    "click>=8.1.8",
+    "pydantic>=2.10.6",
+    "pydantic-settings>=2.7.1",
+    "requests>=2.32.3",
+]
+
+[project.scripts]
+beeai-cli = "beeai_cli:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

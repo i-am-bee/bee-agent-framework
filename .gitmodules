@@ -1,0 +1,3 @@
+[submodule "packages/mcp-python-sdk"]
+	path = packages/mcp-python-sdk
+	url = git@github.com:i-am-bee/mcp-python-sdk.git

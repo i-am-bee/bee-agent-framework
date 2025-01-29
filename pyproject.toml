@@ -1,0 +1,5 @@
+[tool.uv.workspace]
+members = ["packages/*", "apps/*"]
+
+[tool.ruff]
+line-length = 120
