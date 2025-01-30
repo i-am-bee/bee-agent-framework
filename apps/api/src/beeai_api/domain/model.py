@@ -2,17 +2,19 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Union
 
-from pydantic import BaseModel, AnyUrl, Field
+from pydantic import BaseModel, AnyUrl, Field, ConfigDict
 
 from mcp import stdio_client, StdioServerParameters
 from mcp.client.sse import sse_client
 
 
 class GithubProvider(BaseModel):
+    model_config = ConfigDict(frozen=True)
     github: AnyUrl
 
 
 class LocalProvider(BaseModel):
+    model_config = ConfigDict(frozen=True)
     path: Path
 
 

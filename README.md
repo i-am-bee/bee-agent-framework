@@ -16,8 +16,6 @@ uv run beeai-api
 uv run beeai-cli provider add /path/to/repo/beeai/packages/mcp-python-sdk/examples/servers/simple-tool
 uv run beeai-cli provider ls
 
-# Now you need to restart API (!)
-
 # tools
 uv run beeai-cli list tools
 uv run beeai-cli call fetch "url=http://iambee.ai"
