@@ -16,11 +16,9 @@ class LoggingConfiguration(BaseModel):
 
 
 class Configuration(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", env_nested_delimiter="__"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", env_nested_delimiter="__")
     logging: LoggingConfiguration = LoggingConfiguration()
-    registry_path: Path = Path.home() / ".beeai" / "registry.yaml"
+    provider_config_path: Path = Path.home() / ".beeai" / "providers.yaml"
 
 
 @cache
@@ -34,6 +32,4 @@ def get_configuration() -> Configuration:
         configure_logging(configuration=LoggingConfiguration(level=logging.ERROR))
 
         logging.error(f"Improperly configured, Error: {ex!r}")
-        raise ValueError(
-            "Improperly configured, make sure to supply all required variables"
-        ) from ex
+        raise ValueError("Improperly configured, make sure to supply all required variables") from ex

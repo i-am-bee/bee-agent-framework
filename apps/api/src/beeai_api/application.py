@@ -39,9 +39,9 @@ def _include_health_routes(app):
 
 def mount_routes(app):
     from beeai_api.routes.mcp_sse import app as mcp_app
-    from beeai_api.routes.registry import router as registry_router
+    from beeai_api.routes.provider import router as provider_router
 
-    app.include_router(router=registry_router, prefix="/registry")
+    app.include_router(router=provider_router, prefix="/provider")
     app.mount("/mcp", mcp_app)
 
     _include_health_routes(app)

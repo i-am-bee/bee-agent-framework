@@ -19,7 +19,7 @@ def cli():
 
 
 @cli.group()
-def registry():
+def provider():
     pass
 
 
@@ -34,28 +34,28 @@ async def mcp_client() -> AsyncGenerator[ClientSession]:
             yield session
 
 
-@registry.command(name="add")
+@provider.command(name="add")
 @click.argument("path", type=click.Path(exists=True))
-def registry_add(path: str):
-    """Add a path to the registry."""
+def provider_add(path: str):
+    """Add a path to the provider."""
     abs_path = str(Path(path).resolve())
-    requests.post(url("registry"), json={"path": abs_path})
+    requests.post(url("provider"), json={"path": abs_path})
     click.echo(f"Added path: {abs_path}")
 
 
-@registry.command(name="ls")
-def registry_list():
-    """List all paths in the registry."""
-    response = requests.get(url("registry")).json()
+@provider.command(name="ls")
+def provider_list():
+    """List all paths in the provider."""
+    response = requests.get(url("provider")).json()
     click.echo(yaml.dump(response))
 
 
-@registry.command(name="remove")
+@provider.command(name="remove")
 @click.argument("path")
-def registry_remove(path: str):
-    """Remove a path from the registry."""
+def provider_remove(path: str):
+    """Remove a path from the provider."""
     abs_path = str(Path(path).resolve())
-    requests.post(url("registry/delete"), json={"path": abs_path})
+    requests.post(url("provider/delete"), json={"path": abs_path})
     click.echo(f"Removed path: {abs_path}")
 
 

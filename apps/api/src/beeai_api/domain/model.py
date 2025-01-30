@@ -8,15 +8,15 @@ from mcp import stdio_client, StdioServerParameters
 from mcp.client.sse import sse_client
 
 
-class GithubRegistry(BaseModel):
+class GithubProvider(BaseModel):
     github: AnyUrl
 
 
-class LocalRegistry(BaseModel):
+class LocalProvider(BaseModel):
     path: Path
 
 
-Registry = Union[GithubRegistry, LocalRegistry]
+Provider = Union[GithubProvider, LocalProvider]
 
 
 # Connection to agent server

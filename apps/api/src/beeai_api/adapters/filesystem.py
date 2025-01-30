@@ -6,41 +6,41 @@ import yaml
 from anyio import Path as AsyncPath
 from pydantic import BaseModel
 
-from beeai_api.adapters.interface import IRegistryRepository
-from beeai_api.domain.model import Registry
+from beeai_api.adapters.interface import IProviderRepository
+from beeai_api.domain.model import Provider
 
 
-class RegistryConfigFile(BaseModel):
-    registries: list[Registry]
+class ProviderConfigFile(BaseModel):
+    providers: list[Provider]
 
 
-class FilesystemRegistryRepository(IRegistryRepository):
-    def __init__(self, registry_path: Path):
-        self._registry_path = AsyncPath(registry_path)
+class FilesystemProviderRepository(IProviderRepository):
+    def __init__(self, provider_config_path: Path):
+        self._config_path = AsyncPath(provider_config_path)
 
-    async def _write_registries(self, registries: list[Registry]):
+    async def _write_config(self, providers: list[Provider]):
         # Ensure that path exists
-        await self._registry_path.parent.mkdir(parents=True, exist_ok=True)
-        config = json.dumps(RegistryConfigFile(registries=registries).model_dump(mode="json"), indent=2)
-        await self._registry_path.write_text(config)
+        await self._config_path.parent.mkdir(parents=True, exist_ok=True)
+        config = json.dumps(ProviderConfigFile(providers=providers).model_dump(mode="json"), indent=2)
+        await self._config_path.write_text(config)
 
-    async def _read_registries(self) -> list[Registry]:
-        if not await self._registry_path.exists():
+    async def _read_config(self) -> list[Provider]:
+        if not await self._config_path.exists():
             return []
 
-        config = await self._registry_path.read_text()
-        return RegistryConfigFile.model_validate(yaml.safe_load(config)).registries
+        config = await self._config_path.read_text()
+        return ProviderConfigFile.model_validate(yaml.safe_load(config)).providers
 
-    async def list(self) -> AsyncIterator[Registry]:
-        for registry in await self._read_registries():
-            yield registry
+    async def list(self) -> AsyncIterator[Provider]:
+        for provider in await self._read_config():
+            yield provider
 
-    async def create(self, *, registry: Registry) -> None:
-        registries = [registry async for registry in self.list()]
-        if registry not in registries:
-            registries.append(registry)
-            await self._write_registries(registries)
+    async def create(self, *, provider: Provider) -> None:
+        providers = [provider async for provider in self.list()]
+        if provider not in providers:
+            providers.append(provider)
+            await self._write_config(providers)
 
-    async def delete(self, *, registry: Registry) -> None:
-        registries = [registry async for registry in self.list() if registry != registry]
-        await self._write_registries(registries)
+    async def delete(self, *, provider: Provider) -> None:
+        providers = [prov async for prov in self.list() if prov != provider]
+        await self._write_config(providers)
