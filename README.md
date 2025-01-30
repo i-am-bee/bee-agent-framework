@@ -1,6 +1,6 @@
 ```sh
 # Clone with submodules
-git clone --recurse-submodules https://github.com/i-am-bee/beeai.git
+git clone --recurse-submodules git@github.com:i-am-bee/beeai.git
 ```
 
 ```sh
