@@ -1,3 +1,5 @@
+import asyncio
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator
@@ -9,8 +11,9 @@ from asgiref.sync import async_to_sync
 
 from beeai_cli.configuration import get_configuration
 from beeai_cli.utils import parse_key_value_args
-from mcp import ClientSession
+from mcp import ClientSession, ClientRequest, CallToolRequest
 from mcp.client.sse import sse_client
+from mcp.types import CallToolRequestParams, CallToolResult, RequestParams
 
 
 @click.group()
@@ -71,14 +74,38 @@ async def list_items(what: str):
         click.echo(yaml.dump(tools, indent=2))
 
 
+async def call_tool_stream(session: ClientSession, name: str, arguments: dict):
+    params = CallToolRequestParams(name=name, arguments=arguments)
+    click.echo(f"Calling tool stream: {name}")
+    params.meta = RequestParams.Meta(progressToken=uuid.uuid4().hex)
+    return await session.send_request(
+        ClientRequest(CallToolRequest(method="tools/call", params=params)),
+        CallToolResult,
+    )
+
+
+async def _call_tool_impl(tool_name: str, args):
+    async with mcp_client() as client:
+        await client.initialize()
+
+        task = asyncio.create_task(call_tool_stream(client, tool_name, args))
+
+        # TODO IMPORTANT(!) if the client does not read the notifications, it gets blocked never receiving the response!
+        async def read_notifications():
+            async for message in client.incoming_messages:
+                click.echo(yaml.dump(message.model_dump(mode="json"), indent=2))
+
+        notif_task = asyncio.create_task(read_notifications())
+
+        result = await task
+        result = result.model_dump(mode="json")
+        click.echo(yaml.dump(result, indent=2))
+        click.echo("Done")
+
+
 @cli.command(name="call")
 @click.argument("tool-name")
 @click.argument("args", nargs=-1)
-@async_to_sync
-async def call_tool(tool_name: str, args: tuple):
+def call_tool(tool_name: str, args: tuple):
     args = parse_key_value_args(args)
-    async with mcp_client() as client:
-        await client.initialize()
-        result = await client.call_tool(tool_name, args)
-        result = result.model_dump(mode="json")
-        click.echo(yaml.dump(result, indent=2))
+    asyncio.run(_call_tool_impl(tool_name, args))

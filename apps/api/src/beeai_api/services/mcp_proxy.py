@@ -1,10 +1,19 @@
 import asyncio
 import logging
+import uuid
+import warnings
+from asyncio import CancelledError
+from collections import defaultdict
 from contextlib import AsyncExitStack, suppress, asynccontextmanager
+from contextvars import ContextVar
 from datetime import timedelta
+from enum import StrEnum
 from functools import cached_property
-from typing import Final
+from typing import Final, Callable, Coroutine
 
+import anyio
+from anyio.abc import TaskGroup
+from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 from kink import inject
 from pydantic import AnyUrl
 
@@ -12,11 +21,26 @@ from beeai_api.adapters.interface import IProviderRepository
 from beeai_api.domain.model import Provider
 from beeai_api.domain.services import get_provider_connection
 from beeai_api.utils.periodic import Periodic
-from mcp import ClientSession, Tool
+from mcp import ClientSession, Tool, ServerNotification, ProgressNotification
+from mcp import ServerSession, types
 from mcp.server import Server
-from mcp.types import AgentTemplate, Resource, Prompt
+from mcp.server.models import InitializationOptions
+from mcp.shared.context import RequestContext
+from mcp.shared.session import RequestResponder
+from mcp.types import (
+    AgentTemplate,
+    Resource,
+    Prompt,
+    CallToolRequestParams,
+    ClientRequest,
+    CallToolRequest,
+    CallToolResult,
+    RequestParams,
+)
 
 logger = logging.getLogger(__name__)
+
+mcp_session_context = ContextVar("mcp_session_context")
 
 
 class LoadedProvider:
@@ -75,6 +99,104 @@ class LoadedProvider:
             await self._exit_stack.aclose()
 
 
+class NotificationStreamType(StrEnum):
+    BROADCAST = "broadcast"
+    """Forward notifications from all providers except those that are private: [ProgressNotification]"""
+
+    PROGRESS = "progress"
+    """Forward progress notifications which belong to this request"""
+
+
+class NotificationHub:
+    _notification_stream_reader: MemoryObjectReceiveStream[ServerNotification]
+    _notification_stream_writer: MemoryObjectSendStream[ServerNotification]
+    _notification_pipe: TaskGroup
+
+    def __init__(self):
+        self._exit_stack = AsyncExitStack()
+        self._notification_subscribers: set[Callable[[ServerNotification], Coroutine]] = set()
+        self._notification_stream_writer, self._notification_stream_reader = anyio.create_memory_object_stream[
+            ServerNotification
+        ]()
+        self._provider_cleanups: dict[Provider, Callable[[], None]] = defaultdict(lambda: lambda: None)
+
+    async def register(self, provider: LoadedProvider):
+        self._notification_pipe.start_soon(self._subscribe_for_messages, provider)
+        logger.info(f"Started listening for notifications from: {provider.provider}")
+
+    async def remove(self, provider: LoadedProvider):
+        self._provider_cleanups[provider.provider]()
+        logger.info(f"Stopped listening for notifications from: {provider.provider}")
+
+    @asynccontextmanager
+    async def forward_notifications(
+        self,
+        session: ServerSession,
+        streams=NotificationStreamType.BROADCAST,
+        request_context: RequestContext | None = None,
+    ):
+        if streams == NotificationStreamType.PROGRESS and not request_context:
+            raise ValueError(f"Missing request context for {NotificationStreamType.PROGRESS} notifications")
+
+        async def forward_notification(notification: ServerNotification):
+            try:
+                match streams:
+                    case NotificationStreamType.PROGRESS:
+                        if not isinstance(notification, ProgressNotification):
+                            return
+                        if not (request_context.meta and request_context.meta.progressToken):
+                            logger.warning("Could not dispatch progress notification, missing progress Token")
+                            return
+                        notification.model_extra.pop("jsonrpc", None)
+                        await session.send_notification(notification)
+
+                    case NotificationStreamType.BROADCAST:
+                        if isinstance(notification, ProgressNotification):
+                            return
+                        notification.model_extra.pop("jsonrpc", None)
+                        await session.send_notification(notification)
+            except anyio.BrokenResourceError:
+                # TODO why the resource broken - need proper cleanup?
+                self._notification_subscribers.remove(forward_notification)
+
+        try:
+            self._notification_subscribers.add(forward_notification)
+            yield
+        finally:
+            self._notification_subscribers.remove(forward_notification)
+
+    async def _forward_notifications_loop(self):
+        async for message in self._notification_stream_reader:
+            for forward_message_handler in self._notification_subscribers.copy():
+                try:
+                    await forward_message_handler(message)
+                except Exception as e:
+                    logger.warning(f"Failed to forward notification: {e}", exc_info=e)
+
+    async def _subscribe_for_messages(self, provider: LoadedProvider):
+        async def subscribe():
+            with suppress(anyio.BrokenResourceError, anyio.EndOfStream, CancelledError):
+                async for message in provider.session.incoming_messages:
+                    match message:
+                        case ServerNotification(root=notify):
+                            logger.debug(f"Dispatching notification {notify.method}")
+                            await self._notification_stream_writer.send(notify)
+
+        with suppress(CancelledError):
+            async with anyio.create_task_group() as tg:
+                tg.start_soon(subscribe)
+        self._provider_cleanups[provider.provider] = lambda: tg.cancel_scope.cancel()
+
+    async def __aenter__(self):
+        self._notification_pipe = await self._exit_stack.enter_async_context(anyio.create_task_group())
+        await self._exit_stack.enter_async_context(self._notification_stream_writer)
+        await self._exit_stack.enter_async_context(self._notification_stream_reader)
+        self._notification_pipe.start_soon(self._forward_notifications_loop)
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self._exit_stack.aclose()
+
+
 class MCPClientContainer:
     RELOAD_PERIOD: Final = timedelta(minutes=1)
 
@@ -84,9 +206,15 @@ class MCPClientContainer:
             period=self.RELOAD_PERIOD,
             name="reload providers",
         )
-        self._repository = repository
         self.loaded_providers: list[LoadedProvider] = []
+        self._repository = repository
 
+        # Cleanup
+        self._stopping = False
+        self._stopped = asyncio.Event()
+        self._exit_stack = AsyncExitStack()
+
+        # Mappings
         self.provider_by_tool: dict[str, LoadedProvider] = {}
         self.provider_by_resource: dict[AnyUrl, LoadedProvider] = {}
         self.provider_by_agent_template: dict[str, LoadedProvider] = {}
@@ -95,8 +223,8 @@ class MCPClientContainer:
         self.all_resources: list[Resource] = []
         self.all_agent_templates: list[AgentTemplate] = []
         self.all_prompts: list[Prompt] = []
-        self._stopping = False
-        self._stopped = asyncio.Event()
+
+        self._notification_hub = NotificationHub()
 
     def _recompute_maps(self):
         self.all_tools = [tool for p in self.loaded_providers for tool in p.tools]
@@ -107,6 +235,16 @@ class MCPClientContainer:
         self.provider_by_prompt = {prompt.name: p for p in self.loaded_providers for prompt in p.prompts}
         self.provider_by_resource = {resource.uri: p for p in self.loaded_providers for resource in p.resources}
         self.provider_by_agent_template = {templ.name: p for p in self.loaded_providers for templ in p.agent_templates}
+
+    def forward_notifications(
+        self,
+        session: ServerSession,
+        streams=NotificationStreamType.BROADCAST,
+        request_context: RequestContext | None = None,
+    ):
+        return self._notification_hub.forward_notifications(
+            session=session, streams=streams, request_context=request_context
+        )
 
     async def _reload(self):
         """
@@ -138,8 +276,10 @@ class MCPClientContainer:
 
         for provider in removed_providers:
             await provider.close()
+            await self._notification_hub.remove(provider)
         for provider in added_providers:
             await provider.init()
+            await self._notification_hub.register(provider)
 
         self.loaded_providers = unaffected_providers + added_providers
         if added_providers or removed_providers:
@@ -151,15 +291,16 @@ class MCPClientContainer:
     async def __aenter__(self):
         self._stopping = False
         self._stopped.clear()
-        await self._periodic_reload.start()
+        await self._exit_stack.enter_async_context(self._notification_hub)
+        await self._exit_stack.enter_async_context(self._periodic_reload)
         self._repository.subscribe(handler=self._handle_providers_change)
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        self._repository.unsubscribe(handler=self._handle_providers_change)
         self._stopping = True
         self._periodic_reload.poke()
         await self._stopped.wait()
-        await self._periodic_reload.stop()
-        self._repository.unsubscribe(handler=self._handle_providers_change)
+        await self._exit_stack.aclose()
 
 
 @inject
@@ -200,9 +341,52 @@ class MCPProxyServer:
         @server.call_tool()
         async def call_tool(name: str, arguments: dict | None = None):
             provider = self._client_container.provider_by_tool[name]
-            resp = await provider.session.call_tool(name, arguments)
+
+            async def call_tool_stream(session: ClientSession, name: str, arguments: dict):
+                params = CallToolRequestParams(name=name, arguments=arguments)
+                # Need to register progressToken to recieve progress notifications
+                params.meta = server.request_context.meta or RequestParams.Meta()
+                params.meta.progressToken = params.meta.progressToken or uuid.uuid4().hex
+                return await session.send_request(
+                    ClientRequest(CallToolRequest(method="tools/call", params=params)),
+                    CallToolResult,
+                )
+
+            async with self._client_container.forward_notifications(
+                session=server.request_context.session,
+                streams=NotificationStreamType.PROGRESS,
+                request_context=server.request_context,
+            ) as notifications:
+                resp = await call_tool_stream(provider.session, name, arguments)
+
             if resp.isError:
                 raise Exception(str(resp.content[0].text))
             return resp.content
 
         return server
+
+    async def run_server(
+        self,
+        read_stream: MemoryObjectReceiveStream[types.JSONRPCMessage | Exception],
+        write_stream: MemoryObjectSendStream[types.JSONRPCMessage],
+        initialization_options: InitializationOptions,
+        raise_exceptions: bool = False,
+    ):
+        """
+        HACK: Modified server.run method that subscribes and forwards messages
+        The default method sets Request ContextVar only for client requests, not notifications.
+        """
+        with warnings.catch_warnings(record=True) as w:
+            async with ServerSession(read_stream, write_stream, initialization_options) as session:
+                async with self._client_container._notification_hub.forward_notifications(session):
+                    async for message in session.incoming_messages:
+                        logger.debug(f"Received message: {message}")
+
+                        match message:
+                            case RequestResponder(request=types.ClientRequest(root=req)):
+                                await self.app._handle_request(message, req, session, raise_exceptions)
+                            case types.ClientNotification(root=notify):
+                                await self.app._handle_notification(notify)
+
+                        for warning in w:
+                            logger.info(f"Warning: {warning.category.__name__}: {warning.message}")
