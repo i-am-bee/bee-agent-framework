@@ -86,7 +86,7 @@ export class DefaultRunner extends BaseRunner {
           } else {
             await this.memory.add(
               BaseMessage.of({
-                role: Role.ASSISTANT,
+                role: Role.USER,
                 text: this.templates.schemaError.render({}),
                 meta: {
                   [tempMessageKey]: true,
