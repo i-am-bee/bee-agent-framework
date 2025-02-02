@@ -25,7 +25,7 @@ import {
 } from "@/tools/base.js";
 import type { GetRunContext } from "@/context.js";
 import type { RunnableConfig } from "@langchain/core/runnables";
-import { AnyZodObject, ZodEffects } from "zod";
+import { ZodEffects } from "zod";
 import * as LCTools from "@langchain/core/tools";
 import { Serializer } from "@/serializer/serializer.js";
 import { isTruthy, pick, pickBy, toCamelCase } from "remeda";
@@ -39,7 +39,7 @@ export type LangChainToolOptions<TOutput = any> = BaseToolOptions & {
   outputClass?: typeof JSONToolOutput<TOutput>;
 };
 
-export class LangChainTool<T extends AnyZodObject, TOutput = any> extends Tool<
+export class LangChainTool<T extends LCTools.StructuredTool, TOutput = any> extends Tool<
   JSONToolOutput<TOutput>,
   LangChainToolOptions<TOutput>,
   LangChainToolRunOptions
@@ -47,7 +47,7 @@ export class LangChainTool<T extends AnyZodObject, TOutput = any> extends Tool<
   declare name: string;
   declare description: string;
 
-  protected tool: LCTools.StructuredTool<T>;
+  protected readonly tool: T;
   public static serializedSchemaKey = "_internalJsonSchema" as const;
 
   public readonly emitter: ToolEmitter<ToolEvents<T>, JSONToolOutput<TOutput>>;
@@ -55,7 +55,9 @@ export class LangChainTool<T extends AnyZodObject, TOutput = any> extends Tool<
   constructor({
     tool,
     ...options
-  }: LangChainToolOptions<TOutput> & { tool: LCTools.StructuredTool<T> }) {
+  }: LangChainToolOptions<TOutput> & {
+    tool: T;
+  }) {
     super(options);
 
     this.tool = tool;
@@ -103,7 +105,7 @@ export class LangChainTool<T extends AnyZodObject, TOutput = any> extends Tool<
     }
   }
 
-  inputSchema(): T {
+  inputSchema(): T["schema"] {
     const { schema, metadata = {} } = this.tool;
 
     return getProp(
@@ -133,8 +135,7 @@ export class LangChainTool<T extends AnyZodObject, TOutput = any> extends Tool<
     };
   }
 
-  loadSnapshot({ tool, ...snapshot }: ReturnType<typeof this.createSnapshot>) {
+  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
     super.loadSnapshot(snapshot);
-    this.tool = tool;
   }
 }
