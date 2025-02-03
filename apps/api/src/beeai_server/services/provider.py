@@ -1,7 +1,7 @@
 from kink import inject
 
-from beeai_api.adapters.interface import IProviderRepository
-from beeai_api.domain.model import Provider
+from beeai_server.adapters.interface import IProviderRepository
+from beeai_server.domain.model import Provider
 
 
 @inject

@@ -3,7 +3,7 @@ import tomllib
 import aiohttp
 from anyio import Path as AsyncPath
 
-from beeai_api.domain.model import (
+from beeai_server.domain.model import (
     Provider,
     ProviderConnection,
     StdioCommand,

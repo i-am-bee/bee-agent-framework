@@ -1,10 +1,10 @@
 from typing import Annotated
 
-from beeai_api.services.mcp_proxy import MCPProxyServer
+from beeai_server.services.mcp_proxy import MCPProxyServer
 from fastapi import Depends
 from kink import di
 
-from beeai_api.services.provider import ProviderService
+from beeai_server.services.provider import ProviderService
 from mcp.server.sse import SseServerTransport
 
 ProviderServiceDependency = Annotated[ProviderService, Depends(lambda: di[ProviderService])]

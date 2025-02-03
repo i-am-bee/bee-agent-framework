@@ -9,7 +9,7 @@ from typing import Any, Final
 import structlog
 from structlog.dev import RichTracebackFormatter
 
-from beeai_api.configuration import LoggingConfiguration, get_configuration
+from beeai_server.configuration import LoggingConfiguration, get_configuration
 
 _LOGGING_CONFIGURED = False
 

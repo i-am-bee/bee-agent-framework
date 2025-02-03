@@ -27,7 +27,7 @@ def get_configuration() -> Configuration:
     try:
         return Configuration()
     except ValidationError as ex:
-        from beeai_api.logging_config import configure_logging
+        from beeai_server.logging_config import configure_logging
 
         configure_logging(configuration=LoggingConfiguration(level=logging.ERROR))
 

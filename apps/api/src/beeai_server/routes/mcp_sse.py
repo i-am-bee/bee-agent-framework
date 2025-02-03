@@ -3,8 +3,8 @@ import logging
 from kink import inject
 from starlette.applications import Starlette
 
-from beeai_api.configuration import Configuration
-from beeai_api.services.mcp_proxy import MCPProxyServer
+from beeai_server.configuration import Configuration
+from beeai_server.services.mcp_proxy import MCPProxyServer
 from mcp.server.sse import SseServerTransport
 
 logger = logging.getLogger(__name__)

@@ -3,8 +3,8 @@ requires-python = ">=3.13"
 
 [manifest]
 members = [
-    "beeai-api",
     "beeai-cli",
+    "beeai-server",
     "mcp",
 ]
 
@@ -102,7 +102,28 @@ wheels = [
 ]
 
 [[package]]
-name = "beeai-api"
+name = "beeai-cli"
+version = "0.1.0"
+source = { editable = "apps/beeai_cli" }
+dependencies = [
+    { name = "asgiref" },
+    { name = "click" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "requests" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "asgiref", specifier = ">=3.8.1" },
+    { name = "click", specifier = ">=8.1.8" },
+    { name = "pydantic", specifier = ">=2.10.6" },
+    { name = "pydantic-settings", specifier = ">=2.7.1" },
+    { name = "requests", specifier = ">=2.32.3" },
+]
+
+[[package]]
+name = "beeai-server"
 version = "0.1.0"
 source = { editable = "apps/api" }
 dependencies = [
@@ -128,27 +149,6 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.7.1" },
     { name = "structlog", specifier = ">=25.1.0" },
     { name = "uvicorn", specifier = ">=0.34.0" },
-]
-
-[[package]]
-name = "beeai-cli"
-version = "0.1.0"
-source = { editable = "apps/cli" }
-dependencies = [
-    { name = "asgiref" },
-    { name = "click" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "requests" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "asgiref", specifier = ">=3.8.1" },
-    { name = "click", specifier = ">=8.1.8" },
-    { name = "pydantic", specifier = ">=2.10.6" },
-    { name = "pydantic-settings", specifier = ">=2.7.1" },
-    { name = "requests", specifier = ">=2.32.3" },
 ]
 
 [[package]]

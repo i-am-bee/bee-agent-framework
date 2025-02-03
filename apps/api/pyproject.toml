@@ -1,5 +1,5 @@
 [project]
-name = "beeai-api"
+name = "beeai-server"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -26,7 +26,7 @@ mcp = { workspace = true }
 line-length = 120
 
 [project.scripts]
-beeai-api = "beeai_api.scripts:app"
+beeai-server = "beeai_server.scripts:app"
 
 [build-system]
 requires = ["hatchling"]

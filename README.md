@@ -8,7 +8,7 @@ git clone --recurse-submodules git@github.com:i-am-bee/beeai.git
 uv sync
 
 # API
-uv run beeai-api
+uv run beeai-server
 
 # CLI
 

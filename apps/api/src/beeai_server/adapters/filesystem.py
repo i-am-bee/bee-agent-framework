@@ -6,8 +6,8 @@ import yaml
 from anyio import Path as AsyncPath
 from pydantic import BaseModel
 
-from beeai_api.adapters.interface import IProviderRepository, RepositoryEventType
-from beeai_api.domain.model import Provider
+from beeai_server.adapters.interface import IProviderRepository, RepositoryEventType
+from beeai_server.domain.model import Provider
 
 
 class ProviderConfigFile(BaseModel):

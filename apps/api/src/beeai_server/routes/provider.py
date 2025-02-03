@@ -1,8 +1,8 @@
 import fastapi
 
-from beeai_api.domain.model import Provider
-from beeai_api.routes.dependencies import ProviderServiceDependency
-from beeai_api.schema import PaginatedResponse
+from beeai_server.domain.model import Provider
+from beeai_server.routes.dependencies import ProviderServiceDependency
+from beeai_server.schema import PaginatedResponse
 
 router = fastapi.APIRouter()
 

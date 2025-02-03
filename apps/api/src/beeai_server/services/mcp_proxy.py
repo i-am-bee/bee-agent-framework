@@ -17,10 +17,10 @@ from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStre
 from kink import inject
 from pydantic import AnyUrl
 
-from beeai_api.adapters.interface import IProviderRepository
-from beeai_api.domain.model import Provider
-from beeai_api.domain.services import get_provider_connection
-from beeai_api.utils.periodic import Periodic
+from beeai_server.adapters.interface import IProviderRepository
+from beeai_server.domain.model import Provider
+from beeai_server.domain.services import get_provider_connection
+from beeai_server.utils.periodic import Periodic
 from mcp import ClientSession, Tool, ServerNotification, ProgressNotification
 from mcp import ServerSession, types
 from mcp.server import Server

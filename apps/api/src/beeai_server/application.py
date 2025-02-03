@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 # configure logging before importing anything
-from beeai_api.logging_config import configure_logging
+from beeai_server.logging_config import configure_logging
 
 configure_logging()
 logger = logging.getLogger(__name__)
@@ -31,8 +31,8 @@ def register_exception_handlers(app):
 
 
 def mount_routes(app):
-    from beeai_api.routes.mcp_sse import app as mcp_app
-    from beeai_api.routes.provider import router as provider_router
+    from beeai_server.routes.mcp_sse import app as mcp_app
+    from beeai_server.routes.provider import router as provider_router
 
     app.include_router(router=provider_router, prefix="/provider")
     app.mount("/mcp", mcp_app)
@@ -44,8 +44,8 @@ def app() -> "FastAPI":
     from fastapi import FastAPI
     from fastapi.responses import ORJSONResponse
 
-    from beeai_api.services.mcp_proxy import MCPProxyServer
-    from beeai_api.bootstrap import bootstrap_dependencies
+    from beeai_server.services.mcp_proxy import MCPProxyServer
+    from beeai_server.bootstrap import bootstrap_dependencies
 
     logger.info("Bootstrapping dependencies...")
     bootstrap_dependencies()

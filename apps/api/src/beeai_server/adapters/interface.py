@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import runtime_checkable, Protocol, AsyncIterator, Callable
 
-from beeai_api.domain.model import Provider
+from beeai_server.domain.model import Provider
 
 
 class RepositoryEventType(StrEnum):
