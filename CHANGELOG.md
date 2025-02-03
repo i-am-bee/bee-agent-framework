@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.60](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.59...v0.0.60) (2025-02-03)
+
+### Features
+
+- **agents:** use user role for schema error message ([f05f7a5](https://github.com/i-am-bee/bee-agent-framework/commit/f05f7a5f81472e2f898615ceb3b5580ef35ad4a1))
+- **tools:** update langchain tool typings ([6c6f2d0](https://github.com/i-am-bee/bee-agent-framework/commit/6c6f2d062994ffef2fcff6fbf9512d33a2384346))
+
 ## [0.0.59](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.58...v0.0.59) (2025-01-28)
 
 ### Features
