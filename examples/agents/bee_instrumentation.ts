@@ -9,18 +9,16 @@ import { Logger } from "bee-agent-framework/logger/logger";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
 Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
-const llm = new OllamaChatLLM({
-  modelId: "llama3.1", // llama3.1:70b for better performance
-});
+const llm = new OllamaChatModel("llama3.1");
 
 const agent = new BeeAgent({
   llm,
-  memory: new TokenMemory({ llm }),
+  memory: new TokenMemory(),
   tools: [
     new DuckDuckGoSearchTool(),
     new WikipediaTool(),

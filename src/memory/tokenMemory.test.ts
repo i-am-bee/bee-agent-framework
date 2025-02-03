@@ -15,10 +15,8 @@
  */
 
 import { TokenMemory } from "@/memory/tokenMemory.js";
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
-import * as R from "remeda";
+import { Message, UserMessage } from "@/backend/message.js";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
-import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
 
 describe("Token Memory", () => {
   const getInstance = (config: {
@@ -27,17 +25,10 @@ describe("Token Memory", () => {
     syncThreshold: number;
     maxTokens: number;
   }) => {
-    const llm = new OllamaChatLLM();
-
-    const estimateLLM = (msg: BaseMessage) => Math.ceil(msg.text.length * config.llmFactor);
-    const estimateLocal = (msg: BaseMessage) => Math.ceil(msg.text.length * config.localFactor);
-
-    vi.spyOn(llm, "tokenize").mockImplementation(async (messages: BaseMessage[]) => ({
-      tokensCount: R.sum(messages.map(estimateLLM)),
-    }));
+    const estimateLLM = (msg: Message) => Math.ceil(msg.text.length * config.llmFactor);
+    const estimateLocal = (msg: Message) => Math.ceil(msg.text.length * config.localFactor);
 
     return new TokenMemory({
-      llm,
       maxTokens: config.maxTokens,
       syncThreshold: config.syncThreshold,
       handlers: {
@@ -54,10 +45,10 @@ describe("Token Memory", () => {
       syncThreshold: 0.5,
     });
     await instance.addMany([
-      BaseMessage.of({ role: Role.USER, text: "A" }),
-      BaseMessage.of({ role: Role.USER, text: "B" }),
-      BaseMessage.of({ role: Role.USER, text: "C" }),
-      BaseMessage.of({ role: Role.USER, text: "D" }),
+      new UserMessage("A"),
+      new UserMessage("B"),
+      new UserMessage("C"),
+      new UserMessage("D"),
     ]);
     expect(instance.stats()).toMatchObject({
       isDirty: false,
@@ -79,12 +70,12 @@ describe("Token Memory", () => {
       messagesCount: 0,
     });
     await instance.addMany([
-      BaseMessage.of({ role: Role.USER, text: "A" }),
-      BaseMessage.of({ role: Role.USER, text: "B" }),
-      BaseMessage.of({ role: Role.USER, text: "C" }),
-      BaseMessage.of({ role: Role.USER, text: "D" }),
-      BaseMessage.of({ role: Role.USER, text: "E" }),
-      BaseMessage.of({ role: Role.USER, text: "F" }),
+      new UserMessage("A"),
+      new UserMessage("B"),
+      new UserMessage("C"),
+      new UserMessage("D"),
+      new UserMessage("E"),
+      new UserMessage("F"),
     ]);
     expect(instance.stats()).toMatchObject({
       isDirty: true,
@@ -107,9 +98,9 @@ describe("Token Memory", () => {
       syncThreshold: 1,
     });
     await instance.add(
-      BaseMessage.of({
+      Message.of({
         text: "Hello!",
-        role: Role.USER,
+        role: "user",
       }),
     );
     const serialized = instance.serialize();

@@ -117,3 +117,16 @@ export type AnyVoid = Promise<unknown> | unknown;
 export type OmitPrivateKeys<T> = {
   [K in keyof T as K extends `_${string}` ? never : K]: T[K];
 };
+
+type MergeElements<A, B> = A extends never ? B : B extends never ? A : A | B;
+export type MergeArrays<A extends any[], B extends any[]> = A extends []
+  ? B
+  : B extends []
+    ? A
+    : [MergeElements<Head<A>, Head<B>>, ...MergeArrays<Tail<A>, Tail<B>>];
+
+export type MergeFunctions<A extends AnyFn, B extends AnyFn> = (
+  ...args: MergeArrays<Parameters<A>, Parameters<B>>
+) => MergeElements<ReturnType<B>, ReturnType<A>>;
+
+export type WithoutLast<T> = T extends [...infer A, infer X] ? A : [];

@@ -18,7 +18,7 @@ import { Serializer } from "@/serializer/serializer.js";
 import * as R from "remeda";
 import { FrameworkError } from "@/errors.js";
 import { AgentError } from "@/agents/base.js";
-import { BaseMessage } from "@/llms/primitives/message.js";
+import { Message, UserMessage } from "@/backend/message.js";
 import { beforeEach, expect, vi } from "vitest";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { SerializerError } from "@/serializer/error.js";
@@ -224,7 +224,7 @@ describe("Serializer", () => {
             meta: { __value: {}, __serializer: true, __class: "Object", __ref: "2" },
           },
           __serializer: true,
-          __class: "BaseMessage",
+          __class: "UserMessage",
           __ref: "1",
         },
       },
@@ -232,12 +232,12 @@ describe("Serializer", () => {
 
     beforeEach(() => {
       vi.unstubAllEnvs();
-      Serializer.deregister(BaseMessage);
+      Serializer.deregister(UserMessage);
     });
 
     it("Automatically registers serializable classes", () => {
-      expect(Serializer.hasFactory("BaseMessage")).toBe(false);
-      const message = BaseMessage.of({ role: "system", text: "a", meta: {} });
+      expect(Serializer.hasFactory("UserMessage")).toBe(false);
+      const message = Message.of({ role: "user", text: "a", meta: {} });
       const input = { message };
       const json = Serializer.serialize(input);
       const deserialized = Serializer.deserialize(json);
@@ -245,10 +245,10 @@ describe("Serializer", () => {
     });
 
     it("Allows to re-register same class", () => {
-      expect(Serializer.hasFactory("BaseMessage")).toBe(false);
-      Serializer.registerSerializable(BaseMessage);
-      expect(Serializer.hasFactory("BaseMessage")).toBe(true);
-      Serializer.registerSerializable(BaseMessage);
+      expect(Serializer.hasFactory("UserMessage")).toBe(false);
+      Serializer.registerSerializable(UserMessage);
+      expect(Serializer.hasFactory("UserMessage")).toBe(true);
+      Serializer.registerSerializable(UserMessage);
     });
 
     it("Throws when required class is not present", () => {
@@ -256,12 +256,12 @@ describe("Serializer", () => {
     });
 
     it("Parses when class is registered", () => {
-      Serializer.registerSerializable(BaseMessage);
+      Serializer.registerSerializable(UserMessage);
       expect(() => Serializer.deserialize(json)).not.toThrowError();
     });
 
     it("Parses when class is passed as external parameter.", () => {
-      expect(() => Serializer.deserialize(json, [BaseMessage])).not.toThrowError();
+      expect(() => Serializer.deserialize(json, [UserMessage])).not.toThrowError();
     });
 
     it("Handles bounded functions", () => {

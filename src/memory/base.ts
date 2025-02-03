@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BaseMessage } from "@/llms/primitives/message.js";
+import { Message } from "@/backend/message.js";
 import { FrameworkError, FrameworkErrorOptions } from "@/errors.js";
 import { Serializable } from "@/internals/serializable.js";
 
@@ -30,14 +30,14 @@ export class MemoryFatalError extends MemoryError {
 }
 
 export abstract class BaseMemory<TState = unknown> extends Serializable<TState> {
-  abstract get messages(): readonly BaseMessage[];
+  abstract get messages(): readonly Message[];
 
-  abstract add(message: BaseMessage, index?: number): Promise<void>;
+  abstract add(message: Message, index?: number): Promise<void>;
 
-  abstract delete(message: BaseMessage): Promise<boolean>;
+  abstract delete(message: Message): Promise<boolean>;
   abstract reset(): void;
 
-  async addMany(messages: Iterable<BaseMessage> | AsyncIterable<BaseMessage>, start?: number) {
+  async addMany(messages: Iterable<Message> | AsyncIterable<Message>, start?: number) {
     let counter = 0;
     for await (const msg of messages) {
       await this.add(msg, start === undefined ? undefined : start + counter);
@@ -45,13 +45,13 @@ export abstract class BaseMemory<TState = unknown> extends Serializable<TState> 
     }
   }
 
-  async deleteMany(messages: Iterable<BaseMessage> | AsyncIterable<BaseMessage>) {
+  async deleteMany(messages: Iterable<Message> | AsyncIterable<Message>) {
     for await (const msg of messages) {
       await this.delete(msg);
     }
   }
 
-  async splice(start: number, deleteCount: number, ...items: BaseMessage[]) {
+  async splice(start: number, deleteCount: number, ...items: Message[]) {
     const total = this.messages.length;
 
     start = start < 0 ? Math.max(total + start, 0) : start;
@@ -90,14 +90,14 @@ export class ReadOnlyMemory<T extends BaseMemory = BaseMemory> extends BaseMemor
   }
 
   // eslint-disable-next-line unused-imports/no-unused-vars
-  async add(message: BaseMessage, index?: number) {}
+  async add(message: Message, index?: number) {}
 
   // eslint-disable-next-line unused-imports/no-unused-vars
-  async delete(message: BaseMessage) {
+  async delete(message: Message) {
     return false;
   }
 
-  get messages(): readonly BaseMessage[] {
+  get messages(): readonly Message[] {
     return this.source.messages;
   }
 

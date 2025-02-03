@@ -1,8 +1,8 @@
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { Logger } from "bee-agent-framework/logger/logger";
 import { Emitter } from "bee-agent-framework/emitter/emitter";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
 // Set up logging
 Logger.defaults.pretty = true;
@@ -20,7 +20,7 @@ Emitter.root.match("*.*", (data, event) => {
 
 // Create and run an agent
 const agent = new BeeAgent({
-  llm: new OllamaChatLLM(),
+  llm: new OllamaChatModel("llama3.1"),
   memory: new UnconstrainedMemory(),
   tools: [],
 });

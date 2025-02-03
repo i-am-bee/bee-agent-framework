@@ -1,22 +1,10 @@
 import "dotenv/config";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
-import { BedrockChatLLM } from "bee-agent-framework/adapters/bedrock/chat";
+import { BedrockChatModel } from "bee-agent-framework/adapters/bedrock/backend/chat";
+import { UserMessage } from "bee-agent-framework/backend/message";
 
-const llm = new BedrockChatLLM({
-  region: process.env.AWS_REGION,
-  modelId: "amazon.titan-text-lite-v1",
-  parameters: {
-    temperature: 0.7,
-    maxTokens: 1024,
-    topP: 1,
-  },
+const llm = new BedrockChatModel("amazon.titan-text-lite-v1");
+
+const response = await llm.create({
+  messages: [new UserMessage("Hello world!")],
 });
-
-console.info("meta", await llm.meta());
-const response = await llm.generate([
-  BaseMessage.of({
-    role: "user",
-    text: "Hello world!",
-  }),
-]);
 console.info(response.getTextContent());

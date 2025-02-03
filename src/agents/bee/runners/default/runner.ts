@@ -35,7 +35,7 @@ import { isEmpty, isTruthy, last } from "remeda";
 import { LinePrefixParser, LinePrefixParserError } from "@/agents/parsers/linePrefix.js";
 import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
+import { Message, Role } from "@/backend/message.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { getProp } from "@/internals/helpers/object.js";
 import { BaseMemory } from "@/memory/base.js";
@@ -75,7 +75,7 @@ export class DefaultRunner extends BaseRunner {
           // Prevent hanging on EOT
           if (error.reason === LinePrefixParserError.Reason.NoDataReceived) {
             await this.memory.add(
-              BaseMessage.of({
+              Message.of({
                 role: Role.ASSISTANT,
                 text: "\n",
                 meta: {
@@ -85,7 +85,7 @@ export class DefaultRunner extends BaseRunner {
             );
           } else {
             await this.memory.add(
-              BaseMessage.of({
+              Message.of({
                 role: Role.USER,
                 text: this.templates.schemaError.render({}),
                 meta: {
@@ -101,12 +101,16 @@ export class DefaultRunner extends BaseRunner {
         await emitter.emit("start", { meta, tools, memory: this.memory });
 
         const { parser, parserRegex } = this.createParser(tools);
-        const llmOutput = await this.input.llm
-          .generate(this.memory.messages.slice(), {
-            signal,
-            stream: true,
-            guided: {
-              regex: parserRegex.source,
+        // TODO: this will not work I guess
+        const { result } = await this.input.llm
+          .createStream({
+            messages: this.memory.messages.slice(),
+            abortSignal: signal,
+            experimental_providerMetadata: {
+              // TODO: how to handle guided?
+              guided: {
+                regex: parserRegex.source,
+              },
             },
           })
           .observe((llmEmitter) => {
@@ -142,6 +146,7 @@ export class DefaultRunner extends BaseRunner {
             });
           });
 
+        const raw = await result;
         await parser.end();
         await this.memory.deleteMany(
           this.memory.messages.filter((msg) => getProp(msg.meta, [tempMessageKey]) === true),
@@ -149,7 +154,7 @@ export class DefaultRunner extends BaseRunner {
 
         return {
           state: parser.finalState,
-          raw: llmOutput,
+          raw,
         };
       },
       config: {
@@ -277,7 +282,7 @@ export class DefaultRunner extends BaseRunner {
       user: {
         message: ({ prompt }: BeeRunInput) =>
           prompt !== null || this.input.memory.isEmpty()
-            ? BaseMessage.of({
+            ? Message.of({
                 role: Role.USER,
                 text: prompt || this.templates.userEmpty.render({}),
                 meta: {
@@ -305,7 +310,7 @@ export class DefaultRunner extends BaseRunner {
           },
         },
         message: async () =>
-          BaseMessage.of({
+          Message.of({
             role: Role.SYSTEM,
             text: this.templates.system.render({
               tools: await self.system.variables.tools(),
@@ -339,7 +344,7 @@ export class DefaultRunner extends BaseRunner {
                 },
               });
 
-          return BaseMessage.of({
+          return Message.of({
             role: Role.USER,
             text,
             meta: message.meta,
@@ -349,7 +354,6 @@ export class DefaultRunner extends BaseRunner {
       });
 
     const memory = new TokenMemory({
-      llm,
       capacityThreshold: 0.85,
       syncThreshold: 0.5,
       handlers: {

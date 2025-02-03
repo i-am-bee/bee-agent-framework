@@ -20,6 +20,10 @@ export function safeSum(...numbers: (number | undefined | null)[]): number {
   return R.sum(numbers?.filter(R.isNonNullish) || [0]);
 }
 
+export function takeBigger(...numbers: (number | undefined | null)[]): number {
+  return Math.max(...(numbers?.filter(R.isNonNullish) || [0])) || 0;
+}
+
 export function ensureRange(value: number, options: { min?: number; max?: number }): number {
   return Math.max(options.min ?? -Infinity, Math.min(value, options.max ?? Infinity));
 }

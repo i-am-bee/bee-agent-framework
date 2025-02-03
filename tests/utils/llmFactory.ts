@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import process from "node:process";
-import { OpenAIChatLLM } from "@/adapters/openai/chat.js";
-import { WatsonXChatLLM } from "@/adapters/watsonx/chat.js";
-import { GroqChatLLM } from "@/adapters/groq/chat.js";
-import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
-import { Ollama } from "ollama";
 import { Agent, Dispatcher } from "undici";
+import { ChatModel } from "@/backend/chat.js";
+import { OpenAIChatModel } from "@/adapters/openai/backend/chat.js";
+import { AzureChatModel } from "@/adapters/azure/backend/chat.js";
+import { WatsonXChatModel } from "@/adapters/watsonx/backend/chat.js";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
-export function createChatLLM(): ChatLLM<ChatLLMOutput> {
+export function createChatLLM(): ChatModel {
   if (process.env.OPENAI_API_KEY) {
-    return new OpenAIChatLLM({ modelId: "gpt-4o" });
+    return new OpenAIChatModel("gpt-4o");
   } else if (process.env.AZURE_OPENAI_API_KEY) {
-    return new OpenAIChatLLM({ modelId: "gpt-4o", azure: true });
+    return new AzureChatModel("gpt-4o");
   } else if (process.env.WATSONX_API_KEY && process.env.WATSONX_PROJECT_ID) {
-    return WatsonXChatLLM.fromPreset("meta-llama/llama-3-70b-instruct", {
-      projectId: process.env.WATSONX_PROJECT_ID,
-      region: process.env.WATSONX_REGION,
-    });
+    return new WatsonXChatModel("meta-llama/llama-3-3-70b-instruct");
   } else if (process.env.GROQ_API_KEY) {
-    return new GroqChatLLM({
-      modelId: `llama-3.1-70b-versatile`,
-      parameters: { temperature: 0 },
-    });
+    // TODO: needs to be implemented
+    // return new GroqChatLLM({
+    //   modelId: `llama-3.1-70b-versatile`,
+    //   parameters: { temperature: 0 },
+    // });
+    return {} as never;
   } else if (process.env.OLLAMA_HOST) {
     // the undici definition of RequestInit does not extend the default
     // fetch RequestInit so we can't use its type directly. Define
@@ -46,13 +44,11 @@ export function createChatLLM(): ChatLLM<ChatLLMOutput> {
     interface UndiciRequestInit extends RequestInit {
       dispatcher: Dispatcher;
     }
-    return new OllamaChatLLM({
-      modelId: process.env.OLLAMA_MODEL ?? "llama3.1:8b",
-      parameters: {
-        temperature: 0,
-      },
-      client: new Ollama({
-        host: process.env.OLLAMA_HOST,
+    return new OllamaChatModel(
+      "llama3.1:8b",
+      {},
+      {
+        baseURL: process.env.OLLAMA_HOST,
         fetch: (input, init?) => {
           const someInit = init || {};
           const requestInit: UndiciRequestInit = {
@@ -61,8 +57,8 @@ export function createChatLLM(): ChatLLM<ChatLLMOutput> {
           };
           return fetch(input, requestInit);
         },
-      }),
-    });
+      },
+    );
   } else {
     throw new Error("No API key for any LLM provider has been provided. Cannot run test case.");
   }

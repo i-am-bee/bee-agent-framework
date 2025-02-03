@@ -1,19 +1,14 @@
 import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
 import { SQLTool } from "bee-agent-framework/tools/database/sql";
 import { FrameworkError } from "bee-agent-framework/errors";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import fs from "node:fs";
 import * as path from "node:path";
 import os from "node:os";
+import { GroqChatModel } from "@/adapters/groq/backend/chat.js";
 
-const llm = new GroqChatLLM({
-  modelId: "llama-3.1-70b-versatile",
-  parameters: {
-    temperature: 0,
-  },
-});
+const llm = new GroqChatModel("llama-3.1-70b-versatile");
 
 const sqlTool = new SQLTool({
   provider: "sqlite",

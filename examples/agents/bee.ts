@@ -11,7 +11,7 @@ import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
@@ -21,7 +21,7 @@ const logger = new Logger({ name: "app", level: "trace" });
 // "granite3.1-dense"
 // "deepseek-r1:32b"
 // ensure the model is pulled before running
-const llm = new OllamaChatLLM({ modelId: "llama3.1:8b" });
+const llm = new OllamaChatModel("llama3.1");
 
 const codeInterpreterUrl = process.env.CODE_INTERPRETER_URL;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -32,7 +32,7 @@ const localTmpdir = process.env.LOCAL_TMPDIR ?? "./examples/tmp/local";
 
 const agent = new BeeAgent({
   llm,
-  memory: new TokenMemory({ llm }),
+  memory: new TokenMemory(),
   tools: [
     new DuckDuckGoSearchTool(),
     // new WebCrawlerTool(), // HTML web page crawler

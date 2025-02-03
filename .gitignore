@@ -1,7 +1,3 @@
-scripts/ibm_vllm_generate_protos/dist
-scripts/ibm_vllm_generate_protos/dts
-scripts/ibm_vllm_generate_protos/types
-
 ### Node template
 # Logs
 logs

@@ -1,15 +1,13 @@
 import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { OpenAPITool } from "bee-agent-framework/tools/openapi";
 import * as fs from "fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { ChatModel } from "bee-agent-framework/backend/chat";
 
-const llm = new OllamaChatLLM({
-  modelId: "llama3.1", // llama3.1:70b for better performance
-});
+const llm = await ChatModel.fromName("ollama:llama3.1");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const openApiSchema = await fs.promises.readFile(
@@ -19,7 +17,7 @@ const openApiSchema = await fs.promises.readFile(
 
 const agent = new BeeAgent({
   llm,
-  memory: new TokenMemory({ llm }),
+  memory: new TokenMemory(),
   tools: [new OpenAPITool({ openApiSchema })],
 });
 

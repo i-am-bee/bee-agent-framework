@@ -42,7 +42,7 @@ import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMem
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
+import { Message, Role } from "bee-agent-framework/llms/primitives/message";
 import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
 
 const workflow = new AgentWorkflow();
@@ -72,7 +72,7 @@ workflow.addAgent({
 const memory = new UnconstrainedMemory();
 
 await memory.add(
-  BaseMessage.of({
+  Message.of({
     role: Role.USER,
     text: "What is the capital of France and what is the current weather there?",
     meta: { createdAt: new Date() },
@@ -114,16 +114,16 @@ yarn add bee-agent-framework
 
 ```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
-const llm = new OllamaChatLLM(); // default is llama3.1 (8B), it is recommended to use 70B model
+const llm = new OllamaChatModel("llama3.1"); // default is llama3.1 (8B), it is recommended to use 70B model
 
 const agent = new BeeAgent({
   llm, // for more explore 'bee-agent-framework/adapters'
-  memory: new TokenMemory({ llm }), // for more explore 'bee-agent-framework/memory'
+  memory: new TokenMemory(), // for more explore 'bee-agent-framework/memory'
   tools: [new DuckDuckGoSearchTool(), new OpenMeteoTool()], // for more explore 'bee-agent-framework/tools'
 });
 

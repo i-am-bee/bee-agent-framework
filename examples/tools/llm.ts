@@ -1,19 +1,19 @@
 import "dotenv/config";
 import { LLMTool } from "bee-agent-framework/tools/llm";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { Tool } from "bee-agent-framework/tools/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Message } from "@/backend/message.js";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
 const memory = new UnconstrainedMemory();
 await memory.addMany([
-  BaseMessage.of({ role: "system", text: "You are a helpful assistant." }),
-  BaseMessage.of({ role: "user", text: "Hello!" }),
-  BaseMessage.of({ role: "assistant", text: "Hello user. I am here to help you." }),
+  Message.of({ role: "system", text: "You are a helpful assistant." }),
+  Message.of({ role: "user", text: "Hello!" }),
+  Message.of({ role: "assistant", text: "Hello user. I am here to help you." }),
 ]);
 
 const tool = new LLMTool({
-  llm: new OllamaChatLLM(),
+  llm: new OllamaChatModel("llama3.1"),
 });
 
 const response = await tool

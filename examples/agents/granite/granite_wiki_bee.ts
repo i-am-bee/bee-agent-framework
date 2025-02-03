@@ -2,22 +2,24 @@ import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { FrameworkError } from "bee-agent-framework/errors";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { z } from "zod";
-import { OllamaLLM } from "bee-agent-framework/adapters/ollama/llm";
 import { SimilarityTool } from "bee-agent-framework/tools/similarity";
 import { cosineSimilarityMatrix } from "bee-agent-framework/internals/helpers/math";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { splitString } from "bee-agent-framework/internals/helpers/string";
 import { AnyTool } from "bee-agent-framework/tools/base";
 import { createConsoleReader } from "examples/helpers/io.js";
+import { ChatModel } from "bee-agent-framework/backend/chat";
+import { EmbeddingModel } from "bee-agent-framework/backend/embedding";
 
 // Creates a wikipedia tool that supports information retrieval
-function wikipediaRetrivalTool(passageSize: number, overlap: number, maxResults: number): AnyTool {
+async function createWikipediaRetrivalTool(
+  passageSize: number,
+  overlap: number,
+  maxResults: number,
+): Promise<AnyTool> {
   // LLM to perform text embedding
-  const embeddingLLM = new OllamaLLM({
-    modelId: "nomic-embed-text",
-  });
+  const embeddingLLM = await EmbeddingModel.fromName("ollama:nomic-embed-text");
 
   // Estimate of character per LLM token
   const charsPerToken = 4;
@@ -26,10 +28,9 @@ function wikipediaRetrivalTool(passageSize: number, overlap: number, maxResults:
   const similarity = new SimilarityTool({
     maxResults: maxResults,
     provider: async (input): Promise<{ score: number }[]> => {
-      const embeds = await embeddingLLM.embed([
-        input.query,
-        ...input.documents.map((doc) => doc.text),
-      ]);
+      const embeds = await embeddingLLM.create({
+        values: [input.query, ...input.documents.map((doc) => doc.text)],
+      });
       const similarities = cosineSimilarityMatrix(
         [embeds.embeddings[0]], // Query
         embeds.embeddings.slice(1), // Documents
@@ -75,7 +76,7 @@ function wikipediaRetrivalTool(passageSize: number, overlap: number, maxResults:
 }
 
 // Agent LLM
-const llm = new OllamaChatLLM({
+const llm = await ChatModel.fromName("ollama:granite3.1-dense:8b", {
   modelId: "granite3.1-dense:8b",
   parameters: {
     temperature: 0,
@@ -85,8 +86,8 @@ const llm = new OllamaChatLLM({
 
 const agent = new BeeAgent({
   llm,
-  memory: new TokenMemory({ llm }),
-  tools: [wikipediaRetrivalTool(400, 50, 3)],
+  memory: new TokenMemory(),
+  tools: [await createWikipediaRetrivalTool(400, 50, 3)],
 });
 
 const reader = createConsoleReader();

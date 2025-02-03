@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-import { BaseMessage } from "@/llms/primitives/message.js";
 import { BaseMemory, MemoryFatalError } from "@/memory/base.js";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import * as R from "remeda";
 import { shallowCopy } from "@/serializer/utils.js";
 import { removeFromArray } from "@/internals/helpers/array.js";
-import { sum } from "remeda";
+import { map, sum } from "remeda";
 import { ensureRange } from "@/internals/helpers/number.js";
+import { Message } from "@/backend/message.js";
 
 export interface Handlers {
-  estimate: (messages: BaseMessage) => number;
-  removalSelector: (messages: BaseMessage[]) => BaseMessage;
+  estimate: (messages: Message) => number;
+  tokenize: (messages: Message[]) => Promise<number>;
+  removalSelector: (messages: Message[]) => Message;
 }
 
+const simpleEstimate: Handlers["estimate"] = (msg: Message) => Math.ceil(msg.text.length / 4);
+const simpleTokenize: Handlers["tokenize"] = async (msgs: Message[]) =>
+  sum(map(msgs, simpleEstimate)); // TODO
+
 export interface TokenMemoryInput {
-  llm: ChatLLM<ChatLLMOutput>;
   maxTokens?: number;
   syncThreshold?: number;
   capacityThreshold?: number;
@@ -42,18 +45,16 @@ interface TokenByMessage {
 }
 
 export class TokenMemory extends BaseMemory {
-  public readonly messages: BaseMessage[] = [];
+  public readonly messages: Message[] = [];
 
-  protected llm: ChatLLM<ChatLLMOutput>;
   protected threshold;
   protected syncThreshold;
   protected maxTokens: number | null = null;
-  protected tokensByMessage = new WeakMap<BaseMessage, TokenByMessage>();
+  protected tokensByMessage = new WeakMap<Message, TokenByMessage>();
   public readonly handlers: Handlers;
 
-  constructor(config: TokenMemoryInput) {
+  constructor(config: TokenMemoryInput = {}) {
     super();
-    this.llm = config.llm;
     this.maxTokens = config.maxTokens ?? null;
     this.threshold = config.capacityThreshold ?? 0.75;
     this.syncThreshold = config.syncThreshold ?? 0.25;
@@ -61,6 +62,7 @@ export class TokenMemory extends BaseMemory {
       ...config?.handlers,
       estimate:
         config?.handlers?.estimate || ((msg) => Math.ceil((msg.role.length + msg.text.length) / 4)),
+      tokenize: config?.handlers?.tokenize || simpleTokenize,
       removalSelector: config.handlers?.removalSelector || ((messages) => messages[0]),
     };
     if (!R.clamp({ min: 0, max: 1 })(this.threshold)) {
@@ -80,10 +82,10 @@ export class TokenMemory extends BaseMemory {
     return this.messages.some((msg) => this.tokensByMessage.get(msg)?.dirty !== false);
   }
 
-  async add(message: BaseMessage, index?: number) {
+  async add(message: Message, index?: number) {
     if (this.maxTokens === null) {
-      const meta = await this.llm.meta();
-      this.maxTokens = Math.ceil((meta.tokenLimit ?? Infinity) * this.threshold);
+      // TODO: improve
+      this.maxTokens = 128_000;
     }
 
     const meta = this.tokensByMessage.has(message)
@@ -115,7 +117,7 @@ export class TokenMemory extends BaseMemory {
     }
   }
 
-  async delete(message: BaseMessage) {
+  async delete(message: Message) {
     return removeFromArray(this.messages, message);
   }
 
@@ -124,8 +126,8 @@ export class TokenMemory extends BaseMemory {
       this.messages.map(async (msg) => {
         const cache = this.tokensByMessage.get(msg);
         if (cache?.dirty !== false) {
-          const result = await this.llm.tokenize([msg]);
-          this.tokensByMessage.set(msg, { tokensCount: result.tokensCount, dirty: false });
+          const tokensCount = await this.handlers.tokenize([msg]);
+          this.tokensByMessage.set(msg, { tokensCount, dirty: false });
         }
         return msg;
       }),
@@ -153,15 +155,13 @@ export class TokenMemory extends BaseMemory {
 
   createSnapshot() {
     return {
-      llm: this.llm,
-      maxTokens: this.maxTokens,
       threshold: this.threshold,
       syncThreshold: this.syncThreshold,
       messages: shallowCopy(this.messages),
       handlers: shallowCopy(this.handlers),
       tokensByMessage: this.messages
         .map((message) => [message, this.tokensByMessage.get(message)])
-        .filter(([_, value]) => value !== undefined) as [BaseMessage, number][],
+        .filter(([_, value]) => value !== undefined) as [Message, number][],
     };
   }
 

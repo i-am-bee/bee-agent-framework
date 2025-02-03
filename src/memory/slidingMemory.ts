@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BaseMessage } from "@/llms/primitives/message.js";
+import { Message } from "@/backend/message.js";
 import { BaseMemory, MemoryFatalError } from "@/memory/base.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { filter, forEach, isTruthy, pipe } from "remeda";
@@ -23,7 +23,7 @@ import { RequiredNested } from "@/internals/types.js";
 import { ensureRange } from "@/internals/helpers/number.js";
 
 export interface Handlers {
-  removalSelector: (messages: BaseMessage[]) => BaseMessage | BaseMessage[];
+  removalSelector: (messages: Message[]) => Message | Message[];
 }
 
 export interface SlidingWindowMemoryInput {
@@ -32,7 +32,7 @@ export interface SlidingWindowMemoryInput {
 }
 
 export class SlidingMemory extends BaseMemory {
-  public readonly messages: BaseMessage[] = [];
+  public readonly messages: Message[] = [];
   public readonly config: RequiredNested<SlidingWindowMemoryInput>;
 
   constructor(config: SlidingWindowMemoryInput) {
@@ -41,7 +41,7 @@ export class SlidingMemory extends BaseMemory {
       ...config,
       handlers: {
         removalSelector:
-          config.handlers?.removalSelector ?? ((messages: BaseMessage[]) => [messages[0]]),
+          config.handlers?.removalSelector ?? ((messages: Message[]) => [messages[0]]),
       },
     };
   }
@@ -51,7 +51,7 @@ export class SlidingMemory extends BaseMemory {
     this.register(aliases);
   }
 
-  async add(message: BaseMessage, index?: number) {
+  async add(message: Message, index?: number) {
     const { size, handlers } = this.config;
     const isOverflow = () => this.messages.length + 1 > size;
 
@@ -83,7 +83,7 @@ export class SlidingMemory extends BaseMemory {
     this.messages.splice(index, 0, message);
   }
 
-  async delete(message: BaseMessage) {
+  async delete(message: Message) {
     return removeFromArray(this.messages, message);
   }
 

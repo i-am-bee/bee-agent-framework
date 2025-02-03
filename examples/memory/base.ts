@@ -1,11 +1,11 @@
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Message } from "@/backend/message.js";
 
 const memory = new UnconstrainedMemory();
 
 // Single message
 await memory.add(
-  BaseMessage.of({
+  Message.of({
     role: "system",
     text: `You are a helpful assistant.`,
   }),
@@ -13,8 +13,8 @@ await memory.add(
 
 // Multiple messages
 await memory.addMany([
-  BaseMessage.of({ role: "user", text: `What can you do?` }),
-  BaseMessage.of({ role: "assistant", text: `Everything!` }),
+  Message.of({ role: "user", text: `What can you do?` }),
+  Message.of({ role: "assistant", text: `Everything!` }),
 ]);
 
 console.info(memory.isEmpty()); // false

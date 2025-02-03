@@ -18,25 +18,23 @@ import { Callback } from "@/emitter/types.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { AgentError, BaseAgent, BaseAgentRunOptions } from "@/agents/base.js";
 import { GetRunContext } from "@/context.js";
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
+import { AssistantMessage, Message, UserMessage } from "@/backend/message.js";
 import {
   createRePlanOutputSchema,
   RePlanState,
-  RePlanSystemPrompt,
   RePlanAssistantPrompt,
 } from "@/agents/experimental/replan/prompts.js";
 import { BaseMemory } from "@/memory/base.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
-import { JsonDriver } from "@/llms/drivers/json.js";
 import { AnyTool, Tool } from "@/tools/base.js";
-import { AnyChatLLM } from "@/llms/chat.js";
+import { ChatModel } from "@/backend/chat.js";
 
 export interface RePlanRunInput {
   prompt: string | null;
 }
 
 export interface RePlanRunOutput {
-  message: BaseMessage;
+  message: Message;
   intermediateMemory: BaseMemory;
 }
 
@@ -57,7 +55,7 @@ export interface RePlanEvents {
 interface Input {
   memory: BaseMemory;
   tools: AnyTool[];
-  llm: AnyChatLLM;
+  llm: ChatModel;
 }
 
 export class RePlanAgent extends BaseAgent<RePlanRunInput, RePlanRunOutput> {
@@ -76,34 +74,25 @@ export class RePlanAgent extends BaseAgent<RePlanRunInput, RePlanRunOutput> {
     context: GetRunContext<this>,
   ): Promise<RePlanRunOutput> {
     if (input.prompt !== null) {
-      await this.memory.add(
-        BaseMessage.of({
-          role: Role.USER,
-          text: input.prompt,
-        }),
-      );
+      await this.memory.add(new UserMessage(input.prompt));
     }
 
     const runner = await this.createRunner(context);
 
-    let finalMessage: BaseMessage | undefined = undefined;
+    let finalMessage: Message | undefined = undefined;
     while (!finalMessage) {
       const state = await runner.run();
 
       if (state.nextStep.type === "message") {
-        finalMessage = BaseMessage.of({
-          role: Role.USER,
-          text: state.nextStep.message,
-        });
+        finalMessage = new UserMessage(state.nextStep.message);
       } else if (state.nextStep.type === "tool") {
         const toolResults = await runner.tools(state.nextStep.calls);
         await runner.memory.add(
-          BaseMessage.of({
-            role: Role.ASSISTANT,
-            text: RePlanAssistantPrompt.render({
+          new AssistantMessage(
+            RePlanAssistantPrompt.render({
               results: JSON.stringify(toolResults),
             }),
-          }),
+          ),
         );
       }
     }
@@ -121,19 +110,15 @@ export class RePlanAgent extends BaseAgent<RePlanRunInput, RePlanRunOutput> {
     await memory.addMany(this.memory.messages);
 
     const run = async (): Promise<RePlanState> => {
-      const driver = JsonDriver.fromTemplate(RePlanSystemPrompt, this.input.llm);
       const schema = await createRePlanOutputSchema(this.input.tools);
-      const response = await driver.generate<RePlanState>(schema.json, memory.messages, {
-        options: { signal: context.signal },
+      const response = await this.input.llm.createStructure({
+        schema: schema.definition,
+        abortSignal: context.signal,
+        messages: memory.messages,
       });
-      await memory.add(
-        BaseMessage.of({
-          role: Role.ASSISTANT,
-          text: response.raw.getTextContent(),
-        }),
-      );
-      await context.emitter.emit("update", { state: response.parsed });
-      return response.parsed;
+      await memory.add(new AssistantMessage(JSON.stringify(response)));
+      await context.emitter.emit("update", { state: response.object });
+      return response.object;
     };
 
     const tools = async (calls: RePlanToolCall[]) => {

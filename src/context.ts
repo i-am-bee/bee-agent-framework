@@ -24,6 +24,7 @@ import { Serializable } from "@/internals/serializable.js";
 import { executeSequentially, LazyPromise } from "@/internals/helpers/promise.js";
 import { FrameworkError } from "@/errors.js";
 import { shallowCopy } from "@/serializer/utils.js";
+import { isAsyncIterable } from "@/internals/helpers/stream.js";
 
 export interface RunInstance<T = any> {
   emitter: Emitter<T>;
@@ -72,6 +73,16 @@ export class Run<R, I extends RunInstance, P = any> extends LazyPromise<R> {
   protected async before(): Promise<void> {
     await super.before();
     await executeSequentially(this.tasks.splice(0, Infinity));
+  }
+
+  // @ts-expect-error too complex
+  async *[Symbol.asyncIterator](): R extends AsyncIterable<infer X> ? AsyncIterator<X> : never {
+    const response = await this.then();
+    if (isAsyncIterable(response)) {
+      yield* response;
+    } else {
+      throw new Error("Result is not iterable!");
+    }
   }
 }
 

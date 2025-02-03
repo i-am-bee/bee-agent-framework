@@ -1,47 +1,10 @@
 import "dotenv/config.js";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
-import { VertexAILLM } from "bee-agent-framework/adapters/vertexai/llm";
-import { VertexAIChatLLM } from "bee-agent-framework/adapters/vertexai/chat";
+import { UserMessage } from "@/backend/message.js";
+import { VertexAIChatModel } from "@/adapters/vertexai/backend/chat.js";
 
-const project = process.env.GCP_VERTEXAI_PROJECT;
-const location = process.env.GCP_VERTEXAI_LOCATION;
+const llm = new VertexAIChatModel("gemini-1.5-flash-001");
 
-if (!project || !location) {
-  throw new Error("No ENVs has been set!");
-}
-
-{
-  console.info("===RAW===");
-  const llm = new VertexAILLM({
-    modelId: "gemini-1.5-flash-001",
-    project,
-    location,
-    parameters: {},
-  });
-
-  console.info("Meta", await llm.meta());
-
-  const response = await llm.generate("Hello world!", {
-    stream: true,
-  });
-  console.info(response.getTextContent());
-}
-
-{
-  console.info("===CHAT===");
-  const llm = new VertexAIChatLLM({
-    modelId: "gemini-1.5-flash-001",
-    project,
-    location,
-  });
-
-  console.info("Meta", await llm.meta());
-
-  const response = await llm.generate([
-    BaseMessage.of({
-      role: "user",
-      text: "Hello world!",
-    }),
-  ]);
-  console.info(response.getTextContent());
-}
+const response = await llm.create({
+  messages: [new UserMessage("Hello world!")],
+});
+console.info(response.getTextContent());

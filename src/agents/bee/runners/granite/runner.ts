@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
+import { CustomMessage, Role, ToolMessage } from "@/backend/message.js";
 import { isEmpty } from "remeda";
 import type { AnyTool } from "@/tools/base.js";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
-import { BaseMemory } from "@/memory/base.js";
 import type { BeeParserInput, BeeRunInput, BeeRunOptions } from "@/agents/bee/types.js";
 import { BeeAgent, BeeInput } from "@/agents/bee/agent.js";
 import type { GetRunContext } from "@/context.js";
@@ -33,6 +32,7 @@ import {
 } from "@/agents/bee/runners/granite/prompts.js";
 import { BeeToolNoResultsPrompt, BeeUserEmptyPrompt } from "@/agents/bee/prompts.js";
 import { Cache } from "@/cache/decoratorCache.js";
+import { BaseMemory } from "@/memory/base.js";
 
 export class GraniteRunner extends DefaultRunner {
   @Cache({ enumerable: false })
@@ -60,14 +60,19 @@ export class GraniteRunner extends DefaultRunner {
 
     run.emitter.on(
       "update",
-      async ({ update, meta, memory }) => {
+      async ({ update, meta, memory, data }) => {
         if (update.key === "tool_output") {
           await memory.add(
-            BaseMessage.of({
-              role: "tool_response",
-              text: update.value,
-              meta: { success: meta.success },
-            }),
+            new ToolMessage(
+              {
+                type: "tool-result",
+                result: update.value!,
+                toolName: data.tool_name!,
+                isError: !meta.success,
+                toolCallId: "DUMMY_ID",
+              },
+              { success: meta.success },
+            ),
           );
         }
       },
@@ -79,13 +84,12 @@ export class GraniteRunner extends DefaultRunner {
 
   protected async initMemory(input: BeeRunInput): Promise<BaseMemory> {
     const memory = await super.initMemory(input);
-
     if (!isEmpty(this.input.tools)) {
       const index = memory.messages.findIndex((msg) => msg.role === Role.SYSTEM) + 1;
       await memory.add(
-        BaseMessage.of({
-          role: "tools",
-          text: JSON.stringify(
+        new CustomMessage(
+          "tools",
+          JSON.stringify(
             (await this.renderers.system.variables.tools()).map((tool) => ({
               name: tool.name,
               description: tool.description,
@@ -94,7 +98,7 @@ export class GraniteRunner extends DefaultRunner {
             null,
             4,
           ),
-        }),
+        ),
         index,
       );
     }

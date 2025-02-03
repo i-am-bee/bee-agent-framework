@@ -29,7 +29,7 @@ interface SerializableStructure<T> {
   snapshot: T;
 }
 
-interface DeserializeOptions {
+export interface DeserializeOptions {
   extraClasses?: SerializableClass<unknown>[];
 }
 

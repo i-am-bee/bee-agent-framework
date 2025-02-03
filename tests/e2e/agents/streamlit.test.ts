@@ -20,9 +20,9 @@ import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
 import { createCallbackRegister } from "@tests/e2e/utils.js";
 import { createChatLLM } from "@tests/utils/llmFactory.js";
 import { StreamlitAgent } from "@/agents/experimental/streamlit/agent.js";
-import { BaseLLMOutput } from "@/llms/base.js";
 import { BaseMemory } from "@/memory/base.js";
-import { BaseMessage } from "@/llms/primitives/message.js";
+import { Message } from "@/backend/message.js";
+import { ChatModelOutput } from "@/backend/chat.js";
 
 describe("Streamlit Agent", () => {
   const createAgent = () => {
@@ -54,7 +54,7 @@ describe("Streamlit Agent", () => {
                 expect(value).toBeTruthy();
                 expect(value.delta).toBeTypeOf("string");
                 expect(value.state).toBeTypeOf("object");
-                expect(value.chunk).toBeInstanceOf(BaseLLMOutput);
+                expect(value.chunk).toBeInstanceOf(ChatModelOutput);
               },
             }),
           });
@@ -67,7 +67,7 @@ describe("Streamlit Agent", () => {
     }
 
     expect(response.memory).toBeInstanceOf(BaseMemory);
-    expect(response.message).toBeInstanceOf(BaseMessage);
+    expect(response.message).toBeInstanceOf(Message);
 
     expect(response.result.raw).toBeTypeOf("string");
     expect(response.result.blocks.length).toBeGreaterThanOrEqual(2);

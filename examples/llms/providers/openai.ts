@@ -1,20 +1,10 @@
-import "dotenv/config";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
-import { OpenAIChatLLM } from "bee-agent-framework/adapters/openai/chat";
+import "dotenv/config.js";
+import { UserMessage } from "@/backend/message.js";
+import { OpenAIChatModel } from "@/adapters/openai/backend/chat.js";
 
-const llm = new OpenAIChatLLM({
-  modelId: "gpt-4o",
-  parameters: {
-    max_tokens: 10,
-    stop: ["post"],
-  },
+const llm = new OpenAIChatModel("gpt-4o");
+
+const response = await llm.create({
+  messages: [new UserMessage("Hello world!")],
 });
-
-console.info("Meta", await llm.meta());
-const response = await llm.generate([
-  BaseMessage.of({
-    role: "user",
-    text: "Hello world!",
-  }),
-]);
 console.info(response.getTextContent());

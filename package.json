@@ -137,7 +137,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "yarn clean && yarn ts:check && NODE_OPTIONS='--max-old-space-size=8192' tsup && cp -r src/adapters/ibm-vllm/proto dist/adapters/ibm-vllm",
+    "build": "yarn clean && yarn ts:check && NODE_OPTIONS='--max-old-space-size=8192' tsup",
     "ts:check": "tsc --noEmit && tsc -p tsconfig.examples.json --noEmit",
     "start": "tsx --tsconfig tsconfig.examples.json",
     "start:bee": "yarn start -- examples/agents/bee.ts",
@@ -162,21 +162,19 @@
     "copyright": "./scripts/copyright.sh",
     "copyright:check": "TYPE=check ./scripts/copyright.sh",
     "release": "release-it",
-    "ibm-vllm:generate-types": "./scripts/ibm_vllm_generate_protos/ibm_vllm_generate_protos.sh",
     "_ensure_env": "cp -n .env.template .env || true"
   },
   "dependencies": {
     "@ai-zen/node-fetch-event-source": "^2.1.4",
     "@opentelemetry/api": "^1.9.0",
     "@streamparser/json": "^0.0.21",
+    "ai": "^4.1.11",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "duck-duck-scrape": "^2.2.7",
     "fast-xml-parser": "^4.5.0",
     "header-generator": "^2.1.57",
     "joplin-turndown-plugin-gfm": "^1.0.12",
-    "js-yaml": "^4.1.0",
-    "json-schema-to-typescript": "^15.0.3",
     "jsonrepair": "^3.11.1",
     "mathjs": "^14.0.0",
     "mustache": "^4.2.0",
@@ -195,12 +193,15 @@
     "zod-to-json-schema": "^3.23.5"
   },
   "peerDependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.687.0",
+    "@ai-sdk/amazon-bedrock": "^1.1.5",
+    "@ai-sdk/azure": "^1.1.2",
+    "@ai-sdk/google-vertex": "^2.1.6",
+    "@ai-sdk/groq": "^1.1.6",
+    "@ai-sdk/openai": "^1.1.2",
+    "@aws-sdk/client-bedrock-runtime": "^3.706.0",
     "@elastic/elasticsearch": "^8.0.0",
     "@google-cloud/vertexai": "*",
     "@googleapis/customsearch": "^3.2.0",
-    "@grpc/grpc-js": "^1.11.3",
-    "@grpc/proto-loader": "^0.7.13",
     "@langchain/community": ">=0.2.28",
     "@langchain/core": ">=0.2.27",
     "@modelcontextprotocol/sdk": "^1.0.4",
@@ -208,12 +209,28 @@
     "google-auth-library": "*",
     "groq-sdk": "^0.7.0",
     "ollama": "^0.5.11",
+    "ollama-ai-provider": "^1.2.0",
     "openai": "^4.67.3",
     "openai-chat-tokens": "^0.2.8",
     "sequelize": "^6.37.3",
     "yaml": "^2.6.1"
   },
   "peerDependenciesMeta": {
+    "@ai-sdk/amazon-bedrock": {
+      "optional": true
+    },
+    "@ai-sdk/azure": {
+      "optional": true
+    },
+    "@ai-sdk/google-vertex": {
+      "optional": true
+    },
+    "@ai-sdk/groq": {
+      "optional": true
+    },
+    "@ai-sdk/openai": {
+      "optional": true
+    },
     "@aws-sdk/client-bedrock-runtime": {
       "optional": true
     },
@@ -267,6 +284,11 @@
     }
   },
   "devDependencies": {
+    "@ai-sdk/amazon-bedrock": "^1.1.5",
+    "@ai-sdk/azure": "^1.1.2",
+    "@ai-sdk/google-vertex": "^2.1.6",
+    "@ai-sdk/groq": "^1.1.6",
+    "@ai-sdk/openai": "^1.1.2",
     "@aws-sdk/client-bedrock-runtime": "^3.706.0",
     "@commitlint/cli": "^19.6.0",
     "@commitlint/config-conventional": "^19.6.0",
@@ -277,10 +299,11 @@
     "@googleapis/customsearch": "^3.2.0",
     "@grpc/grpc-js": "^1.12.4",
     "@grpc/proto-loader": "^0.7.13",
-    "@langchain/community": "~0.3.17",
-    "@langchain/core": "~0.3.22",
-    "@langchain/langgraph": "^0.2.39",
-    "@langchain/ollama": "^0.1.4",
+    "@ibm-cloud/watsonx-ai": "^1.3.2",
+    "@langchain/community": "~0.3.28",
+    "@langchain/core": "~0.3.37",
+    "@langchain/langgraph": "^0.2.44",
+    "@langchain/ollama": "^0.1.5",
     "@modelcontextprotocol/sdk": "^1.0.4",
     "@opentelemetry/instrumentation": "^0.56.0",
     "@opentelemetry/resources": "^1.29.0",
@@ -311,10 +334,12 @@
     "glob": "^11.0.0",
     "groq-sdk": "^0.9.0",
     "husky": "^9.1.7",
+    "ibm-cloud-sdk-core": "^5.1.1",
     "langchain": "~0.3.6",
     "linkinator": "^6.1.2",
     "lint-staged": "^15.2.10",
     "ollama": "^0.5.11",
+    "ollama-ai-provider": "^1.2.0",
     "openai": "^4.76.0",
     "openai-chat-tokens": "^0.2.8",
     "openapi-fetch": "^0.13.3",

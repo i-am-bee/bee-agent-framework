@@ -8,16 +8,14 @@ import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
 // Import the HumanTool from the updated file
 import { HumanTool } from "../../tools/experimental/human.js";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
 // Set up logger
 Logger.root.level = "silent"; // Disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });
 
 // Initialize LLM (test against llama as requested)
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
-const llm = new OllamaChatLLM({
-  modelId: "llama3.1",
-});
+const llm = new OllamaChatModel("llama3.1");
 
 // Create the console reader once, share it with HumanTool
 const reader = createConsoleReader();
@@ -25,7 +23,7 @@ const reader = createConsoleReader();
 // Initialize BeeAgent with shared reader for HumanTool
 const agent = new BeeAgent({
   llm,
-  memory: new TokenMemory({ llm }),
+  memory: new TokenMemory(),
   tools: [
     new OpenMeteoTool(),
     new HumanTool({

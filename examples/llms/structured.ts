@@ -1,13 +1,12 @@
 import "dotenv/config.js";
 import { z } from "zod";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
-import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
+import { Message } from "@/backend/message.js";
+import { Role } from "@/backend/message.js";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
-const llm = new OllamaChatLLM();
-const driver = new JsonDriver(llm);
-const response = await driver.generate(
-  z.union([
+const llm = new OllamaChatModel("llama3.1");
+const response = await llm.createStructure({
+  schema: z.union([
     z.object({
       firstName: z.string().min(1),
       lastName: z.string().min(1),
@@ -19,11 +18,11 @@ const response = await driver.generate(
       error: z.string(),
     }),
   ]),
-  [
-    BaseMessage.of({
+  messages: [
+    Message.of({
       role: Role.USER,
       text: "Generate a profile of a citizen of Europe.",
     }),
   ],
-);
+});
 console.info(response);

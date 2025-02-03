@@ -17,12 +17,12 @@
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { StreamlitAgent } from "@/agents/experimental/streamlit/agent.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
-import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
 describe("Streamlit agent", () => {
   it("Serializes", async () => {
     const instance = new StreamlitAgent({
-      llm: new OllamaChatLLM(),
+      llm: new OllamaChatModel("llama3.1"),
       memory: new UnconstrainedMemory(),
     });
     const serialized = instance.serialize();

@@ -31,44 +31,6 @@ Are you interested in creating your own adapter? Jump to the [adding a new provi
 
 ## Usage
 
-### Plain text generation
-
-<!-- embedme examples/llms/text.ts -->
-
-```ts
-import "dotenv/config.js";
-import { createConsoleReader } from "examples/helpers/io.js";
-import { WatsonXLLM } from "bee-agent-framework/adapters/watsonx/llm";
-
-const llm = new WatsonXLLM({
-  modelId: "google/flan-ul2",
-  projectId: process.env.WATSONX_PROJECT_ID,
-  apiKey: process.env.WATSONX_API_KEY,
-  region: process.env.WATSONX_REGION, // (optional) default is us-south
-  parameters: {
-    decoding_method: "greedy",
-    max_new_tokens: 50,
-  },
-});
-
-const reader = createConsoleReader();
-const prompt = await reader.prompt();
-const response = await llm.generate(prompt);
-reader.write(`LLM 🤖 (text) : `, response.getTextContent());
-reader.close();
-```
-
-_Source: [examples/llms/text.ts](/examples/llms/text.ts)_
-
-> [!NOTE]
->
-> The `generate` method returns a class that extends the base [`BaseLLMOutput`](/src/llms/base.ts) class.
-> This class allows you to retrieve the response as text using the `getTextContent` method and other useful metadata.
-
-> [!TIP]
->
-> You can enable streaming communication (internally) by passing `{ stream: true }` as a second parameter to the `generate` method.
-
 ### Chat text generation
 
 <!-- embedme examples/llms/chat.ts -->
@@ -76,22 +38,25 @@ _Source: [examples/llms/text.ts](/examples/llms/text.ts)_
 ```ts
 import "dotenv/config.js";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { Message } from "@/backend/message.js";
+import { Role } from "@/backend/message.js";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
-const llm = new OllamaChatLLM();
+const llm = new OllamaChatModel("llama3.1");
 
 const reader = createConsoleReader();
 
 for await (const { prompt } of reader) {
-  const response = await llm.generate([
-    BaseMessage.of({
-      role: Role.USER,
-      text: prompt,
-    }),
-  ]);
+  const response = await llm.create({
+    messages: [
+      Message.of({
+        role: Role.USER,
+        text: prompt,
+      }),
+    ],
+  });
   reader.write(`LLM 🤖 (txt) : `, response.getTextContent());
-  reader.write(`LLM 🤖 (raw) : `, JSON.stringify(response.finalResult));
+  reader.write(`LLM 🤖 (raw) : `, JSON.stringify(response.messages));
 }
 ```
 
@@ -114,22 +79,25 @@ _Source: [examples/llms/chat.ts](/examples/llms/chat.ts)_
 ```ts
 import "dotenv/config.js";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { Message } from "@/backend/message.js";
+import { Role } from "@/backend/message.js";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
-const llm = new OllamaChatLLM();
+const llm = new OllamaChatModel("llama3.1");
 
 const reader = createConsoleReader();
 
 for await (const { prompt } of reader) {
-  for await (const chunk of llm.stream([
-    BaseMessage.of({
-      role: Role.USER,
-      text: prompt,
-    }),
-  ])) {
+  for await (const chunk of llm.createStream({
+    messages: [
+      Message.of({
+        role: Role.USER,
+        text: prompt,
+      }),
+    ],
+  })) {
     reader.write(`LLM 🤖 (txt) : `, chunk.getTextContent());
-    reader.write(`LLM 🤖 (raw) : `, JSON.stringify(chunk.finalResult));
+    reader.write(`LLM 🤖 (raw) : `, JSON.stringify(chunk.messages));
   }
 }
 ```
@@ -143,24 +111,24 @@ _Source: [examples/llms/chatStream.ts](/examples/llms/chatStream.ts)_
 ```ts
 import "dotenv/config.js";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { Message } from "@/backend/message.js";
+import { Role } from "@/backend/message.js";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
-const llm = new OllamaChatLLM();
+const llm = new OllamaChatModel("llama3.1");
 
 const reader = createConsoleReader();
 
 for await (const { prompt } of reader) {
   const response = await llm
-    .generate(
-      [
-        BaseMessage.of({
+    .create({
+      messages: [
+        Message.of({
           role: Role.USER,
           text: prompt,
         }),
       ],
-      {},
-    )
+    })
     .observe((emitter) =>
       emitter.match("*", (data, event) => {
         reader.write(`LLM 🤖 (event: ${event.name})`, JSON.stringify(data));
@@ -171,7 +139,7 @@ for await (const { prompt } of reader) {
     );
 
   reader.write(`LLM 🤖 (txt) : `, response.getTextContent());
-  reader.write(`LLM 🤖 (raw) : `, JSON.stringify(response.finalResult));
+  reader.write(`LLM 🤖 (raw) : `, JSON.stringify(response.messages));
 }
 ```
 
@@ -184,14 +152,13 @@ _Source: [examples/llms/chatCallback.ts](/examples/llms/chatCallback.ts)_
 ```ts
 import "dotenv/config.js";
 import { z } from "zod";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
-import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
+import { Message } from "@/backend/message.js";
+import { Role } from "@/backend/message.js";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
-const llm = new OllamaChatLLM();
-const driver = new JsonDriver(llm);
-const response = await driver.generate(
-  z.union([
+const llm = new OllamaChatModel("llama3.1");
+const response = await llm.createStructure({
+  schema: z.union([
     z.object({
       firstName: z.string().min(1),
       lastName: z.string().min(1),
@@ -203,13 +170,13 @@ const response = await driver.generate(
       error: z.string(),
     }),
   ]),
-  [
-    BaseMessage.of({
+  messages: [
+    Message.of({
       role: Role.USER,
       text: "Generate a profile of a citizen of Europe.",
     }),
   ],
-);
+});
 console.info(response);
 ```
 

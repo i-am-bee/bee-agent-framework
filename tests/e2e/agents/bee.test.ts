@@ -19,7 +19,7 @@ import { beforeEach, expect, vi } from "vitest";
 import { Logger } from "@/logger/logger.js";
 import { BeeAgent } from "@/agents/bee/agent.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
-import { BaseMessage } from "@/llms/primitives/message.js";
+import { Message } from "@/backend/message.js";
 import { createCallbackRegister } from "@tests/e2e/utils.js";
 import { omitEmptyValues } from "@/internals/helpers/object.js";
 import * as process from "node:process";
@@ -104,7 +104,7 @@ describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", ()
           emitter.registerCallbacks({
             success: callbacks.create("success", {
               check: ({ data }) => {
-                expect(data).toBeInstanceOf(BaseMessage);
+                expect(data).toBeInstanceOf(Message);
                 expect(Object.keys(omitEmptyValues(data)).length).toBeGreaterThan(0);
               },
             }),
@@ -133,7 +133,7 @@ describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", ()
 
     userLogger.info("==================END=====================");
     expect(response.result).toBeDefined();
-    expect(response.result.text).toMatch(/petr pavel/i);
+    expect(response.result.getTextContent()).toMatch(/petr pavel/i);
 
     callbacks.verify(({ fn }) => {
       for (const [_, event, ...extra] of fn.mock.calls) {

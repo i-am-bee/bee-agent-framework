@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { ChatLLMOutput } from "@/llms/chat.js";
 import { BaseMemory } from "@/memory/base.js";
-import { BaseMessage } from "@/llms/primitives/message.js";
+import { Message } from "@/backend/message.js";
 import { Callback } from "@/emitter/types.js";
 import { AnyTool, BaseToolRunOptions, ToolError, ToolOutput } from "@/tools/base.js";
 import {
@@ -33,19 +32,20 @@ import {
 import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
 import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { NonUndefined } from "@/internals/types.js";
+import { ChatModelOutput } from "@/backend/chat.js";
 
 export interface BeeRunInput {
   prompt: string | null;
 }
 
 export interface BeeRunOutput {
-  result: BaseMessage;
+  result: Message;
   iterations: BeeAgentRunIteration[];
   memory: BaseMemory;
 }
 
 export interface BeeAgentRunIteration {
-  raw: ChatLLMOutput;
+  raw: ChatModelOutput;
   state: BeeIterationResult;
 }
 
@@ -73,7 +73,7 @@ export interface BeeCallbacks {
   error?: Callback<{ error: Error; meta: BeeMeta }>;
   retry?: Callback<{ meta: BeeMeta }>;
   success?: Callback<{
-    data: BaseMessage;
+    data: Message;
     iterations: BeeAgentRunIteration[];
     memory: BaseMemory;
     meta: BeeMeta;

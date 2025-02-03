@@ -19,19 +19,18 @@ import { AgentMeta } from "@/agents/types.js";
 import { GetRunContext } from "@/context.js";
 import { Callback, Emitter } from "@/emitter/emitter.js";
 import { BaseMemory } from "@/memory/base.js";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
 import { isTruthy, last } from "remeda";
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
+import { AssistantMessage, Message, Role, SystemMessage, UserMessage } from "@/backend/message.js";
 import {
   StreamlitAgentSystemPrompt,
   StreamlitAgentTemplates,
 } from "@/agents/experimental/streamlit/prompts.js";
-import { BaseLLMOutput } from "@/llms/base.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { findFirstPair } from "@/internals/helpers/string.js";
+import { ChatModel, ChatModelOutput } from "@/backend/chat.js";
 
 export interface StreamlitAgentInput {
-  llm: ChatLLM<ChatLLMOutput>;
+  llm: ChatModel;
   memory: BaseMemory;
   templates?: Partial<StreamlitAgentTemplates>;
 }
@@ -54,7 +53,7 @@ interface Result {
 
 export interface StreamlitRunOutput {
   result: Result;
-  message: BaseMessage;
+  message: Message;
   memory: BaseMemory;
 }
 
@@ -64,7 +63,7 @@ export interface StreamlitEvents {
     state: Readonly<{
       content: string;
     }>;
-    chunk: BaseLLMOutput;
+    chunk: ChatModelOutput;
   }>;
 }
 
@@ -102,8 +101,9 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
     const { userMessage, runMemory } = await this.prepare(input);
 
     let content = "";
-    for await (const chunk of this.input.llm.stream(runMemory.messages, {
-      signal: run.signal,
+    for await (const chunk of this.input.llm.createStream({
+      messages: runMemory.messages,
+      abortSignal: run.signal,
     })) {
       const delta = chunk.getTextContent();
       content += delta;
@@ -111,10 +111,7 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
     }
     const result = this.parse(content);
 
-    const assistantMessage = BaseMessage.of({
-      role: Role.ASSISTANT,
-      text: content,
-    });
+    const assistantMessage = new AssistantMessage(content);
     await this.memory.addMany([userMessage, assistantMessage].filter(isTruthy));
 
     return {
@@ -125,26 +122,18 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
   }
 
   protected async prepare(input: StreamlitRunInput) {
-    const systemMessage = BaseMessage.of({
-      role: Role.SYSTEM,
-      text: (this.input.templates?.system ?? StreamlitAgentSystemPrompt).render({}),
-    });
+    const systemMessage = new SystemMessage(
+      (this.input.templates?.system ?? StreamlitAgentSystemPrompt).render({}),
+    );
 
     const userMessage =
       input.prompt !== null || this.memory.isEmpty()
-        ? BaseMessage.of({
-            role: Role.USER,
-            text: input.prompt ?? "No message.",
-            meta: {
-              createdAt: new Date(),
-            },
-          })
+        ? new UserMessage(input.prompt ?? "No message.", { createdAt: new Date() })
         : null;
 
     const inputMessages = [...this.memory.messages, userMessage].filter(isTruthy);
 
     const runMemory = new TokenMemory({
-      llm: this.input.llm,
       capacityThreshold: 0.85,
       syncThreshold: 0.6,
       handlers: {

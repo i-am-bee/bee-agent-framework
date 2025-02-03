@@ -1,5 +1,5 @@
 import { SlidingMemory } from "bee-agent-framework/memory/slidingMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Message } from "@/backend/message.js";
 
 const memory = new SlidingMemory({
   size: 3, // (required) number of messages that can be in the memory at a single moment
@@ -10,11 +10,11 @@ const memory = new SlidingMemory({
   },
 });
 
-await memory.add(BaseMessage.of({ role: "system", text: "You are a guide through France." }));
-await memory.add(BaseMessage.of({ role: "user", text: "What is the capital?" }));
-await memory.add(BaseMessage.of({ role: "assistant", text: "Paris" }));
-await memory.add(BaseMessage.of({ role: "user", text: "What language is spoken there?" })); // removes the first user's message
-await memory.add(BaseMessage.of({ role: "assistant", text: "French" })); // removes the first assistant's message
+await memory.add(Message.of({ role: "system", text: "You are a guide through France." }));
+await memory.add(Message.of({ role: "user", text: "What is the capital?" }));
+await memory.add(Message.of({ role: "assistant", text: "Paris" }));
+await memory.add(Message.of({ role: "user", text: "What language is spoken there?" })); // removes the first user's message
+await memory.add(Message.of({ role: "assistant", text: "French" })); // removes the first assistant's message
 
 console.info(memory.isEmpty()); // false
 console.log(memory.messages.length); // 3

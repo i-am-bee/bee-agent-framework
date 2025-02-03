@@ -1,10 +1,10 @@
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
 const agent = new BeeAgent({
   memory: new UnconstrainedMemory(),
-  llm: new OllamaChatLLM(),
+  llm: new OllamaChatModel("llama3.1"),
   tools: [],
 });
 await agent.run({ prompt: "Hello world!" });

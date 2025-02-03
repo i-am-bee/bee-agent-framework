@@ -1,21 +1,13 @@
 import "dotenv/config";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
-import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
+import { GroqChatModel } from "bee-agent-framework/adapters/groq/backend/chat";
+import { UserMessage } from "bee-agent-framework/backend/message";
 
-const llm = new GroqChatLLM({
-  modelId: "gemma2-9b-it",
-  parameters: {
-    temperature: 0.7,
-    max_tokens: 1024,
-    top_p: 1,
-  },
+const llm = new GroqChatModel("gemma2-9b-it");
+
+const response = await llm.create({
+  messages: [new UserMessage("Hello!")],
+  temperature: 0.7,
+  maxTokens: 1024,
+  topP: 1,
 });
-
-console.info("Meta", await llm.meta());
-const response = await llm.generate([
-  BaseMessage.of({
-    role: "user",
-    text: "Hello world!",
-  }),
-]);
 console.info(response.getTextContent());

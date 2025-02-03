@@ -81,7 +81,7 @@ _Source: [examples/emitter/advanced.ts](/examples/emitter/advanced.ts)_
 
 ```ts
 import { Callback, Emitter } from "bee-agent-framework/emitter/emitter";
-import { BaseLLM } from "bee-agent-framework/llms/base";
+import { ChatModel } from "@/backend/chat.js";
 
 interface Events {
   update: Callback<{ data: string }>;
@@ -102,7 +102,7 @@ emitter.match("*.*", async (data, event) => {});
 
 // Match events by providing a filter function
 emitter.match(
-  (event) => event.creator instanceof BaseLLM,
+  (event) => event.creator instanceof ChatModel,
   async (data, event) => {},
 );
 
@@ -164,10 +164,10 @@ Typically, you consume out-of-the-box modules that use the `Emitter` concept on 
 ```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 
 const agent = new BeeAgent({
-  llm: new OllamaChatLLM(),
+  llm: new OllamaChatModel("llama3.1"),
   memory: new UnconstrainedMemory(),
   tools: [],
 });

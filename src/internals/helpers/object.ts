@@ -133,8 +133,10 @@ export function customMerge<T extends NonNullable<unknown>>(
 }
 
 export function mapObj<T extends object>(obj: T) {
-  return function <K extends keyof T>(fn: (key: K, value: T[K]) => T[K]): T {
-    const updated: T = Object.assign({}, obj);
+  return function <K extends keyof T, R = T[K]>(
+    fn: (key: K, value: T[K]) => R,
+  ): Record<keyof T, R> {
+    const updated = {} as Record<keyof T, R>;
     for (const pair of Object.entries(obj)) {
       const [key, value] = pair as [K, T[K]];
       updated[key] = fn(key, value);

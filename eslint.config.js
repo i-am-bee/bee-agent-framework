@@ -9,15 +9,11 @@ import stylisticJs from "@stylistic/eslint-plugin-js";
 
 export default tseslint.config(
   {
-    ignores: ["node_modules/**", "dist/**", "scripts/ibm_vllm_generate_protos/**"],
+    ignores: ["node_modules/**", "dist/**"],
   },
   eslint.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
-  {
-    files: ["src/adapters/ibm-vllm/types.ts"],
-    rules: { "@typescript-eslint/unified-signatures": "off" },
-  },
   {
     files: ["**/*.md/**"],
     languageOptions: {
@@ -88,6 +84,7 @@ export default tseslint.config(
           ignorePattern: /^(?![\s\S]*Copyright \d+ IBM Corp.)[\s\S]+$/u.source,
         },
       ],
+      "@typescript-eslint/class-literal-property-style": "off",
     },
   },
   {
