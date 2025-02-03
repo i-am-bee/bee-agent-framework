@@ -8,15 +8,13 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "asgiref>=3.8.1",
-    "click>=8.1.8",
     "pydantic>=2.10.6",
     "pydantic-settings>=2.7.1",
     "requests>=2.32.3",
 ]
 
 [project.scripts]
-beeai = "beeai_cli:cli"
+beeai-cli = "beeai_cli:app"
 
 [build-system]
 requires = ["hatchling"]

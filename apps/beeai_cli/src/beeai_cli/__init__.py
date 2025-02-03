@@ -1,4 +1,8 @@
-from beeai_cli.cli import cli
+from beeai_cli.async_typer import AsyncTyper
+import beeai_cli.commands.tool
 
-if __name__ == '__main__':
-    cli()
+app = AsyncTyper()
+app.add_typer(beeai_cli.commands.tool.app, name="tool")
+
+if __name__ == "__main__":
+    app()
