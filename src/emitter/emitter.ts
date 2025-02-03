@@ -21,6 +21,7 @@ import {
   EventMeta,
   EventTrace,
   Matcher,
+  MatcherFn,
   StringKey,
 } from "@/emitter/types.js";
 export type { EventMeta, EventTrace, Callback };
@@ -49,7 +50,7 @@ export interface EmitterChildInput<E extends object = object> {
 }
 
 interface Listener<T = any> {
-  readonly match: (event: EventMeta) => boolean;
+  readonly match: MatcherFn;
   readonly raw: Matcher;
   readonly callback: Callback<T>;
   readonly options?: EmitterOptions;
@@ -156,28 +157,53 @@ export class Emitter<T = Record<keyof any, Callback<unknown>>> extends Serializa
   }
 
   match<L>(matcher: Matcher, callback: Callback<L>, options?: EmitterOptions): CleanupFn {
+    const createMatcher = (): MatcherFn => {
+      const matchers: MatcherFn[] = [];
+      let matchNested = options?.matchNested;
+
+      if (matcher === "*") {
+        matchNested ??= false;
+        matchers.push((event) => event.path === createFullPath(this.namespace, event.name));
+      } else if (matcher === "*.*") {
+        matchNested ??= false;
+        matchers.push(() => true);
+      } else if (matcher instanceof RegExp) {
+        matchNested ??= true;
+        matchers.push((event) => matcher.test(event.path));
+      } else if (typeof matcher === "function") {
+        matchNested ??= false;
+        matchers.push(matcher);
+      } else if (typeof matcher === "string") {
+        if (isPath(matcher)) {
+          matchNested ??= true;
+          matchers.push((event) => event.path === matcher);
+        } else {
+          matchNested ??= false;
+          matchers.push(
+            (event) =>
+              event.name === matcher && event.path === createFullPath(this.namespace, event.name),
+          );
+        }
+      } else {
+        throw new EmitterError("Invalid matcher provided!");
+      }
+
+      if (!matchNested) {
+        const matchSameRun = (event: EventMeta) => {
+          // global observability x scoped observability
+          return !this.trace?.runId ? true : this.trace?.runId === event.trace?.runId;
+        };
+        matchers.unshift(matchSameRun);
+      }
+
+      return (event) => matchers.every((matcher) => matcher(event));
+    };
+
     const listener: Listener = {
       options,
       callback,
       raw: matcher,
-      match: (() => {
-        if (matcher === "*") {
-          return (event) => event.path === createFullPath(this.namespace, event.name);
-        } else if (matcher === "*.*") {
-          return () => true;
-        } else if (matcher instanceof RegExp) {
-          return (event) => matcher.test(event.path);
-        } else if (typeof matcher === "function") {
-          return matcher;
-        } else if (typeof matcher === "string") {
-          return isPath(matcher)
-            ? (event) => event.path === matcher
-            : (event) =>
-                event.name === matcher && event.path === createFullPath(this.namespace, event.name);
-        } else {
-          throw new EmitterError("Invalid matcher provided!");
-        }
-      })(),
+      match: createMatcher(),
     };
     this.listeners.add(listener);
 

@@ -17,7 +17,8 @@
 import { AnyVoid } from "@/internals/types.js";
 import { Emitter } from "@/emitter/emitter.js";
 
-export type Matcher = "*" | "*.*" | RegExp | ((event: EventMeta) => boolean);
+export type MatcherFn = (event: EventMeta) => boolean;
+export type Matcher = "*" | "*.*" | RegExp | MatcherFn;
 //export type Callback<T> = ((value: T) => AnyVoid) | ((value: T, event: EventMeta) => AnyVoid);
 export type InferCallbackValue<T> = NonNullable<T> extends Callback<infer P> ? P : never;
 export type Callback<T> = (value: T, event: EventMeta) => AnyVoid;
@@ -27,6 +28,7 @@ export interface EmitterOptions {
   isBlocking?: boolean;
   once?: boolean;
   persistent?: boolean;
+  matchNested?: boolean;
 }
 export interface EventTrace {
   id: string;
