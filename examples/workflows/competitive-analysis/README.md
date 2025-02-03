@@ -5,6 +5,7 @@ A workflow built with the BeeAI Framework that automates competitor research and
 ## Workflow Overview
 
 This workflow helps streamline competitive research by:
+
 1. Identifying Competitors: Automatically generates a list of competitors in a given industry or from a custom list you provide.
 2. Selecting Competitors for Analysis: Chooses which competitor to analyze next from the list.
 3. Conducting Web Research: Uses the Tavily API to gather relevant data about each competitor.
@@ -16,13 +17,13 @@ This workflow helps streamline competitive research by:
 stateDiagram-v2
     [*] --> GENERATE_COMPETITORS
     GENERATE_COMPETITORS --> SELECT_COMPETITOR
-    
+
     SELECT_COMPETITOR --> WEB_RESEARCH: More competitors
     SELECT_COMPETITOR --> FINALIZE_SUMMARY: All done
-    
+
     WEB_RESEARCH --> CATEGORIZE_FINDINGS
     CATEGORIZE_FINDINGS --> SELECT_COMPETITOR
-    
+
     FINALIZE_SUMMARY --> REFLECTION
     REFLECTION --> GENERATE_COMPETITORS: Needs improvement
     REFLECTION --> [*]: Analysis complete
@@ -38,15 +39,20 @@ stateDiagram-v2
 ## How to Use
 
 1. Clone the Repository
+
 ```
 git clone https://github.com/jenna-winkler/beeAI-competitive-analysis-workflow`
 cd competitive-analysis-workflow
 ```
+
 2. Install Dependencies
+
 ```
 npm install
 ```
+
 4. Set Up Environment Variables
+
 ```
 # Copy the example environment file
 cp .env.example .env
@@ -55,7 +61,9 @@ cp .env.example .env
 # Get your API key from https://tavily.com
 TAVILY_API_KEY=your-api-key-here
 ```
+
 4. Run the Workflow with a direct JSON input
+
 ```
 # Analyze a specific industry
 npm start <<< '{"industry": "Electric Vehicles"}'
@@ -67,7 +75,7 @@ npm start <<< '{"industry": "Open Source AI Agent Frameworks", "specifiedCompeti
 5. It will then run through the workflow steps, providing logs and insights along the way.
 
 6. Upon completion, it will output the final competitive analysis.
-   
+
 Example Output
 
 ```markdown
@@ -78,56 +86,123 @@ Example Output
 Competitive analysis of CrewAI, Relevance AI, LangGraph, AutoGen, OpenAI
 
 ## CrewAI
-* CrewAI is an open-source framework for managing AI agents, offering task automation and multi-agent collaboration.
-* It provides tools to streamline workflows and enhance agent efficiency.
-* Open-source framework allowing developers to build and manage AI agents with ease.
-* Portkey Observability for comprehensive monitoring and optimization of AI agents.
-* Role-based orchestration enabling agents to assume distinct roles in collaborative tasks.
+
+- CrewAI is an open-source framework for managing AI agents, enabling collaboration and automation.
+- It offers task automation and role-based orchestration, which are key differentiators.
+- Open-source framework allowing collaboration among multiple AI agents.
+- Task automation with role-based orchestration.
+- Portkey observability for monitoring and optimization of agent performance.
 
 ## Relevance AI
-* Relevance AI is a no-code platform for building custom AI agents.
-* It offers low-code environment for creating automation workflows.
-* The platform supports various business functions like sales and BDR activities.
-* Customizable AI Agents with unique names, avatars, and descriptions.
-* Low-code environment for easy deployment of AI solutions.
-* Seamless integration with existing tools and workflows.
+
+- Relevance AI is a no-code platform for building and deploying AI agents and automation workflows.
+- It offers tools like Gait and Cart.ai for collaboration and business automation.
+- The platform emphasizes ease of use with its no-code interface.
+- No-code platform for creating AI agents and automation workflows
+- Gait: AI-assisted code generation with version control
+- Cart.ai: Comprehensive business automation services including coding, CRM, video editing, e-commerce setup, and custom AI development
 
 ## LangGraph
-* LangGraph provides a graph-based framework for building AI agents, enabling complex workflows and state management.
-* It supports seamless integration of human input and external tools/APIs.
-* Graph-based architecture allowing sophisticated stateful agents
-* Built-in support for cyclic workflows and persistence
-* Memory management capabilities for maintaining context over interactions
-* Integration with various LLM models and external tools
+
+- LangGraph provides a comprehensive framework for building advanced AI agents with built-in state management and memory systems.
+- The platform offers robust integration options, including human feedback and persistence capabilities.
+- Stateful AI agents capable of maintaining context over multiple interactions.
+- Built-in memory management to handle complex workflows and persistent data storage.
+- Seamless integration with human input for enhanced decision-making.
+- Graph-based architecture enabling sophisticated workflow design and cyclic processes.
 
 ## AutoGen
-* AutoGen is a multi-agent AI development framework that supports collaboration among multiple AI models and tools.
-* It offers advanced capabilities for building complex workflows through agent interactions.
-* Multi-agent collaboration
-* LLM integration
-* Human-in-the-loop functionality
-* Customizable interaction patterns
+
+- AutoGen is a multi-agent framework designed for building complex AI applications.
+- It supports collaboration between multiple agents, enabling collaborative problem-solving.
+- The platform provides human-in-the-loop capabilities, allowing for human feedback and oversight.
+- Multi-agent collaboration and synergy
+- Human-in-the-loop integration
+- Support for large language models (LLMs)
+- Customizable workflows and task orchestration
 
 ## OpenAI
-* OpenAI is a leader in AI development with strong capabilities in NLP and generative models.
-* Their platform offers comprehensive tools for text generation, knowledge integration, and API access.
-* Generative Pretrained Transformer (GPT) models like ChatGPT that enable advanced natural language processing.
-* File Search tools for integrating external knowledge into AI applications.
+
+- OpenAI offers access to advanced language models like GPT-4 and GPT-4 Turbo.
+- The OpenAI API provides seamless integration for various AI tasks such as text generation, code completion, and image generation.
+- Advanced language models with high capabilities in text generation and understanding.
+- Seamless API integration enabling quick deployment of AI features across applications.
 
 ### Sources
-* Unlocking the Power of AI with CrewAI: A Comprehensive Overview : https://www.squareshift.co/post/unlocking-the-power-of-ai-with-crewai-a-comprehensive-overview
-* CrewAI: Unlocking Collaborative Intelligence in AI Systems : https://insights.codegpt.co/crewai-guide
-* Portkey Observability and Guardrails - CrewAI : https://docs.crewai.com/how-to/portkey-observability
-* Relevance AI: Platform for building custom AI agents to automate ... : https://aiforeasylife.com/tool/relevance-ai/
-* How to Use Relevance AI: A Comprehensive Guide : https://aipure.ai/articles/how-to-use-relevance-ai-a-comprehensive-guide
-* Relevance AI Review 2025: Use Cases, Pricing, and Low-Code Automation ... : https://techspherezone.com/relevance-ai-review-2025-use-cases-pricing-and-low-code-automation-insights/
-* LangGraph Tutorial: A Comprehensive Guide to Building Advanced AI ... : https://dev.to/aragorn_talks/langgraph-tutorial-a-comprehensive-guide-to-building-advanced-ai-agents-l31
-* LangGraph Tutorial: A Comprehensive Guide for Beginners : https://blog.futuresmart.ai/langgraph-tutorial-for-beginners
-* Advanced Features of LangGraph: Summary and Considerations : https://dev.to/jamesli/advanced-features-of-langgraph-summary-and-considerations-3m1e
-* Autogen Overview, Examples, Pros and Cons in 2025 : https://best-of-web.builder.io/library/microsoft/autogen
-* What is AutoGen? Our Full Guide to the Autogen Multi-Agent Platform : https://skimai.com/what-is-autogen-our-full-guide-to-the-autogen-multi-agent-platform/
-* AutoGen AI Agent Frameworks Reviews 2025: Features, Pricing, Pros, Cons ... : https://www.aitoolsty.com/tool/autogen
-* Openai platform overview - Restackio : https://www.restack.io/p/openai-platform-overview
-* OpenAI: A comprehensive overview and guide - Educative : https://www.educative.io/answers/openai-a-comprehensive-overview-and-guide
-* Everything You Need to Know about OpenAI - analyticsdrift.com : https://analyticsdrift.com/everything-you-need-to-know-about-openai/
+
+- Unlocking the Power of AI with CrewAI: A Comprehensive Overview : https://www.squareshift.co/post/unlocking-the-power-of-ai-with-crewai-a-comprehensive-overview
+- CrewAI: Unlocking Collaborative Intelligence in AI Systems : https://insights.codegpt.co/crewai-guide
+- Portkey Observability and Guardrails - CrewAI : https://docs.crewai.com/how-to/portkey-observability
+- Relevance AI Overview, Key Features, Use Cases and Alternatives : https://rushtechhub.com/ai-tool/relevance-ai/
+- Relevance AI Features, Pros, Cons, and Use Cases : https://aipure.ai/products/relevance-ai/features
+- How to Use Relevance AI: A Comprehensive Guide : https://aipure.ai/articles/how-to-use-relevance-ai-a-comprehensive-guide
+- LangGraph Tutorial: A Comprehensive Guide to Building Advanced AI ... : https://dev.to/aragorn_talks/langgraph-tutorial-a-comprehensive-guide-to-building-advanced-ai-agents-l31
+- Concepts - GitHub Pages : https://langchain-ai.github.io/langgraph/concepts/
+- Building Autonomous AI Agents with LangGraph - Coursera : https://www.coursera.org/learn/packt-building-autonomous-ai-agents-with-langgraph-oyjym
+- What is AutoGen? Our Full Guide to the Autogen Multi-Agent Platform : https://skimai.com/what-is-autogen-our-full-guide-to-the-autogen-multi-agent-platform/
+- A Developer's Guide to the AutoGen AI Agent Framework : https://startupnews.fyi/2025/01/07/a-developers-guide-to-the-autogen-ai-agent-framework/
+- Autogen Overview, Examples, Pros and Cons in 2025 : https://best-of-web.builder.io/library/microsoft/autogen
+- Openai platform overview - Restackio : https://www.restack.io/p/openai-platform-overview
+- OpenAI: A comprehensive overview and guide - Educative : https://www.educative.io/answers/openai-a-comprehensive-overview-and-guide
+- A Complete Guide to the OpenAI API | Updated for 2024-25 : https://thirdeyedata.ai/a-complete-guide-to-the-openai-api-step-by-step-guide-for-2024-25/
+- Unlocking the Power of AI with CrewAI: A Comprehensive Overview : https://www.squareshift.co/post/unlocking-the-power-of-ai-with-crewai-a-comprehensive-overview
+- CrewAI: Unlocking Collaborative Intelligence in AI Systems : https://insights.codegpt.co/crewai-guide
+- Portkey Observability and Guardrails - CrewAI : https://docs.crewai.com/how-to/portkey-observability
+- Relevance AI Overview, Key Features, Use Cases and Alternatives : https://rushtechhub.com/ai-tool/relevance-ai/
+- Relevance AI Features, Pros, Cons, and Use Cases : https://aipure.ai/products/relevance-ai/features
+- How to Use Relevance AI: A Comprehensive Guide : https://aipure.ai/articles/how-to-use-relevance-ai-a-comprehensive-guide
+- LangGraph Tutorial: A Comprehensive Guide to Building Advanced AI ... : https://dev.to/aragorn_talks/langgraph-tutorial-a-comprehensive-guide-to-building-advanced-ai-agents-l31
+- Concepts - GitHub Pages : https://langchain-ai.github.io/langgraph/concepts/
+- Building Autonomous AI Agents with LangGraph - Coursera : https://www.coursera.org/learn/packt-building-autonomous-ai-agents-with-langgraph-oyjym
+- What is AutoGen? Our Full Guide to the Autogen Multi-Agent Platform : https://skimai.com/what-is-autogen-our-full-guide-to-the-autogen-multi-agent-platform/
+- A Developer's Guide to the AutoGen AI Agent Framework : https://startupnews.fyi/2025/01/07/a-developers-guide-to-the-autogen-ai-agent-framework/
+- Autogen Overview, Examples, Pros and Cons in 2025 : https://best-of-web.builder.io/library/microsoft/autogen
+- Openai platform overview - Restackio : https://www.restack.io/p/openai-platform-overview
+- OpenAI: A comprehensive overview and guide - Educative : https://www.educative.io/answers/openai-a-comprehensive-overview-and-guide
+- A Complete Guide to the OpenAI API | Updated for 2024-25 : https://thirdeyedata.ai/a-complete-guide-to-the-openai-api-step-by-step-guide-for-2024-25/
+- Unlocking the Power of AI with CrewAI: A Comprehensive Overview : https://www.squareshift.co/post/unlocking-the-power-of-ai-with-crewai-a-comprehensive-overview
+- CrewAI: Unlocking Collaborative Intelligence in AI Systems : https://insights.codegpt.co/crewai-guide
+- Portkey Observability and Guardrails - CrewAI : https://docs.crewai.com/how-to/portkey-observability
+- Relevance AI Overview, Key Features, Use Cases and Alternatives : https://rushtechhub.com/ai-tool/relevance-ai/
+- Relevance AI Features, Pros, Cons, and Use Cases : https://aipure.ai/products/relevance-ai/features
+- How to Use Relevance AI: A Comprehensive Guide : https://aipure.ai/articles/how-to-use-relevance-ai-a-comprehensive-guide
+- LangGraph Tutorial: A Comprehensive Guide to Building Advanced AI ... : https://dev.to/aragorn_talks/langgraph-tutorial-a-comprehensive-guide-to-building-advanced-ai-agents-l31
+- Concepts - GitHub Pages : https://langchain-ai.github.io/langgraph/concepts/
+- Building Autonomous AI Agents with LangGraph - Coursera : https://www.coursera.org/learn/packt-building-autonomous-ai-agents-with-langgraph-oyjym
+- What is AutoGen? Our Full Guide to the Autogen Multi-Agent Platform : https://skimai.com/what-is-autogen-our-full-guide-to-the-autogen-multi-agent-platform/
+- A Developer's Guide to the AutoGen AI Agent Framework : https://startupnews.fyi/2025/01/07/a-developers-guide-to-the-autogen-ai-agent-framework/
+- Autogen Overview, Examples, Pros and Cons in 2025 : https://best-of-web.builder.io/library/microsoft/autogen
+- Openai platform overview - Restackio : https://www.restack.io/p/openai-platform-overview
+- OpenAI: A comprehensive overview and guide - Educative : https://www.educative.io/answers/openai-a-comprehensive-overview-and-guide
+- A Complete Guide to the OpenAI API | Updated for 2024-25 : https://thirdeyedata.ai/a-complete-guide-to-the-openai-api-step-by-step-guide-for-2024-25/
+- Unlocking the Power of AI with CrewAI: A Comprehensive Overview : https://www.squareshift.co/post/unlocking-the-power-of-ai-with-crewai-a-comprehensive-overview
+- CrewAI: Unlocking Collaborative Intelligence in AI Systems : https://insights.codegpt.co/crewai-guide
+- Portkey Observability and Guardrails - CrewAI : https://docs.crewai.com/how-to/portkey-observability
+- Relevance AI Overview, Key Features, Use Cases and Alternatives : https://rushtechhub.com/ai-tool/relevance-ai/
+- Relevance AI Features, Pros, Cons, and Use Cases : https://aipure.ai/products/relevance-ai/features
+- How to Use Relevance AI: A Comprehensive Guide : https://aipure.ai/articles/how-to-use-relevance-ai-a-comprehensive-guide
+- LangGraph Tutorial: A Comprehensive Guide to Building Advanced AI ... : https://dev.to/aragorn_talks/langgraph-tutorial-a-comprehensive-guide-to-building-advanced-ai-agents-l31
+- Concepts - GitHub Pages : https://langchain-ai.github.io/langgraph/concepts/
+- Building Autonomous AI Agents with LangGraph - Coursera : https://www.coursera.org/learn/packt-building-autonomous-ai-agents-with-langgraph-oyjym
+- What is AutoGen? Our Full Guide to the Autogen Multi-Agent Platform : https://skimai.com/what-is-autogen-our-full-guide-to-the-autogen-multi-agent-platform/
+- A Developer's Guide to the AutoGen AI Agent Framework : https://startupnews.fyi/2025/01/07/a-developers-guide-to-the-autogen-ai-agent-framework/
+- Autogen Overview, Examples, Pros and Cons in 2025 : https://best-of-web.builder.io/library/microsoft/autogen
+- Openai platform overview - Restackio : https://www.restack.io/p/openai-platform-overview
+- OpenAI: A comprehensive overview and guide - Educative : https://www.educative.io/answers/openai-a-comprehensive-overview-and-guide
+- A Complete Guide to the OpenAI API | Updated for 2024-25 : https://thirdeyedata.ai/a-complete-guide-to-the-openai-api-step-by-step-guide-for-2024-25/
+
+## Reflection Notes
+
+- The analysis lacks depth in comparing specific capabilities of each competitor.
+- Key functionalities or features are missing from the critique, making it difficult to provide actionable insights.
+- The sources and evidence used are not clearly cited, which undermines credibility.
+- There is a lack of clarity in how each framework positions itself in the market.
+- Enhance the analysis by including detailed comparisons of unique features across competitors.
+- Ensure all key functionalities or features are identified and thoroughly discussed.
+- Improve citation formatting to clearly reference sources and evidence.
+- Clarify the market positioning of each framework, highlighting their unique selling points.
+- Enhance the analysis by including detailed comparisons of unique features across competitors.
+- Ensure all key functionalities or features are identified and thoroughly discussed.
+- Improve citation formatting to clearly reference sources and evidence.
+- Clarify the market positioning of each framework, highlighting their unique selling points.
 ```
