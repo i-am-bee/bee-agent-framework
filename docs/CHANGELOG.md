@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.0.61](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.60...v0.0.61) (2025-02-03)
+
+### Features
+
+- **emitter:** allow context override ([76b6442](https://github.com/i-am-bee/bee-agent-framework/commit/76b64426bc7e65b0166f8cb63ef723793ac84b59))
+- **emitter:** update event matching conditions ([7994282](https://github.com/i-am-bee/bee-agent-framework/commit/7994282f8541ec67dd0d6c93a2b0ead0dc1dac39))
+
+### Bug Fixes
+
+- **agents:** add missing isRunning check ([beca613](https://github.com/i-am-bee/bee-agent-framework/commit/beca6134eec9a42cae0168a521b9936ec094c7d0))
+
 ## [0.0.60](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.59...v0.0.60) (2025-02-03)
 
 ### Features
