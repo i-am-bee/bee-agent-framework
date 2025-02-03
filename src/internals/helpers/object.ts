@@ -111,22 +111,6 @@ export function updateObject<T extends object, L extends object>(
   }
 }
 
-export function createNonOverridableObject<T extends object>(target: T) {
-  return new Proxy<typeof target>(target, {
-    set(target: any, k: keyof any, v) {
-      const existingValue = target[k];
-      if (existingValue === undefined || existingValue === null) {
-        target[k] = v;
-        return true;
-      }
-
-      // eslint-disable-next-line
-      console.error(`Property '${String(k)}' already exists. Cannot set value.`);
-      return false;
-    },
-  });
-}
-
 export function customMerge<T extends NonNullable<unknown>>(
   results: T[],
   processors: {

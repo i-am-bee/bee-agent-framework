@@ -19,7 +19,6 @@ import { Emitter } from "@/emitter/emitter.js";
 import { createRandomHash } from "@/internals/helpers/hash.js";
 import { omit } from "remeda";
 import { Callback } from "@/emitter/types.js";
-import { createNonOverridableObject } from "@/internals/helpers/object.js";
 import { registerSignals } from "@/internals/helpers/cancellation.js";
 import { Serializable } from "@/internals/serializable.js";
 import { executeSequentially, LazyPromise } from "@/internals/helpers/promise.js";
@@ -112,9 +111,7 @@ export class RunContext<T extends RunInstance, P = any> extends Serializable {
     this.runId = createRandomHash(5);
     this.parentId = parent?.runId;
     this.groupId = parent?.groupId ?? createRandomHash();
-    this.context = createNonOverridableObject(
-      omit((parent?.context ?? {}) as any, ["id", "parentId"]),
-    );
+    this.context = omit((parent?.context ?? {}) as any, ["id", "parentId"]);
 
     this.controller = new AbortController();
     registerSignals(this.controller, [input.signal, parent?.signal]);
