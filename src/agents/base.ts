@@ -53,6 +53,7 @@ export abstract class BaseAgent<
       { signal: options?.signal, params: [input, options] as const },
       async (context) => {
         try {
+          this.isRunning = true;
           // @ts-expect-error
           return await this._run(input, options, context);
         } catch (e) {
