@@ -39,6 +39,13 @@ if [[ -z "$AUTHOR" ]]; then
   exit 1
 fi
 
+# Check if 'nwa' command is not available and 'brew' is available
+if ! command -v nwa &> /dev/null && command -v brew &> /dev/null; then
+  echo "Installing 'nwa' via 'brew' (https://github.com/B1NARY-GR0UP/nwa)"
+  brew tap B1NARY-GR0UP/nwa
+  brew install nwa
+fi
+
 # Check if 'nwa' command is not available and 'go' is available, then install 'nwa'
 if ! command -v nwa &> /dev/null && command -v go &> /dev/null; then
   echo "Installing 'nwa' via 'go' (https://github.com/B1NARY-GR0UP/nwa)"
