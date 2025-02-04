@@ -15,19 +15,18 @@
  */
 
 import { OpenAIChatModelId, OpenAIChatSettings } from "@ai-sdk/openai/internal";
-import { createVercelAIChatProvider } from "@/adapters/vercel/backend/chat.js";
 import { createOpenAIClient } from "@/adapters/openai/backend/client.js";
 import { OpenAIProviderSettings } from "@ai-sdk/openai";
-import { BackendProviderConfig } from "@/backend/constants.js";
+import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 
-export const OpenAIChatModel = createVercelAIChatProvider(
-  BackendProviderConfig.OpenAI,
-  (
+export class OpenAIChatModel extends VercelChatModel {
+  constructor(
     modelId: OpenAIChatModelId,
     settings?: OpenAIChatSettings,
     clientSettings?: OpenAIProviderSettings,
-  ) => {
+  ) {
     const client = createOpenAIClient(clientSettings);
-    return client.chat(modelId, settings);
-  },
-);
+    const model = client.chat(modelId, settings);
+    super(model);
+  }
+}

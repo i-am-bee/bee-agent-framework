@@ -21,7 +21,7 @@ import { FrameworkError } from "@/errors.js";
 import { ChatModelCache } from "@/backend/chat.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { shallowCopy } from "@/serializer/utils.js";
-import { RunContext } from "@/context.js";
+import { GetRunContext, RunContext } from "@/context.js";
 import { pRetry } from "@/internals/helpers/retry.js";
 import { NullCache } from "@/cache/nullCache.js";
 import { FullModelName, loadProvider, parseModel } from "@/backend/utils.js";
@@ -92,6 +92,6 @@ export abstract class EmbeddingModel extends Serializable {
 
   protected abstract _create(
     input: EmbeddingModelInput,
-    run: RunContext<this>,
+    run: GetRunContext<typeof this>,
   ): Promise<EmbeddingModelOutput>;
 }

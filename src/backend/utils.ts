@@ -17,13 +17,13 @@
 import { ValueError } from "@/errors.js";
 import { BackendProvider } from "@/backend/provider.js";
 import { ClassConstructor } from "@/internals/types.js";
-import { BackendProviderConfig, ProviderDef, ProviderName } from "@/backend/constants.js";
+import { BackendProviders, ProviderDef, ProviderName } from "@/backend/constants.js";
 
 export type FullModelName = `${ProviderName}:${string}`;
 
 function findProviderDef(value: string): ProviderDef | null {
   return (
-    Object.values(BackendProviderConfig).find((p) => p.name === value || p.module === value) ?? null
+    Object.values(BackendProviders).find((p) => p.name === value || p.module === value) ?? null
   );
 }
 
@@ -41,7 +41,9 @@ export async function loadProvider(
   options?: Record<string, any>,
 ) {
   const { providerDef } = parseModel(name);
-  const module = await import(`../adapters/${providerDef.module}/backend/provider.js`); // TODO: will not work
+  const module = await import(
+    `bee-agent-framework/adapters/${providerDef.module}/backend/provider`
+  );
   const TargetClass: ClassConstructor<BackendProvider> = module[`${providerDef.name}Provider`];
   return new TargetClass(options);
 }

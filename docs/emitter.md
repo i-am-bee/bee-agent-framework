@@ -81,7 +81,7 @@ _Source: [examples/emitter/advanced.ts](/examples/emitter/advanced.ts)_
 
 ```ts
 import { Callback, Emitter } from "bee-agent-framework/emitter/emitter";
-import { ChatModel } from "@/backend/chat.js";
+import { ChatModel } from "bee-agent-framework/backend/chat";
 
 interface Events {
   update: Callback<{ data: string }>;
@@ -164,7 +164,7 @@ Typically, you consume out-of-the-box modules that use the `Emitter` concept on 
 ```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const agent = new BeeAgent({
   llm: new OllamaChatModel("llama3.1"),

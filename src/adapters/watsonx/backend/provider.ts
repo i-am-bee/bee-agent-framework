@@ -40,7 +40,7 @@ export class WatsonXProvider extends BackendProvider {
     this.client = createWatsonXClient(input);
   }
 
-  chatModel(modelId: string, settings?: WatsonXChatParams) {
+  chatModel(modelId: string, settings?: WatsonXChatParams): WatsonXChatModel {
     return new WatsonXChatModel(
       modelId || this.config.chat.modelId,
       { ...this.config.chat.options, ...settings },
@@ -48,7 +48,7 @@ export class WatsonXProvider extends BackendProvider {
     );
   }
 
-  embeddingModel(modelId: string, settings?: EmbeddingParameters) {
+  embeddingModel(modelId: string, settings?: EmbeddingParameters): WatsonXEmbeddingModel {
     return new WatsonXEmbeddingModel(
       modelId || this.config.embedding.modelId,
       { ...this.config.embedding.options, ...settings },

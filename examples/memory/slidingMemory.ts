@@ -1,5 +1,5 @@
 import { SlidingMemory } from "bee-agent-framework/memory/slidingMemory";
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 
 const memory = new SlidingMemory({
   size: 3, // (required) number of messages that can be in the memory at a single moment

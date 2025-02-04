@@ -17,6 +17,7 @@
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { Message, UserMessage } from "@/backend/message.js";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
+import { sum } from "remeda";
 
 describe("Token Memory", () => {
   const getInstance = (config: {
@@ -25,14 +26,13 @@ describe("Token Memory", () => {
     syncThreshold: number;
     maxTokens: number;
   }) => {
-    const estimateLLM = (msg: Message) => Math.ceil(msg.text.length * config.llmFactor);
-    const estimateLocal = (msg: Message) => Math.ceil(msg.text.length * config.localFactor);
-
     return new TokenMemory({
       maxTokens: config.maxTokens,
       syncThreshold: config.syncThreshold,
       handlers: {
-        estimate: estimateLocal,
+        estimate: (msg) => Math.ceil(msg.text.length * config.localFactor),
+        tokenize: async (msgs) =>
+          sum(msgs.map((msg) => Math.ceil(msg.text.length * config.llmFactor))),
       },
     });
   };

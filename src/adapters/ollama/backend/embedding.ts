@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-import { createVercelAIEmbeddingProvider } from "@/adapters/vercel/backend/embedding.js";
-import { BackendProviderConfig } from "@/backend/constants.js";
 import { OllamaProvider, OllamaProviderSettings } from "ollama-ai-provider";
 import { createOllamaClient } from "@/adapters/ollama/backend/client.js";
+import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
 
 export type OllamaEmbeddingSettings = NonNullable<Parameters<OllamaProvider["embedding"]>[1]>;
 
-export const OllamaEmbeddingModel = createVercelAIEmbeddingProvider(
-  BackendProviderConfig.OpenAI,
-  (
+export class OllamaEmbeddingModel extends VercelEmbeddingModel {
+  constructor(
     modelId: string,
     settings?: OllamaEmbeddingSettings,
     clientSettings?: OllamaProviderSettings,
-  ) => {
+  ) {
     const client = createOllamaClient(clientSettings);
-    return client.embedding(modelId, settings);
-  },
-);
+    const model = client.embedding(modelId, settings);
+    super(model);
+  }
+}

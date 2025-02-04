@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { createVercelAIEmbeddingProvider } from "@/adapters/vercel/backend/embedding.js";
-import { BackendProviderConfig } from "@/backend/constants.js";
+import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
 import { createGroqClient } from "./client.js";
 import { GroqProvider } from "@/adapters/groq/backend/provider.js";
 import { GroqProviderSettings } from "@ai-sdk/groq";
@@ -24,14 +23,14 @@ type Params = Parameters<GroqProvider["embeddingModel"]>;
 export type GroqEmbeddingModelId = NonNullable<Params[0]>;
 export type GroqEmbeddingSettings = Record<string, any>;
 
-export const GroqEmbeddingModel = createVercelAIEmbeddingProvider(
-  BackendProviderConfig.Groq,
-  (
+export class GroqEmbeddingModel extends VercelEmbeddingModel {
+  constructor(
     modelId: GroqEmbeddingModelId,
     settings?: GroqEmbeddingSettings,
     clientSettings?: GroqProviderSettings,
-  ) => {
+  ) {
     const client = createGroqClient(clientSettings);
-    return client.textEmbeddingModel(modelId);
-  },
-);
+    const model = client.textEmbeddingModel(modelId);
+    super(model);
+  }
+}

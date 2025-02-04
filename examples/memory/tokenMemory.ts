@@ -1,5 +1,5 @@
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 
 const memory = new TokenMemory({
   maxTokens: undefined, // optional (default is 128k),

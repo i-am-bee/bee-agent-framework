@@ -1,6 +1,6 @@
 import "dotenv/config.js";
-import { UserMessage } from "@/backend/message.js";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { UserMessage } from "bee-agent-framework/backend/message";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const llm = new OllamaChatModel("llama3.1");
 

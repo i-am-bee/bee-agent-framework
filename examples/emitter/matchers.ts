@@ -1,5 +1,5 @@
 import { Callback, Emitter } from "bee-agent-framework/emitter/emitter";
-import { ChatModel } from "@/backend/chat.js";
+import { ChatModel } from "bee-agent-framework/backend/chat";
 
 interface Events {
   update: Callback<{ data: string }>;

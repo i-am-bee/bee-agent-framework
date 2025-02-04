@@ -6,9 +6,9 @@ import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMem
 import fs from "node:fs";
 import * as path from "node:path";
 import os from "node:os";
-import { GroqChatModel } from "@/adapters/groq/backend/chat.js";
+import { GroqChatModel } from "bee-agent-framework/adapters/groq/backend/chat";
 
-const llm = new GroqChatModel("llama-3.1-70b-versatile");
+const llm = new GroqChatModel("llama-3.3-70b-versatile");
 
 const sqlTool = new SQLTool({
   provider: "sqlite",

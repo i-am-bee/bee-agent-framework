@@ -9,7 +9,7 @@ import { Logger } from "bee-agent-framework/logger/logger";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 Logger.root.level = "silent"; // disable internal logs
 const logger = new Logger({ name: "app", level: "trace" });

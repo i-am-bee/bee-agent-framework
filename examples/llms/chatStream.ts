@@ -1,8 +1,8 @@
 import "dotenv/config.js";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { Message } from "@/backend/message.js";
-import { Role } from "@/backend/message.js";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { Message } from "bee-agent-framework/backend/message";
+import { Role } from "bee-agent-framework/backend/message";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const llm = new OllamaChatModel("llama3.1");
 

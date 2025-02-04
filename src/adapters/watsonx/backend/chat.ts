@@ -25,14 +25,14 @@ import WatsonxAiMlVml_v1, {
 } from "@ibm-cloud/watsonx-ai/dist/watsonx-ai-ml/vml_v1.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { RunContext } from "@/context.js";
+import { GetRunContext } from "@/context.js";
 import { AssistantMessage, Message } from "@/backend/message.js";
 import { ToolCallPart } from "ai";
 import Type = WatsonxAiMlVml_v1.TextChatResponseFormat.Constants.Type;
 
 export type WatsonXChatParams = Omit<
   TextChatParams,
-  "modelId" | "spaceId" | "projectId" | "messages"
+  "modelId" | "spaceId" | "projectId" | "messages" | "toolChoice" | "toolChoiceOption"
 >;
 
 export class WatsonXChatModel extends ChatModel {
@@ -55,14 +55,14 @@ export class WatsonXChatModel extends ChatModel {
     this.client = client ?? createWatsonXClient();
   }
 
-  protected async _create(input: ChatModelInput, run: RunContext<this>) {
+  protected async _create(input: ChatModelInput) {
     // TODO: support abortion (https://github.com/IBM/watsonx-ai-node-sdk/issues/3)
     const { result } = await this.client.instance.textChat(await this.prepareParameters(input));
     const { messages, finishReason, usage } = this.extractResult(result.choices, result.usage);
     return new ChatModelOutput(messages, usage, finishReason);
   }
 
-  async *_createStream(input: ChatModelInput, run: RunContext<this>) {
+  async *_createStream(input: ChatModelInput, run: GetRunContext<this>) {
     const chunks: ChatModelOutput[] = [];
     const stream = await this.client.instance.textChatStream({
       ...(await this.prepareParameters(input)),
@@ -163,6 +163,7 @@ export class WatsonXChatModel extends ChatModel {
 
   createSnapshot() {
     return {
+      ...super.createSnapshot(),
       modelId: this.modelId,
       parameters: shallowCopy(this.parameters),
       client: this.client,

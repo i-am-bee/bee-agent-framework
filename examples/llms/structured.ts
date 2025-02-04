@@ -1,7 +1,7 @@
 import "dotenv/config.js";
 import { z } from "zod";
-import { Message } from "@/backend/message.js";
-import { Role } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
+import { Role } from "bee-agent-framework/backend/message";
 import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const llm = new OllamaChatModel("llama3.1");

@@ -46,12 +46,12 @@ export class BedrockProvider extends BackendProvider {
 
   chatModel(...args: Parameters<typeof this.client.languageModel>) {
     const model = this.client.languageModel(...args);
-    return new BedrockChatModel(model);
+    return BedrockChatModel.fromModel(model);
   }
 
   embeddingModel(...args: Parameters<typeof this.client.embedding>) {
     const model = this.client.embedding(...args);
-    return new BedrockEmbeddingModel(model);
+    return BedrockEmbeddingModel.fromModel(model);
   }
 
   createSnapshot() {

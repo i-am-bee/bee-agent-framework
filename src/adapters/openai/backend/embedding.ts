@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import { createVercelAIEmbeddingProvider } from "@/adapters/vercel/backend/embedding.js";
 import { OpenAIEmbeddingSettings } from "@ai-sdk/openai/internal";
 import { createOpenAIClient } from "@/adapters/openai/backend/client.js";
 import { OpenAIProviderSettings } from "@ai-sdk/openai";
-import { BackendProviderConfig } from "@/backend/constants.js";
+import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
 
-export const OpenAIEmbeddingModel = createVercelAIEmbeddingProvider(
-  BackendProviderConfig.OpenAI,
-  (
+export class OpenAIEmbeddingModel extends VercelEmbeddingModel {
+  constructor(
     modelId: string,
     settings?: OpenAIEmbeddingSettings,
     clientSettings?: OpenAIProviderSettings,
-  ) => {
+  ) {
     const client = createOpenAIClient(clientSettings);
-    return client.embedding(modelId, settings);
-  },
-);
+    const model = client.embedding(modelId, settings);
+    super(model);
+  }
+}

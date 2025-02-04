@@ -3,7 +3,7 @@
 // - @langchain/cohere (or any other provider related package that you would like to use)
 // List of available providers: https://js.langchain.com/v0.2/docs/integrations/chat/
 
-import { UserMessage } from "@/backend/message.js";
+import { UserMessage } from "bee-agent-framework/backend/message";
 import { LangChainChatModel } from "bee-agent-framework/adapters/langchain/backend/chat";
 // @ts-expect-error package not installed
 import { ChatCohere } from "@langchain/cohere";

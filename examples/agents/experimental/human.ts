@@ -8,7 +8,7 @@ import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
 // Import the HumanTool from the updated file
 import { HumanTool } from "../../tools/experimental/human.js";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 // Set up logger
 Logger.root.level = "silent"; // Disable internal logs

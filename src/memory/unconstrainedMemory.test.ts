@@ -18,7 +18,9 @@ import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
 import { Message } from "@/backend/message.js";
 
 describe("Unconstrained Memory", () => {
-  const createMessage = (i: number) => Message.of({ role: "user", text: `${i}` });
+  const date = new Date();
+  const createMessage = (i: number) =>
+    Message.of({ role: "user", text: `${i}`, meta: { createdAt: new Date(date) } });
 
   it("Splices", async () => {
     const memory = new UnconstrainedMemory();

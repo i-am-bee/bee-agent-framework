@@ -1,5 +1,5 @@
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 
 const memory = new UnconstrainedMemory();
 

@@ -68,14 +68,11 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 
 ### LLM Providers
 
-- [`customChatProvider.ts`](/examples/llms/providers/customChatProvider.ts): Custom chat provider implementation
-- [`customProvider.ts`](/examples/llms/providers/customProvider.ts): Custom language model provider
 - [`groq.ts`](/examples/llms/providers/groq.ts): Groq language model integration
 - [`langchain.ts`](/examples/llms/providers/langchain.ts): LangChain integration
 - [`ollama.ts`](/examples/llms/providers/ollama.ts): Ollama model usage
 - [`openai.ts`](/examples/llms/providers/openai.ts): OpenAI integration
 - [`watsonx.ts`](/examples/llms/providers/watsonx.ts): WatsonX integration
-- [`watsonx_verbose.ts`](/examples/llms/providers/watsonx_verbose.ts): Verbose WatsonX usage
 
 ## Logger
 

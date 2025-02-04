@@ -15,22 +15,21 @@
  */
 
 import { GoogleVertexProvider, GoogleVertexProviderSettings } from "@ai-sdk/google-vertex";
-import { createVercelAIChatProvider } from "@/adapters/vercel/backend/chat.js";
-import { BackendProviderConfig } from "@/backend/constants.js";
+import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 import { createVertexAIClient } from "@/adapters/vertexai/backend/client.js";
 
 type Params = Parameters<GoogleVertexProvider["languageModel"]>;
 export type VertexAIModelId = NonNullable<Params[0]>;
 export type VertexAIChatSettings = NonNullable<Params[1]>;
 
-export const VertexAIChatModel = createVercelAIChatProvider(
-  BackendProviderConfig.VertexAI,
-  (
+export class VertexAIChatModel extends VercelChatModel {
+  constructor(
     modelId: VertexAIModelId,
     settings?: VertexAIChatSettings,
     clientSettings?: GoogleVertexProviderSettings,
-  ) => {
+  ) {
     const client = createVertexAIClient(clientSettings);
-    return client.languageModel(modelId, settings);
-  },
-);
+    const model = client.languageModel(modelId, settings);
+    super(model);
+  }
+}

@@ -40,7 +40,7 @@ export class LangChainChatModel extends ChatModel {
   constructor(protected readonly lcLLM: BaseChatModel) {
     super();
     this.emitter = Emitter.root.child({
-      namespace: ["langchain", "backend", "chat"],
+      namespace: ["backend", "langchain", "chat"],
       creator: this,
     });
   }
@@ -152,7 +152,7 @@ export class LangChainChatModel extends ChatModel {
   }
 
   createSnapshot() {
-    return { emitter: this.emitter, lcLLM: this.lcLLM };
+    return { ...super.createSnapshot(), emitter: this.emitter, lcLLM: this.lcLLM };
   }
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {

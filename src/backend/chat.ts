@@ -21,7 +21,7 @@ import { takeBigger } from "@/internals/helpers/number.js";
 import { Callback } from "@/emitter/types.js";
 import { FrameworkError, NotImplementedError } from "@/errors.js";
 import { Emitter } from "@/emitter/emitter.js";
-import { RunContext } from "@/context.js";
+import { GetRunContext, RunContext } from "@/context.js";
 import { createAbortController } from "@/internals/helpers/cancellation.js";
 import { pRetry } from "@/internals/helpers/retry.js";
 import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
@@ -248,16 +248,16 @@ export abstract class ChatModel extends Serializable {
 
   protected abstract _create(
     input: ChatModelInput,
-    run: RunContext<this>,
+    run: GetRunContext<typeof this>,
   ): Promise<ChatModelOutput>;
   protected abstract _createStream(
     input: ChatModelInput,
-    run: RunContext<this>,
+    run: GetRunContext<typeof this>,
   ): AsyncGenerator<ChatModelOutput, ChatModelOutput>;
 
   protected async _createStructure<T>(
     input: ChatModelObjectInput<T>,
-    run: RunContext<this>,
+    run: GetRunContext<typeof this>,
   ): Promise<ChatModelObjectOutput<T>> {
     const { schema, ...options } = input;
     const jsonSchema = toJsonSchema(schema);
@@ -353,6 +353,10 @@ Validation Errors: {{errors}}`,
         }
       },
     };
+  }
+
+  createSnapshot() {
+    return { cache: this.cache, emitter: this.emitter };
   }
 }
 

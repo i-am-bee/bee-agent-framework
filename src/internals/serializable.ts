@@ -42,7 +42,7 @@ export abstract class Serializable<T = unknown> {
     Cache.init(this);
   }
 
-  protected static register<T>(this: SerializableClass<T>, aliases?: string[]) {
+  public static register<T>(this: SerializableClass<T>, aliases?: string[]) {
     Serializer.registerSerializable(this, undefined, aliases);
   }
 

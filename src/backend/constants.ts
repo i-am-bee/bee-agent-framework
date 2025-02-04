@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const BackendProviderConfig = {
+export const BackendProviders = {
   OpenAI: { name: "OpenAI", module: "openai" },
   Azure: { name: "Azure", module: "azure" },
   WatsonX: { name: "WatsonX", module: "watsonx" },
@@ -25,8 +25,6 @@ export const BackendProviderConfig = {
   Dummy: { name: "Dummy", module: "dummy" },
 } as const;
 
-export type ProviderName =
-  (typeof BackendProviderConfig)[keyof typeof BackendProviderConfig]["module"];
-export type ProviderHumanName =
-  (typeof BackendProviderConfig)[keyof typeof BackendProviderConfig]["name"];
-export type ProviderDef = (typeof BackendProviderConfig)[keyof typeof BackendProviderConfig];
+export type ProviderName = (typeof BackendProviders)[keyof typeof BackendProviders]["module"];
+export type ProviderHumanName = (typeof BackendProviders)[keyof typeof BackendProviders]["name"];
+export type ProviderDef = (typeof BackendProviders)[keyof typeof BackendProviders];

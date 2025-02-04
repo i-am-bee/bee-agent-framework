@@ -50,7 +50,7 @@ export class AzureProvider extends BackendProvider {
       ...config.options,
       ...settings,
     });
-    return new AzureChatModel(model);
+    return AzureChatModel.fromModel(model);
   }
 
   embeddingModel(...args: Parameters<typeof this.client.textEmbeddingModel>) {
@@ -62,7 +62,7 @@ export class AzureProvider extends BackendProvider {
       ...settings,
     });
 
-    return new AzureEmbeddingModel(model);
+    return AzureEmbeddingModel.fromModel(model);
   }
 
   createSnapshot() {

@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-import { createVercelAIChatProvider } from "@/adapters/vercel/backend/chat.js";
-import { BackendProviderConfig } from "@/backend/constants.js";
-import { createGroqClient } from "@/adapters/groq/backend/client.js";
+import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 import { GroqProvider } from "@/adapters/groq/backend/provider.js";
 import { GroqProviderSettings } from "@ai-sdk/groq";
+import { createGroqClient } from "@/adapters/groq/backend/client.js";
 
 type Params = Parameters<GroqProvider["chatModel"]>;
 export type GroqModelId = string;
 export type GroqChatSettings = NonNullable<Params[1]>;
 
-export const GroqChatModel = createVercelAIChatProvider(
-  BackendProviderConfig.Groq,
-  (modelId: GroqModelId, settings?: GroqChatSettings, clientSettings?: GroqProviderSettings) => {
+export class GroqChatModel extends VercelChatModel {
+  constructor(
+    modelId: GroqModelId,
+    settings?: GroqChatSettings,
+    clientSettings?: GroqProviderSettings,
+  ) {
     const client = createGroqClient(clientSettings);
-    return client.languageModel(modelId, settings);
-  },
-);
+    const model = client.languageModel(modelId, settings);
+    super(model);
+  }
+}

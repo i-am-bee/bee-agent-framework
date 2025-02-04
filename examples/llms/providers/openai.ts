@@ -1,6 +1,6 @@
 import "dotenv/config.js";
-import { UserMessage } from "@/backend/message.js";
-import { OpenAIChatModel } from "@/adapters/openai/backend/chat.js";
+import { UserMessage } from "bee-agent-framework/backend/message";
+import { OpenAIChatModel } from "bee-agent-framework/adapters/openai/backend/chat";
 
 const llm = new OpenAIChatModel("gpt-4o");
 

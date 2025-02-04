@@ -32,8 +32,8 @@ import { ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
 import { BeeInput, BeeAgent } from "@/agents/bee/agent.js";
 import { BeeRunOptions } from "@/agents/bee/types.js";
-import { BaseMessage } from "@/llms/primitives/message.js";
 import { GetRunContext } from "@/context.js";
+import { Message } from "@/backend/message.js";
 
 export class DeepThinkRunner extends DefaultRunner {
   @Cache({ enumerable: false })
@@ -64,10 +64,10 @@ export class DeepThinkRunner extends DefaultRunner {
       async ({ update, meta, memory }) => {
         if (update.key === "tool_output") {
           await memory.add(
-            BaseMessage.of({
+            Message.of({
               role: "user",
               text: update.value,
-              meta: { success: meta.success },
+              meta: { success: meta.success, createdAt: new Date() },
             }),
           );
         }

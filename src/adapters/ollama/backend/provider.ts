@@ -49,7 +49,7 @@ export class OllamaProvider extends BackendProvider {
       ...this.config.chat.options,
       ...config,
     });
-    return new OllamaChatModel(model);
+    return OllamaChatModel.fromModel(model);
   }
 
   embeddingModel(...args: Parameters<typeof this.client.textEmbeddingModel>) {
@@ -58,7 +58,7 @@ export class OllamaProvider extends BackendProvider {
       ...this.config.embedding.options,
       ...config,
     });
-    return new OllamaEmbeddingModel(model);
+    return OllamaEmbeddingModel.fromModel(model);
   }
 
   createSnapshot() {

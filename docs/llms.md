@@ -38,9 +38,9 @@ Are you interested in creating your own adapter? Jump to the [adding a new provi
 ```ts
 import "dotenv/config.js";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { Message } from "@/backend/message.js";
-import { Role } from "@/backend/message.js";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { Message } from "bee-agent-framework/backend/message";
+import { Role } from "bee-agent-framework/backend/message";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const llm = new OllamaChatModel("llama3.1");
 
@@ -62,16 +62,6 @@ for await (const { prompt } of reader) {
 
 _Source: [examples/llms/chat.ts](/examples/llms/chat.ts)_
 
-> [!NOTE]
->
-> The `generate` method returns a class that extends the base [`ChatLLMOutput`](/src/llms/chat.ts) class.
-> This class allows you to retrieve the response as text using the `getTextContent` method and other useful metadata.
-> To retrieve all messages (chunks) access the `messages` property (getter).
-
-> [!TIP]
->
-> You can enable streaming communication (internally) by passing `{ stream: true }` as a second parameter to the `generate` method.
-
 #### Streaming
 
 <!-- embedme examples/llms/chatStream.ts -->
@@ -79,9 +69,9 @@ _Source: [examples/llms/chat.ts](/examples/llms/chat.ts)_
 ```ts
 import "dotenv/config.js";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { Message } from "@/backend/message.js";
-import { Role } from "@/backend/message.js";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { Message } from "bee-agent-framework/backend/message";
+import { Role } from "bee-agent-framework/backend/message";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const llm = new OllamaChatModel("llama3.1");
 
@@ -111,9 +101,9 @@ _Source: [examples/llms/chatStream.ts](/examples/llms/chatStream.ts)_
 ```ts
 import "dotenv/config.js";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { Message } from "@/backend/message.js";
-import { Role } from "@/backend/message.js";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { Message } from "bee-agent-framework/backend/message";
+import { Role } from "bee-agent-framework/backend/message";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const llm = new OllamaChatModel("llama3.1");
 
@@ -152,8 +142,8 @@ _Source: [examples/llms/chatCallback.ts](/examples/llms/chatCallback.ts)_
 ```ts
 import "dotenv/config.js";
 import { z } from "zod";
-import { Message } from "@/backend/message.js";
-import { Role } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
+import { Role } from "bee-agent-framework/backend/message";
 import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const llm = new OllamaChatModel("llama3.1");
@@ -181,30 +171,3 @@ console.info(response);
 ```
 
 _Source: [examples/llms/structured.ts](/examples/llms/structured.ts)_
-
-## Adding a new provider (adapter)
-
-To use an inference provider that is not mentioned in our providers list feel free to [create a request](https://github.com/i-am-bee/bee-agent-framework/discussions).
-
-If approved and you want to create it on your own, you must do the following things. Let's assume the name of your provider is `Custom.`
-
-- Base location within the framework: `bee-agent-framework/adapters/custom`
-  - Text LLM (filename): `llm.ts` ([example implementation](/examples/llms/providers/customProvider.ts))
-  - Chat LLM (filename): `chat.ts` ([example implementation](/examples/llms/providers/customChatProvider.ts))
-
-> [!IMPORTANT]
->
-> If the target provider provides an SDK, use it.
-
-> [!IMPORTANT]
->
-> All provider-related dependencies (if any) must be included in `devDependencies` and `peerDependencies` in the [`package.json`](/package.json).
-
-> [!TIP]
->
-> To simplify work with the target RestAPI feel free to use the helper [`RestfulClient`](/src/internals/fetcher.ts) class.
-> The client usage can be seen in the WatsonX LLM Adapter [here](/src/adapters/watsonx/llm.ts).
-
-> [!TIP]
->
-> Parsing environment variables should be done via helper functions (`parseEnv` / `hasEnv` / `getEnv`) that can be found [here](/src/internals/env.ts).

@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import { createVercelAIChatProvider } from "@/adapters/vercel/backend/chat.js";
-import type { OpenAIChatSettings } from "@ai-sdk/openai/internal";
-import { createAzureClient } from "@/adapters/azure/backend/client.js";
-import { BackendProviderConfig } from "@/backend/constants.js";
+import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
+import { OpenAIChatSettings } from "@ai-sdk/openai/internal";
 import { AzureOpenAIProviderSettings } from "@ai-sdk/azure";
+import { createOpenAIClient } from "@/adapters/openai/backend/client.js";
 
 export type AzureChatSettings = OpenAIChatSettings;
 
-export const AzureChatModel = createVercelAIChatProvider(
-  BackendProviderConfig.Azure,
-  (modelId: string, settings?: AzureChatSettings, clientSettings?: AzureOpenAIProviderSettings) => {
-    const client = createAzureClient(clientSettings);
-    return client.chat(modelId, settings);
-  },
-);
+export class AzureChatModel extends VercelChatModel {
+  constructor(
+    modelId: string,
+    settings?: AzureChatSettings,
+    clientSettings?: AzureOpenAIProviderSettings,
+  ) {
+    const client = createOpenAIClient(clientSettings);
+    const model = client.chat(modelId, settings);
+    super(model);
+  }
+}

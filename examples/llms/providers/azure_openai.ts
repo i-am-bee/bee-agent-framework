@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { UserMessage } from "@/backend/message.js";
-import { AzureChatModel } from "@/adapters/azure/backend/chat.js";
+import { UserMessage } from "bee-agent-framework/backend/message";
+import { AzureChatModel } from "bee-agent-framework/adapters/azure/backend/chat";
 
 const llm = new AzureChatModel("gpt-4o-mini");
 

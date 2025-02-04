@@ -43,12 +43,12 @@ export class GroqProvider extends BackendProvider {
 
   chatModel(...args: Parameters<typeof this.client.languageModel>) {
     const model = this.client.languageModel(...args);
-    return new GroqChatModel(model);
+    return GroqChatModel.fromModel(model);
   }
 
   embeddingModel(...args: Parameters<typeof this.client.textEmbeddingModel>) {
     const model = this.client.textEmbeddingModel(...args);
-    return new GroqEmbeddingModel(model);
+    return GroqEmbeddingModel.fromModel(model);
   }
 
   createSnapshot() {

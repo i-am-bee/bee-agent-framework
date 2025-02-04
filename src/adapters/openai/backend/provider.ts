@@ -43,12 +43,12 @@ export class OpenAIProvider extends BackendProvider {
 
   chatModel(...args: Parameters<typeof this.client.chat>) {
     const model = this.client.chat(...args);
-    return new OpenAIChatModel(model);
+    return OpenAIChatModel.fromModel(model);
   }
 
   embeddingModel(...args: Parameters<typeof this.client.textEmbeddingModel>) {
     const model = this.client.textEmbeddingModel(...args);
-    return new OpenAIEmbeddingModel(model);
+    return OpenAIEmbeddingModel.fromModel(model);
   }
 
   createSnapshot() {

@@ -1,5 +1,5 @@
 import { BaseMemory } from "bee-agent-framework/memory/base";
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 import { NotImplementedError } from "bee-agent-framework/errors";
 
 export class MyMemory extends BaseMemory {

@@ -220,7 +220,7 @@ describe("Serializer", () => {
         message: {
           __value: {
             role: "system",
-            text: "a",
+            content: [{ type: "text", text: "a" }],
             meta: { __value: {}, __serializer: true, __class: "Object", __ref: "2" },
           },
           __serializer: true,

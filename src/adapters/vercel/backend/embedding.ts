@@ -20,62 +20,65 @@ import {
   EmbeddingModelOutput,
   EmbeddingModelEvents,
 } from "@/backend/embedding.js";
-import { embedMany, EmbeddingModel as VercelEmbeddingModel } from "ai";
-import { ProviderDef } from "@/backend/constants.js";
+import { embedMany, EmbeddingModel as Model } from "ai";
 import { Emitter } from "@/emitter/emitter.js";
-import { RunContext } from "@/context.js";
+import { GetRunContext } from "@/context.js";
+import { toCamelCase } from "remeda";
 
-export function createVercelAIEmbeddingProvider<
-  R extends VercelEmbeddingModel<string>,
-  T extends (...args: any[]) => R,
->(provider: ProviderDef, fn: T) {
-  const DynamicEmbeddingProvider = class extends EmbeddingModel {
-    protected readonly model: R;
-    public readonly emitter: Emitter<EmbeddingModelEvents>;
+type InternalEmbeddingModel = Model<string>;
 
-    constructor(...args: Parameters<T>);
-    constructor(_INTERNAL_MODEL: R);
-    constructor(...args: Parameters<T> | [R]) {
-      super();
-      this.model = typeof args[0] === "object" ? args[0] : fn(...args);
-      this.emitter = Emitter.root.child({
-        namespace: ["backend", provider.module, "embedding"],
-      });
+export class VercelEmbeddingModel<
+  R extends InternalEmbeddingModel = InternalEmbeddingModel,
+> extends EmbeddingModel {
+  protected readonly model: R;
+  public readonly emitter: Emitter<EmbeddingModelEvents>;
+
+  constructor(model: R) {
+    super();
+    this.model = model;
+    this.emitter = Emitter.root.child({
+      namespace: ["backend", this.providerId, "embedding"],
+    });
+  }
+
+  static fromModel<T2 extends InternalEmbeddingModel, T extends VercelEmbeddingModel<T2>>(
+    this: new (...args: any[]) => T,
+    model: T2,
+  ): T {
+    if (this.prototype === VercelEmbeddingModel) {
+      return new VercelEmbeddingModel(model) as T;
+    } else {
+      return Reflect.construct(VercelEmbeddingModel, [model], this) as T;
     }
+  }
 
-    get modelId(): string {
-      return this.model.modelId;
-    }
+  get modelId(): string {
+    return this.model.modelId;
+  }
 
-    get providerId(): string {
-      return this.model.provider;
-    }
+  get providerId(): string {
+    const provider = this.model.provider.split(".")[0].split("-")[0];
+    return toCamelCase(provider);
+  }
 
-    protected async _create(
-      input: EmbeddingModelInput,
-      run: RunContext<this>,
-    ): Promise<EmbeddingModelOutput> {
-      return embedMany<string>({
-        model: this.model,
-        values: input.values,
-        abortSignal: run.signal,
-      });
-    }
+  protected async _create(
+    input: EmbeddingModelInput,
+    run: GetRunContext<this>,
+  ): Promise<EmbeddingModelOutput> {
+    return embedMany<string>({
+      model: this.model,
+      values: input.values,
+      abortSignal: run.signal,
+    });
+  }
 
-    createSnapshot() {
-      return {
-        model: this.model,
-      };
-    }
+  createSnapshot() {
+    return {
+      model: this.model,
+    };
+  }
 
-    loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
-      Object.assign(this, snapshot);
-    }
-  };
-
-  Object.defineProperty(DynamicEmbeddingProvider, "name", {
-    value: `${provider.name}EmbeddingModel`,
-    writable: false,
-  });
-  return DynamicEmbeddingProvider;
+  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
+    Object.assign(this, snapshot);
+  }
 }

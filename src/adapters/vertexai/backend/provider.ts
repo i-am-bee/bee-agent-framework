@@ -46,12 +46,12 @@ export class VertexAIProvider extends BackendProvider {
 
   chatModel(...args: Parameters<typeof this.client.languageModel>) {
     const model = this.client.languageModel(...args);
-    return new VertexAIChatModel(model);
+    return VertexAIChatModel.fromModel(model);
   }
 
   embeddingModel(...args: Parameters<typeof this.client.textEmbeddingModel>) {
     const model = this.client.textEmbeddingModel(...args);
-    return new VertexAIEmbeddingModel(model);
+    return VertexAIEmbeddingModel.fromModel(model);
   }
 
   createSnapshot() {

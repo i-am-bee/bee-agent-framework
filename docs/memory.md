@@ -14,7 +14,7 @@ Memory in the context of an agent refers to the system's capability to store, re
 
 ```ts
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 
 const memory = new UnconstrainedMemory();
 
@@ -46,8 +46,8 @@ _Source: [examples/memory/base.ts](/examples/memory/base.ts)_
 
 ```ts
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { Message } from "@/backend/message.js";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { Message } from "bee-agent-framework/backend/message";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const memory = new UnconstrainedMemory();
 await memory.addMany([
@@ -82,7 +82,7 @@ _Source: [examples/memory/llmMemory.ts](/examples/memory/llmMemory.ts)_
 ```ts
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const agent = new BeeAgent({
   memory: new UnconstrainedMemory(),
@@ -126,7 +126,7 @@ Unlimited in size.
 
 ```ts
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 
 const memory = new UnconstrainedMemory();
 await memory.add(
@@ -151,7 +151,7 @@ Keeps last `k` entries in the memory. The oldest ones are deleted (unless specif
 
 ```ts
 import { SlidingMemory } from "bee-agent-framework/memory/slidingMemory";
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 
 const memory = new SlidingMemory({
   size: 3, // (required) number of messages that can be in the memory at a single moment
@@ -184,7 +184,7 @@ If overflow occurs, the oldest message will be removed.
 
 ```ts
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 
 const memory = new TokenMemory({
   maxTokens: undefined, // optional (default is 128k),
@@ -217,9 +217,9 @@ Only a single summarization of the conversation is preserved. Summarization is u
 <!-- embedme examples/memory/summarizeMemory.ts -->
 
 ```ts
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 import { SummarizeMemory } from "bee-agent-framework/memory/summarizeMemory";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const memory = new SummarizeMemory({
   llm: new OllamaChatModel("llama3.1"),
@@ -247,7 +247,7 @@ To create your memory implementation, you must implement the `BaseMemory` class.
 
 ```ts
 import { BaseMemory } from "bee-agent-framework/memory/base";
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 import { NotImplementedError } from "bee-agent-framework/errors";
 
 export class MyMemory extends BaseMemory {

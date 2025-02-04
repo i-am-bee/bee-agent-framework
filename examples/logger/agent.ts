@@ -2,7 +2,7 @@ import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { Logger } from "bee-agent-framework/logger/logger";
 import { Emitter } from "bee-agent-framework/emitter/emitter";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 // Set up logging
 Logger.defaults.pretty = true;

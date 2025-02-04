@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-import { createVercelAIEmbeddingProvider } from "@/adapters/vercel/backend/embedding.js";
-import { BackendProviderConfig } from "@/backend/constants.js";
+import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
 import { createBedrockClient } from "./client.js";
-import { BedrockProvider } from "@/adapters/bedrock/backend/provider.js";
-import { AmazonBedrockProviderSettings } from "@ai-sdk/amazon-bedrock";
+import { AmazonBedrockProviderSettings, AmazonBedrockProvider } from "@ai-sdk/amazon-bedrock";
 
-type Params = Parameters<BedrockProvider["embeddingModel"]>;
+type Params = Parameters<AmazonBedrockProvider["embedding"]>;
 export type BedrockEmbeddingModelId = NonNullable<Params[0]>;
 export type BedrockEmbeddingSettings = NonNullable<Params[1]>;
 
-export const BedrockEmbeddingModel = createVercelAIEmbeddingProvider(
-  BackendProviderConfig.Groq,
-  (
+export class BedrockEmbeddingModel extends VercelEmbeddingModel {
+  constructor(
     modelId: BedrockEmbeddingModelId,
     settings?: BedrockEmbeddingSettings,
     clientSettings?: AmazonBedrockProviderSettings,
-  ) => {
+  ) {
     const client = createBedrockClient(clientSettings);
-    return client.embedding(modelId, settings);
-  },
-);
+    const model = client.embedding(modelId, settings);
+    super(model);
+  }
+}

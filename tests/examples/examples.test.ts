@@ -40,7 +40,6 @@ const exclude: string[] = [
   "examples/workflows/competitive-analysis/**/*.ts",
   "examples/playground/**/*.ts",
   // prevents 'Too many requests' error on Free Tier
-  "examples/llms/providers/watsonx_verbose.ts",
   !getEnv("WATSONX_API_KEY") && [
     "examples/llms/providers/watson*.ts",
     "examples/agents/experimental/replan.ts",

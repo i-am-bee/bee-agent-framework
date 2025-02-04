@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import { createVercelAIChatProvider } from "@/adapters/vercel/backend/chat.js";
-import { BackendProviderConfig } from "@/backend/constants.js";
+import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 import { OllamaProvider, OllamaProviderSettings } from "ollama-ai-provider";
 import { createOllamaClient } from "@/adapters/ollama/backend/client.js";
 
 export type OllamaChatSettings = NonNullable<Parameters<OllamaProvider["chat"]>[1]>;
 
-export const OllamaChatModel = createVercelAIChatProvider(
-  BackendProviderConfig.Ollama,
-  (modelId: string, settings?: OllamaChatSettings, clientSettings?: OllamaProviderSettings) => {
+export class OllamaChatModel extends VercelChatModel {
+  constructor(
+    modelId: string,
+    settings?: OllamaChatSettings,
+    clientSettings?: OllamaProviderSettings,
+  ) {
     const client = createOllamaClient(clientSettings);
-    return client.chat(modelId, settings);
-  },
-);
+    const model = client.chat(modelId, settings);
+    super(model);
+  }
+}

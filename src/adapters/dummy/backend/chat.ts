@@ -45,7 +45,7 @@ export class DummyChatModel extends ChatModel {
   }
 
   createSnapshot() {
-    return { modelId: this.modelId };
+    return { ...super.createSnapshot(), modelId: this.modelId };
   }
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {

@@ -1,6 +1,6 @@
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 import { SummarizeMemory } from "bee-agent-framework/memory/summarizeMemory";
-import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const memory = new SummarizeMemory({
   llm: new OllamaChatModel("llama3.1"),

@@ -43,7 +43,7 @@ See the direct usage on the following memory example.
 ```ts
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
-import { Message } from "@/backend/message.js";
+import { Message } from "bee-agent-framework/backend/message";
 
 const llm = new OllamaChatModel("llama3.1");
 const memory = new TokenMemory();
