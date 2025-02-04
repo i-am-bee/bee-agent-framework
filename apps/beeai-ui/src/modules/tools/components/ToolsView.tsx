@@ -1,11 +1,7 @@
-import { useQuery } from "react-query";
-import { useMCPClient } from "./mcp-client";
+import { useListTools } from '../api/queries/useListTools';
 
 export const ToolsView = () => {
-  const client = useMCPClient();
-  const { data, isLoading, isSuccess } = useQuery({
-    queryFn: () => client.listTools(),
-  });
+  const { data, isLoading, isSuccess } = useListTools();
 
   if (isLoading || !data || !isSuccess) {
     return <div>Loading...</div>;
