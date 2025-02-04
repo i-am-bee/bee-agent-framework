@@ -15,18 +15,17 @@ import anyio
 from anyio.abc import TaskGroup
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 from kink import inject
-from pydantic import AnyUrl
 
 from beeai_server.adapters.interface import IProviderRepository
 from beeai_server.domain.model import Provider
 from beeai_server.domain.services import get_provider_connection
 from beeai_server.utils.periodic import Periodic
-from mcp import ClientSession, Tool, ServerNotification, ProgressNotification
+from mcp import ClientSession, Tool, ServerNotification, ProgressNotification, ServerRequest
 from mcp import ServerSession, types
 from mcp.server import Server
 from mcp.server.models import InitializationOptions
 from mcp.shared.context import RequestContext
-from mcp.shared.session import RequestResponder
+from mcp.shared.session import RequestResponder, ReceiveResultT, ReceiveRequestT, SendResultT, ReceiveNotificationT
 from mcp.types import (
     AgentTemplate,
     Resource,
@@ -36,6 +35,8 @@ from mcp.types import (
     CallToolRequest,
     CallToolResult,
     RequestParams,
+    RunAgentRequestParams,
+    RunAgentRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,9 +45,13 @@ mcp_session_context = ContextVar("mcp_session_context")
 
 
 class LoadedProvider:
+    RECONNECT_INTERVAL = timedelta(seconds=10)
+    PING_TIMEOUT = timedelta(seconds=5)
     session: ClientSession | None = None
+    incoming_messages: MemoryObjectReceiveStream[
+        RequestResponder[ReceiveRequestT, SendResultT] | ReceiveNotificationT | Exception
+    ]
     provider: Provider
-
     agent_templates: list[AgentTemplate] = []
     tools: list[Tool] = []
     resources: list[Resource] = []
@@ -55,7 +60,17 @@ class LoadedProvider:
     def __init__(self, provider: Provider):
         self.provider = provider
         self._open = False
-        self._exit_stack = AsyncExitStack()
+        self._ensure_session_periodic = Periodic(
+            executor=self._ensure_session,
+            period=self.RECONNECT_INTERVAL,
+            name=f"Ensure session for provider: {provider}",
+        )
+        self._session_exit_stack = AsyncExitStack()
+        self._writers_exit_stack = AsyncExitStack()
+        self._write_messages, self.incoming_messages = anyio.create_memory_object_stream()
+        self._stopping = False
+        self._stopped = asyncio.Event()
+        self._supports_agents = True
 
     async def init(self):
         return await self.__aenter__()
@@ -63,40 +78,71 @@ class LoadedProvider:
     async def close(self):
         return await self.__aexit__(None, None, None)
 
-    async def load_features(self):
+    async def load_features(self, capabilities):
         # TODO: Use low lever requests - pagination not implemented in mcp client?
-        with suppress(Exception):  # TODO what exception
-            self.agent_templates = (await self.session.list_agent_templates()).agentTemplates
-        with suppress(Exception):  # TODO what exception
-            self.tools = (await self.session.list_tools()).tools
-        with suppress(Exception):  # TODO what exception
-            self.resources = (await self.session.list_resources()).resources
-        with suppress(Exception):  # TODO what exception
-            self.prompts = (await self.session.list_prompts()).resources
+        # TODO: server exceptions - unknown requests such as
+        with anyio.fail_after(10):
+            if capabilities.agents:
+                self.agent_templates = (await self.session.list_agent_templates()).agentTemplates
+                logger.info(f"Loaded {len(self.agent_templates)} agent templates")
+            with suppress(Exception):  # TODO what exception
+                self.tools = (await self.session.list_tools()).tools
+                logger.info(f"Loaded {len(self.tools)} tools")
+            with suppress(Exception):  # TODO what exception
+                self.resources = (await self.session.list_resources()).resources
+                logger.info(f"Loaded {len(self.resources)} resources")
+            with suppress(Exception):  # TODO what exception
+                self.prompts = (await self.session.list_prompts()).resources
+                logger.info(f"Loaded {len(self.prompts)} prompts")
 
-    @asynccontextmanager
-    async def _create_session(self, connection):
-        async with connection.mcp_client() as (read_stream, write_stream):
-            async with ClientSession(read_stream, write_stream) as session:
-                yield session
+    async def _pipe_messages(self):
+        async for message in self.session.incoming_messages:
+            await self._write_messages.send(message)
+
+    async def _initialize_session(self):
+        with suppress(Exception):
+            await self._session_exit_stack.aclose()
+        logger.info(f"Initializing session to provider {self.provider}")
+        connection = await get_provider_connection(self.provider)
+        read_stream, write_stream = await self._session_exit_stack.enter_async_context(connection.mcp_client())
+        session = await self._session_exit_stack.enter_async_context(ClientSession(read_stream, write_stream))
+        initialize_result = await session.initialize()
+        tg = await self._session_exit_stack.enter_async_context(anyio.create_task_group())
+        tg.start_soon(self._pipe_messages)
+        self._session_exit_stack.callback(lambda: tg.cancel_scope.cancel())
+        self.session = session
+        await self.load_features(initialize_result.capabilities)
+
+    async def _ensure_session(self):
+        if self._stopping:
+            await self._session_exit_stack.aclose()
+            self._stopped.set()
+            return
+        try:
+            if self.session:
+                with anyio.fail_after(self.PING_TIMEOUT.total_seconds()):
+                    await self.session.send_ping()
+                return
+            await self._initialize_session()
+        except TimeoutError:
+            logger.warning(f"The server did not respond in {self.PING_TIMEOUT}, we assume it is processing a request")
+        except Exception as ex:  # TODO narrow exception scope
+            logger.warning(f"Connection to {self.provider} was closed, reconnecting in {self.RECONNECT_INTERVAL}: {ex}")
+            self.session = None
 
     async def __aenter__(self):
-        if not self.session:
-            logger.info(f"Loading provider {self.provider}")
-            connection = await get_provider_connection(self.provider)
-
-            self.session = await self._exit_stack.enter_async_context(self._create_session(connection))
-            await self.session.initialize()
-            await self.load_features()
-            logger.info(f"Loaded {len(self.agent_templates)} agent templates")
-            logger.info(f"Loaded {len(self.tools)} tools")
-            logger.info(f"Loaded {len(self.resources)} resources")
-            logger.info(f"Loaded {len(self.prompts)} prompts")
+        self._stopping = False
+        logger.info(f"Loading provider {self.provider}")
+        await self._writers_exit_stack.enter_async_context(self._write_messages)
+        await self._ensure_session_periodic.start()
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        if self.session:
-            logger.info(f"Removing provider {self.provider}")
-            await self._exit_stack.aclose()
+        await self._writers_exit_stack.aclose()
+        self._stopping = True
+        self._ensure_session_periodic.poke()
+        await self._stopped.wait()
+        await self._ensure_session_periodic.stop()
+        logger.info(f"Removing provider {self.provider}")
 
 
 class NotificationStreamType(StrEnum):
@@ -175,12 +221,14 @@ class NotificationHub:
 
     async def _subscribe_for_messages(self, provider: LoadedProvider):
         async def subscribe():
-            with suppress(anyio.BrokenResourceError, anyio.EndOfStream, CancelledError):
-                async for message in provider.session.incoming_messages:
+            try:
+                async for message in provider.incoming_messages:
                     match message:
                         case ServerNotification(root=notify):
                             logger.debug(f"Dispatching notification {notify.method}")
                             await self._notification_stream_writer.send(notify)
+            except (anyio.BrokenResourceError, anyio.EndOfStream, CancelledError) as ex:
+                logger.error(f"Exception occured during reading messages: {ex}")
 
         with suppress(CancelledError):
             async with anyio.create_task_group() as tg:
@@ -214,27 +262,32 @@ class MCPClientContainer:
         self._stopped = asyncio.Event()
         self._exit_stack = AsyncExitStack()
 
-        # Mappings
-        self.provider_by_tool: dict[str, LoadedProvider] = {}
-        self.provider_by_resource: dict[AnyUrl, LoadedProvider] = {}
-        self.provider_by_agent_template: dict[str, LoadedProvider] = {}
-        self.provider_by_prompt: dict[str, LoadedProvider] = {}
-        self.all_tools: list[Tool] = []
-        self.all_resources: list[Resource] = []
-        self.all_agent_templates: list[AgentTemplate] = []
-        self.all_prompts: list[Prompt] = []
-
         self._notification_hub = NotificationHub()
 
-    def _recompute_maps(self):
-        self.all_tools = [tool for p in self.loaded_providers for tool in p.tools]
-        self.all_agent_templates = [template for p in self.loaded_providers for template in p.agent_templates]
-        self.all_prompts = [prompt for p in self.loaded_providers for prompt in p.prompts]
-        self.all_resources = [resource for p in self.loaded_providers for resource in p.resources]
-        self.provider_by_tool = {tool.name: p for p in self.loaded_providers for tool in p.tools}
-        self.provider_by_prompt = {prompt.name: p for p in self.loaded_providers for prompt in p.prompts}
-        self.provider_by_resource = {resource.uri: p for p in self.loaded_providers for resource in p.resources}
-        self.provider_by_agent_template = {templ.name: p for p in self.loaded_providers for templ in p.agent_templates}
+    @property
+    def tools(self) -> list[Tool]:
+        return [tool for p in self.loaded_providers for tool in p.tools]
+
+    @property
+    def agent_templates(self) -> list[AgentTemplate]:
+        return [template for p in self.loaded_providers for template in p.agent_templates]
+
+    @property
+    def resources(self) -> list[Resource]:
+        return [resource for p in self.loaded_providers for resource in p.resources]
+
+    @property
+    def prompts(self) -> list[Prompt]:
+        return [prompt for p in self.loaded_providers for prompt in p.prompts]
+
+    @property
+    def routing_table(self) -> dict[str, LoadedProvider]:
+        return {
+            **{f"tool/{tool.name}": p for p in self.loaded_providers for tool in p.tools},
+            **{f"prompt/{prompt.name}": p for p in self.loaded_providers for prompt in p.prompts},
+            **{f"resource/{resource.uri}": p for p in self.loaded_providers for resource in p.resources},
+            **{f"agent/{templ.name}": p for p in self.loaded_providers for templ in p.agent_templates},
+        }
 
     def forward_notifications(
         self,
@@ -259,7 +312,6 @@ class MCPClientContainer:
             for provider in self.loaded_providers:
                 await provider.close()
             self.loaded_providers = []
-            self._recompute_maps()
             self._stopped.set()
             return
 
@@ -280,10 +332,7 @@ class MCPClientContainer:
         for provider in added_providers:
             await provider.init()
             await self._notification_hub.register(provider)
-
         self.loaded_providers = unaffected_providers + added_providers
-        if added_providers or removed_providers:
-            self._recompute_maps()
 
     def _handle_providers_change(self, _event):
         self._periodic_reload.poke()
@@ -317,50 +366,77 @@ class MCPProxyServer:
         logger.info("Shutting down MCP proxy server")
         await self._exit_stack.aclose()
 
+    @asynccontextmanager
+    async def _forward_progress_notifications(self, server):
+        async with self._client_container.forward_notifications(
+            session=server.request_context.session,
+            streams=NotificationStreamType.PROGRESS,
+            request_context=server.request_context,
+        ) as notifications:
+            yield notifications
+
+    async def _send_request_with_token(
+        self,
+        client_session: ClientSession,
+        server: Server,
+        request: ServerRequest,
+        result_type: type[ReceiveResultT],
+        forward_progress_notifications=True,
+    ):
+        if forward_progress_notifications:
+            async with self._forward_progress_notifications(server):
+                request.params.meta = server.request_context.meta or RequestParams.Meta()
+                request.params.meta.progressToken = request.params.meta.progressToken or uuid.uuid4().hex
+                resp = await client_session.send_request(ClientRequest(request), result_type)
+        else:
+            resp = await client_session.send_request(ClientRequest(request), result_type)
+
+        if resp.isError:
+            raise Exception(str(resp.content[0].text))
+        return resp
+
     @cached_property
     def app(self):
         server = Server(name="beeai-platform-server", version="1.0.0")
 
         @server.list_tools()
         async def list_tools():
-            return self._client_container.all_tools
+            return self._client_container.tools
 
         @server.list_resources()
         async def list_resources():
-            return self._client_container.all_resources
+            return self._client_container.resources
 
         @server.list_prompts()
         async def list_prompts():
-            return self._client_container.all_prompts
+            return self._client_container.prompts
 
-        # TODO
-        # @server.list_agent_templates()
-        # async def list_agent_templates():
-        #     return self._client_container.all_agent_templates
+        @server.list_agent_templates()
+        async def list_agent_templates():
+            return self._client_container.agent_templates
 
         @server.call_tool()
         async def call_tool(name: str, arguments: dict | None = None):
-            provider = self._client_container.provider_by_tool[name]
+            provider = self._client_container.routing_table[f"tool/{name}"]
+            resp = await self._send_request_with_token(
+                provider.session,
+                server,
+                CallToolRequest(method="tools/call", params=CallToolRequestParams(name=name, arguments=arguments)),
+                CallToolResult,
+            )
+            return resp.content
 
-            async def call_tool_stream(session: ClientSession, name: str, arguments: dict):
-                params = CallToolRequestParams(name=name, arguments=arguments)
-                # Need to register progressToken to recieve progress notifications
-                params.meta = server.request_context.meta or RequestParams.Meta()
-                params.meta.progressToken = params.meta.progressToken or uuid.uuid4().hex
-                return await session.send_request(
-                    ClientRequest(CallToolRequest(method="tools/call", params=params)),
-                    CallToolResult,
-                )
-
-            async with self._client_container.forward_notifications(
-                session=server.request_context.session,
-                streams=NotificationStreamType.PROGRESS,
-                request_context=server.request_context,
-            ) as notifications:
-                resp = await call_tool_stream(provider.session, name, arguments)
-
-            if resp.isError:
-                raise Exception(str(resp.content[0].text))
+        @server.run_agent()
+        async def run_agent(name: str, config: dict, prompt: str):
+            provider = self._client_container.routing_table[f"agent/{name}"]
+            resp = await self._send_request_with_token(
+                provider.session,
+                server,
+                RunAgentRequest(
+                    method="agents/run", params=RunAgentRequestParams(name=name, prompt=prompt, config=config)
+                ),
+                CallToolResult,
+            )
             return resp.content
 
         return server
@@ -370,7 +446,7 @@ class MCPProxyServer:
         read_stream: MemoryObjectReceiveStream[types.JSONRPCMessage | Exception],
         write_stream: MemoryObjectSendStream[types.JSONRPCMessage],
         initialization_options: InitializationOptions,
-        raise_exceptions: bool = False,
+        raise_exceptions: bool = True,
     ):
         """
         HACK: Modified server.run method that subscribes and forwards messages

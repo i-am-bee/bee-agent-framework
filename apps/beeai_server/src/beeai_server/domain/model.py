@@ -1,6 +1,5 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
-from typing import Union
+from typing import Union, Literal
 
 from pydantic import BaseModel, AnyUrl, Field, ConfigDict
 
@@ -8,17 +7,20 @@ from mcp import stdio_client, StdioServerParameters
 from mcp.client.sse import sse_client
 
 
-class GithubProvider(BaseModel):
+class UvxProvider(BaseModel):
+    type: Literal["uvx"] = "uvx"
+    location: AnyUrl
+    executable_command: str | None = None
     model_config = ConfigDict(frozen=True)
-    github: AnyUrl
 
 
-class LocalProvider(BaseModel):
+class RemoteMcpProvider(BaseModel):
     model_config = ConfigDict(frozen=True)
-    path: Path
+    type: Literal["mcp"] = "mcp"
+    location: AnyUrl
 
 
-Provider = Union[GithubProvider, LocalProvider]
+Provider = Union[UvxProvider, RemoteMcpProvider]
 
 
 # Connection to agent server
@@ -42,8 +44,8 @@ class SSEServer(BaseModel):
     url: AnyUrl
 
     @asynccontextmanager
-    def mcp_client(self):
-        with sse_client(self.url) as client:
+    async def mcp_client(self):
+        async with sse_client(str(self.url)) as client:
             yield client
 
 

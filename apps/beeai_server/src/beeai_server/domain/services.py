@@ -1,47 +1,41 @@
-import tomllib
+import re
 
-import aiohttp
-from anyio import Path as AsyncPath
+import anyio
 
 from beeai_server.domain.model import (
     Provider,
     ProviderConnection,
     StdioCommand,
-    LocalProvider,
-    GithubProvider,
+    UvxProvider,
+    RemoteMcpProvider,
+    SSEServer,
 )
 
 
-async def get_local_connection(provider: LocalProvider) -> ProviderConnection:
-    path = AsyncPath(provider.path)
-    path = await path.resolve()
-    if not await path.exists():
-        raise ValueError(f"Provider {provider.model_dump()} does not exist")
+async def get_local_connection(provider: UvxProvider) -> ProviderConnection:
+    if not (executable_command := provider.executable_command):
+        resp = await anyio.run_process(
+            ["uvx", "--from", str(provider.location), "_nonexistent_command"],
+            check=False,
+        )
+        pattern = r'provided by [`"].*?[`"]:\n-\s*([\w-]+)'
+        stdout = resp.stdout.decode("utf-8")
+        match = re.search(pattern, stdout)
+        if not match:
+            raise ValueError(f"Unable to register provider, {stdout}")
+        executable_command = match.group(1)
 
-    if await (path / "pyproject.toml").is_file():
-        toml = tomllib.loads(await (path / "pyproject.toml").read_text())
-        script = (list(((toml.get("project", {}).get("scripts", None)) or {}).keys()) or [None])[0]  # get first script
-        if not script:
-            raise ValueError("No script found in pyproject.toml")
-
-        return StdioCommand(command=["uvx", "--from", str(path), script])
-
-    if await (path / "package.json").is_file():
-        return StdioCommand(command=["npx", str(path)])
+        return StdioCommand(command=["uvx", "--from", str(provider.location), executable_command])
     raise ValueError("Not a compatible provider")
 
 
-async def get_github_connection(provider: GithubProvider) -> ProviderConnection:
-    url = provider.github
-    async with aiohttp.ClientSession() as session:
-        await session.get(f"{url}/pyproject.toml")
-        ...  # todo
-    raise ValueError("Not a compatible provider")
+async def get_sse_connection(provider: RemoteMcpProvider):
+    return SSEServer(url=provider.location)
 
 
 async def get_provider_connection(provider: Provider) -> ProviderConnection:
-    if isinstance(provider, LocalProvider):
+    if isinstance(provider, UvxProvider):
         return await get_local_connection(provider)
-    elif isinstance(provider, GithubProvider):
-        return await get_github_connection(provider)
+    elif isinstance(provider, RemoteMcpProvider):
+        return await get_sse_connection(provider)
     raise NotImplementedError
