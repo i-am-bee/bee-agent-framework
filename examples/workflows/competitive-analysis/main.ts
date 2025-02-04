@@ -12,6 +12,9 @@ for await (const { prompt } of reader) {
     input = { industry: prompt };
   }
 
+
+  reader.write(`Analyst 🤖:`, `🔬 Initiating competitor research workflow. I'll analyze your industry and build a detailed report based on real-time market data 📊`);
+
   const response = await workflow
     .run({
       ...input,
@@ -24,19 +27,18 @@ for await (const { prompt } of reader) {
     })
     .observe((emitter) => {
       emitter.on("start", (data) => {
-        console.log(`Starting ${data.step} for ${data.run.state.industry}`);
+        reader.write(``, `▶ Starting ${data.step} for ${data.run.state.industry}`);
       });
       emitter.on("success", (data) => {
-        console.log(`Completed ${data.step}`);
+        reader.write(``, `  ✔ Completed ${data.step}`);
         if (data.run.state.currentCompetitor) {
-          console.log(`Analyzed: ${data.run.state.currentCompetitor}`);
+          reader.write(``, `  ✔ Analyzed: ${data.run.state.currentCompetitor}`);
         }
       });
       emitter.on("error", (data) => {
-        console.error(`Error in ${data.step}: ${data.error}`);
+        reader.write(`Analyst 🤖:`, `Error in ${data.step}: ${data.error}`);
       });
     });
 
-  console.log("\n=== Final Analysis ===\n");
-  console.log(response.state.answer!.text);
+  reader.write(`Analyst 🤖:`, `✅ Analysis complete! Your competitive analysis report is ready for your review 📋\n=== Final Analysis ===\n${response.state.answer!.text}`);  
 }

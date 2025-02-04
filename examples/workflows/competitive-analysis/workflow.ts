@@ -208,5 +208,4 @@ export const workflow = new Workflow({ schema: StateSchema })
   .addStep(Steps.WEB_RESEARCH, webResearch)
   .addStep(Steps.CATEGORIZE_FINDINGS, categorizeFindings)
   .addStep(Steps.FINALIZE_SUMMARY, finalizeSummary)
-  .addStep(Steps.REFLECTION, reflectAndImprove)
-  .setStart(Steps.GENERATE_COMPETITORS);
+  .addStep(Steps.REFLECTION, reflectAndImprove);
