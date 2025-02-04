@@ -7,20 +7,20 @@ Bee Agent Framework is open-source framework for building, deploying, and servin
 <!-- embedme examples/integrations/langgraph.ts -->
 
 ```ts
-import "dotenv/config";
 import { DuckDuckGoSearch as LangChainDDG } from "@langchain/community/tools/duckduckgo_search";
+import { ChatMessage as LangChainMessage } from "@langchain/core/messages";
 import { createReactAgent as createLangGraphReactAgent } from "@langchain/langgraph/prebuilt";
-import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
-import { z } from "zod";
-import { createConsoleReader } from "examples/helpers/io.js";
-import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
-import { OllamaChatLLM as BeeOllamaChat } from "bee-agent-framework/adapters/ollama/chat";
 import { ChatOllama as LangChainOllamaChat } from "@langchain/ollama";
+import { OllamaChatLLM as BeeOllamaChat } from "bee-agent-framework/adapters/ollama/chat";
+import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
+import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 import { ReadOnlyMemory } from "bee-agent-framework/memory/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
-import { ChatMessage as LangChainMessage } from "@langchain/core/messages";
+import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
+import "dotenv/config";
+import { createConsoleReader } from "examples/helpers/io.js";
+import { z } from "zod";
 
 const workflow = new Workflow({
   schema: z.object({ memory: z.instanceof(ReadOnlyMemory), answer: z.string().default("") }),
@@ -54,7 +54,7 @@ const workflow = new Workflow({
       },
       { signal: ctx.signal, recursionLimit: 5 },
     );
-    const answer = response.messages.at(-1).content;
+    const answer = String(response.messages.at(-1)?.content);
     return { next: Workflow.END, update: { answer } };
   });
 
