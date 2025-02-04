@@ -28,6 +28,7 @@ import {
   CoreToolMessage,
   generateObject,
   generateText,
+  jsonSchema,
   LanguageModelV1,
   streamText,
 } from "ai";
@@ -37,7 +38,7 @@ import { RunContext } from "@/context.js";
 import { ValueError } from "@/errors.js";
 import { Serializer } from "@/serializer/serializer.js";
 import { ClassConstructor } from "@/internals/types.js";
-import { toCamelCase } from "remeda";
+import { mapToObj, toCamelCase } from "remeda";
 
 export class VercelChatModel<R extends LanguageModelV1 = LanguageModelV1> extends ChatModel {
   public readonly emitter: Emitter<ChatModelEvents>;
@@ -157,9 +158,18 @@ export class VercelChatModel<R extends LanguageModelV1 = LanguageModelV1> extend
   protected async transformInput(
     input: ChatModelInput,
   ): Promise<Parameters<typeof generateText<Record<string, any>>>[0]> {
+    const tools = await Promise.all(
+      (input.tools ?? []).map(async (tool) => ({
+        name: tool.name,
+        description: tool.description,
+        parameters: jsonSchema(await tool.getInputJsonSchema()),
+      })),
+    );
+
     return {
       ...input,
       model: this.model,
+      tools: mapToObj(tools, ({ name, ...tool }) => [name, tool]),
       messages: input.messages.map((msg): CoreMessage => {
         if (msg instanceof AssistantMessage) {
           return { role: "assistant", content: msg.content };

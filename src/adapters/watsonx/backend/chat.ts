@@ -18,6 +18,7 @@ import { ChatModel, ChatModelEmitter, ChatModelInput, ChatModelOutput } from "@/
 import { createWatsonXClient, WatsonXClient } from "@/adapters/watsonx/backend/client.js";
 import { findLast, isEmpty, isTruthy } from "remeda";
 import WatsonxAiMlVml_v1, {
+  TextChatMessages,
   TextChatParameterTools,
   TextChatParams,
   TextChatResultChoice,
@@ -26,9 +27,10 @@ import WatsonxAiMlVml_v1, {
 import { shallowCopy } from "@/serializer/utils.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
-import { AssistantMessage, Message } from "@/backend/message.js";
+import { AssistantMessage, Message, SystemMessage, ToolMessage } from "@/backend/message.js";
 import { ToolCallPart } from "ai";
 import Type = WatsonxAiMlVml_v1.TextChatResponseFormat.Constants.Type;
+import { parseBrokenJson } from "@/internals/helpers/schema.js";
 
 export type WatsonXChatParams = Omit<
   TextChatParams,
@@ -111,7 +113,7 @@ export class WatsonXChatModel extends ChatModel {
                   type: "tool-call",
                   toolCallId: call.id,
                   toolName: call.function.name,
-                  args: call.function.arguments,
+                  args: parseBrokenJson(call.function.arguments),
                 }),
               ),
             );
@@ -144,7 +146,37 @@ export class WatsonXChatModel extends ChatModel {
     return {
       ...this.parameters,
       modelId: this.modelId,
-      messages: input.messages!, // todo: verify
+      messages: input.messages.flatMap((message): TextChatMessages[] => {
+        if (message instanceof ToolMessage) {
+          return message.content.map((content) => ({
+            role: "tool",
+            content: JSON.stringify(content.result),
+            tool_call_id: content.toolCallId,
+          }));
+        } else if (message instanceof SystemMessage) {
+          return message.content.map((content) => ({
+            role: "system",
+            content: content.text,
+          }));
+        } else if (message instanceof AssistantMessage) {
+          return message.content.map((content) => ({
+            role: "assistant",
+            ...(content.type === "text" && {
+              content: content.text,
+            }),
+            ...(content.type === "tool-call" && {
+              id: content.toolCallId,
+              type: "function",
+              function: {
+                name: content.toolName,
+                arguments: JSON.stringify(content.args),
+              },
+            }),
+          }));
+        } else {
+          return [message.toPlain()];
+        }
+      }),
       spaceId: this.client.options.spaceId,
       projectId: this.client.options.projectId,
       tools: isEmpty(tools) ? undefined : tools,
