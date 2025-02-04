@@ -8,5 +8,6 @@
       "@/*": ["./src/*"]
     }
   },
+  "references": [{ "path": "./src" }],
   "exclude": ["../tests", "../**/*.test.ts"]
 }
