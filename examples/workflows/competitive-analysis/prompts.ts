@@ -87,8 +87,3 @@ Return JSON:
   "should_iterate": boolean
 }`,
 });
-
-export const summarizerInstructions = `Create a clear, concise competitive analysis that:
-- Highlights key insights
-- Provides objective observations
-- Focuses on substantive information`;

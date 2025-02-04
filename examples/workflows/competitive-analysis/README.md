@@ -46,14 +46,14 @@ Please follow these instructions common for all examples [Usage](../../README.md
 
 Provide TAVILY API key (Get your API key from https://tavily.com)
 
-```
+```dotenv
 ## Third-party services
 TAVILY_API_KEY=your-api-key-here
 ```
 
 4. Run the Workflow with a direct JSON input
 
-```
+```shell
 # Analyze a specific industry
 yarn start examples/workflows/competitive-analysis/main.ts <<< '{"industry": "Electric Vehicles"}'
 

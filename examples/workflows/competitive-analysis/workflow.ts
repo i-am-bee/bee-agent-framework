@@ -11,6 +11,7 @@ import {
 } from "./prompts.js";
 import { State, StateSchema } from "./state.js";
 import { deduplicateAndFormatSources, formatSources, getChatLLM, tavilySearch } from "./utils.js";
+import { isEmpty, mapValues } from "remeda";
 
 export enum Steps {
   GENERATE_COMPETITORS = "GENERATE_COMPETITORS",
@@ -27,13 +28,7 @@ async function generateCompetitors(state: State) {
       update: {
         competitors: state.specifiedCompetitors,
         runningSummary: `Competitive analysis of ${state.specifiedCompetitors.join(", ")}`,
-        competitorFindings: state.specifiedCompetitors.reduce(
-          (acc, competitor) => {
-            acc[competitor] = [];
-            return acc;
-          },
-          {} as Record<string, string[]>,
-        ),
+        competitorFindings: mapValues(state.specifiedCompetitors, () => []),
       },
     };
   }
@@ -54,25 +49,17 @@ async function generateCompetitors(state: State) {
     update: {
       competitors: result.parsed.competitors,
       runningSummary: result.parsed.overview,
-      competitorFindings: result.parsed.competitors.reduce(
-        (acc, competitor) => {
-          acc[competitor] = [];
-          return acc;
-        },
-        {} as Record<string, string[]>,
-      ),
+      competitorFindings: mapValues(state.competitors, () => []),
     },
   };
 }
 
 async function selectCompetitor(state: State) {
-  const unprocessedCompetitors = state.competitors.filter((competitor) => {
-    return (
-      !state.competitorFindings[competitor] || state.competitorFindings[competitor].length === 0
-    );
-  });
+  const unprocessedCompetitors = state.competitors.filter((competitor) =>
+    isEmpty(state.competitorFindings[competitor]),
+  );
 
-  if (unprocessedCompetitors.length === 0) {
+  if (isEmpty(unprocessedCompetitors)) {
     return { next: Steps.FINALIZE_SUMMARY };
   }
 
