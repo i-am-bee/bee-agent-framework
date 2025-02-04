@@ -12,18 +12,15 @@ for await (const { prompt } of reader) {
     input = { industry: prompt };
   }
 
-
-  reader.write(`Analyst 🤖:`, `🔬 Initiating competitor research workflow. I'll analyze your industry and build a detailed report based on real-time market data 📊`);
+  reader.write(
+    `Analyst 🤖:`,
+    `🔬 Initiating competitor research workflow. I'll analyze your industry and build a detailed report based on real-time market data 📊`,
+  );
 
   const response = await workflow
     .run({
       ...input,
-      competitors: input.specifiedCompetitors || [],
-      competitorFindings: {},
-      searchQuery: "",
-      webResearchResults: [],
-      sourcesGathered: [],
-      researchLoopCount: 0,
+      competitors: input.specifiedCompetitors,
     })
     .observe((emitter) => {
       emitter.on("start", (data) => {
@@ -40,5 +37,8 @@ for await (const { prompt } of reader) {
       });
     });
 
-  reader.write(`Analyst 🤖:`, `✅ Analysis complete! Your competitive analysis report is ready for your review 📋\n=== Final Analysis ===\n${response.state.answer!.text}`);  
+  reader.write(
+    `Analyst 🤖:`,
+    `✅ Analysis complete! Your competitive analysis report is ready for your review 📋\n=== Final Analysis ===\n${response.state.answer!.text}`,
+  );
 }
