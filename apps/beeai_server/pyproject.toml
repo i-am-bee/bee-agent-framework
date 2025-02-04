@@ -10,6 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
     "aiohttp>=3.11.11",
     "anyio>=4.8.0",
+    "asgiref>=3.8.1",
     "fastapi[standard]>=0.115.7",
     "kink>=0.8.1",
     "orjson>=3.10.15",

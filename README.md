@@ -19,8 +19,8 @@ uv run beeai provider add /path/to/repo/beeai/packages/mcp-python-sdk/examples/s
 uv run beeai provider ls
 
 # tools
-uv run beeai list tools
-uv run beeai call fetch "url=http://iambee.ai"
+uv run beeai tool list
+uv run beeai tool call fetch '{"url": "http://iambee.ai"}'
 ```
 
 ## UI

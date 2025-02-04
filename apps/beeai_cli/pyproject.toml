@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-beeai-cli = "beeai_cli:app"
+beeai = "beeai_cli:app"
 
 [build-system]
 requires = ["hatchling"]
