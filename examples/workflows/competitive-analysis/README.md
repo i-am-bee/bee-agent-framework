@@ -44,24 +44,7 @@ Please follow these instructions common for all examples [Usage](../../README.md
 
 2. Set Up Environment Variables
 
-Uncomment and setup example related variables:
-
-- Pick your favorite provider (default is ollama)
-
-```
-## Examples
-EXAMPLES_LLM_BACKEND="ollama"  # watsonx / ollama / openai / groq / azure / vertexai
-```
-
-- Setup installed ollama model
-
-```
-# For Ollama LLM Adapter
-OLLAMA_HOST="http://0.0.0.0:11434"
-OLLAMA_MODEL="deepseek-r1:8b"
-```
-
-- Provide TAVILY API key (Get your API key from https://tavily.com)
+Provide TAVILY API key (Get your API key from https://tavily.com)
 
 ```
 ## Third-party services

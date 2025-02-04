@@ -1,7 +1,6 @@
 import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
 import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { getChatLLM } from "examples/helpers/llm.js";
 import {
   categorizationPromptTemplate,
   competitorsPromptTemplate,
@@ -11,7 +10,7 @@ import {
   reflectionSchema,
 } from "./prompts.js";
 import { State, StateSchema } from "./state.js";
-import { deduplicateAndFormatSources, formatSources, tavilySearch } from "./utils.js";
+import { deduplicateAndFormatSources, formatSources, getChatLLM, tavilySearch } from "./utils.js";
 
 export enum Steps {
   GENERATE_COMPETITORS = "GENERATE_COMPETITORS",
