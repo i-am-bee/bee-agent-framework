@@ -1,6 +1,6 @@
-import { createConsoleReader } from "./helpers/reader.js";
 import { workflow } from "./workflow.js";
 import { InputSchema } from "./state.js";
+import { createConsoleReader } from "examples/helpers/io.js";
 
 const reader = createConsoleReader();
 for await (const { prompt } of reader) {

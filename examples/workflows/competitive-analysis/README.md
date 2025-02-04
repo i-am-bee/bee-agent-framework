@@ -38,27 +38,33 @@ stateDiagram-v2
 
 ## How to Use
 
-1. Clone the Repository
+1. Project setup
+
+Please follow these instructions common for all examples [Usage](../../README.md#usage)
+
+2. Set Up Environment Variables
+
+Uncomment and setup example related variables:
+
+- Pick your favorite provider (default is ollama)
 
 ```
-git clone https://github.com/jenna-winkler/beeAI-competitive-analysis-workflow`
-cd competitive-analysis-workflow
+## Examples
+EXAMPLES_LLM_BACKEND="ollama"  # watsonx / ollama / openai / groq / azure / vertexai
 ```
 
-2. Install Dependencies
+- Setup installed ollama model
 
 ```
-npm install
+# For Ollama LLM Adapter
+OLLAMA_HOST="http://0.0.0.0:11434"
+OLLAMA_MODEL="deepseek-r1:8b"
 ```
 
-4. Set Up Environment Variables
+- Provide TAVILY API key (Get your API key from https://tavily.com)
 
 ```
-# Copy the example environment file
-cp .env.example .env
-
-# Edit the .env file and add your Tavily API key
-# Get your API key from https://tavily.com
+## Third-party services
 TAVILY_API_KEY=your-api-key-here
 ```
 
@@ -66,10 +72,10 @@ TAVILY_API_KEY=your-api-key-here
 
 ```
 # Analyze a specific industry
-npm start <<< '{"industry": "Electric Vehicles"}'
+yarn start examples/workflows/competitive-analysis/main.ts <<< '{"industry": "Electric Vehicles"}'
 
 # Analyze specific competitors
-npm start <<< '{"industry": "Open Source AI Agent Frameworks", "specifiedCompetitors": ["CrewAI", "Relevance AI", "LangGraph", "AutoGen", "OpenAI"]}'
+yarn start examples/workflows/competitive-analysis/main.ts <<< '{"industry": "Open Source AI Agent Frameworks", "specifiedCompetitors": ["CrewAI", "Relevance AI", "LangGraph", "AutoGen", "OpenAI"]}'
 ```
 
 5. It will then run through the workflow steps, providing logs and insights along the way.

@@ -1,11 +1,11 @@
 import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
 import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
 import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { getChatLLM } from "./helpers/llm.js";
+import { getChatLLM } from "examples/helpers/llm.js";
 import {
+  categorizationPromptTemplate,
   competitorsPromptTemplate,
   competitorsSchema,
-  categorizationPromptTemplate,
   findingsSchema,
   reflectionPromptTemplate,
   reflectionSchema,
