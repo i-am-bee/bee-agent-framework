@@ -1,6 +1,11 @@
 import "dotenv/config";
 import { DuckDuckGoSearch as LangChainDDG } from "@langchain/community/tools/duckduckgo_search";
 import { createReactAgent as createLangGraphReactAgent } from "@langchain/langgraph/prebuilt";
+import type {
+  MessageContentComplex,
+  MessageContentImageUrl,
+  MessageContentText,
+} from "@langchain/core/messages";
 import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
 import { z } from "zod";
 import { createConsoleReader } from "examples/helpers/io.js";
@@ -12,6 +17,39 @@ import { ReadOnlyMemory } from "bee-agent-framework/memory/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 import { ChatMessage as LangChainMessage } from "@langchain/core/messages";
+
+//// LangGraph content parser helper functions ////
+
+function isMessageContentText(content: any): content is MessageContentText {
+  return content.type === "text";
+}
+
+function isMessageContentImageUrl(content: any): content is MessageContentImageUrl {
+  return content.type === "image_url";
+}
+
+function parseImageUrl(imageUrl: MessageContentImageUrl["image_url"]) {
+  if (typeof imageUrl === "string") {
+    return imageUrl;
+  }
+
+  return imageUrl.url;
+}
+
+function parseContent(content: MessageContentComplex[] | undefined | string) {
+  if (!content || typeof content === "string") {
+    return content;
+  }
+
+  return content
+    .filter((c) => isMessageContentText(c) || isMessageContentImageUrl(c))
+    .map((c) => {
+      return isMessageContentText(c) ? c.text : parseImageUrl(c.image_url);
+    })
+    .join("\n");
+}
+
+//// workflow ////
 
 const workflow = new Workflow({
   schema: z.object({ memory: z.instanceof(ReadOnlyMemory), answer: z.string().default("") }),
@@ -45,8 +83,9 @@ const workflow = new Workflow({
       },
       { signal: ctx.signal, recursionLimit: 5 },
     );
-    const answer = response.messages.at(-1).content;
-    return { next: Workflow.END, update: { answer } };
+    const content = response.messages.at(-1)?.content;
+
+    return { next: Workflow.END, update: { answer: parseContent(content) } };
   });
 
 const memory = new UnconstrainedMemory();

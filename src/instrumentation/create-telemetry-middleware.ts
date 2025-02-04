@@ -27,7 +27,7 @@ import { Version } from "@/version.js";
 import { Role } from "@/llms/primitives/message.js";
 import type { GetRunContext, RunInstance } from "@/context.js";
 import type { GeneratedResponse, FrameworkSpan } from "./types.js";
-import { activeTracesMap, buildTraceTree } from "./tracer.js";
+import { buildTraceTree } from "./opentelemetry.js";
 import { traceSerializer } from "./helpers/trace-serializer.js";
 import { INSTRUMENTATION_IGNORED_KEYS } from "./config.js";
 import { createFullPath } from "@/emitter/utils.js";
@@ -35,6 +35,8 @@ import type { BeeAgent } from "@/agents/bee/agent.js";
 import { instrumentationLogger } from "./logger.js";
 import { BaseAgent } from "@/agents/base.js";
 import { assertLLMWithMessagesToPromptFn } from "./helpers/utils.js";
+
+export const activeTracesMap = new Map<string, string>();
 
 export function createTelemetryMiddleware() {
   return (context: GetRunContext<RunInstance, unknown>) => {
