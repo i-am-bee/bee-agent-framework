@@ -1,5 +1,5 @@
 [tool.uv.workspace]
-members = ["packages/*", "apps/*"]
+members = ["packages/mcp-python-sdk", "apps/beeai_cli", "apps/beeai_server"]
 
 [tool.ruff]
 line-length = 120
