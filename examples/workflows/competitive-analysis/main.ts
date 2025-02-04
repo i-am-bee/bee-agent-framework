@@ -6,9 +6,8 @@ const reader = createConsoleReader();
 for await (const { prompt } of reader) {
   let input;
   try {
-    input = JSON.parse(prompt);
-    input = InputSchema.parse(input);
-  } catch {
+    input = InputSchema.parse(JSON.parse(prompt));
+  } catch (e) {
     input = { industry: prompt };
   }
 
