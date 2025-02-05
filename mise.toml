@@ -9,9 +9,6 @@ postinstall = "corepack enable" # to enable pnpm
 [settings]
 python.uv_venv_auto = true
 
-[env]
-VITE_MCP_CLIENT_SERVER_URL = "http://localhost:5173/mcp/sse"
-
 # TASKS
 
 ## prepare
@@ -44,7 +41,7 @@ outputs = { auto = true }
 depends = ["dependencies:pnpm"]
 dir = "{{config_root}}/apps/beeai-ui"
 run = "pnpm build"
-sources = ["**/*.{js,jsx,ts,tsx,html}"]
+sources = ["*.json", "*.js", "index.html", "src/**/*.tsx", "src/**/*.ts"]
 outputs = { auto = true }
 
 [tasks."build:beeai-cli"]
