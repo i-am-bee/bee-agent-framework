@@ -165,7 +165,7 @@ export class Emitter<T = Record<keyof any, Callback<unknown>>> extends Serializa
         matchNested ??= false;
         matchers.push((event) => event.path === createFullPath(this.namespace, event.name));
       } else if (matcher === "*.*") {
-        matchNested ??= false;
+        matchNested ??= true;
         matchers.push(() => true);
       } else if (matcher instanceof RegExp) {
         matchNested ??= true;

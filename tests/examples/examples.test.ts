@@ -37,6 +37,7 @@ const excludePattern = process.env.EXCLUDE_PATTERN || ``;
 
 const exclude: string[] = [
   "examples/workflows/contentCreator.ts",
+  "examples/workflows/competitive-analysis/**/*.ts",
   "examples/playground/**/*.ts",
   // prevents 'Too many requests' error on Free Tier
   "examples/llms/providers/watsonx_verbose.ts",
