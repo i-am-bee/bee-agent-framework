@@ -1,5 +1,11 @@
 [tool.uv.workspace]
-members = ["packages/mcp-python-sdk", "apps/beeai-cli", "apps/beeai-server", "examples/simple-agent", "examples/simple-tool"]
+members = [
+  "apps/beeai-cli",
+  "apps/beeai-server",
+  "packages/mcp-python-sdk",
+  "examples/simple-agent",
+  "examples/simple-tool",
+]
 
 [tool.ruff]
 line-length = 120

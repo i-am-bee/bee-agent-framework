@@ -1,9 +1,8 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - apps/beeai-ui
+  - packages/mcp-typescript-sdk
 
 catalog:
   typescript: "^5.7.3"
   typescript-eslint: "^8.23.0"
   eslint: "^9.17.0"
-  

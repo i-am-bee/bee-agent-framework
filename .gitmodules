@@ -1,6 +1,7 @@
 [submodule "packages/mcp-python-sdk"]
 	path = packages/mcp-python-sdk
-	url = git@github.com:i-am-bee/mcp-python-sdk.git
+	url = ../mcp-python-sdk
+
 [submodule "packages/mcp-typescript-sdk"]
 	path = packages/mcp-typescript-sdk
-	url = https://github.com/i-am-bee/mcp-typescript-sdk
+	url = ../acp-typescript-sdk
