@@ -1,0 +1,93 @@
+[tools]
+python = "3.13"
+nodejs = "22"
+uv = "latest"
+
+[hooks]
+postinstall = "corepack enable" # to enable pnpm
+
+[settings]
+python.uv_venv_auto = true
+
+[env]
+VITE_MCP_CLIENT_SERVER_URL = "http://localhost:5173/mcp/sse"
+
+# TASKS
+
+## prepare
+
+[tasks."prepare:ensure-submodules"]
+dir = "{{config_root}}"
+run = "git submodule init"
+sources = [".gitmodules"]
+outputs = { auto = true }
+
+## dependencies
+
+[tasks."dependencies:pnpm"]
+depends = ["prepare:*"]
+dir = "{{config_root}}"
+run = "pnpm install"
+sources = ["pnpm-{lock,workspace}.yaml", "**/package.json"]
+outputs = { auto = true }
+
+[tasks."dependencies:uv"]
+depends = ["prepare:*"]
+dir = "{{config_root}}"
+run = "uv sync"
+sources = ["uv.lock", "**/pyproject.toml"]
+outputs = { auto = true }
+
+## build
+
+[tasks."build:beeai-ui"]
+depends = ["dependencies:pnpm"]
+dir = "{{config_root}}/apps/beeai-ui"
+run = "pnpm build"
+sources = ["**/*.{js,jsx,ts,tsx,html}"]
+outputs = { auto = true }
+
+[tasks."build:beeai-cli"]
+depends = ["dependencies:uv"]
+dir = "{{config_root}}/apps/beeai-cli"
+run = "uv build . --out-dir dist"
+sources = ["**/*.py"]
+outputs = { auto = true }
+
+[tasks."build:beeai-server"]
+depends = ["dependencies:uv", "build:beeai-ui"]
+dir = "{{config_root}}/apps/beeai-server"
+run = "uv build . --out-dir dist"
+sources = ["**/*.py"]
+outputs = { auto = true }
+
+## run
+
+[tasks."run:beeai-ui"]
+depends = ["dependencies:pnpm"]
+dir = "{{config_root}}/apps/beeai-ui"
+run = "pnpm --filter=@beeai/ui dev"
+
+[tasks."run:beeai-cli"]
+depends = ["dependencies:uv", "build:beeai-ui"]
+dir = "{{config_root}}/apps/beeai-cli"
+run = "uv run beeai"
+
+[tasks."run:beeai-server"]
+depends = ["dependencies:uv", "build:beeai-ui"]
+dir = "{{config_root}}/apps/beeai-server"
+run = "uv run beeai-server"
+
+[tasks."run:example:mcp-simple-agent"]
+depends = ["dependencies:uv"]
+dir = "{{config_root}}/examples/simple-agent"
+run = "uv run mcp-simple-agent"
+
+[tasks."run:example:mcp-simple-tool"]
+depends = ["dependencies:uv"]
+dir = "{{config_root}}/examples/simple-tool"
+run = "uv run mcp-simple-tool"
+
+## publish
+
+# TODO: publish to npm, pip

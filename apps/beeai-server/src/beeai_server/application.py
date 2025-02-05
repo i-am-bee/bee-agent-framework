@@ -1,6 +1,8 @@
 import logging
+import pathlib
 from typing import TYPE_CHECKING
 
+from fastapi.staticfiles import StaticFiles
 from kink import di
 
 if TYPE_CHECKING:
@@ -37,6 +39,11 @@ def mount_routes(app):
     app.include_router(router=provider_router, prefix="/provider")
     app.mount("/mcp", mcp_app)
     app.mount("/health", lambda: "OK")
+
+    static_directory = pathlib.Path(__file__).parent.joinpath("static")
+    if not static_directory.joinpath("index.html").exists():  # this check is for running locally
+        raise RuntimeError("Could not find static files -- ensure that beeai-ui is built: `mise build:beeai-ui`")
+    app.mount("/", StaticFiles(directory=static_directory, html=True))
 
 
 def app() -> "FastAPI":

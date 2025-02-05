@@ -1,53 +1,71 @@
+## Setup
+
+This project uses [Mise-en-place](https://mise.jdx.dev/). You **don't need to install any other dependencies** (Python, Node.js, etc.). Simply run:
+
 ```sh
-# Clone with submodules
-git clone --recurse-submodules git@github.com:i-am-bee/beeai.git
+brew install mise  # more ways to install: https://mise.jdx.dev/installing-mise.html
+mise install
 ```
 
 ## Server
 
 ```sh
-# install dependencies
-uv sync
-
 # remove existing providers (due to breaking changes during rapid development)
 rm -f ~/.beeai/providers.yaml
 
 # API
-uv run beeai-server
+mise run:beeai-server
+# (keep it running, open another terminal for next steps)
+```
 
-# CLI
+## CLI
 
+```sh
 # run example SSE provider
-OPENAI_API_KEY=<your-openai-api-key> uv run mcp-simple-agent --transport sse --port 9999
+OPENAI_API_KEY=<your-openai-api-key> mise run:example:mcp-simple-agent -- --transport sse --port 9999
+# (keep it running, open another terminal for next steps)
 
-# add SSE provider
-uv run beeai provider add mcp http://localhost:9999/sse
+# add SSE provider 
+mise run:beeai-cli -- provider add mcp http://localhost:9999/sse
+
 # add local filesystem provider
-uv run beeai provider add uvx file://packages/mcp-python-sdk/examples/servers/simple-tool
-uv run beeai provider list
+mise run:beeai-cli -- provider add uvx file://packages/mcp-python-sdk/examples/servers/simple-tool
+mise run:beeai-cli -- provider list
 
 # tools
-uv run beeai tool list
-uv run beeai tool call fetch '{"url": "http://iambee.ai"}'
+mise run:beeai-cli -- tool list
+mise run:beeai-cli -- tool call fetch '{"url": "http://iambee.ai"}'
 
 # agents
-uv run beeai agent list
-uv run beeai agent run website_summarizer "summarize iambee.ai"
+mise run:beeai-cli -- agent list
+mise run:beeai-cli -- agent run website_summarizer "summarize iambee.ai"
 ```
 
 ## UI
 
 ```sh
-# use correct node version
-nvm use
+# run the UI development server:
+mise run:beeai-ui
 
-# install pnpm if not available
-npm install -g pnpm
-
-# install dependencies
-pnpm install
-
-# Run dev server
-pnpm --filter=@beeai/ui dev
-
+# UI is also available from beeai-server (in static mode):
+mise run:beeai-server
 ```
+
+## Development
+
+To directly access development tools installed by Mise (`python`, `uv`, `node`, etc.), run the following command in your shell. This is recommended to ensure you are using the correct tool versions. It can be made permanent by adding this to your shell's `rc` file.
+
+```sh
+# bash (add to ~/.bashrc to make permanent):
+eval "$(mise activate bash)"
+
+# zsh (add to ~/.zshrc to make permanent):
+eval "$(mise activate zsh)"
+
+# fish (add to ~/.config/fish/config.fish to make permanent):
+mise activate fish | source
+
+# other shells: see https://mise.jdx.dev/installing-mise.html#shells
+```
+
+To configure env vars, create a file `mise.local.toml` in the repo root, and use the `[env]` section to configure them ((documentation)[https://mise.jdx.dev/environments/]). You may start with the example file: `mv mise.local.toml-example mise.local.toml`.

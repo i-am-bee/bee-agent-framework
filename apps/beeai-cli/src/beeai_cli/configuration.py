@@ -7,7 +7,6 @@ import pydantic_settings
 class Configuration(pydantic_settings.BaseSettings):
     model_config = pydantic_settings.SettingsConfigDict(
         env_prefix="BEEAI",
-        env_file=".env",
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
     )
