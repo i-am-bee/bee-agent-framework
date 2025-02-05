@@ -19,15 +19,12 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { customMerge } from "@/internals/helpers/object.js";
 import { takeBigger } from "@/internals/helpers/number.js";
 import { Callback } from "@/emitter/types.js";
-import { FrameworkError, NotImplementedError } from "@/errors.js";
+import { FrameworkError } from "@/errors.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext, RunContext } from "@/context.js";
-import { createAbortController } from "@/internals/helpers/cancellation.js";
-import { pRetry } from "@/internals/helpers/retry.js";
 import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
 import { createTelemetryMiddleware } from "@/instrumentation/create-telemetry-middleware.js";
 import { doNothing, omit } from "remeda";
-import { emitterToGenerator } from "@/internals/helpers/promise.js";
 import { ObjectHashKeyFn } from "@/cache/decoratorCache.js";
 import { Task } from "promise-based-task";
 import { NullCache } from "@/cache/nullCache.js";
@@ -35,7 +32,7 @@ import { BaseCache } from "@/cache/base.js";
 import { FullModelName, loadProvider, parseModel } from "@/backend/utils.js";
 import { ProviderName } from "@/backend/constants.js";
 import { AnyTool } from "@/tools/base.js";
-import { Message, SystemMessage, UserMessage } from "@/backend/message.js";
+import { AssistantMessage, Message, SystemMessage, UserMessage } from "@/backend/message.js";
 import {
   JSONSchema7,
   LanguageModelV1FunctionTool,
@@ -52,6 +49,7 @@ import {
 import { Retryable } from "@/internals/helpers/retryable.js";
 import type { ValidateFunction } from "ajv";
 import { PromptTemplate } from "@/template.js";
+import { toAsyncGenerator } from "@/internals/helpers/promise.js";
 
 interface CallSettings {
   abortSignal?: AbortSignal;
@@ -116,7 +114,7 @@ export interface ChatModelUsage {
 }
 
 export interface ChatModelEvents {
-  newToken?: Callback<{ value: ChatModelOutput; callbacks: { abort: () => void } }>;
+  update?: Callback<{ value: ChatModelOutput; callbacks: { abort: () => void } }>;
   success?: Callback<{ value: ChatModelOutput }>;
   start?: Callback<{ input: ChatModelInput; options: any }>;
   error?: Callback<{ input: ChatModelInput; options: any; error: FrameworkError }>;
@@ -136,7 +134,7 @@ export abstract class ChatModel extends Serializable {
   abstract get modelId(): string;
   abstract get providerId(): string;
 
-  create(input: ChatModelInput, ...args: any[]) {
+  create(input: ChatModelInput & { stream?: boolean }, ...args: any[]) {
     input = shallowCopy(input);
     args = shallowCopy(args);
 
@@ -144,22 +142,30 @@ export abstract class ChatModel extends Serializable {
       this,
       { params: [input, ...args] as const, signal: input?.abortSignal },
       async (run) => {
-        const cacheEntry = await this.createCacheAccessor(input, args);
-
         try {
           await run.emitter.emit("start", { input, options: args });
-          const result: ChatModelOutput =
-            cacheEntry?.value?.at(0) ||
-            (await pRetry(() => this._create(input, run), {
-              retries: input.maxRetries || 0,
-              signal: run.signal,
-            }));
+          const chunks: ChatModelOutput[] = [];
+
+          const controller = new AbortController();
+          const generator = input.stream
+            ? this._createStream(input, run)
+            : toAsyncGenerator(this._create(input, run));
+          for await (const value of generator) {
+            chunks.push(value);
+            await run.emitter.emit("update", {
+              value,
+              callbacks: { abort: () => controller.abort() },
+            });
+            if (controller.signal.aborted) {
+              break;
+            }
+          }
+
+          const result = ChatModelOutput.fromChunks(chunks);
           await run.emitter.emit("success", { value: result });
-          cacheEntry.resolve([result]);
           return result;
         } catch (error) {
           await run.emitter.emit("error", { input, error, options: args });
-          await cacheEntry.reject(error);
           if (error instanceof ChatModelError) {
             throw error;
           } else {
@@ -168,64 +174,6 @@ export abstract class ChatModel extends Serializable {
         } finally {
           await run.emitter.emit("finish", null);
         }
-      },
-    ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
-  }
-
-  createStream(input: ChatModelInput, ...args: any[]) {
-    input = shallowCopy(input);
-    args = shallowCopy(args);
-
-    return RunContext.enter(
-      this,
-      { params: [input, ...args] as const, signal: input?.abortSignal },
-      async (run) => {
-        const result = new Task<ChatModelOutput>();
-        const stream = emitterToGenerator<ChatModelOutput, ChatModelOutput>(async ({ emit }) => {
-          const cacheEntry = await this.createCacheAccessor(input, ...args);
-
-          try {
-            await run.emitter.emit("start", { input, options: args });
-
-            const tokenEmitter = run.emitter.child({ groupId: "tokens" });
-            const controller = createAbortController(input?.abortSignal);
-
-            const generator = this._createStream(input, run);
-            while (true) {
-              const { value, done } = await generator.next();
-              if (done) {
-                await run.emitter.emit("success", { value });
-                result.resolve(value);
-                return result;
-              } else {
-                await tokenEmitter.emit("newToken", {
-                  value,
-                  callbacks: { abort: () => controller.abort() },
-                });
-                emit(value);
-              }
-            }
-            throw new NotImplementedError("unhandled state");
-          } catch (error) {
-            await run.emitter.emit("error", { input, error, options: args });
-            await cacheEntry.reject(error);
-            if (error instanceof ChatModelError) {
-              throw error;
-            } else {
-              throw new ChatModelError(`LLM has occurred an error.`, [error]);
-            }
-          } finally {
-            await run.emitter.emit("finish", null);
-          }
-        });
-
-        return {
-          stream,
-          result,
-          async *[Symbol.asyncIterator](): AsyncGenerator<ChatModelOutput> {
-            yield* stream;
-          },
-        };
       },
     ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
   }
@@ -253,7 +201,7 @@ export abstract class ChatModel extends Serializable {
   protected abstract _createStream(
     input: ChatModelInput,
     run: GetRunContext<typeof this>,
-  ): AsyncGenerator<ChatModelOutput, ChatModelOutput>;
+  ): AsyncGenerator<ChatModelOutput>;
 
   protected async _createStructure<T>(
     input: ChatModelObjectInput<T>,
@@ -329,6 +277,14 @@ Validation Errors: {{errors}}`,
     }).get();
   }
 
+  createSnapshot() {
+    return { cache: this.cache, emitter: this.emitter };
+  }
+
+  destroy() {
+    this.emitter.destroy();
+  }
+
   protected async createCacheAccessor(input: ChatModelInput, ...extra: any[]) {
     const key = ObjectHashKeyFn(omit(input ?? {}, ["abortSignal"]), ...extra);
     const value = await this.cache.get(key);
@@ -354,10 +310,6 @@ Validation Errors: {{errors}}`,
       },
     };
   }
-
-  createSnapshot() {
-    return { cache: this.cache, emitter: this.emitter };
-  }
 }
 
 export class ChatModelOutput extends Serializable {
@@ -369,19 +321,10 @@ export class ChatModelOutput extends Serializable {
     super();
   }
 
-  static fromChunks<T extends ChatModelOutput>([chunk, ...chunks]: T[]) {
-    if (!chunk) {
-      throw new ChatModelError("Cannot merge empty chunks!");
-    }
-    const final = chunk.clone();
+  static fromChunks(chunks: ChatModelOutput[]) {
+    const final = new ChatModelOutput([]);
     chunks.forEach((cur) => final.merge(cur));
     return final;
-  }
-
-  mergeImmutable<T extends ChatModelOutput>(this: ChatModelOutput, other: T): T {
-    const newInstance = this.clone() as T;
-    newInstance.merge(other);
-    return newInstance;
   }
 
   merge(other: ChatModelOutput) {
@@ -398,8 +341,19 @@ export class ChatModelOutput extends Serializable {
     }
   }
 
+  getToolCalls() {
+    return this.messages
+      .filter((r) => r instanceof AssistantMessage)
+      .flatMap((r) => r.getToolCalls())
+      .filter(Boolean);
+  }
+
   getTextContent(): string {
-    return this.messages.map((msg) => msg.getTextContent()).join("");
+    return this.messages
+      .filter((r) => r instanceof AssistantMessage)
+      .flatMap((r) => r.getTextContent())
+      .filter(Boolean)
+      .join("");
   }
 
   toString() {

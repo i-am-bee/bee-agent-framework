@@ -103,8 +103,8 @@ describe("Token Memory", () => {
         role: "user",
       }),
     );
-    const serialized = instance.serialize();
-    const deserialized = TokenMemory.fromSerialized(serialized);
+    const serialized = await instance.serialize();
+    const deserialized = await TokenMemory.fromSerialized(serialized);
     verifyDeserialization(instance, deserialized);
   });
 });

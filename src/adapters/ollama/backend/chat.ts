@@ -30,4 +30,8 @@ export class OllamaChatModel extends VercelChatModel {
     const model = client.chat(modelId, settings);
     super(model);
   }
+
+  static {
+    this.register();
+  }
 }

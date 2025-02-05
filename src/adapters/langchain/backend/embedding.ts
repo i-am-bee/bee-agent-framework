@@ -62,7 +62,7 @@ export class LangChainEmbeddingModel extends EmbeddingModel {
 
   createSnapshot() {
     return {
-      emitter: this.emitter,
+      ...super.createSnapshot(),
       lcEmbedding: this.lcEmbedding,
     };
   }

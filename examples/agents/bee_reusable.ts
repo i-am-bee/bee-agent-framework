@@ -1,12 +1,12 @@
 import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { OpenAIChatModel } from "bee-agent-framework/adapters/openai/backend/chat";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 // We create an agent
 let agent = new BeeAgent({
-  llm: new OpenAIChatModel("gpt-4o"),
+  llm: new OllamaChatModel("llama3.1"),
   tools: [new WikipediaTool()],
   memory: new UnconstrainedMemory(),
 });
@@ -20,10 +20,10 @@ const response = await agent.run({
 console.info(response.result.text);
 
 // We can save (serialize) the agent
-const json = agent.serialize();
+const json = await agent.serialize();
 
 // We reinitialize the agent to the exact state he was
-agent = BeeAgent.fromSerialized(json);
+agent = await BeeAgent.fromSerialized(json);
 
 // We continue in our conversation
 prompt = "When was he born?";

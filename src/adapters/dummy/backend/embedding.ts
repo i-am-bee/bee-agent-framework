@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { RunContext } from "@/context.js";
+import { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { NotImplementedError } from "@/errors.js";
 import {
@@ -40,13 +40,13 @@ export class DummyEmbeddingModel extends EmbeddingModel {
 
   protected _create(
     input: EmbeddingModelInput,
-    run: RunContext<this, any>,
+    run: GetRunContext<this>,
   ): Promise<EmbeddingModelOutput> {
     throw new NotImplementedError();
   }
 
   createSnapshot() {
-    return { modelId: this.modelId, emitter: this.emitter };
+    return { ...super.createSnapshot(), modelId: this.modelId };
   }
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {

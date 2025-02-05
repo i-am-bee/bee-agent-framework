@@ -31,11 +31,11 @@ import {
 } from "@/agents/bee/prompts.js";
 import { AnyTool, Tool, ToolError, ToolInputValidationError, ToolOutput } from "@/tools/base.js";
 import { FrameworkError } from "@/errors.js";
-import { isEmpty, isTruthy, last } from "remeda";
+import { isTruthy, last } from "remeda";
 import { LinePrefixParser, LinePrefixParserError } from "@/agents/parsers/linePrefix.js";
 import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
 import { z } from "zod";
-import { Message, Role } from "@/backend/message.js";
+import { Message, Role, UserMessage } from "@/backend/message.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { getProp } from "@/internals/helpers/object.js";
 import { BaseMemory } from "@/memory/base.js";
@@ -100,18 +100,12 @@ export class DefaultRunner extends BaseRunner {
         const tools = this.input.tools.slice();
         await emitter.emit("start", { meta, tools, memory: this.memory });
 
-        const { parser, parserRegex } = this.createParser(tools);
-        // TODO: this will not work I guess
-        const { result } = await this.input.llm
-          .createStream({
+        const { parser } = this.createParser(tools);
+        const raw = await this.input.llm
+          .create({
             messages: this.memory.messages.slice(),
             abortSignal: signal,
-            experimental_providerMetadata: {
-              // TODO: how to handle guided?
-              guided: {
-                regex: parserRegex.source,
-              },
-            },
+            stream: true,
           })
           .observe((llmEmitter) => {
             parser.emitter.on("update", async ({ value, key, field }) => {
@@ -133,7 +127,7 @@ export class DefaultRunner extends BaseRunner {
               });
             });
 
-            llmEmitter.on("newToken", async ({ value, callbacks }) => {
+            llmEmitter.on("update", async ({ value, callbacks }) => {
               if (parser.isDone) {
                 callbacks.abort();
                 return;
@@ -146,7 +140,6 @@ export class DefaultRunner extends BaseRunner {
             });
           });
 
-        const raw = await result;
         await parser.end();
         await this.memory.deleteMany(
           this.memory.messages.filter((msg) => getProp(msg.meta, [tempMessageKey]) === true),
@@ -282,13 +275,7 @@ export class DefaultRunner extends BaseRunner {
       user: {
         message: ({ prompt }: BeeRunInput) =>
           prompt !== null || this.input.memory.isEmpty()
-            ? Message.of({
-                role: Role.USER,
-                text: prompt || this.templates.userEmpty.render({}),
-                meta: {
-                  createdAt: new Date(),
-                },
-              })
+            ? new UserMessage(prompt || this.templates.userEmpty.render({}))
             : undefined,
       },
       system: {
@@ -327,7 +314,7 @@ export class DefaultRunner extends BaseRunner {
   }
 
   protected async initMemory({ prompt }: BeeRunInput): Promise<BaseMemory> {
-    const { memory: history, llm } = this.input;
+    const { memory: history } = this.input;
 
     const prevConversation = [...history.messages, this.renderers.user.message({ prompt })]
       .filter(isTruthy)
@@ -384,12 +371,6 @@ export class DefaultRunner extends BaseRunner {
   }
 
   protected createParser(tools: AnyTool[]) {
-    const parserRegex = isEmpty(tools)
-      ? new RegExp(`Thought: .+\\nFinal Answer: [\\s\\S]+`)
-      : new RegExp(
-          `Thought: .+\\n(?:Final Answer: [\\s\\S]+|Function Name: (${tools.map((tool) => tool.name).join("|")})\\nFunction Input: \\{.*\\}\\nFunction Output:)`,
-        );
-
     const parser = new LinePrefixParser<BeeParserInput>(
       {
         thought: {
@@ -447,7 +428,6 @@ export class DefaultRunner extends BaseRunner {
 
     return {
       parser,
-      parserRegex,
     } as const;
   }
 }

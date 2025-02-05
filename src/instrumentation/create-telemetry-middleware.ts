@@ -73,7 +73,7 @@ export function createTelemetryMiddleware() {
 
     const idNameManager = new IdNameManager();
 
-    const newTokenEventName: keyof ChatModelEvents = `newToken`;
+    const updateEventName: keyof ChatModelEvents = `update`;
     const partialUpdateEventName: keyof BeeCallbacks = "partialUpdate";
     const successEventName: keyof ChatModelEvents = `success`;
     const finishEventName: keyof ChatModelEvents = `finish`;
@@ -221,7 +221,7 @@ export function createTelemetryMiddleware() {
 
       // delete the `newToken` event if exists and create the new one
       const lastIterationOnNewTokenSpanId = eventsIterationsMap.get(lastIteration)?.get(meta.name);
-      if (lastIterationOnNewTokenSpanId && meta.name === newTokenEventName) {
+      if (lastIterationOnNewTokenSpanId && meta.name === updateEventName) {
         // delete span
         cleanSpanSources({ spanId: lastIterationOnNewTokenSpanId });
         spansMap.delete(lastIterationOnNewTokenSpanId);

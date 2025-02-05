@@ -24,6 +24,7 @@ import { embedMany, EmbeddingModel as Model } from "ai";
 import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext } from "@/context.js";
 import { toCamelCase } from "remeda";
+import { FullModelName } from "@/backend/utils.js";
 
 type InternalEmbeddingModel = Model<string>;
 
@@ -74,11 +75,23 @@ export class VercelEmbeddingModel<
 
   createSnapshot() {
     return {
-      model: this.model,
+      ...super.createSnapshot(),
+      providerId: this.providerId,
+      modelId: this.model,
     };
   }
 
-  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
-    Object.assign(this, snapshot);
+  async loadSnapshot({ providerId, modelId, ...snapshot }: ReturnType<typeof this.createSnapshot>) {
+    const instance = await VercelEmbeddingModel.fromName(
+      `${providerId}:${modelId}` as FullModelName,
+    );
+    if (!(instance instanceof VercelEmbeddingModel)) {
+      throw new Error("Incorrect deserialization!");
+    }
+    instance.destroy();
+    Object.assign(this, {
+      ...snapshot,
+      model: instance.model,
+    });
   }
 }

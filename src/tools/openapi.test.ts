@@ -71,11 +71,11 @@ describe("OpenAPI Tool", () => {
     vi.clearAllTimers();
   });
 
-  it("Serializes", () => {
+  it("Serializes", async () => {
     const tool = new OpenAPITool({ openApiSchema });
 
-    const serialized = tool.serialize();
-    const deserialized = OpenAPITool.fromSerialized(serialized);
+    const serialized = await tool.serialize();
+    const deserialized = await OpenAPITool.fromSerialized(serialized);
     verifyDeserialization(tool, deserialized);
   });
 });

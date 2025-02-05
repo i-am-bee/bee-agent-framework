@@ -22,8 +22,8 @@ class MyClass extends Serializable {
 }
 
 const instance = new MyClass("Bee");
-const serialized = instance.serialize();
-const deserialized = MyClass.fromSerialized(serialized);
+const serialized = await instance.serialize();
+const deserialized = await MyClass.fromSerialized(serialized);
 
 console.info(instance);
 console.info(deserialized);

@@ -101,15 +101,22 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
     const { userMessage, runMemory } = await this.prepare(input);
 
     let content = "";
-    for await (const chunk of this.input.llm.createStream({
-      messages: runMemory.messages,
-      abortSignal: run.signal,
-    })) {
-      const delta = chunk.getTextContent();
-      content += delta;
-      await run.emitter.emit("newToken", { delta, state: { content }, chunk });
-    }
-    const result = this.parse(content);
+    const raw = await this.input.llm
+      .create({
+        stream: true,
+        messages: runMemory.messages,
+        abortSignal: run.signal,
+      })
+      .observe((emitter) => {
+        emitter.on("update", async ({ value: chunk }) => {
+          const delta = chunk.getTextContent();
+          if (delta) {
+            content += delta;
+            await run.emitter.emit("newToken", { delta, state: { content }, chunk });
+          }
+        });
+      });
+    const result = this.parse(content || raw.getTextContent());
 
     const assistantMessage = new AssistantMessage(content);
     await this.memory.addMany([userMessage, assistantMessage].filter(isTruthy));

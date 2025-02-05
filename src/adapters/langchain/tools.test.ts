@@ -44,8 +44,8 @@ describe("Langchain Tools", () => {
       tool: lcTool,
     });
 
-    const serialized = instance.serialize();
-    const deserialized = LangChainTool.fromSerialized(serialized);
+    const serialized = await instance.serialize();
+    const deserialized = await LangChainTool.fromSerialized(serialized);
     verifyDeserialization(instance, deserialized, undefined, [], ["tool.schema"]);
   });
 });

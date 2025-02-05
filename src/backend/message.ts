@@ -34,6 +34,22 @@ export interface MessageInput {
   meta?: MessageMeta;
 }
 
+function isText(content: MessageContentPart): content is TextPart {
+  return content.type === "text";
+}
+function isImage(content: MessageContentPart): content is ImagePart {
+  return content.type === "image";
+}
+function isFile(content: MessageContentPart): content is FilePart {
+  return content.type === "file";
+}
+function isToolCall(content: MessageContentPart): content is ToolCallPart {
+  return content.type === "tool-call";
+}
+function isToolResult(content: MessageContentPart): content is ToolResultPart {
+  return content.type === "tool-result";
+}
+
 export abstract class Message<
   T extends MessageContentPart = MessageContentPart,
   R extends string = MessageRole | string,
@@ -65,6 +81,8 @@ export abstract class Message<
       return new AssistantMessage(text, meta);
     } else if (role === "system") {
       return new SystemMessage(text, meta);
+    } else if (role === "tool") {
+      return new ToolMessage(text, meta);
     } else {
       return new CustomMessage(role, text, meta);
     }
@@ -75,12 +93,18 @@ export abstract class Message<
     return this.getTextContent();
   }
 
+  getTexts() {
+    return this.content.filter(isText) as TextPart[];
+  }
+
   getTextContent() {
-    return this.content.map((content) => (content.type === "text" ? content.text : "")).join("");
+    return this.getTexts()
+      .map((c) => c.text)
+      .join("");
   }
 
   createSnapshot() {
-    return { role: this.role, content: shallowCopy(this.content), meta: shallowCopy(this.meta) };
+    return { content: shallowCopy(this.content), meta: shallowCopy(this.meta), role: this.role };
   }
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
@@ -90,6 +114,10 @@ export abstract class Message<
   toPlain() {
     return { role: this.role, content: shallowCopy(this.content) } as const;
   }
+
+  [Symbol.iterator](): Iterator<T> {
+    return this.content[Symbol.iterator]();
+  }
 }
 
 export class AssistantMessage extends Message<TextPart | ToolCallPart> {
@@ -97,6 +125,10 @@ export class AssistantMessage extends Message<TextPart | ToolCallPart> {
 
   static {
     this.register();
+  }
+
+  getToolCalls() {
+    return this.content.filter(isToolCall);
   }
 
   protected fromString(text: string): TextPart {
@@ -109,6 +141,10 @@ export class ToolMessage extends Message<ToolResultPart> {
 
   static {
     this.register();
+  }
+
+  getToolResults() {
+    return this.content.filter(isToolResult);
   }
 
   protected fromString(text: string): ToolResultPart {
@@ -146,6 +182,14 @@ export class UserMessage extends Message<TextPart | ImagePart | FilePart> {
 
   static {
     this.register();
+  }
+
+  getImages() {
+    return this.content.filter(isImage);
+  }
+
+  getFiles() {
+    return this.content.filter(isFile);
   }
 
   protected fromString(text: string): TextPart {

@@ -131,8 +131,8 @@ describe("GoogleCustomSearch Tool", () => {
     );
 
     await tool.cache!.set("B", Task.resolve(new GoogleSearchToolOutput([])));
-    const serialized = tool.serialize();
-    const deserialized = GoogleSearchTool.fromSerialized(serialized);
+    const serialized = await tool.serialize();
+    const deserialized = await GoogleSearchTool.fromSerialized(serialized);
     expect(await tool.cache.get("A")).toStrictEqual(await deserialized.cache.get("A"));
     verifyDeserialization(tool, deserialized);
   });

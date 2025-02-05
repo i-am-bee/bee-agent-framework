@@ -51,6 +51,7 @@ export interface BeeInput {
     [K in keyof BeeAgentTemplates]: BeeAgentTemplates[K] | BeeTemplateFactory<K>;
   }>;
   execution?: BeeAgentExecutionConfig;
+  saveIntermediateSteps?: boolean;
 }
 
 export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions> {

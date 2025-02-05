@@ -36,35 +36,22 @@ import { Emitter } from "@/emitter/emitter.js";
 import { AssistantMessage, Message, ToolMessage } from "@/backend/message.js";
 import { RunContext } from "@/context.js";
 import { ValueError } from "@/errors.js";
-import { Serializer } from "@/serializer/serializer.js";
-import { ClassConstructor } from "@/internals/types.js";
 import { mapToObj, toCamelCase } from "remeda";
+import { FullModelName } from "@/backend/utils.js";
 
-export class VercelChatModel<R extends LanguageModelV1 = LanguageModelV1> extends ChatModel {
+export abstract class VercelChatModel<
+  R extends LanguageModelV1 = LanguageModelV1,
+> extends ChatModel {
   public readonly emitter: Emitter<ChatModelEvents>;
 
-  constructor(protected readonly model: R) {
+  constructor(private readonly model: R) {
     super();
-    this.emitter = Emitter.root.child({
-      namespace: ["backend", this.providerId, "chat"],
-    });
     if (!this.modelId) {
       throw new ValueError("No modelId has been provided!");
     }
-
-    const target = this.model.constructor as ClassConstructor<R>;
-    Serializer.register(target, {
-      toPlain: (value) => Object.entries(value),
-      fromPlain: (value: any) => {
-        const instance = new target();
-        Object.assign(instance, Object.fromEntries(value));
-        return instance;
-      },
+    this.emitter = Emitter.root.child({
+      namespace: ["backend", this.providerId, "chat"],
     });
-  }
-
-  static {
-    this.register();
   }
 
   get modelId(): string {
@@ -193,22 +180,27 @@ export class VercelChatModel<R extends LanguageModelV1 = LanguageModelV1> extend
   createSnapshot() {
     return {
       ...super.createSnapshot(),
-      model: this.model,
+      providerId: this.providerId,
+      modelId: this.modelId,
     };
   }
 
-  loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
-    Object.assign(this, snapshot);
+  async loadSnapshot({ providerId, modelId, ...snapshot }: ReturnType<typeof this.createSnapshot>) {
+    const instance = await ChatModel.fromName(`${providerId}:${modelId}` as FullModelName);
+    if (!(instance instanceof VercelChatModel)) {
+      throw new Error("Incorrect deserialization!");
+    }
+    instance.destroy();
+    Object.assign(this, {
+      ...snapshot,
+      model: instance.model,
+    });
   }
 
   static fromModel<T2 extends LanguageModelV1, T extends VercelChatModel<T2>>(
-    this: new (...args: any[]) => T,
+    this: abstract new (...args: any[]) => T,
     model: T2,
   ): T {
-    if (this.prototype === VercelChatModel) {
-      return new VercelChatModel(model) as T;
-    } else {
-      return Reflect.construct(VercelChatModel, [model], this) as T;
-    }
+    return Reflect.construct(VercelChatModel, [model], this) as T;
   }
 }

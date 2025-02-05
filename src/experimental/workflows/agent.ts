@@ -68,14 +68,17 @@ export class AgentWorkflow {
     );
   }
 
-  addAgent(agent: AgentInstance | AgentFactory | AgentFactoryInput) {
+  addAgent(agent: AgentFactory | AgentFactoryInput): this;
+  addAgent(agent: AgentInstance): Promise<this>;
+  addAgent(agent: AgentInstance | AgentFactory | AgentFactoryInput): this | Promise<this> {
     if (agent instanceof BaseAgent) {
-      const clone = agent.clone();
-      const factory: AgentFactory = (memory) => {
-        clone.memory = memory;
-        return clone;
-      };
-      return this._add(clone.meta.name, factory);
+      return agent.clone().then((clone) => {
+        const factory: AgentFactory = (memory) => {
+          clone.memory = memory;
+          return clone;
+        };
+        return this._add(clone.meta.name, factory);
+      });
     }
 
     const name = agent.name || `Agent${randomString(4)}`;

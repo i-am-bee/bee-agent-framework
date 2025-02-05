@@ -18,13 +18,13 @@ import * as R from "remeda";
 import { SafeWeakSet } from "@/internals/helpers/weakRef.js";
 import { AnyConstructable, AnyFn, ClassConstructor, NamedFunction } from "@/internals/types.js";
 import { SerializeFactory } from "@/serializer/serializer.js";
-import { Cache } from "@/cache/decoratorCache.js";
 import { getProp, hasProp } from "@/internals/helpers/object.js";
 import { isDirectInstanceOf } from "@/internals/helpers/prototype.js";
 import { SerializerError } from "@/serializer/error.js";
 
 export const SerializerSelfRefIdentifier = "__self_ref";
 export const SerializerRefIdentifier = "__ref";
+export class ClassConstructorPlaceholder {}
 export class RefPlaceholder<T = unknown> {
   private static EmptyPlaceholder = Symbol();
   private partialResult: T = RefPlaceholder.EmptyPlaceholder as T;
@@ -48,9 +48,8 @@ export class RefPlaceholder<T = unknown> {
     return this.partialResult;
   }
 
-  @Cache()
-  get final() {
-    const finalInstance = this.factory.fromPlain(this.node.__value);
+  async final() {
+    const finalInstance = await this.factory.fromPlain(this.node.__value, this.factory.ref);
     if (this.partialResult === RefPlaceholder.EmptyPlaceholder) {
       return finalInstance;
     }
@@ -127,15 +126,15 @@ export function primitiveToSerializableClass(value: unknown) {
   return ClassByValueType[type];
 }
 
-type TraverseObjectFn = (el: { key: string; path: readonly string[]; value: any }) => void;
-export function traverseObject(
+type TraverseObjectFn = (el: { key: string; path: readonly string[]; value: any }) => Promise<void>;
+export async function traverseObject(
   obj: unknown,
   handler: TraverseObjectFn,
   stopFn?: (_obj: unknown) => boolean,
 ) {
   const seen = new SafeWeakSet();
 
-  const traverse = (_obj: unknown, path: readonly string[] = []) => {
+  const traverse = async (_obj: unknown, path: readonly string[] = []) => {
     if (!R.isPlainObject(_obj) || seen.has(_obj)) {
       return;
     }
@@ -146,9 +145,8 @@ export function traverseObject(
     }
 
     for (const [key, value] of Object.entries(_obj)) {
-      traverse(value, path.concat(key));
-
-      handler({
+      await traverse(value, path.concat(key));
+      await handler({
         key,
         value,
         path: path.concat(key),
@@ -156,7 +154,7 @@ export function traverseObject(
     }
   };
 
-  return traverse(obj, []);
+  return await traverse(obj, []);
 }
 
 export function isSerializationRequired(factory: ClassConstructor | NamedFunction) {

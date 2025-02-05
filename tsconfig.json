@@ -26,6 +26,7 @@
     "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"],
+      "bee-agent-framework/*": ["./src/*"],
       "@tests/*": ["./tests/*"]
     },
     "useUnknownInCatchVariables": false

@@ -65,7 +65,6 @@ export class WatsonXChatModel extends ChatModel {
   }
 
   async *_createStream(input: ChatModelInput, run: GetRunContext<this>) {
-    const chunks: ChatModelOutput[] = [];
     const stream = await this.client.instance.textChatStream({
       ...(await this.prepareParameters(input)),
       returnObject: true,
@@ -79,12 +78,8 @@ export class WatsonXChatModel extends ChatModel {
         raw.data.choices.map(({ delta, ...choice }) => ({ ...choice, message: delta })),
         raw.data.usage,
       );
-      const chunk = new ChatModelOutput(messages, usage, finishReason);
-      yield chunk;
-      chunks.push(chunk);
+      yield new ChatModelOutput(messages, usage, finishReason);
     }
-
-    return ChatModelOutput.fromChunks(chunks);
   }
 
   protected extractResult(choices: TextChatResultChoice[], usage?: TextChatUsage) {

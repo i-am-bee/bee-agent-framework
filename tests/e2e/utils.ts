@@ -26,13 +26,10 @@ import { Callback } from "@/emitter/types.js";
 import { RunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { toJsonSchema } from "@/internals/helpers/schema.js";
-import { OpenAI } from "openai";
-import { Groq } from "groq-sdk";
 import { customsearch_v1 } from "@googleapis/customsearch";
 import { LangChainTool } from "@/adapters/langchain/tools.js";
 import { Client as esClient } from "@elastic/elasticsearch";
-import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
-import { VertexAI } from "@google-cloud/vertexai";
+import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 
 interface CallbackOptions<T> {
   required?: boolean;
@@ -129,8 +126,6 @@ verifyDeserialization.ignoredClasses = [
   RunContext,
   Emitter,
   esClient,
-  BedrockRuntimeClient,
-  VertexAI,
 ] as ClassConstructor[];
 verifyDeserialization.isIgnored = (key: string, value: unknown, parent?: any) => {
   if (verifyDeserialization.ignoredKeys.has(key)) {
@@ -144,7 +139,7 @@ verifyDeserialization.isIgnored = (key: string, value: unknown, parent?: any) =>
     return true;
   }
 
-  if (parent && (parent instanceof OpenAI || parent instanceof Groq)) {
+  if (parent && parent instanceof VercelChatModel) {
     try {
       Serializer.findFactory(value);
       return false;

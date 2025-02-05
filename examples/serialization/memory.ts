@@ -11,8 +11,8 @@ await memory.addMany([
   }),
 ]);
 
-const serialized = memory.serialize();
-const deserialized = TokenMemory.fromSerialized(serialized);
+const serialized = await memory.serialize();
+const deserialized = await TokenMemory.fromSerialized(serialized);
 
 await deserialized.add(
   Message.of({

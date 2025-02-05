@@ -94,4 +94,12 @@ export abstract class EmbeddingModel extends Serializable {
     input: EmbeddingModelInput,
     run: GetRunContext<typeof this>,
   ): Promise<EmbeddingModelOutput>;
+
+  createSnapshot() {
+    return { cache: this.cache, emitter: this.emitter };
+  }
+
+  destroy() {
+    this.emitter.destroy();
+  }
 }

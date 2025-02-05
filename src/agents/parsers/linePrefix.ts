@@ -407,7 +407,7 @@ export class LinePrefixParser<T extends Input<StringKey<T>>> extends Serializabl
   }
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {
-    return Object.assign(this, snapshot);
+    Object.assign(this, snapshot);
   }
 }
 

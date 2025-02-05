@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isEmpty } from "remeda";
 import type { AnyTool } from "@/tools/base.js";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import {
@@ -81,14 +80,7 @@ export class DeepThinkRunner extends DefaultRunner {
   protected createParser(tools: AnyTool[]) {
     const { parser } = super.createParser(tools);
 
-    const parserRegex = isEmpty(tools)
-      ? new RegExp(`<think>.+?</think>\\n\\nFinal Answer: [\\s\\S]+`)
-      : new RegExp(
-          `<think>.+?</think>\\n\\n(?:Final Answer: [\\s\\S]+|Tool Name: (${tools.map((tool) => tool.name).join("|")})\\nTool Input: \\{.*\\})`,
-        );
-
     return {
-      parserRegex,
       parser: parser.fork((nodes, options) => ({
         options: {
           ...options,

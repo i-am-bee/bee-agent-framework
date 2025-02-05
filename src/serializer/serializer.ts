@@ -51,8 +51,8 @@ export interface SerializeFactory<A = unknown, B = unknown> {
   ref: ClassConstructor<A> | NamedFunction<A>;
   createEmpty?: () => A;
   updateInstance?: (instance: A, update: A) => void;
-  toPlain: (value: A) => B;
-  fromPlain: (value: B) => A;
+  toPlain: (value: A) => B | Promise<B>;
+  fromPlain: (value: B, ref: ClassConstructor<A> | NamedFunction<A>) => A | Promise<A>;
 }
 
 export class Serializer {
@@ -154,7 +154,7 @@ export class Serializer {
     return Serializer.factories.has(clsName);
   }
 
-  static serialize<T>(rawData: T): string {
+  static async serialize<T>(rawData: T): Promise<string> {
     const output = Serializer._createOutputBuilder();
     const getRefId = (() => {
       let id = 0;
@@ -187,7 +187,7 @@ export class Serializer {
       };
     })();
 
-    const toSerializable = (rawValue: unknown): SerializerNode | unknown => {
+    const toSerializable = async (rawValue: unknown): Promise<SerializerNode | unknown> => {
       if (seen.has(rawValue)) {
         return seen.get(rawValue);
       }
@@ -202,7 +202,7 @@ export class Serializer {
         return rawValue;
       }
 
-      const snapshot = isSelfRef ? SerializerSelfRefIdentifier : factory.toPlain(rawValue);
+      const snapshot = isSelfRef ? SerializerSelfRefIdentifier : await factory.toPlain(rawValue);
       assertValidSnapshot(snapshot, factory);
 
       const result: SerializerNode = {
@@ -214,7 +214,7 @@ export class Serializer {
       seen.set(rawValue, result);
 
       for (const node of traverseWithUpdate(snapshot)) {
-        const newValue = toSerializable(node.value);
+        const newValue = await toSerializable(node.value);
         if (newValue !== node.value) {
           node.update(newValue);
         }
@@ -223,24 +223,24 @@ export class Serializer {
     };
 
     const root: RootNode<T> = { __version: Version, __root: rawData };
-    traverseObject(root, ({ value, path }) => {
-      const content = toSerializable(value);
+    await traverseObject(root, async ({ value, path }) => {
+      const content = await toSerializable(value);
       output.update(path, content);
     });
     return output.toJSON();
   }
 
   /** @internal */
-  static deserializeWithMeta<T = any>(
+  static async deserializeWithMeta<T = any>(
     raw: string,
     extraClasses?: SerializableClass<unknown>[],
-  ): RootNode<T> {
+  ): Promise<RootNode<T>> {
     extraClasses?.forEach((ref) => Serializer.registerSerializable(ref));
 
     const output = Serializer._createOutputBuilder<RootNode<T>>();
     const instances = new Map<string, unknown>();
 
-    const toDeserialize = (contentRaw: unknown) => {
+    const toDeserialize = async (contentRaw: unknown) => {
       if (isSerializerNode(contentRaw)) {
         const clsName = String(contentRaw.__class);
         const factory = Serializer.getFactory(clsName);
@@ -262,9 +262,9 @@ export class Serializer {
           return data;
         }
 
-        const traverseNested = () => {
+        const traverseNested = async () => {
           for (const node of traverseWithUpdate(rawData)) {
-            const newValue = toDeserialize(node.value);
+            const newValue = await toDeserialize(node.value);
             if (newValue !== node.value) {
               node.update(newValue);
             }
@@ -274,9 +274,10 @@ export class Serializer {
         // Handle circular dependencies
         const placeholder = new RefPlaceholder<any>(contentRaw, factory);
         instances.set(contentRaw.__ref!, placeholder);
-        traverseNested();
-        instances.set(contentRaw.__ref!, placeholder.final);
-        return placeholder.final;
+        await traverseNested();
+        const final = await placeholder.final();
+        instances.set(contentRaw.__ref!, final);
+        return final;
       }
       return contentRaw;
     };
@@ -286,18 +287,21 @@ export class Serializer {
       throw new SerializerError("Provided data cannot be deserialized due to malformed format!");
     }
 
-    traverseObject(
+    await traverseObject(
       root,
-      ({ value: contentRaw, path }) => {
-        output.update(path, toDeserialize(contentRaw));
+      async ({ value: contentRaw, path }) => {
+        output.update(path, await toDeserialize(contentRaw));
       },
       (_obj) => isSerializerNode(_obj),
     );
     return output.get();
   }
 
-  static deserialize<T = any>(raw: string, extraClasses?: SerializableClass<unknown>[]): T {
-    const response = Serializer.deserializeWithMeta(raw, extraClasses);
+  static async deserialize<T = any>(
+    raw: string,
+    extraClasses?: SerializableClass<unknown>[],
+  ): Promise<T> {
+    const response = await Serializer.deserializeWithMeta(raw, extraClasses);
     return response.__root;
   }
 

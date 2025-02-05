@@ -15,8 +15,7 @@
  */
 
 import { Serializer } from "@/serializer/serializer.js";
-import { ClassConstructor, PromiseOrPlain } from "@/internals/types.js";
-import * as R from "remeda";
+import { ClassConstructor } from "@/internals/types.js";
 import { extractClassName } from "@/serializer/utils.js";
 import { SerializerError } from "@/serializer/error.js";
 import { Cache } from "@/cache/decoratorCache.js";
@@ -34,8 +33,8 @@ export interface DeserializeOptions {
 }
 
 export abstract class Serializable<T = unknown> {
-  abstract createSnapshot(): T;
-  abstract loadSnapshot(snapshot: T): void;
+  abstract createSnapshot(): T | Promise<T>;
+  abstract loadSnapshot(snapshot: T): void | Promise<void>;
 
   constructor() {
     Object.getPrototypeOf(this).constructor.register();
@@ -46,24 +45,24 @@ export abstract class Serializable<T = unknown> {
     Serializer.registerSerializable(this, undefined, aliases);
   }
 
-  clone<T extends Serializable>(this: T): T {
-    const snapshot = this.createSnapshot();
+  async clone<T extends Serializable>(this: T): Promise<T> {
+    const snapshot = await this.createSnapshot();
 
-    const target = Object.create(this.constructor.prototype);
-    target.loadSnapshot(snapshot);
+    const target = Object.create(this.constructor.prototype) as T;
+    await target.loadSnapshot(snapshot);
     return target;
   }
 
-  serialize(): string {
-    const snapshot = this.createSnapshot();
-    return Serializer.serialize<SerializableStructure<T>>({
+  async serialize(): Promise<string> {
+    const snapshot = await this.createSnapshot();
+    return await Serializer.serialize<SerializableStructure<T>>({
       target: extractClassName(this),
       snapshot,
     });
   }
 
-  protected deserialize(value: string, options?: DeserializeOptions): T {
-    const { __root } = Serializer.deserializeWithMeta<SerializableStructure<T>>(
+  protected async deserialize(value: string, options?: DeserializeOptions): Promise<T> {
+    const { __root } = await Serializer.deserializeWithMeta<SerializableStructure<T>>(
       value,
       options?.extraClasses,
     );
@@ -84,29 +83,25 @@ export abstract class Serializable<T = unknown> {
     return __root.snapshot;
   }
 
-  static fromSnapshot<T, P>(
-    this: new (...args: any[]) => T extends Serializable<P> ? T : never,
+  static async fromSnapshot<P, T extends Serializable<P>>(
+    this: new (...args: any[]) => T,
     state: P,
-  ): T {
+  ): Promise<T> {
     const target = Object.create(this.prototype);
-    target.loadSnapshot(state);
+    await target.loadSnapshot(state);
     Cache.init(target);
     return target;
   }
 
-  static fromSerialized<T extends Serializable>(
+  static async fromSerialized<T extends Serializable>(
     this: abstract new (...args: any[]) => T,
     serialized: string,
     options: DeserializeOptions = {},
-  ): PromiseOrPlain<T, T["loadSnapshot"]> {
+  ): Promise<T> {
     const target = Object.create(this.prototype) as T;
-    const state = target.deserialize(serialized, options);
-    const load = target.loadSnapshot(state);
+    const state = await target.deserialize(serialized, options);
+    await target.loadSnapshot(state);
     Cache.init(target);
-
-    return (R.isPromise(load) ? load.then(() => target) : target) as PromiseOrPlain<
-      T,
-      T["loadSnapshot"]
-    >;
+    return target;
   }
 }

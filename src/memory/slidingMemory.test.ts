@@ -71,8 +71,8 @@ describe("Sliding Memory", () => {
       size: 5,
     });
     await instance.add(new UserMessage("Hello!"));
-    const serialized = instance.serialize();
-    const deserialized = SlidingMemory.fromSerialized(serialized);
+    const serialized = await instance.serialize();
+    const deserialized = await SlidingMemory.fromSerialized(serialized);
     verifyDeserialization(instance, deserialized);
   });
 });

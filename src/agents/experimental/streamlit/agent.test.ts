@@ -25,8 +25,8 @@ describe("Streamlit agent", () => {
       llm: new OllamaChatModel("llama3.1"),
       memory: new UnconstrainedMemory(),
     });
-    const serialized = instance.serialize();
-    const deserialized = StreamlitAgent.fromSerialized(serialized);
+    const serialized = await instance.serialize();
+    const deserialized = await StreamlitAgent.fromSerialized(serialized);
     verifyDeserialization(instance, deserialized);
   });
 });

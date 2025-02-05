@@ -73,6 +73,7 @@ export class WatsonXEmbeddingModel extends EmbeddingModel {
 
   createSnapshot() {
     return {
+      ...super.createSnapshot(),
       modelId: this.modelId,
       parameters: shallowCopy(this.parameters),
       client: this.client,

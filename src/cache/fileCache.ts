@@ -39,7 +39,7 @@ export class FileCache<T> extends BaseCache<T> {
   }
 
   static async fromProvider<A>(provider: BaseCache<A>, input: Input) {
-    await fs.promises.writeFile(input.fullPath, provider.serialize());
+    await fs.promises.writeFile(input.fullPath, await provider.serialize());
     return new FileCache<A>(input);
   }
 
@@ -54,7 +54,7 @@ export class FileCache<T> extends BaseCache<T> {
       const serialized = await fs.promises.readFile(this.input.fullPath, "utf8");
       const { target, snapshot } = await Serializer.deserialize<any>(serialized);
       const Target = Serializer.getFactory(target).ref as SerializableClass<BaseCache<T>>;
-      const instance = Target.fromSnapshot(snapshot);
+      const instance = await Target.fromSnapshot(snapshot);
       if (!(instance instanceof BaseCache)) {
         throw new TypeError("Provided file does not serialize any instance of BaseCache class.");
       }
@@ -75,7 +75,7 @@ export class FileCache<T> extends BaseCache<T> {
 
   protected async save() {
     const provider = await this.getProvider();
-    return await fs.promises.writeFile(this.input.fullPath, provider.serialize());
+    return await fs.promises.writeFile(this.input.fullPath, await provider.serialize());
   }
 
   async size() {
