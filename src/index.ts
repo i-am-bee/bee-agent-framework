@@ -19,3 +19,4 @@ export * from "./template.js";
 export * from "./errors.js";
 export * from "./version.js";
 export * from "./serializer/serializer.js";
+export * from "./agents/base.js";
