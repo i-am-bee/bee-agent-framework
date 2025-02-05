@@ -6,6 +6,8 @@ import { MCPFallback } from './components/fallbacks/MCPFallback';
 import { AppLayout } from './components/layouts/AppLayout';
 import { MCPClientProvider } from './contexts/MCPClient/MCPClientProvider';
 import { Home } from './pages/Home';
+import { NotFound } from './pages/NotFound';
+import { routes } from './utils/routes';
 
 const queryClient = new QueryClient();
 
@@ -17,7 +19,9 @@ export function App() {
           <BrowserRouter>
             <Routes>
               <Route element={<AppLayout />}>
-                <Route index element={<Home />} />
+                <Route path={routes.home()} element={<Home />} />
+
+                <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
           </BrowserRouter>
