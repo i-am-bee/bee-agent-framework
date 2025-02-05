@@ -11,10 +11,15 @@
     "clean": "rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
+    "@carbon/react": "^1.75.0",
+    "@carbon/styles": "^1.74.0",
     "@modelcontextprotocol/sdk": "file:../../packages/mcp-typescript-sdk",
+    "@tanstack/react-query": "^5.66.0",
+    "clsx": "^2.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-query": "^3.39.3"
+    "react-error-boundary": "^5.0.0",
+    "react-router": "^7.1.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -25,8 +30,17 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "sass-embedded": "^1.83.4",
+    "stylelint": "^16.14.1",
+    "stylelint-config-css-modules": "^4.4.0",
+    "stylelint-config-recommended-scss": "^14.1.0",
+    "stylelint-plugin-logical-css": "^1.2.1",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:",
-    "vite": "^6.0.5"
-  }
+    "vite": "^6.0.5",
+    "vite-plugin-svgr": "^4.3.0",
+    "vite-tsconfig-paths": "^5.1.4"
+  },
+  "packageManager": "pnpm@9.6.0+sha512.38dc6fba8dba35b39340b9700112c2fe1e12f10b17134715a4aa98ccf7bb035e76fd981cf0bb384dfa98f8d6af5481c2bef2f4266a24bfa20c34eb7147ce0b5e"
 }
