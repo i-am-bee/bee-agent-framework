@@ -6166,9 +6166,9 @@ __metadata:
     "@zilliz/milvus2-sdk-node": ^2.4.9
     google-auth-library: "*"
     groq-sdk: ^0.7.0
-    ollama: ^0.5.11
+    ollama: ^0.5.12
     ollama-ai-provider: ^1.2.0
-    openai: ^4.67.3
+    openai: ^4.83.0
     openai-chat-tokens: ^0.2.8
     sequelize: ^6.37.3
     yaml: ^2.6.1

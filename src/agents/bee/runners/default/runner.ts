@@ -43,6 +43,8 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { shallowCopy } from "@/serializer/utils.js";
 
 export class DefaultRunner extends BaseRunner {
+  protected useNativeToolCalling = false;
+
   @Cache({ enumerable: false })
   public get defaultTemplates() {
     return {
@@ -104,6 +106,7 @@ export class DefaultRunner extends BaseRunner {
         const raw = await this.input.llm
           .create({
             messages: this.memory.messages.slice(),
+            tools: this.useNativeToolCalling ? tools : undefined,
             abortSignal: signal,
             stream: true,
           })
@@ -140,6 +143,7 @@ export class DefaultRunner extends BaseRunner {
             });
           });
 
+        console.info(JSON.stringify(raw));
         await parser.end();
         await this.memory.deleteMany(
           this.memory.messages.filter((msg) => getProp(msg.meta, [tempMessageKey]) === true),

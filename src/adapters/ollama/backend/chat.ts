@@ -27,8 +27,11 @@ export class OllamaChatModel extends VercelChatModel {
     clientSettings?: OllamaProviderSettings,
   ) {
     const client = createOllamaClient(clientSettings);
-    const model = client.chat(modelId, settings);
+    const model = client.chat(modelId, {
+      ...settings,
+    });
     super(model);
+    this.supportsToolStreaming = false;
   }
 
   static {

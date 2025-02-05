@@ -36,13 +36,14 @@ import { Emitter } from "@/emitter/emitter.js";
 import { AssistantMessage, Message, ToolMessage } from "@/backend/message.js";
 import { RunContext } from "@/context.js";
 import { ValueError } from "@/errors.js";
-import { mapToObj, toCamelCase } from "remeda";
+import { isEmpty, mapToObj, toCamelCase } from "remeda";
 import { FullModelName } from "@/backend/utils.js";
 
 export abstract class VercelChatModel<
   R extends LanguageModelV1 = LanguageModelV1,
 > extends ChatModel {
   public readonly emitter: Emitter<ChatModelEvents>;
+  protected supportsToolStreaming = true;
 
   constructor(private readonly model: R) {
     super();
@@ -63,7 +64,7 @@ export abstract class VercelChatModel<
     return toCamelCase(provider);
   }
 
-  protected async _create(input: ChatModelInput) {
+  protected async _create(input: ChatModelInput, run: RunContext<this>) {
     const {
       finishReason,
       usage,
@@ -90,6 +91,12 @@ export abstract class VercelChatModel<
   }
 
   async *_createStream(input: ChatModelInput, run: RunContext<this>) {
+    if (!this.supportsToolStreaming && !isEmpty(input.tools ?? [])) {
+      const response = await this._create(input, run);
+      yield response;
+      return;
+    }
+
     const { fullStream, usage, finishReason } = streamText({
       ...(await this.transformInput(input)),
       abortSignal: run.signal,
@@ -136,6 +143,7 @@ export abstract class VercelChatModel<
       yield chunk;
     }
 
+    // TODO: not propagated yet
     const final = ChatModelOutput.fromChunks(chunks);
     final.usage = await usage;
     final.finishReason = await finishReason;
@@ -153,18 +161,20 @@ export abstract class VercelChatModel<
       })),
     );
 
+    const messages = input.messages.map((msg): CoreMessage => {
+      if (msg instanceof AssistantMessage) {
+        return { role: "assistant", content: msg.content };
+      } else if (msg instanceof ToolMessage) {
+        return { role: "tool", content: msg.content };
+      }
+      return { role: msg.role as "user" | "system", content: msg.getTextContent() };
+    });
+
     return {
       ...input,
       model: this.model,
       tools: mapToObj(tools, ({ name, ...tool }) => [name, tool]),
-      messages: input.messages.map((msg): CoreMessage => {
-        if (msg instanceof AssistantMessage) {
-          return { role: "assistant", content: msg.content };
-        } else if (msg instanceof ToolMessage) {
-          return { role: "tool", content: msg.content };
-        }
-        return { role: msg.role as "user" | "system", content: msg.getTextContent() };
-      }),
+      messages,
     };
   }
 
@@ -197,6 +207,7 @@ export abstract class VercelChatModel<
     });
   }
 
+  // TODO: replace
   static fromModel<T2 extends LanguageModelV1, T extends VercelChatModel<T2>>(
     this: abstract new (...args: any[]) => T,
     model: T2,

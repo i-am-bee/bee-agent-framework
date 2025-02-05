@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { CustomMessage, Role, ToolMessage } from "@/backend/message.js";
-import { isEmpty } from "remeda";
+import { ToolMessage } from "@/backend/message.js";
 import type { AnyTool } from "@/tools/base.js";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
-import type { BeeParserInput, BeeRunInput, BeeRunOptions } from "@/agents/bee/types.js";
+import type { BeeParserInput, BeeRunOptions } from "@/agents/bee/types.js";
 import { BeeAgent, BeeInput } from "@/agents/bee/agent.js";
 import type { GetRunContext } from "@/context.js";
 import {
@@ -32,9 +31,10 @@ import {
 } from "@/agents/bee/runners/granite/prompts.js";
 import { BeeToolNoResultsPrompt, BeeUserEmptyPrompt } from "@/agents/bee/prompts.js";
 import { Cache } from "@/cache/decoratorCache.js";
-import { BaseMemory } from "@/memory/base.js";
 
 export class GraniteRunner extends DefaultRunner {
+  protected useNativeToolCalling = true;
+
   @Cache({ enumerable: false })
   public get defaultTemplates() {
     return {
@@ -80,29 +80,6 @@ export class GraniteRunner extends DefaultRunner {
         isBlocking: true,
       },
     );
-  }
-
-  protected async initMemory(input: BeeRunInput): Promise<BaseMemory> {
-    const memory = await super.initMemory(input);
-    if (!isEmpty(this.input.tools)) {
-      const index = memory.messages.findIndex((msg) => msg.role === Role.SYSTEM) + 1;
-      await memory.add(
-        new CustomMessage(
-          "tools",
-          JSON.stringify(
-            (await this.renderers.system.variables.tools()).map((tool) => ({
-              name: tool.name,
-              description: tool.description,
-              schema: JSON.parse(tool.schema),
-            })),
-            null,
-            4,
-          ),
-        ),
-        index,
-      );
-    }
-    return memory;
   }
 
   protected createParser(tools: AnyTool[]) {
