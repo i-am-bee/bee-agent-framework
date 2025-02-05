@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class LoggingConfiguration(BaseModel):
-    level: int = logging.DEBUG
+    level: int = logging.INFO
     level_flows: int = logging.INFO
 
     @field_validator("level", "level_flows", mode="before")

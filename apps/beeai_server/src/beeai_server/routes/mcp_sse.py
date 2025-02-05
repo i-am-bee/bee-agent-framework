@@ -9,7 +9,7 @@ from starlette.responses import Response
 from starlette.status import HTTP_408_REQUEST_TIMEOUT, HTTP_200_OK
 
 from beeai_server.configuration import Configuration
-from beeai_server.services.mcp_proxy import MCPProxyServer
+from beeai_server.services.mcp_proxy.proxy_server import MCPProxyServer
 from mcp.server.sse import SseServerTransport
 
 logger = logging.getLogger(__name__)
@@ -58,8 +58,6 @@ def create_sse_app(sse: SseServerTransport, mcp_proxy: MCPProxyServer, config: C
             return Response(status_code=HTTP_408_REQUEST_TIMEOUT)
         logger.debug("Client disconnected.")
         return Response(status_code=HTTP_200_OK)
-
-    # TODO: cancellation - there is a bug in SSE handling, server cannot be shutdown because of this
 
     return Starlette(
         debug=config.logging.level == logging.DEBUG,

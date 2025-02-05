@@ -1,29 +1,12 @@
+import re
 from contextlib import asynccontextmanager
 from typing import Union, Literal
 
+import anyio
 from pydantic import BaseModel, AnyUrl, Field, ConfigDict
 
 from mcp import stdio_client, StdioServerParameters
 from mcp.client.sse import sse_client
-
-
-class UvxProvider(BaseModel):
-    type: Literal["uvx"] = "uvx"
-    location: AnyUrl
-    executable_command: str | None = None
-    model_config = ConfigDict(frozen=True)
-
-
-class RemoteMcpProvider(BaseModel):
-    model_config = ConfigDict(frozen=True)
-    type: Literal["mcp"] = "mcp"
-    location: AnyUrl
-
-
-Provider = Union[UvxProvider, RemoteMcpProvider]
-
-
-# Connection to agent server
 
 
 class StdioCommand(BaseModel):
@@ -50,3 +33,38 @@ class SSEServer(BaseModel):
 
 
 ProviderConnection = Union[StdioCommand, SSEServer]
+
+
+# Providers
+class UvxProvider(BaseModel):
+    type: Literal["uvx"] = "uvx"
+    location: AnyUrl
+    executable_command: str | None = None
+    model_config = ConfigDict(frozen=True)
+
+    async def get_connection(self):
+        if not (executable_command := self.executable_command):
+            resp = await anyio.run_process(
+                ["uvx", "--from", str(self.location), "_nonexistent_command"],
+                check=False,
+            )
+            pattern = r'provided by [`"].*?[`"]:\n-\s*([\w-]+)'
+            stdout = resp.stdout.decode("utf-8")
+            match = re.search(pattern, stdout)
+            if not match:
+                raise ValueError(f"Unable to register provider, {stdout}")
+            executable_command = match.group(1)
+
+        return StdioCommand(command=["uvx", "--from", str(self.location), executable_command])
+
+
+class RemoteMcpProvider(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    type: Literal["mcp"] = "mcp"
+    location: AnyUrl
+
+    async def get_connection(self) -> ProviderConnection:
+        return SSEServer(url=self.location)
+
+
+Provider = Union[UvxProvider, RemoteMcpProvider]

@@ -44,7 +44,7 @@ def app() -> "FastAPI":
     from fastapi import FastAPI
     from fastapi.responses import ORJSONResponse
 
-    from beeai_server.services.mcp_proxy import MCPProxyServer
+    from beeai_server.services.mcp_proxy.proxy_server import MCPProxyServer
     from beeai_server.bootstrap import bootstrap_dependencies
 
     logger.info("Bootstrapping dependencies...")

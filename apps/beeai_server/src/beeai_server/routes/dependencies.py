@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from beeai_server.services.mcp_proxy import MCPProxyServer
+from beeai_server.services.mcp_proxy.proxy_server import MCPProxyServer
 from fastapi import Depends
 from kink import di
 
