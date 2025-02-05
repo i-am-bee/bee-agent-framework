@@ -13,7 +13,7 @@
   "dependencies": {
     "@carbon/react": "^1.75.0",
     "@carbon/styles": "^1.74.0",
-    "@modelcontextprotocol/sdk": "file:../../packages/mcp-typescript-sdk",
+    "@modelcontextprotocol/sdk": "workspace:",
     "@tanstack/react-query": "^5.66.0",
     "clsx": "^2.1.1",
     "react": "^19.0.0",

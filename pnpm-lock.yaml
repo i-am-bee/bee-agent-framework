@@ -27,7 +27,7 @@ importers:
         specifier: ^1.74.0
         version: 1.74.0(sass@1.83.4)
       '@modelcontextprotocol/sdk':
-        specifier: file:../../packages/mcp-typescript-sdk
+        specifier: 'workspace:'
         version: link:../../packages/mcp-typescript-sdk
       '@tanstack/react-query':
         specifier: ^5.66.0
