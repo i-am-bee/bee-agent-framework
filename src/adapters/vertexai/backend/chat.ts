@@ -17,19 +17,19 @@
 import { GoogleVertexProvider } from "@ai-sdk/google-vertex";
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 import { VertexAIClient, VertexAIClientSettings } from "@/adapters/vertexai/backend/client.js";
-import { ChatModelSettings } from "@/backend/chat.js";
 import { getEnv } from "@/internals/env.js";
 
-type Params = Parameters<GoogleVertexProvider["languageModel"]>;
-export type VertexAIChatSettings = NonNullable<Params[1]> & ChatModelSettings;
+type VertexAIParameters = Parameters<GoogleVertexProvider["languageModel"]>;
+export type VertexAIChatModelId = NonNullable<VertexAIParameters[0]>;
+export type VertexAIChatModelSettings = NonNullable<VertexAIParameters[1]>;
 
 export class VertexAIChatModel extends VercelChatModel {
   constructor(
-    modelId: string = getEnv("GOOGLE_VERTEX_API_CHAT_MODEL", "gemini-1.5-pro"),
-    settings: VertexAIChatSettings = {},
+    modelId: VertexAIChatModelId = getEnv("GOOGLE_VERTEX_API_CHAT_MODEL", "gemini-1.5-pro"),
+    settings: VertexAIChatModelSettings = {},
     client?: VertexAIClientSettings | VertexAIClient,
   ) {
     const model = VertexAIClient.ensure(client).instance.languageModel(modelId, settings);
-    super(model, settings);
+    super(model);
   }
 }

@@ -21,7 +21,6 @@ import {
   ChatModelEvents,
   ChatModelObjectInput,
   ChatModelObjectOutput,
-  ChatModelSettings,
 } from "@/backend/chat.js";
 import {
   CoreAssistantMessage,
@@ -42,16 +41,11 @@ import { FullModelName } from "@/backend/utils.js";
 import { ChatModelError } from "@/backend/errors.js";
 
 export abstract class VercelChatModel<
-  P extends ChatModelSettings = ChatModelSettings,
   M extends LanguageModelV1 = LanguageModelV1,
 > extends ChatModel {
   public readonly emitter: Emitter<ChatModelEvents>;
-  protected supportsToolStreaming = true;
 
-  constructor(
-    private readonly model: M,
-    public readonly settings: P,
-  ) {
+  constructor(private readonly model: M) {
     super();
     if (!this.modelId) {
       throw new ValueError("No modelId has been provided!");
@@ -173,7 +167,7 @@ export abstract class VercelChatModel<
     });
 
     return {
-      ...this.settings,
+      ...this.parameters,
       ...input,
       model: this.model,
       tools: mapToObj(tools, ({ name, ...tool }) => [name, tool]),
@@ -195,7 +189,6 @@ export abstract class VercelChatModel<
       ...super.createSnapshot(),
       providerId: this.providerId,
       modelId: this.modelId,
-      supportsToolStreaming: this.supportsToolStreaming,
     };
   }
 

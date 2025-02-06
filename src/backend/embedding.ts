@@ -18,12 +18,10 @@ import { embedMany } from "ai";
 import { Serializable } from "@/internals/serializable.js";
 import { Callback } from "@/emitter/types.js";
 import { FrameworkError } from "@/errors.js";
-import { ChatModelCache } from "@/backend/chat.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { GetRunContext, RunContext } from "@/context.js";
 import { pRetry } from "@/internals/helpers/retry.js";
-import { NullCache } from "@/cache/nullCache.js";
 import { FullModelName, loadModel, parseModel } from "@/backend/utils.js";
 import { ProviderName } from "@/backend/constants.js";
 import { EmbeddingModelError } from "@/backend/errors.js";
@@ -38,8 +36,8 @@ export interface EmbeddingModelOutput {
 
 export interface EmbeddingModelEvents {
   success?: Callback<{ value: EmbeddingModelOutput }>;
-  start?: Callback<{ input: EmbeddingModelInput; options: any }>;
-  error?: Callback<{ input: EmbeddingModelInput; options: any; error: FrameworkError }>;
+  start?: Callback<{ input: EmbeddingModelInput }>;
+  error?: Callback<{ input: EmbeddingModelInput; error: FrameworkError }>;
   finish?: Callback<null>;
 }
 
@@ -47,28 +45,21 @@ export type EmbeddingModelEmitter<A = Record<never, never>> = Emitter<
   EmbeddingModelEvents & Omit<A, keyof EmbeddingModelEvents>
 >;
 
-export interface EmbeddingModelSettings {
-  headers?: Record<string, any>;
-}
-
 export abstract class EmbeddingModel extends Serializable {
   public abstract readonly emitter: Emitter<EmbeddingModelEvents>;
-  public readonly cache: ChatModelCache = new NullCache();
-  public abstract readonly settings: EmbeddingModelSettings;
 
   abstract get modelId(): string;
   abstract get providerId(): string;
 
-  create(input: EmbeddingModelInput, ...args: any[]) {
+  create(input: EmbeddingModelInput) {
     input = shallowCopy(input);
-    args = shallowCopy(args);
 
     return RunContext.enter(
       this,
-      { params: [input, ...args] as const, signal: input?.abortSignal },
+      { params: [input] as const, signal: input?.abortSignal },
       async (run) => {
         try {
-          await run.emitter.emit("start", { input, options: args });
+          await run.emitter.emit("start", { input });
           const result: EmbeddingModelOutput = await pRetry(() => this._create(input, run), {
             retries: input.maxRetries || 0,
             signal: run.signal,
@@ -76,7 +67,7 @@ export abstract class EmbeddingModel extends Serializable {
           await run.emitter.emit("success", { value: result });
           return result;
         } catch (error) {
-          await run.emitter.emit("error", { input, error, options: args });
+          await run.emitter.emit("error", { input, error });
           if (error instanceof EmbeddingModelError) {
             throw error;
           } else {
@@ -86,13 +77,13 @@ export abstract class EmbeddingModel extends Serializable {
           await run.emitter.emit("finish", null);
         }
       },
-    ); // TODO: telemetry?
+    );
   }
 
-  static async fromName(name: FullModelName | ProviderName, options?: EmbeddingModelSettings) {
+  static async fromName(name: FullModelName | ProviderName) {
     const { providerId, modelId = "" } = parseModel(name);
     const Target = await loadModel<EmbeddingModel>(providerId, "embedding");
-    return new Target(modelId, options);
+    return new Target(modelId);
   }
 
   protected abstract _create(
@@ -101,7 +92,7 @@ export abstract class EmbeddingModel extends Serializable {
   ): Promise<EmbeddingModelOutput>;
 
   createSnapshot() {
-    return { cache: this.cache, emitter: this.emitter, settings: shallowCopy(this.settings) };
+    return { emitter: this.emitter };
   }
 
   destroy() {

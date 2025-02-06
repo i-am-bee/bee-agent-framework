@@ -24,7 +24,7 @@ import { Emitter } from "@/emitter/emitter.js";
 import { GetRunContext, RunContext } from "@/context.js";
 import { INSTRUMENTATION_ENABLED } from "@/instrumentation/config.js";
 import { createTelemetryMiddleware } from "@/instrumentation/create-telemetry-middleware.js";
-import { doNothing, omit } from "remeda";
+import { doNothing, isFunction } from "remeda";
 import { ObjectHashKeyFn } from "@/cache/decoratorCache.js";
 import { Task } from "promise-based-task";
 import { NullCache } from "@/cache/nullCache.js";
@@ -50,9 +50,9 @@ import { Retryable } from "@/internals/helpers/retryable.js";
 import type { ValidateFunction } from "ajv";
 import { PromptTemplate } from "@/template.js";
 import { toAsyncGenerator } from "@/internals/helpers/promise.js";
+import { Serializer } from "@/serializer/serializer.js";
 
-export interface ChatModelSettings {
-  maxRetries?: number;
+export interface ChatModelParameters {
   maxTokens?: number;
   topP?: number;
   frequencyPenalty?: number;
@@ -60,15 +60,15 @@ export interface ChatModelSettings {
   topK?: number;
   n?: number;
   presencePenalty?: number;
-  headers?: Record<string, any>;
   seed?: number;
-  stopSequence?: string[];
+  stopSequences?: string[];
 }
 
-export interface ChatModelObjectInput<T> extends ChatModelSettings {
+export interface ChatModelObjectInput<T> extends ChatModelParameters {
   schema: z.ZodSchema<T>;
   messages: Message[];
   abortSignal?: AbortSignal;
+  maxRetries?: number;
 }
 
 export interface ChatModelObjectOutput<T> {
@@ -76,7 +76,7 @@ export interface ChatModelObjectOutput<T> {
 }
 
 //export type ChatModelInp2ut = Omit<Parameters<typeof generateText>[0], "model" | "prompt">;
-export interface ChatModelInput extends ChatModelSettings {
+export interface ChatModelInput extends ChatModelParameters {
   tools?: AnyTool[];
   abortSignal?: AbortSignal;
   stopSequences?: string[];
@@ -118,8 +118,8 @@ export interface ChatModelUsage {
 export interface ChatModelEvents {
   update?: Callback<{ value: ChatModelOutput; callbacks: { abort: () => void } }>;
   success?: Callback<{ value: ChatModelOutput }>;
-  start?: Callback<{ input: ChatModelInput; options: any }>;
-  error?: Callback<{ input: ChatModelInput; options: any; error: FrameworkError }>;
+  start?: Callback<{ input: ChatModelInput }>;
+  error?: Callback<{ input: ChatModelInput; error: FrameworkError }>;
   finish?: Callback<null>;
 }
 
@@ -128,31 +128,41 @@ export type ChatModelEmitter<A = Record<never, never>> = Emitter<
 >;
 
 export type ChatModelCache = BaseCache<Task<ChatModelOutput[]>>;
+export type ConfigFn<T> = (value: T) => T;
+export interface ChatConfig {
+  cache?: ChatModelCache | ConfigFn<ChatModelCache>;
+  parameters?: ChatModelParameters | ConfigFn<ChatModelParameters>;
+}
 
 export abstract class ChatModel extends Serializable {
   public abstract readonly emitter: Emitter<ChatModelEvents>;
-  public readonly cache: ChatModelCache = new NullCache();
-  public abstract readonly settings: ChatModelSettings;
+  public cache: ChatModelCache = new NullCache();
+  public parameters: ChatModelParameters = {};
 
   abstract get modelId(): string;
   abstract get providerId(): string;
 
-  create(input: ChatModelInput & { stream?: boolean }, ...args: any[]) {
+  create(input: ChatModelInput & { stream?: boolean }) {
     input = shallowCopy(input);
-    args = shallowCopy(args);
 
     return RunContext.enter(
       this,
-      { params: [input, ...args] as const, signal: input?.abortSignal },
+      { params: [input] as const, signal: input?.abortSignal },
       async (run) => {
+        const cacheEntry = await this.createCacheAccessor(input);
+        console.info(cacheEntry.key);
+
         try {
-          await run.emitter.emit("start", { input, options: args });
+          await run.emitter.emit("start", { input });
           const chunks: ChatModelOutput[] = [];
 
+          const generator =
+            cacheEntry.value ??
+            (input.stream
+              ? this._createStream(input, run)
+              : toAsyncGenerator(this._create(input, run)));
+
           const controller = new AbortController();
-          const generator = input.stream
-            ? this._createStream(input, run)
-            : toAsyncGenerator(this._create(input, run));
           for await (const value of generator) {
             chunks.push(value);
             await run.emitter.emit("update", {
@@ -164,11 +174,13 @@ export abstract class ChatModel extends Serializable {
             }
           }
 
+          cacheEntry.resolve(chunks);
           const result = ChatModelOutput.fromChunks(chunks);
           await run.emitter.emit("success", { value: result });
           return result;
         } catch (error) {
-          await run.emitter.emit("error", { input, error, options: args });
+          await run.emitter.emit("error", { input, error });
+          await cacheEntry.reject(error);
           if (error instanceof ChatModelError) {
             throw error;
           } else {
@@ -181,17 +193,26 @@ export abstract class ChatModel extends Serializable {
     ).middleware(INSTRUMENTATION_ENABLED ? createTelemetryMiddleware() : doNothing());
   }
 
-  createStructure<T>(input: ChatModelObjectInput<T>, ...args: any[]) {
+  createStructure<T>(input: ChatModelObjectInput<T>) {
     return RunContext.enter(
       this,
-      { params: [input, ...args] as const, signal: input?.abortSignal },
+      { params: [input] as const, signal: input?.abortSignal },
       async (run) => {
         return await this._createStructure<T>(input, run);
       },
     );
   }
 
-  static async fromName(name: FullModelName | ProviderName, options?: ChatModelSettings) {
+  config({ cache, parameters }: ChatConfig): void {
+    if (cache) {
+      this.cache = isFunction(cache) ? cache(this.cache) : cache;
+    }
+    if (parameters) {
+      this.parameters = isFunction(parameters) ? parameters(this.parameters) : parameters;
+    }
+  }
+
+  static async fromName(name: FullModelName | ProviderName, options?: ChatModelParameters) {
     const { providerId, modelId = "" } = parseModel(name);
     const Target = await loadModel<ChatModel>(providerId, "chat");
     return new Target(modelId, options);
@@ -275,21 +296,30 @@ Validation Errors: {{errors}}`,
       },
       config: {
         signal: run.signal,
-        maxRetries: input?.maxRetries || 0,
+        maxRetries: input?.maxRetries || 1,
       },
     }).get();
   }
 
   createSnapshot() {
-    return { cache: this.cache, emitter: this.emitter, settings: shallowCopy(this.settings) };
+    return { cache: this.cache, emitter: this.emitter, settings: shallowCopy(this.parameters) };
   }
 
   destroy() {
     this.emitter.destroy();
   }
 
-  protected async createCacheAccessor(input: ChatModelInput, ...extra: any[]) {
-    const key = ObjectHashKeyFn(omit(input ?? {}, ["abortSignal"]), ...extra);
+  protected async createCacheAccessor({
+    abortSignal: _,
+    messages,
+    tools = [],
+    ...input
+  }: ChatModelInput) {
+    const key = ObjectHashKeyFn({
+      ...input,
+      messages: await Serializer.serialize(messages.map((msg) => msg.toPlain())),
+      tools: await Serializer.serialize(tools),
+    });
     const value = await this.cache.get(key);
     const isNew = value === undefined;
 
@@ -302,8 +332,8 @@ Validation Errors: {{errors}}`,
     return {
       key,
       value,
-      resolve: <T2 extends ChatModelOutput>(value: T2 | T2[]) => {
-        task?.resolve?.(Array.isArray(value) ? value : [value]);
+      resolve: <T2 extends ChatModelOutput>(value: T2[]) => {
+        task?.resolve?.(value);
       },
       reject: async (error: Error) => {
         task?.reject?.(error);

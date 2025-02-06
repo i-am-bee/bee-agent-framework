@@ -20,13 +20,12 @@ import {
   EmbeddingModelInput,
   EmbeddingModelOutput,
   EmbeddingModelEvents,
-  EmbeddingModelSettings,
 } from "@/backend/embedding.js";
 import { EmbeddingParameters as WXEmbeddingParameters } from "@ibm-cloud/watsonx-ai/dist/watsonx-ai-ml/vml_v1.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { getEnv } from "@/internals/env.js";
 
-export type WatsonXEmbeddingModelSettings = WXEmbeddingParameters & EmbeddingModelSettings;
+export type WatsonXEmbeddingModelParameters = WXEmbeddingParameters;
 
 export class WatsonXEmbeddingModel extends EmbeddingModel {
   protected readonly client: WatsonXClient;
@@ -41,7 +40,7 @@ export class WatsonXEmbeddingModel extends EmbeddingModel {
       "WATSONX_API_EMBEDDING_MODEL",
       "ibm/granite-embedding-107m-multilingual",
     ),
-    public readonly settings: WatsonXEmbeddingModelSettings = {},
+    public readonly parameters: WatsonXEmbeddingModelParameters = {},
     client?: WatsonXClient | WatsonXClientSettings,
   ) {
     super();
@@ -57,11 +56,10 @@ export class WatsonXEmbeddingModel extends EmbeddingModel {
       modelId: this.modelId,
       spaceId: this.client.spaceId,
       projectId: this.client.projectId,
-      headers: this.settings.headers,
       inputs: input.values,
       parameters: {
         return_options: { input_text: true },
-        ...this.settings,
+        ...this.parameters,
       },
     });
 

@@ -16,11 +16,12 @@
 
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 import { GroqClient, GroqClientSettings } from "@/adapters/groq/backend/client.js";
-import { ChatModelSettings } from "@/backend/chat.js";
 import { getEnv } from "@/internals/env.js";
+import { GroqProvider } from "@ai-sdk/groq";
 
-export type GroqChatModelId = string;
-export type GroqChatModelSettings = ChatModelSettings;
+type GroqParameters = Parameters<GroqProvider["languageModel"]>;
+export type GroqChatModelId = NonNullable<GroqParameters[0]>;
+export type GroqChatModelSettings = NonNullable<GroqParameters[1]>;
 
 export class GroqChatModel extends VercelChatModel {
   constructor(
@@ -28,8 +29,8 @@ export class GroqChatModel extends VercelChatModel {
     settings: GroqChatModelSettings = {},
     client?: GroqClient | GroqClientSettings,
   ) {
-    const model = GroqClient.ensure(client).instance.languageModel(modelId);
-    super(model, settings);
+    const model = GroqClient.ensure(client).instance.languageModel(modelId, settings);
+    super(model);
   }
 
   static {

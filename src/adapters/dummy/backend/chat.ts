@@ -19,7 +19,7 @@ import {
   ChatModelEvents,
   ChatModelOutput,
   ChatModelInput,
-  ChatModelSettings,
+  ChatModelParameters,
 } from "@/backend/chat.js";
 import { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
@@ -33,7 +33,7 @@ export class DummyChatModel extends ChatModel {
 
   constructor(
     public readonly modelId = "dummy",
-    public readonly settings: ChatModelSettings = {},
+    public readonly parameters: ChatModelParameters = {},
   ) {
     super();
   }

@@ -63,7 +63,6 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 
 - [`chat.ts`](/examples/llms/chat.ts): Chat-based language model usage
 - [`chatCallback.ts`](/examples/llms/chatCallback.ts): Callbacks for chat models
-- [`chatStream.ts`](/examples/llms/chatStream.ts): Streaming with chat models
 - [`structured.ts`](/examples/llms/structured.ts): Structured output from language models
 
 ### LLM Providers

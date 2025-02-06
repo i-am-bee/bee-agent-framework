@@ -16,17 +16,23 @@
 
 import { VertexAIClient, VertexAIClientSettings } from "./client.js";
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
-import { EmbeddingModelSettings } from "@/backend/embedding.js";
 import { getEnv } from "@/internals/env.js";
-export type VertexAIEmbeddingSettings = EmbeddingModelSettings;
+import { GoogleVertexProvider } from "@ai-sdk/google-vertex";
+
+type VertexAIParameters = Parameters<GoogleVertexProvider["textEmbeddingModel"]>;
+export type VertexAIChatModelId = NonNullable<VertexAIParameters[0]>;
+export type VertexAIChatModelSettings = Record<string, any>;
 
 export class VertexAIEmbeddingModel extends VercelEmbeddingModel {
   constructor(
-    modelId: string = getEnv("GOOGLE_VERTEX_API_EMBEDDING_MODEL", "text-embedding-004"),
-    settings: VertexAIEmbeddingSettings = {},
+    modelId: VertexAIChatModelId = getEnv(
+      "GOOGLE_VERTEX_API_EMBEDDING_MODEL",
+      "text-embedding-004",
+    ),
+    _settings: VertexAIChatModelSettings = {},
     client?: VertexAIClient | VertexAIClientSettings,
   ) {
     const model = VertexAIClient.ensure(client).instance.textEmbeddingModel(modelId);
-    super(model, settings);
+    super(model);
   }
 }

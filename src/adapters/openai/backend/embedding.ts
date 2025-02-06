@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { OpenAIEmbeddingModelId, OpenAIEmbeddingSettings } from "@ai-sdk/openai/internal";
 import { OpenAIClient } from "@/adapters/openai/backend/client.js";
-import { OpenAIProviderSettings } from "@ai-sdk/openai";
+import { OpenAIProvider, OpenAIProviderSettings } from "@ai-sdk/openai";
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
 import { getEnv } from "@/internals/env.js";
-import { ChatModelSettings } from "@/backend/chat.js";
 
-export type OpenAIEmbeddingModelSettings = OpenAIEmbeddingSettings & ChatModelSettings;
+type OpenAIParameters = Parameters<OpenAIProvider["textEmbeddingModel"]>;
+export type OpenAIEmbeddingModelId = NonNullable<OpenAIParameters[0]>;
+export type OpenAIEmbeddingModelSettings = NonNullable<OpenAIParameters[1]>;
 
 export class OpenAIEmbeddingModel extends VercelEmbeddingModel {
   constructor(
@@ -33,6 +33,6 @@ export class OpenAIEmbeddingModel extends VercelEmbeddingModel {
     client?: OpenAIProviderSettings | OpenAIClient,
   ) {
     const model = OpenAIClient.ensure(client).instance.embedding(modelId, settings);
-    super(model, settings);
+    super(model);
   }
 }

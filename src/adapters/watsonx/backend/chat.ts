@@ -32,12 +32,6 @@ import { ToolCallPart } from "ai";
 import Type = WatsonxAiMlVml_v1.TextChatResponseFormat.Constants.Type;
 import { parseBrokenJson } from "@/internals/helpers/schema.js";
 import { getEnv } from "@/internals/env.js";
-import { omitUndefined } from "@/internals/helpers/object.js";
-
-export type WatsonXChatParams = Omit<
-  TextChatParams,
-  "modelId" | "spaceId" | "projectId" | "messages" | "toolChoice" | "toolChoiceOption"
->;
 
 export class WatsonXChatModel extends ChatModel {
   protected readonly client: WatsonXClient;
@@ -52,7 +46,6 @@ export class WatsonXChatModel extends ChatModel {
 
   constructor(
     public readonly modelId = getEnv("WATSONX_API_CHAT_MODEL", "ibm/granite-3-8b-instruct"),
-    public readonly settings: WatsonXChatParams = {},
     client?: WatsonXClient | WatsonXClientSettings,
   ) {
     super();
@@ -61,14 +54,14 @@ export class WatsonXChatModel extends ChatModel {
 
   protected async _create(input: ChatModelInput) {
     // TODO: support abortion (https://github.com/IBM/watsonx-ai-node-sdk/issues/3)
-    const { result } = await this.client.instance.textChat(await this.prepareParameters(input));
-    const { messages, finishReason, usage } = this.extractResult(result.choices, result.usage);
+    const { result } = await this.client.instance.textChat(await this.prepareInput(input));
+    const { messages, finishReason, usage } = this.extractOutput(result.choices, result.usage);
     return new ChatModelOutput(messages, usage, finishReason);
   }
 
   async *_createStream(input: ChatModelInput, run: GetRunContext<this>) {
     const stream = await this.client.instance.textChatStream({
-      ...(await this.prepareParameters(input)),
+      ...(await this.prepareInput(input)),
       returnObject: true,
     });
     for await (const raw of stream) {
@@ -76,7 +69,7 @@ export class WatsonXChatModel extends ChatModel {
         stream.controller.abort(run.signal.aborted);
         break;
       }
-      const { messages, finishReason, usage } = this.extractResult(
+      const { messages, finishReason, usage } = this.extractOutput(
         raw.data.choices.map(({ delta, ...choice }) => ({ ...choice, message: delta })),
         raw.data.usage,
       );
@@ -84,7 +77,7 @@ export class WatsonXChatModel extends ChatModel {
     }
   }
 
-  protected extractResult(choices: TextChatResultChoice[], usage?: TextChatUsage) {
+  protected extractOutput(choices: TextChatResultChoice[], usage?: TextChatUsage) {
     return {
       finishReason: findLast(choices, (choice) => Boolean(choice?.finish_reason))
         ?.finish_reason as ChatModelOutput["finishReason"],
@@ -128,7 +121,7 @@ export class WatsonXChatModel extends ChatModel {
     };
   }
 
-  protected async prepareParameters(input: ChatModelInput): Promise<TextChatParams> {
+  protected async prepareInput(input: ChatModelInput): Promise<TextChatParams> {
     const tools: TextChatParameterTools[] = await Promise.all(
       (input.tools ?? []).map(async (tool) => ({
         type: "function",
@@ -141,7 +134,7 @@ export class WatsonXChatModel extends ChatModel {
     );
 
     return {
-      ...omitUndefined(this.settings),
+      ...this.parameters,
       modelId: this.modelId,
       messages: input.messages.flatMap((message): TextChatMessages[] => {
         if (message instanceof ToolMessage) {
@@ -177,13 +170,12 @@ export class WatsonXChatModel extends ChatModel {
       spaceId: this.client.spaceId,
       projectId: this.client.projectId,
       tools: isEmpty(tools) ? undefined : tools,
-      maxTokens: input.maxTokens,
-      headers: input.headers,
-      topP: input.topP,
-      frequencyPenalty: input.frequencyPenalty,
-      temperature: input.temperature,
-      n: input.topK,
-      presencePenalty: input.presencePenalty,
+      maxTokens: input.maxTokens ?? this.parameters.maxTokens,
+      topP: input.topP ?? this.parameters.topP,
+      frequencyPenalty: input.frequencyPenalty ?? this.parameters.frequencyPenalty,
+      temperature: input.temperature ?? this.parameters.temperature,
+      n: input.topK ?? this.parameters.topK,
+      presencePenalty: input.presencePenalty ?? this.parameters.presencePenalty,
       ...(input.responseFormat?.type === "object-json" && {
         responseFormat: { type: Type.JSON_OBJECT },
       }),
@@ -194,7 +186,7 @@ export class WatsonXChatModel extends ChatModel {
     return {
       ...super.createSnapshot(),
       modelId: this.modelId,
-      parameters: shallowCopy(this.settings),
+      parameters: shallowCopy(this.parameters),
       client: this.client,
     };
   }

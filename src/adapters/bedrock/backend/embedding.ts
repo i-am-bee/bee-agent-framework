@@ -17,12 +17,11 @@
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
 import { AmazonBedrockProvider } from "@ai-sdk/amazon-bedrock";
 import { getEnv } from "@/internals/env.js";
-import { EmbeddingModelSettings } from "@/backend/embedding.js";
 import { BedrockClient, BedrockClientSettings } from "@/adapters/bedrock/backend/client.js";
 
 type Params = Parameters<AmazonBedrockProvider["embedding"]>;
 export type BedrockEmbeddingModelId = NonNullable<Params[0]>;
-export type BedrockEmbeddingSettings = NonNullable<Params[1]> & EmbeddingModelSettings;
+export type BedrockEmbeddingSettings = NonNullable<Params[1]>;
 
 export class BedrockEmbeddingModel extends VercelEmbeddingModel {
   constructor(
@@ -34,6 +33,6 @@ export class BedrockEmbeddingModel extends VercelEmbeddingModel {
     client?: BedrockClient | BedrockClientSettings,
   ) {
     const model = BedrockClient.ensure(client).instance.embedding(modelId, settings);
-    super(model, settings);
+    super(model);
   }
 }

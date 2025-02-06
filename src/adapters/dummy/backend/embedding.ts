@@ -22,7 +22,6 @@ import {
   EmbeddingModelEvents,
   EmbeddingModelInput,
   EmbeddingModelOutput,
-  EmbeddingModelSettings,
 } from "@/backend/embedding.js";
 
 export class DummyEmbeddingModel extends EmbeddingModel {
@@ -31,10 +30,7 @@ export class DummyEmbeddingModel extends EmbeddingModel {
     creator: this,
   });
 
-  constructor(
-    public readonly modelId = "dummy",
-    public readonly settings: EmbeddingModelSettings = {},
-  ) {
+  constructor(public readonly modelId = "dummy") {
     super();
   }
 

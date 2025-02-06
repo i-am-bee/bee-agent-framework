@@ -6,9 +6,7 @@ import { Steps } from "./workflow.js";
 import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 export function getChatLLM() {
-  return new OllamaChatModel(getEnv("OLLAMA_MODEL") || "deepseek-r1:8b", {
-    temperature: 0,
-  });
+  return new OllamaChatModel(getEnv("OLLAMA_MODEL") || "deepseek-r1:8b");
 }
 
 export interface SearchResult {

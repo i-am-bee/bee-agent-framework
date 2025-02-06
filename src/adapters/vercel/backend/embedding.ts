@@ -19,7 +19,6 @@ import {
   EmbeddingModelInput,
   EmbeddingModelOutput,
   EmbeddingModelEvents,
-  EmbeddingModelSettings,
 } from "@/backend/embedding.js";
 import { embedMany, EmbeddingModel as Model } from "ai";
 import { Emitter } from "@/emitter/emitter.js";
@@ -31,14 +30,10 @@ type InternalEmbeddingModel = Model<string>;
 
 export class VercelEmbeddingModel<
   R extends InternalEmbeddingModel = InternalEmbeddingModel,
-  S extends EmbeddingModelSettings = EmbeddingModelSettings,
 > extends EmbeddingModel {
   public readonly emitter: Emitter<EmbeddingModelEvents>;
 
-  constructor(
-    public readonly model: R,
-    public readonly settings: S,
-  ) {
+  constructor(public readonly model: R) {
     super();
     this.emitter = Emitter.root.child({
       namespace: ["backend", this.providerId, "embedding"],
@@ -69,7 +64,6 @@ export class VercelEmbeddingModel<
   createSnapshot() {
     return {
       ...super.createSnapshot(),
-      settings: this.settings,
       providerId: this.providerId,
       modelId: this.model,
     };

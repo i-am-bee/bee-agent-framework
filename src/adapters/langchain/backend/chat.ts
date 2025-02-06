@@ -22,7 +22,7 @@ import {
   ChatModelObjectInput,
   ChatModelObjectOutput,
   ChatModelOutput,
-  ChatModelSettings,
+  ChatModelParameters,
   ChatModelUsage,
 } from "@/backend/chat.js";
 import { RunContext } from "@/context.js";
@@ -40,7 +40,7 @@ export class LangChainChatModel extends ChatModel {
 
   constructor(
     protected readonly lcLLM: BaseChatModel,
-    public readonly settings: ChatModelSettings = {},
+    public readonly parameters: ChatModelParameters = {},
   ) {
     super();
     this.emitter = Emitter.root.child({

@@ -17,24 +17,24 @@
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 import { OllamaProvider } from "ollama-ai-provider";
 import { OllamaClient, OllamaClientSettings } from "@/adapters/ollama/backend/client.js";
-import { ChatModelSettings } from "@/backend/chat.js";
 import { getEnv } from "@/internals/env.js";
 
-export type OllamaChatSettings = NonNullable<Parameters<OllamaProvider["chat"]>[1]> &
-  ChatModelSettings;
+type OllamaParameters = Parameters<OllamaProvider["languageModel"]>;
+export type OllamaChatModelId = NonNullable<OllamaParameters[0]>;
+export type OllamaChatModelSettings = NonNullable<OllamaParameters[1]>;
 
 export class OllamaChatModel extends VercelChatModel {
   constructor(
-    modelId: string = getEnv("OLLAMA_API_CHAT_MODEL", "llama3.1:8b"),
-    settings: OllamaChatSettings = {},
+    modelId: OllamaChatModelId = getEnv("OLLAMA_API_CHAT_MODEL", "llama3.1:8b"),
+    settings: OllamaChatModelSettings = {},
     client?: OllamaClient | OllamaClientSettings,
   ) {
     const model = OllamaClient.ensure(client).instance.chat(modelId, {
       ...settings,
-      simulateStreaming: true,
-      structuredOutputs: true,
+      simulateStreaming: true, // otherwise breaks event propagation
+      structuredOutputs: true, // otherwise breaks generated structure
     });
-    super(model, settings);
+    super(model);
   }
 
   static {

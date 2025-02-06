@@ -16,19 +16,20 @@
 
 import { BedrockClient, BedrockClientSettings } from "@/adapters/bedrock/backend/client.js";
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
-import { ChatModelSettings } from "@/backend/chat.js";
 import { getEnv } from "@/internals/env.js";
+import { AmazonBedrockProvider } from "@ai-sdk/amazon-bedrock";
 
-export type BedrockModelId = string;
-export type BedrockChatSettings = ChatModelSettings;
+type BedrockParameters = Parameters<AmazonBedrockProvider["languageModel"]>;
+export type BedrockChatModelId = NonNullable<BedrockParameters[0]>;
+export type BedrockChatModelSettings = NonNullable<BedrockParameters[1]>;
 
 export class BedrockChatModel extends VercelChatModel {
   constructor(
-    modelId: BedrockModelId = getEnv("BEDROCK_API_CHAT_MODEL", "meta.llama3-70b-instruct-v1:0"),
-    settings: BedrockChatSettings = {},
+    modelId: BedrockChatModelId = getEnv("BEDROCK_API_CHAT_MODEL", "meta.llama3-70b-instruct-v1:0"),
+    settings: BedrockChatModelSettings = {},
     client?: BedrockClient | BedrockClientSettings,
   ) {
-    const model = BedrockClient.ensure(client).instance.languageModel(modelId);
-    super(model, settings);
+    const model = BedrockClient.ensure(client).instance.languageModel(modelId, settings);
+    super(model);
   }
 }

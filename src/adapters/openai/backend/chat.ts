@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { OpenAIChatModelId, OpenAIChatSettings } from "@ai-sdk/openai/internal";
+import { OpenAIProvider } from "@ai-sdk/openai";
 import { OpenAIClient, OpenAIClientSettings } from "@/adapters/openai/backend/client.js";
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
-import { ChatModelSettings } from "@/backend/chat.js";
 import { getEnv } from "@/internals/env.js";
 
-export type OpenAIChatModelSettings = OpenAIChatSettings & ChatModelSettings;
+type OpenAIParameters = Parameters<OpenAIProvider["languageModel"]>;
+export type OpenAIChatModelId = NonNullable<OpenAIParameters[0]>;
+export type OpenAIChatModelSettings = NonNullable<OpenAIParameters[1]>;
 
 export class OpenAIChatModel extends VercelChatModel {
   constructor(
@@ -29,6 +30,6 @@ export class OpenAIChatModel extends VercelChatModel {
     client?: OpenAIClient | OpenAIClientSettings,
   ) {
     const model = OpenAIClient.ensure(client).instance.chat(modelId, settings);
-    super(model, settings);
+    super(model);
   }
 }

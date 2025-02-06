@@ -59,7 +59,7 @@ const logger = Logger.root.child({
 // Log events emitted during agent execution
 Emitter.root.match("*.*", (data, event) => {
   const logLevel = event.path.includes(".run.") ? "trace" : "info";
-  logger[logLevel](`Event '${event.path}' triggered by '${event.creator.constructor.name}'.`);
+  logger[logLevel](`Event '${event.path}' triggered by '${event.creator.constructor.name}'`);
 });
 
 // Create and run an agent
