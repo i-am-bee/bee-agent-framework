@@ -17,11 +17,12 @@
 import { VertexAIClient, VertexAIClientSettings } from "./client.js";
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
 import { EmbeddingModelSettings } from "@/backend/embedding.js";
+import { getEnv } from "@/internals/env.js";
 export type VertexAIEmbeddingSettings = EmbeddingModelSettings;
 
 export class VertexAIEmbeddingModel extends VercelEmbeddingModel {
   constructor(
-    modelId: string,
+    modelId: string = getEnv("GOOGLE_VERTEX_API_EMBEDDING_MODEL", "text-embedding-004"),
     settings: VertexAIEmbeddingSettings = {},
     client?: VertexAIClient | VertexAIClientSettings,
   ) {

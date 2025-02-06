@@ -18,13 +18,17 @@ import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
 import { getEnv } from "@/internals/env.js";
 import { EmbeddingModelSettings } from "@/backend/embedding.js";
 import { GroqClient, GroqClientSettings } from "@/adapters/groq/backend/client.js";
+import { ValueError } from "@/errors.js";
 
 export class GroqEmbeddingModel extends VercelEmbeddingModel {
   constructor(
-    modelId: string = getEnv("GROQ_API_EMBEDDING_MODEL", "TODO"),
+    modelId: string = getEnv("GROQ_API_EMBEDDING_MODEL", ""),
     settings: EmbeddingModelSettings = {},
     client?: GroqClientSettings | GroqClient,
   ) {
+    if (!modelId) {
+      throw new ValueError("Missing modelId!");
+    }
     const model = GroqClient.ensure(client).instance.textEmbeddingModel(modelId);
     super(model, settings);
   }

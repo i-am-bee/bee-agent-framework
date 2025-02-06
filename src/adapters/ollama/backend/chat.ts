@@ -24,8 +24,6 @@ export type OllamaChatSettings = NonNullable<Parameters<OllamaProvider["chat"]>[
   ChatModelSettings;
 
 export class OllamaChatModel extends VercelChatModel {
-  //protected supportsToolStreaming = false;
-
   constructor(
     modelId: string = getEnv("OLLAMA_API_CHAT_MODEL", "llama3.1:8b"),
     settings: OllamaChatSettings = {},

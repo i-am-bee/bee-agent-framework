@@ -24,7 +24,7 @@ export type BedrockChatSettings = ChatModelSettings;
 
 export class BedrockChatModel extends VercelChatModel {
   constructor(
-    modelId: BedrockModelId = getEnv("BEDROCK_CHAT_MODEL", "TODO"),
+    modelId: BedrockModelId = getEnv("BEDROCK_API_CHAT_MODEL", "meta.llama3-70b-instruct-v1:0"),
     settings: BedrockChatSettings = {},
     client?: BedrockClient | BedrockClientSettings,
   ) {

@@ -25,7 +25,7 @@ export type AzureChatSettings = OpenAIChatSettings & ChatModelSettings;
 
 export class AzureChatModel extends VercelChatModel {
   constructor(
-    modelId: string = getEnv("AZURE_OPENAI_API_DEPLOYMENT", "gpt-4o"),
+    modelId: string = getEnv("AZURE_OPENAI_API_CHAT_DEPLOYMENT", "gpt-4o"),
     settings: AzureChatSettings = {},
     client?: AzureOpenAIProviderSettings | AzureClient,
   ) {

@@ -24,7 +24,7 @@ export type GroqChatModelSettings = ChatModelSettings;
 
 export class GroqChatModel extends VercelChatModel {
   constructor(
-    modelId: GroqChatModelId = getEnv("GROQ_API_CHAT_MODEL", "TODO"),
+    modelId: GroqChatModelId = getEnv("GROQ_API_CHAT_MODEL", "gemma2-9b-it"),
     settings: GroqChatModelSettings = {},
     client?: GroqClient | GroqClientSettings,
   ) {

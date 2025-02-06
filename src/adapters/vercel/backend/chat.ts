@@ -37,7 +37,7 @@ import { Emitter } from "@/emitter/emitter.js";
 import { AssistantMessage, Message, ToolMessage } from "@/backend/message.js";
 import { GetRunContext } from "@/context.js";
 import { ValueError } from "@/errors.js";
-import { isEmpty, mapToObj, toCamelCase } from "remeda";
+import { mapToObj, toCamelCase } from "remeda";
 import { FullModelName } from "@/backend/utils.js";
 import { ChatModelError } from "@/backend/errors.js";
 
@@ -98,12 +98,6 @@ export abstract class VercelChatModel<
   }
 
   async *_createStream(input: ChatModelInput, run: GetRunContext<this>) {
-    if (!this.supportsToolStreaming && !isEmpty(input.tools ?? [])) {
-      const response = await this._create(input, run);
-      yield response;
-      return;
-    }
-
     const { fullStream, usage, finishReason, response } = streamText({
       ...(await this.transformInput(input)),
       abortSignal: run.signal,
