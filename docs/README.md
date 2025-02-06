@@ -84,7 +84,6 @@ const { result } = await workflow.run(memory.messages).observe((emitter) => {
 });
 
 console.log(`Agent 🤖`, result.finalAnswer);
-
 ```
 
 ## Getting started

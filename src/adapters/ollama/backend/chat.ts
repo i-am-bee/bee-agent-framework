@@ -32,6 +32,7 @@ export class OllamaChatModel extends VercelChatModel {
     const model = OllamaClient.ensure(client).instance.chat(modelId, {
       ...settings,
       simulateStreaming: true,
+      structuredOutputs: true,
     });
     super(model, settings);
   }

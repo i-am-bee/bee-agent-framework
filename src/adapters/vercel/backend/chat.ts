@@ -86,12 +86,13 @@ export abstract class VercelChatModel<
     run: GetRunContext<this>,
   ): Promise<ChatModelObjectOutput<T>> {
     const response = await generateObject({
+      temperature: 0,
       ...(await this.transformInput(input)),
       schema,
       abortSignal: run.signal,
       model: this.model,
       output: "object",
-      mode: "auto",
+      mode: "json",
     });
 
     return { object: response.object };
