@@ -14,6 +14,7 @@ python.uv_venv_auto = true
 ## prepare
 
 [tasks."prepare:ensure-submodules"]
+hide = true
 dir = "{{config_root}}"
 run = "git submodule init"
 sources = [".gitmodules"]
@@ -22,6 +23,7 @@ outputs = { auto = true }
 ## dependencies
 
 [tasks."dependencies:pnpm"]
+hide = true
 depends = ["prepare:*"]
 dir = "{{config_root}}"
 run = "pnpm install"
@@ -29,6 +31,7 @@ sources = ["pnpm-{lock,workspace}.yaml", "**/package.json"]
 outputs = { auto = true }
 
 [tasks."dependencies:uv"]
+hide = true
 depends = ["prepare:*"]
 dir = "{{config_root}}"
 run = "uv sync"
