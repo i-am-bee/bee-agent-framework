@@ -32,8 +32,8 @@ import {
 import { AnyTool, Tool, ToolError, ToolInputValidationError, ToolOutput } from "@/tools/base.js";
 import { FrameworkError } from "@/errors.js";
 import { isTruthy, last } from "remeda";
-import { LinePrefixParser, LinePrefixParserError } from "@/agents/parsers/linePrefix.js";
-import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
+import { LinePrefixParser, LinePrefixParserError } from "@/parsers/linePrefix.js";
+import { JSONParserField, ZodParserField } from "@/parsers/field.js";
 import { z } from "zod";
 import { Message, Role, UserMessage } from "@/backend/message.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
@@ -108,7 +108,7 @@ export class DefaultRunner extends BaseRunner {
             messages: this.memory.messages.slice(),
             tools: this.useNativeToolCalling ? tools : undefined,
             abortSignal: signal,
-            stream: true,
+            stream: this.input.stream !== false,
           })
           .observe((llmEmitter) => {
             parser.emitter.on("update", async ({ value, key, field }) => {
@@ -143,7 +143,6 @@ export class DefaultRunner extends BaseRunner {
             });
           });
 
-        console.info(JSON.stringify(raw));
         await parser.end();
         await this.memory.deleteMany(
           this.memory.messages.filter((msg) => getProp(msg.meta, [tempMessageKey]) === true),

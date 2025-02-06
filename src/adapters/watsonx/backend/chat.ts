@@ -15,7 +15,7 @@
  */
 
 import { ChatModel, ChatModelEmitter, ChatModelInput, ChatModelOutput } from "@/backend/chat.js";
-import { createWatsonXClient, WatsonXClient } from "@/adapters/watsonx/backend/client.js";
+import { WatsonXClient, WatsonXClientSettings } from "@/adapters/watsonx/backend/client.js";
 import { findLast, isEmpty, isTruthy } from "remeda";
 import WatsonxAiMlVml_v1, {
   TextChatMessages,
@@ -31,6 +31,8 @@ import { AssistantMessage, Message, SystemMessage, ToolMessage } from "@/backend
 import { ToolCallPart } from "ai";
 import Type = WatsonxAiMlVml_v1.TextChatResponseFormat.Constants.Type;
 import { parseBrokenJson } from "@/internals/helpers/schema.js";
+import { getEnv } from "@/internals/env.js";
+import { omitUndefined } from "@/internals/helpers/object.js";
 
 export type WatsonXChatParams = Omit<
   TextChatParams,
@@ -49,12 +51,12 @@ export class WatsonXChatModel extends ChatModel {
   }
 
   constructor(
-    public readonly modelId: string,
-    public readonly parameters: WatsonXChatParams = {},
-    client?: WatsonXClient,
+    public readonly modelId = getEnv("WATSONX_API_CHAT_MODEL", "ibm/granite-3-8b-instruct"),
+    public readonly settings: WatsonXChatParams = {},
+    client?: WatsonXClient | WatsonXClientSettings,
   ) {
     super();
-    this.client = client ?? createWatsonXClient();
+    this.client = WatsonXClient.ensure(client);
   }
 
   protected async _create(input: ChatModelInput) {
@@ -139,7 +141,7 @@ export class WatsonXChatModel extends ChatModel {
     );
 
     return {
-      ...this.parameters,
+      ...omitUndefined(this.settings),
       modelId: this.modelId,
       messages: input.messages.flatMap((message): TextChatMessages[] => {
         if (message instanceof ToolMessage) {
@@ -172,8 +174,8 @@ export class WatsonXChatModel extends ChatModel {
           return [message.toPlain()];
         }
       }),
-      spaceId: this.client.options.spaceId,
-      projectId: this.client.options.projectId,
+      spaceId: this.client.spaceId,
+      projectId: this.client.projectId,
       tools: isEmpty(tools) ? undefined : tools,
       maxTokens: input.maxTokens,
       headers: input.headers,
@@ -192,7 +194,7 @@ export class WatsonXChatModel extends ChatModel {
     return {
       ...super.createSnapshot(),
       modelId: this.modelId,
-      parameters: shallowCopy(this.parameters),
+      parameters: shallowCopy(this.settings),
       client: this.client,
     };
   }

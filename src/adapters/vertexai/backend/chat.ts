@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-import { GoogleVertexProvider, GoogleVertexProviderSettings } from "@ai-sdk/google-vertex";
+import { GoogleVertexProvider } from "@ai-sdk/google-vertex";
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
-import { createVertexAIClient } from "@/adapters/vertexai/backend/client.js";
+import { VertexAIClient, VertexAIClientSettings } from "@/adapters/vertexai/backend/client.js";
+import { ChatModelSettings } from "@/backend/chat.js";
 
 type Params = Parameters<GoogleVertexProvider["languageModel"]>;
-export type VertexAIModelId = NonNullable<Params[0]>;
-export type VertexAIChatSettings = NonNullable<Params[1]>;
+export type VertexAIChatSettings = NonNullable<Params[1]> & ChatModelSettings;
 
 export class VertexAIChatModel extends VercelChatModel {
   constructor(
-    modelId: VertexAIModelId,
-    settings?: VertexAIChatSettings,
-    clientSettings?: GoogleVertexProviderSettings,
+    modelId: string,
+    settings: VertexAIChatSettings = {},
+    client?: VertexAIClientSettings | VertexAIClient,
   ) {
-    const client = createVertexAIClient(clientSettings);
-    const model = client.languageModel(modelId, settings);
-    super(model);
+    const model = VertexAIClient.ensure(client).instance.languageModel(modelId, settings);
+    super(model, settings);
   }
 }

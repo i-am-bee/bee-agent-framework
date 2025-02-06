@@ -19,6 +19,7 @@ import {
   EmbeddingModelEvents,
   EmbeddingModelInput,
   EmbeddingModelOutput,
+  EmbeddingModelSettings,
 } from "@/backend/embedding.js";
 import { RunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
@@ -28,7 +29,10 @@ import { signalRace } from "@/internals/helpers/promise.js";
 export class LangChainEmbeddingModel extends EmbeddingModel {
   public readonly emitter: Emitter<EmbeddingModelEvents>;
 
-  constructor(protected readonly lcEmbedding: LCEmbeddingModel) {
+  constructor(
+    protected readonly lcEmbedding: LCEmbeddingModel,
+    public readonly settings: EmbeddingModelSettings = {},
+  ) {
     super();
     this.emitter = Emitter.root.child({
       namespace: ["langchain", "backend", "embedding"],

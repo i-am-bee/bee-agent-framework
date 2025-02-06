@@ -1,5 +1,5 @@
 import { BaseAgent, BaseAgentRunOptions } from "bee-agent-framework/agents/base";
-import { Message, UserMessage } from "bee-agent-framework/backend/message";
+import { Message, SystemMessage, UserMessage } from "bee-agent-framework/backend/message";
 import { Emitter } from "bee-agent-framework/emitter/emitter";
 import { GetRunContext } from "bee-agent-framework/context";
 import { z } from "zod";
@@ -59,7 +59,11 @@ export class CustomAgent extends BaseAgent<RunInput, RunOutput, RunOptions> {
           .string()
           .describe("Here you should provide concise answer to the original question."),
       }),
-      messages: [...this.memory.messages, input.message],
+      messages: [
+        new SystemMessage("You are a helpful assistant. Always use JSON format for you responses."),
+        ...this.memory.messages,
+        input.message,
+      ],
       maxRetries: options?.maxRetries,
       abortSignal: run.signal,
     });
@@ -98,7 +102,7 @@ export class CustomAgent extends BaseAgent<RunInput, RunOutput, RunOptions> {
 }
 
 const agent = new CustomAgent({
-  llm: new OllamaChatModel("llama3.1"),
+  llm: new OllamaChatModel("granite3.1-dense"),
   memory: new UnconstrainedMemory(),
 });
 

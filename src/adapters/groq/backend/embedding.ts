@@ -15,22 +15,17 @@
  */
 
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
-import { createGroqClient } from "./client.js";
-import { GroqProvider } from "@/adapters/groq/backend/provider.js";
-import { GroqProviderSettings } from "@ai-sdk/groq";
-
-type Params = Parameters<GroqProvider["embeddingModel"]>;
-export type GroqEmbeddingModelId = NonNullable<Params[0]>;
-export type GroqEmbeddingSettings = Record<string, any>;
+import { getEnv } from "@/internals/env.js";
+import { EmbeddingModelSettings } from "@/backend/embedding.js";
+import { GroqClient, GroqClientSettings } from "@/adapters/groq/backend/client.js";
 
 export class GroqEmbeddingModel extends VercelEmbeddingModel {
   constructor(
-    modelId: GroqEmbeddingModelId,
-    settings?: GroqEmbeddingSettings,
-    clientSettings?: GroqProviderSettings,
+    modelId: string = getEnv("GROQ_API_EMBEDDING_MODEL", "TODO"),
+    settings: EmbeddingModelSettings = {},
+    client?: GroqClientSettings | GroqClient,
   ) {
-    const client = createGroqClient(clientSettings);
-    const model = client.textEmbeddingModel(modelId);
-    super(model);
+    const model = GroqClient.ensure(client).instance.textEmbeddingModel(modelId);
+    super(model, settings);
   }
 }

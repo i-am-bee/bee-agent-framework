@@ -15,9 +15,9 @@
  */
 
 import { ValueError } from "@/errors.js";
-import { BackendProvider } from "@/backend/provider.js";
 import { ClassConstructor } from "@/internals/types.js";
 import { BackendProviders, ProviderDef, ProviderName } from "@/backend/constants.js";
+import { capitalize } from "remeda";
 
 export type FullModelName = `${ProviderName}:${string}`;
 
@@ -36,14 +36,11 @@ export function parseModel(name: string) {
   return { providerId, modelId, providerDef };
 }
 
-export async function loadProvider(
+export async function loadModel<T>(
   name: ProviderName | FullModelName,
-  options?: Record<string, any>,
-) {
+  type: "embedding" | "chat",
+): Promise<ClassConstructor<T>> {
   const { providerDef } = parseModel(name);
-  const module = await import(
-    `bee-agent-framework/adapters/${providerDef.module}/backend/provider`
-  );
-  const TargetClass: ClassConstructor<BackendProvider> = module[`${providerDef.name}Provider`];
-  return new TargetClass(options);
+  const module = await import(`bee-agent-framework/adapters/${providerDef.module}/backend/${type}`);
+  return module[`${providerDef.name}${capitalize(type)}Model`];
 }

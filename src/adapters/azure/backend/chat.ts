@@ -17,18 +17,19 @@
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 import { OpenAIChatSettings } from "@ai-sdk/openai/internal";
 import { AzureOpenAIProviderSettings } from "@ai-sdk/azure";
-import { createOpenAIClient } from "@/adapters/openai/backend/client.js";
+import { AzureClient } from "@/adapters/azure/backend/client.js";
+import { ChatModelSettings } from "@/backend/chat.js";
+import { getEnv } from "@/internals/env.js";
 
-export type AzureChatSettings = OpenAIChatSettings;
+export type AzureChatSettings = OpenAIChatSettings & ChatModelSettings;
 
 export class AzureChatModel extends VercelChatModel {
   constructor(
-    modelId: string,
-    settings?: AzureChatSettings,
-    clientSettings?: AzureOpenAIProviderSettings,
+    modelId: string = getEnv("AZURE_OPENAI_API_DEPLOYMENT", "gpt-4o"),
+    settings: AzureChatSettings = {},
+    client?: AzureOpenAIProviderSettings | AzureClient,
   ) {
-    const client = createOpenAIClient(clientSettings);
-    const model = client.chat(modelId, settings);
-    super(model);
+    const model = AzureClient.ensure(client).instance.chat(modelId, settings);
+    super(model, settings);
   }
 }

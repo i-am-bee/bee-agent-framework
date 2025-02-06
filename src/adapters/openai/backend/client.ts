@@ -14,31 +14,36 @@
  * limitations under the License.
  */
 
+import { createOpenAI, OpenAIProvider, OpenAIProviderSettings } from "@ai-sdk/openai";
 import { getEnv, parseEnv } from "@/internals/env.js";
-import { createOpenAI, OpenAIProviderSettings } from "@ai-sdk/openai";
 import { z } from "zod";
+import { BackendClient } from "@/backend/client.js";
 
-export function createOpenAIClient(options?: OpenAIProviderSettings) {
-  const extraHeaders = parseEnv(
-    "OPENAI_API_HEADERS",
-    z.preprocess((value) => {
-      return Object.fromEntries(
-        String(value || "")
-          .split(",")
-          .filter((pair) => pair.includes("="))
-          .map((pair) => pair.split("=")),
-      );
-    }, z.record(z.string())),
-  );
+export type OpenAIClientSettings = OpenAIProviderSettings;
 
-  return createOpenAI({
-    ...options,
-    compatibility: "compatible",
-    apiKey: options?.apiKey || getEnv("OPENAI_API_KEY"),
-    baseURL: options?.baseURL || getEnv("OPENAI_API_ENDPOINT"),
-    headers: {
-      ...extraHeaders,
-      ...options?.headers,
-    },
-  });
+export class OpenAIClient extends BackendClient<OpenAIClientSettings, OpenAIProvider> {
+  protected create(): OpenAIProvider {
+    const extraHeaders = parseEnv(
+      "OPENAI_API_HEADERS",
+      z.preprocess((value) => {
+        return Object.fromEntries(
+          String(value || "")
+            .split(",")
+            .filter((pair) => pair.includes("="))
+            .map((pair) => pair.split("=")),
+        );
+      }, z.record(z.string())),
+    );
+
+    return createOpenAI({
+      ...this.settings,
+      compatibility: "compatible",
+      apiKey: this.settings?.apiKey || getEnv("OPENAI_API_KEY"),
+      baseURL: this.settings?.baseURL || getEnv("OPENAI_API_ENDPOINT"),
+      headers: {
+        ...extraHeaders,
+        ...this.settings?.headers,
+      },
+    });
+  }
 }

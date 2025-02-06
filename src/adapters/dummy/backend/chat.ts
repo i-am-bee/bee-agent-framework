@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import { ChatModel, ChatModelEvents, ChatModelOutput, ChatModelInput } from "@/backend/chat.js";
-import { RunContext } from "@/context.js";
+import {
+  ChatModel,
+  ChatModelEvents,
+  ChatModelOutput,
+  ChatModelInput,
+  ChatModelSettings,
+} from "@/backend/chat.js";
+import { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { NotImplementedError } from "@/errors.js";
 
@@ -25,7 +31,10 @@ export class DummyChatModel extends ChatModel {
     creator: this,
   });
 
-  constructor(public readonly modelId = "dummy") {
+  constructor(
+    public readonly modelId = "dummy",
+    public readonly settings: ChatModelSettings = {},
+  ) {
     super();
   }
 
@@ -33,14 +42,14 @@ export class DummyChatModel extends ChatModel {
     return "dummy";
   }
 
-  protected _create(input: ChatModelInput, run: RunContext<this, any>): Promise<ChatModelOutput> {
+  protected _create(_input: ChatModelInput, _run: GetRunContext<this>): Promise<ChatModelOutput> {
     throw new NotImplementedError();
   }
 
   protected _createStream(
-    input: ChatModelInput,
-    run: RunContext<this, any>,
-  ): AsyncGenerator<ChatModelOutput, ChatModelOutput> {
+    _input: ChatModelInput,
+    _run: GetRunContext<this>,
+  ): AsyncGenerator<ChatModelOutput> {
     throw new NotImplementedError();
   }
 
@@ -50,5 +59,9 @@ export class DummyChatModel extends ChatModel {
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>): void {
     Object.assign(this, snapshot);
+  }
+
+  static {
+    this.register();
   }
 }

@@ -21,6 +21,7 @@ import {
   ChatModelEvents,
   ChatModelObjectInput,
   ChatModelObjectOutput,
+  ChatModelSettings,
 } from "@/backend/chat.js";
 import {
   CoreAssistantMessage,
@@ -34,24 +35,30 @@ import {
 } from "ai";
 import { Emitter } from "@/emitter/emitter.js";
 import { AssistantMessage, Message, ToolMessage } from "@/backend/message.js";
-import { RunContext } from "@/context.js";
+import { GetRunContext } from "@/context.js";
 import { ValueError } from "@/errors.js";
 import { isEmpty, mapToObj, toCamelCase } from "remeda";
 import { FullModelName } from "@/backend/utils.js";
+import { ChatModelError } from "@/backend/errors.js";
 
 export abstract class VercelChatModel<
-  R extends LanguageModelV1 = LanguageModelV1,
+  P extends ChatModelSettings = ChatModelSettings,
+  M extends LanguageModelV1 = LanguageModelV1,
 > extends ChatModel {
   public readonly emitter: Emitter<ChatModelEvents>;
   protected supportsToolStreaming = true;
 
-  constructor(private readonly model: R) {
+  constructor(
+    private readonly model: M,
+    public readonly settings: P,
+  ) {
     super();
     if (!this.modelId) {
       throw new ValueError("No modelId has been provided!");
     }
     this.emitter = Emitter.root.child({
       namespace: ["backend", this.providerId, "chat"],
+      creator: this,
     });
   }
 
@@ -64,7 +71,7 @@ export abstract class VercelChatModel<
     return toCamelCase(provider);
   }
 
-  protected async _create(input: ChatModelInput, run: RunContext<this>) {
+  protected async _create(input: ChatModelInput, _run: GetRunContext<this>) {
     const {
       finishReason,
       usage,
@@ -76,7 +83,7 @@ export abstract class VercelChatModel<
 
   protected async _createStructure<T>(
     { schema, ...input }: ChatModelObjectInput<T>,
-    run: RunContext<this>,
+    run: GetRunContext<this>,
   ): Promise<ChatModelObjectOutput<T>> {
     const response = await generateObject({
       ...(await this.transformInput(input)),
@@ -90,19 +97,19 @@ export abstract class VercelChatModel<
     return { object: response.object };
   }
 
-  async *_createStream(input: ChatModelInput, run: RunContext<this>) {
+  async *_createStream(input: ChatModelInput, run: GetRunContext<this>) {
     if (!this.supportsToolStreaming && !isEmpty(input.tools ?? [])) {
       const response = await this._create(input, run);
       yield response;
       return;
     }
 
-    const { fullStream, usage, finishReason } = streamText({
+    const { fullStream, usage, finishReason, response } = streamText({
       ...(await this.transformInput(input)),
       abortSignal: run.signal,
     });
 
-    const chunks: ChatModelOutput[] = [];
+    let lastChunk: ChatModelOutput | null = null;
     for await (const event of fullStream) {
       let message: Message;
       switch (event.type) {
@@ -138,16 +145,16 @@ export abstract class VercelChatModel<
         default:
           throw new Error(`Unhandled event "${event.type}"`);
       }
-      const chunk = new ChatModelOutput([message]);
-      chunks.push(chunk);
-      yield chunk;
+      lastChunk = new ChatModelOutput([message]);
+      yield lastChunk;
     }
 
-    // TODO: not propagated yet
-    const final = ChatModelOutput.fromChunks(chunks);
-    final.usage = await usage;
-    final.finishReason = await finishReason;
-    return final;
+    if (!lastChunk) {
+      throw new ChatModelError("No chunks have been received!");
+    }
+    lastChunk.usage = await usage;
+    lastChunk.finishReason = await finishReason;
+    await response;
   }
 
   protected async transformInput(
@@ -171,6 +178,7 @@ export abstract class VercelChatModel<
     });
 
     return {
+      ...this.settings,
       ...input,
       model: this.model,
       tools: mapToObj(tools, ({ name, ...tool }) => [name, tool]),
@@ -192,6 +200,7 @@ export abstract class VercelChatModel<
       ...super.createSnapshot(),
       providerId: this.providerId,
       modelId: this.modelId,
+      supportsToolStreaming: this.supportsToolStreaming,
     };
   }
 
@@ -205,13 +214,5 @@ export abstract class VercelChatModel<
       ...snapshot,
       model: instance.model,
     });
-  }
-
-  // TODO: replace
-  static fromModel<T2 extends LanguageModelV1, T extends VercelChatModel<T2>>(
-    this: abstract new (...args: any[]) => T,
-    model: T2,
-  ): T {
-    return Reflect.construct(VercelChatModel, [model], this) as T;
   }
 }

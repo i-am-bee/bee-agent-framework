@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-import { createAmazonBedrock, AmazonBedrockProviderSettings } from "@ai-sdk/amazon-bedrock";
+import {
+  createAmazonBedrock,
+  AmazonBedrockProviderSettings,
+  AmazonBedrockProvider,
+} from "@ai-sdk/amazon-bedrock";
+import { BackendClient } from "@/backend/client.js";
 
-export function createBedrockClient(options?: AmazonBedrockProviderSettings) {
-  // AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
-  // AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
-  // AWS_REGION=YOUR_REGION
-  return createAmazonBedrock({
-    ...options,
-  });
+export type BedrockClientSettings = AmazonBedrockProviderSettings;
+
+export class BedrockClient extends BackendClient<BedrockClientSettings, AmazonBedrockProvider> {
+  protected create(): AmazonBedrockProvider {
+    // TODO
+    // AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
+    // AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
+    // AWS_REGION=YOUR_REGION
+    return createAmazonBedrock({
+      ...this.settings,
+    });
+  }
 }

@@ -29,8 +29,8 @@ import {
   BeeUserEmptyPrompt,
   BeeUserPrompt,
 } from "@/agents/bee/prompts.js";
-import { LinePrefixParser } from "@/agents/parsers/linePrefix.js";
-import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
+import { LinePrefixParser } from "@/parsers/linePrefix.js";
+import { JSONParserField, ZodParserField } from "@/parsers/field.js";
 import { NonUndefined } from "@/internals/types.js";
 import { ChatModelOutput } from "@/backend/chat.js";
 

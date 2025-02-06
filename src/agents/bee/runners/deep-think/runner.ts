@@ -27,7 +27,7 @@ import {
 } from "@/agents/bee/runners/deep-think/prompts.js";
 import { BeeToolNoResultsPrompt, BeeUserEmptyPrompt } from "@/agents/bee/prompts.js";
 import { Cache } from "@/cache/decoratorCache.js";
-import { ZodParserField } from "@/agents/parsers/field.js";
+import { ZodParserField } from "@/parsers/field.js";
 import { z } from "zod";
 import { BeeInput, BeeAgent } from "@/agents/bee/agent.js";
 import { BeeRunOptions } from "@/agents/bee/types.js";

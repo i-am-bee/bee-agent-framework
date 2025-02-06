@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { LinePrefixParser, LinePrefixParserError } from "@/agents/parsers/linePrefix.js";
+import { LinePrefixParser, LinePrefixParserError } from "@/parsers/linePrefix.js";
 import { z } from "zod";
-import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
+import { JSONParserField, ZodParserField } from "@/parsers/field.js";
 import { splitString } from "@/internals/helpers/string.js";
 import { ValueError } from "@/errors.js";
 

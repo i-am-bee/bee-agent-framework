@@ -129,4 +129,4 @@ export type MergeFunctions<A extends AnyFn, B extends AnyFn> = (
   ...args: MergeArrays<Parameters<A>, Parameters<B>>
 ) => MergeElements<ReturnType<B>, ReturnType<A>>;
 
-export type WithoutLast<T> = T extends [...infer A, infer X] ? A : [];
+export type WithoutLast<T> = T extends [...infer A, any] ? A : [];

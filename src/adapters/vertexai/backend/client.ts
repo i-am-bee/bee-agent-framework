@@ -15,14 +15,23 @@
  */
 
 import { getEnv } from "@/internals/env.js";
-import { createVertex, GoogleVertexProviderSettings } from "@ai-sdk/google-vertex";
+import {
+  createVertex,
+  GoogleVertexProvider,
+  GoogleVertexProviderSettings,
+} from "@ai-sdk/google-vertex";
+import { BackendClient } from "@/backend/client.js";
 
-export function createVertexAIClient(options?: GoogleVertexProviderSettings) {
-  return createVertex({
-    ...options,
-    project: options?.project || getEnv("GOOGLE_VERTEX_PROJECT"),
-    baseURL: options?.baseURL || getEnv("GOOGLE_VERTEX_ENDPOINT"),
-    location: options?.baseURL || getEnv("GOOGLE_VERTEX_LOCATION"),
-    // TODO: handle auth options
-  });
+export type VertexAIClientSettings = GoogleVertexProviderSettings;
+
+export class VertexAIClient extends BackendClient<VertexAIClientSettings, GoogleVertexProvider> {
+  protected create(): GoogleVertexProvider {
+    return createVertex({
+      ...this.settings,
+      project: this.settings?.project || getEnv("GOOGLE_VERTEX_PROJECT"),
+      baseURL: this.settings?.baseURL || getEnv("GOOGLE_VERTEX_ENDPOINT"),
+      location: this.settings?.baseURL || getEnv("GOOGLE_VERTEX_LOCATION"),
+      // TODO: handle auth options
+    });
+  }
 }

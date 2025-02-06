@@ -15,22 +15,24 @@
  */
 
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
-import { GroqProvider } from "@/adapters/groq/backend/provider.js";
-import { GroqProviderSettings } from "@ai-sdk/groq";
-import { createGroqClient } from "@/adapters/groq/backend/client.js";
+import { GroqClient, GroqClientSettings } from "@/adapters/groq/backend/client.js";
+import { ChatModelSettings } from "@/backend/chat.js";
+import { getEnv } from "@/internals/env.js";
 
-type Params = Parameters<GroqProvider["chatModel"]>;
-export type GroqModelId = string;
-export type GroqChatSettings = NonNullable<Params[1]>;
+export type GroqChatModelId = string;
+export type GroqChatModelSettings = ChatModelSettings;
 
 export class GroqChatModel extends VercelChatModel {
   constructor(
-    modelId: GroqModelId,
-    settings?: GroqChatSettings,
-    clientSettings?: GroqProviderSettings,
+    modelId: GroqChatModelId = getEnv("GROQ_API_CHAT_MODEL", "TODO"),
+    settings: GroqChatModelSettings = {},
+    client?: GroqClient | GroqClientSettings,
   ) {
-    const client = createGroqClient(clientSettings);
-    const model = client.languageModel(modelId, settings);
-    super(model);
+    const model = GroqClient.ensure(client).instance.languageModel(modelId);
+    super(model, settings);
+  }
+
+  static {
+    this.register();
   }
 }

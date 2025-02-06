@@ -29,7 +29,7 @@ import { ObjectHashKeyFn } from "@/cache/decoratorCache.js";
 import { Task } from "promise-based-task";
 import { NullCache } from "@/cache/nullCache.js";
 import { BaseCache } from "@/cache/base.js";
-import { FullModelName, loadProvider, parseModel } from "@/backend/utils.js";
+import { FullModelName, loadModel, parseModel } from "@/backend/utils.js";
 import { ProviderName } from "@/backend/constants.js";
 import { AnyTool } from "@/tools/base.js";
 import { AssistantMessage, Message, SystemMessage, UserMessage } from "@/backend/message.js";
@@ -51,23 +51,24 @@ import type { ValidateFunction } from "ajv";
 import { PromptTemplate } from "@/template.js";
 import { toAsyncGenerator } from "@/internals/helpers/promise.js";
 
-interface CallSettings {
-  abortSignal?: AbortSignal;
+export interface ChatModelSettings {
   maxRetries?: number;
   maxTokens?: number;
-  headers?: Record<string, any>;
   topP?: number;
   frequencyPenalty?: number;
   temperature?: number;
   topK?: number;
   n?: number;
   presencePenalty?: number;
-  experimental_providerMetadata?: Record<string, any>;
+  headers?: Record<string, any>;
+  seed?: number;
+  stopSequence?: string[];
 }
 
-export interface ChatModelObjectInput<T> extends CallSettings {
+export interface ChatModelObjectInput<T> extends ChatModelSettings {
   schema: z.ZodSchema<T>;
   messages: Message[];
+  abortSignal?: AbortSignal;
 }
 
 export interface ChatModelObjectOutput<T> {
@@ -75,8 +76,9 @@ export interface ChatModelObjectOutput<T> {
 }
 
 //export type ChatModelInp2ut = Omit<Parameters<typeof generateText>[0], "model" | "prompt">;
-export interface ChatModelInput extends CallSettings {
+export interface ChatModelInput extends ChatModelSettings {
   tools?: AnyTool[];
+  abortSignal?: AbortSignal;
   stopSequences?: string[];
   responseFormat?:
     | {
@@ -96,8 +98,8 @@ export interface ChatModelInput extends CallSettings {
       };
   toolChoice?: never; // TODO
   messages: Message[];
-  system?: never; // TODO
 }
+
 export type ChatModelFinishReason =
   | "stop"
   | "length"
@@ -130,6 +132,7 @@ export type ChatModelCache = BaseCache<Task<ChatModelOutput[]>>;
 export abstract class ChatModel extends Serializable {
   public abstract readonly emitter: Emitter<ChatModelEvents>;
   public readonly cache: ChatModelCache = new NullCache();
+  public abstract readonly settings: ChatModelSettings;
 
   abstract get modelId(): string;
   abstract get providerId(): string;
@@ -188,10 +191,10 @@ export abstract class ChatModel extends Serializable {
     );
   }
 
-  static async fromName(name: FullModelName | ProviderName, options?: Record<string, any>) {
+  static async fromName(name: FullModelName | ProviderName, options?: ChatModelSettings) {
     const { providerId, modelId = "" } = parseModel(name);
-    const provider = await loadProvider(providerId, options);
-    return provider.chatModel(modelId);
+    const Target = await loadModel<ChatModel>(providerId, "chat");
+    return new Target(modelId, options);
   }
 
   protected abstract _create(
@@ -201,7 +204,7 @@ export abstract class ChatModel extends Serializable {
   protected abstract _createStream(
     input: ChatModelInput,
     run: GetRunContext<typeof this>,
-  ): AsyncGenerator<ChatModelOutput>;
+  ): AsyncGenerator<ChatModelOutput, void>;
 
   protected async _createStructure<T>(
     input: ChatModelObjectInput<T>,
@@ -278,7 +281,7 @@ Validation Errors: {{errors}}`,
   }
 
   createSnapshot() {
-    return { cache: this.cache, emitter: this.emitter };
+    return { cache: this.cache, emitter: this.emitter, settings: shallowCopy(this.settings) };
   }
 
   destroy() {

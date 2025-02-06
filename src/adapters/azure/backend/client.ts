@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
+import { AzureOpenAIProvider, AzureOpenAIProviderSettings, createAzure } from "@ai-sdk/azure";
 import { getEnv } from "@/internals/env.js";
-import { AzureOpenAIProviderSettings, createAzure } from "@ai-sdk/azure";
+import { BackendClient } from "@/backend/client.js";
 
-export function createAzureClient(options?: AzureOpenAIProviderSettings) {
-  return createAzure({
-    ...options,
-    apiKey: options?.apiKey || getEnv("AZURE_OPENAI_API_KEY"),
-    baseURL: options?.baseURL || getEnv("AZURE_OPENAI_API_ENDPOINT"),
-    resourceName: options?.resourceName || getEnv("AZURE_OPENAI_API_RESOURCE"),
-    apiVersion: options?.apiVersion || getEnv("AZURE_OPENAI_API_VERSION"),
-  });
+export type AzureClientSettings = AzureOpenAIProviderSettings;
+
+export class AzureClient extends BackendClient<AzureClientSettings, AzureOpenAIProvider> {
+  protected create(options?: AzureClientSettings): AzureOpenAIProvider {
+    return createAzure({
+      ...options,
+      apiKey: options?.apiKey || getEnv("AZURE_OPENAI_API_KEY"),
+      baseURL: options?.baseURL || getEnv("AZURE_OPENAI_API_ENDPOINT"),
+      resourceName: options?.resourceName || getEnv("AZURE_OPENAI_API_RESOURCE"),
+      apiVersion: options?.apiVersion || getEnv("AZURE_OPENAI_API_VERSION"),
+    });
+  }
 }

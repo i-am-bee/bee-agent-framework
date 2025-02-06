@@ -15,20 +15,20 @@
  */
 
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
-import { OpenAIEmbeddingSettings } from "@ai-sdk/openai/internal";
-import { createAzureClient } from "@/adapters/azure/backend/client.js";
-import { AzureOpenAIProviderSettings } from "@ai-sdk/azure";
+import type { OpenAIEmbeddingSettings } from "@ai-sdk/openai/internal";
+import { AzureClient, AzureClientSettings } from "@/adapters/azure/backend/client.js";
+import { getEnv } from "@/internals/env.js";
+import { EmbeddingModelSettings } from "@/backend/embedding.js";
 
-export type AzureEmbeddingSettings = OpenAIEmbeddingSettings;
+export type AzureEmbeddingSettings = OpenAIEmbeddingSettings & EmbeddingModelSettings;
 
 export class AzureEmbeddingModel extends VercelEmbeddingModel {
   constructor(
-    modelId: string,
-    options?: AzureEmbeddingSettings,
-    clientSettings?: AzureOpenAIProviderSettings,
+    modelId: string = getEnv("AZURE_OPENAI_API_EMBEDDING_DEPLOYMENT", "text-embedding-3-small"),
+    settings: AzureEmbeddingSettings = {},
+    client?: AzureClient | AzureClientSettings,
   ) {
-    const client = createAzureClient(clientSettings);
-    const model = client.textEmbeddingModel(modelId, options);
-    super(model);
+    const model = AzureClient.ensure(client).instance.textEmbeddingModel(modelId, settings);
+    super(model, settings);
   }
 }

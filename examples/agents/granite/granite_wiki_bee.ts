@@ -77,11 +77,8 @@ async function createWikipediaRetrivalTool(
 
 // Agent LLM
 const llm = await ChatModel.fromName("ollama:granite3.1-dense:8b", {
-  modelId: "granite3.1-dense:8b",
-  parameters: {
-    temperature: 0,
-    num_predict: 2048,
-  },
+  temperature: 0,
+  maxTokens: 2048,
 });
 
 const agent = new BeeAgent({

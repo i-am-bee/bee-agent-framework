@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-import { createBedrockClient } from "@/adapters/bedrock/backend/client.js";
-import { BedrockProvider } from "@/adapters/bedrock/backend/provider.js";
-import { AmazonBedrockProviderSettings } from "@ai-sdk/amazon-bedrock";
+import { BedrockClient, BedrockClientSettings } from "@/adapters/bedrock/backend/client.js";
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
+import { ChatModelSettings } from "@/backend/chat.js";
+import { getEnv } from "@/internals/env.js";
 
-type Params = Parameters<BedrockProvider["chatModel"]>;
 export type BedrockModelId = string;
-export type BedrockChatSettings = NonNullable<Params[1]>;
+export type BedrockChatSettings = ChatModelSettings;
 
 export class BedrockChatModel extends VercelChatModel {
   constructor(
-    modelId: BedrockModelId,
-    settings?: BedrockChatSettings,
-    clientSettings?: AmazonBedrockProviderSettings,
+    modelId: BedrockModelId = getEnv("BEDROCK_CHAT_MODEL", "TODO"),
+    settings: BedrockChatSettings = {},
+    client?: BedrockClient | BedrockClientSettings,
   ) {
-    const client = createBedrockClient(clientSettings);
-    const model = client.languageModel(modelId, settings);
-    super(model);
+    const model = BedrockClient.ensure(client).instance.languageModel(modelId);
+    super(model, settings);
   }
 }

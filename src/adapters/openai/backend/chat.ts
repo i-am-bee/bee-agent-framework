@@ -15,18 +15,20 @@
  */
 
 import { OpenAIChatModelId, OpenAIChatSettings } from "@ai-sdk/openai/internal";
-import { createOpenAIClient } from "@/adapters/openai/backend/client.js";
-import { OpenAIProviderSettings } from "@ai-sdk/openai";
+import { OpenAIClient, OpenAIClientSettings } from "@/adapters/openai/backend/client.js";
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
+import { ChatModelSettings } from "@/backend/chat.js";
+import { getEnv } from "@/internals/env.js";
+
+export type OpenAIChatModelSettings = OpenAIChatSettings & ChatModelSettings;
 
 export class OpenAIChatModel extends VercelChatModel {
   constructor(
-    modelId: OpenAIChatModelId,
-    settings?: OpenAIChatSettings,
-    clientSettings?: OpenAIProviderSettings,
+    modelId: OpenAIChatModelId = getEnv("OPENAI_API_CHAT_MODEL", "gpt-4o"),
+    settings: OpenAIChatModelSettings = {},
+    client?: OpenAIClient | OpenAIClientSettings,
   ) {
-    const client = createOpenAIClient(clientSettings);
-    const model = client.chat(modelId, settings);
-    super(model);
+    const model = OpenAIClient.ensure(client).instance.chat(modelId, settings);
+    super(model, settings);
   }
 }

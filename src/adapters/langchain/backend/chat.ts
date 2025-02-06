@@ -22,6 +22,7 @@ import {
   ChatModelObjectInput,
   ChatModelObjectOutput,
   ChatModelOutput,
+  ChatModelSettings,
   ChatModelUsage,
 } from "@/backend/chat.js";
 import { RunContext } from "@/context.js";
@@ -37,7 +38,10 @@ import { ValueError } from "@/errors.js";
 export class LangChainChatModel extends ChatModel {
   public readonly emitter: ChatModelEmitter;
 
-  constructor(protected readonly lcLLM: BaseChatModel) {
+  constructor(
+    protected readonly lcLLM: BaseChatModel,
+    public readonly settings: ChatModelSettings = {},
+  ) {
     super();
     this.emitter = Emitter.root.child({
       namespace: ["backend", "langchain", "chat"],
@@ -67,10 +71,8 @@ export class LangChainChatModel extends ChatModel {
   protected async *_createStream(
     input: ChatModelInput,
     run: RunContext<this>,
-  ): AsyncGenerator<ChatModelOutput, ChatModelOutput> {
+  ): AsyncGenerator<ChatModelOutput> {
     const preparedInput = this.prepareInput(input, run);
-
-    const chunks: ChatModelOutput[] = [];
 
     const stream = this.lcLLM.bindTools
       ? await this.lcLLM
@@ -80,11 +82,8 @@ export class LangChainChatModel extends ChatModel {
 
     for await (const response of stream) {
       const chunk = this.prepareOutput(response);
-      chunks.push(chunk);
       yield chunk;
     }
-
-    return ChatModelOutput.fromChunks(chunks);
   }
 
   protected prepareInput(input: ChatModelInput, run: RunContext<this>) {

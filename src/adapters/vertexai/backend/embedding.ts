@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import { createVertexAIClient } from "./client.js";
-import { GoogleVertexProviderSettings } from "@ai-sdk/google-vertex";
+import { VertexAIClient, VertexAIClientSettings } from "./client.js";
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
-export type VertexAIEmbeddingSettings = Record<string, any>;
+import { EmbeddingModelSettings } from "@/backend/embedding.js";
+export type VertexAIEmbeddingSettings = EmbeddingModelSettings;
 
 export class VertexAIEmbeddingModel extends VercelEmbeddingModel {
   constructor(
     modelId: string,
-    settings?: VertexAIEmbeddingSettings,
-    clientSettings?: GoogleVertexProviderSettings,
+    settings: VertexAIEmbeddingSettings = {},
+    client?: VertexAIClient | VertexAIClientSettings,
   ) {
-    const client = createVertexAIClient(clientSettings);
-    const model = client.textEmbeddingModel(modelId);
-    super(model);
+    const model = VertexAIClient.ensure(client).instance.textEmbeddingModel(modelId);
+    super(model, settings);
   }
 }

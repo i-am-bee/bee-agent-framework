@@ -24,7 +24,7 @@ import { shallowCopy } from "@/serializer/utils.js";
 import { GetRunContext, RunContext } from "@/context.js";
 import { pRetry } from "@/internals/helpers/retry.js";
 import { NullCache } from "@/cache/nullCache.js";
-import { FullModelName, loadProvider, parseModel } from "@/backend/utils.js";
+import { FullModelName, loadModel, parseModel } from "@/backend/utils.js";
 import { ProviderName } from "@/backend/constants.js";
 import { EmbeddingModelError } from "@/backend/errors.js";
 
@@ -47,9 +47,14 @@ export type EmbeddingModelEmitter<A = Record<never, never>> = Emitter<
   EmbeddingModelEvents & Omit<A, keyof EmbeddingModelEvents>
 >;
 
+export interface EmbeddingModelSettings {
+  headers?: Record<string, any>;
+}
+
 export abstract class EmbeddingModel extends Serializable {
   public abstract readonly emitter: Emitter<EmbeddingModelEvents>;
   public readonly cache: ChatModelCache = new NullCache();
+  public abstract readonly settings: EmbeddingModelSettings;
 
   abstract get modelId(): string;
   abstract get providerId(): string;
@@ -84,10 +89,10 @@ export abstract class EmbeddingModel extends Serializable {
     ); // TODO: telemetry?
   }
 
-  static async fromName(name: FullModelName | ProviderName, options?: Record<string, any>) {
+  static async fromName(name: FullModelName | ProviderName, options?: EmbeddingModelSettings) {
     const { providerId, modelId = "" } = parseModel(name);
-    const provider = await loadProvider(providerId, options);
-    return provider.embeddingModel(modelId);
+    const Target = await loadModel<EmbeddingModel>(providerId, "embedding");
+    return new Target(modelId, options);
   }
 
   protected abstract _create(
@@ -96,7 +101,7 @@ export abstract class EmbeddingModel extends Serializable {
   ): Promise<EmbeddingModelOutput>;
 
   createSnapshot() {
-    return { cache: this.cache, emitter: this.emitter };
+    return { cache: this.cache, emitter: this.emitter, settings: shallowCopy(this.settings) };
   }
 
   destroy() {

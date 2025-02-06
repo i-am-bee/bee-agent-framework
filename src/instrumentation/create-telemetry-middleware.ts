@@ -281,7 +281,7 @@ export function createTelemetryMiddleware() {
     // Read rawPrompt from llm input only for supported adapters and create the custom event with it
     emitter.match(
       (event) => assertLLMWithMessagesToPromptFn(event.creator) && event.name === startEventName,
-      ({ input }: InferCallbackValue<ChatModelEvents[typeof startEventName]>, meta) => {
+      (_, meta) => {
         if (assertLLMWithMessagesToPromptFn(meta.creator) && meta.trace) {
           // create a custom path to prevent event duplication
           const path = `${meta.path}.custom`;

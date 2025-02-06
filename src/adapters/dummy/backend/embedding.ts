@@ -22,6 +22,7 @@ import {
   EmbeddingModelEvents,
   EmbeddingModelInput,
   EmbeddingModelOutput,
+  EmbeddingModelSettings,
 } from "@/backend/embedding.js";
 
 export class DummyEmbeddingModel extends EmbeddingModel {
@@ -30,7 +31,10 @@ export class DummyEmbeddingModel extends EmbeddingModel {
     creator: this,
   });
 
-  constructor(public readonly modelId = "dummy") {
+  constructor(
+    public readonly modelId = "dummy",
+    public readonly settings: EmbeddingModelSettings = {},
+  ) {
     super();
   }
 
@@ -39,8 +43,8 @@ export class DummyEmbeddingModel extends EmbeddingModel {
   }
 
   protected _create(
-    input: EmbeddingModelInput,
-    run: GetRunContext<this>,
+    _input: EmbeddingModelInput,
+    _run: GetRunContext<this>,
   ): Promise<EmbeddingModelOutput> {
     throw new NotImplementedError();
   }

@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import { createWatsonXClient, WatsonXClient } from "@/adapters/watsonx/backend/client.js";
+import { WatsonXClient, WatsonXClientSettings } from "@/adapters/watsonx/backend/client.js";
 import {
   EmbeddingModel,
   EmbeddingModelInput,
   EmbeddingModelOutput,
   EmbeddingModelEvents,
+  EmbeddingModelSettings,
 } from "@/backend/embedding.js";
-import { EmbeddingParameters } from "@ibm-cloud/watsonx-ai/dist/watsonx-ai-ml/vml_v1.js";
-import { shallowCopy } from "@/serializer/utils.js";
+import { EmbeddingParameters as WXEmbeddingParameters } from "@ibm-cloud/watsonx-ai/dist/watsonx-ai-ml/vml_v1.js";
 import { Emitter } from "@/emitter/emitter.js";
+import { getEnv } from "@/internals/env.js";
+
+export type WatsonXEmbeddingModelSettings = WXEmbeddingParameters & EmbeddingModelSettings;
 
 export class WatsonXEmbeddingModel extends EmbeddingModel {
   protected readonly client: WatsonXClient;
@@ -34,12 +37,15 @@ export class WatsonXEmbeddingModel extends EmbeddingModel {
   }
 
   constructor(
-    public readonly modelId: string,
-    public readonly parameters?: EmbeddingParameters,
-    client?: WatsonXClient,
+    public readonly modelId: string = getEnv(
+      "WATSONX_API_EMBEDDING_MODEL",
+      "ibm/granite-embedding-107m-multilingual",
+    ),
+    public readonly settings: WatsonXEmbeddingModelSettings = {},
+    client?: WatsonXClient | WatsonXClientSettings,
   ) {
     super();
-    this.client = client ?? createWatsonXClient();
+    this.client = WatsonXClient.ensure(client);
     this.emitter = Emitter.root.child({
       namespace: ["backend", "watsonx", "embedding"],
       creator: this,
@@ -49,13 +55,13 @@ export class WatsonXEmbeddingModel extends EmbeddingModel {
   protected async _create(input: EmbeddingModelInput): Promise<EmbeddingModelOutput> {
     const response = await this.client.instance.embedText({
       modelId: this.modelId,
-      spaceId: this.client.options.spaceId,
-      projectId: this.client.options.projectId,
-      headers: this.client.options.headers,
+      spaceId: this.client.spaceId,
+      projectId: this.client.projectId,
+      headers: this.settings.headers,
       inputs: input.values,
       parameters: {
         return_options: { input_text: true },
-        ...this.parameters,
+        ...this.settings,
       },
     });
 
@@ -75,7 +81,6 @@ export class WatsonXEmbeddingModel extends EmbeddingModel {
     return {
       ...super.createSnapshot(),
       modelId: this.modelId,
-      parameters: shallowCopy(this.parameters),
       client: this.client,
     };
   }

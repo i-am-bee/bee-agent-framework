@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import { createGroq, GroqProviderSettings } from "@ai-sdk/groq";
+import { createGroq, GroqProvider, GroqProviderSettings } from "@ai-sdk/groq";
+import { BackendClient } from "@/backend/client.js";
 
-export function createGroqClient(options?: GroqProviderSettings) {
-  return createGroq({
-    ...options,
-  });
+export type GroqClientSettings = GroqProviderSettings;
+
+export class GroqClient extends BackendClient<GroqClientSettings, GroqProvider> {
+  protected create(settings?: GroqClientSettings): GroqProvider {
+    return createGroq({
+      ...settings,
+    });
+  }
 }

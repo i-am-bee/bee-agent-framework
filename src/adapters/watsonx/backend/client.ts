@@ -17,6 +17,7 @@
 import { WatsonXAI } from "@ibm-cloud/watsonx-ai";
 import { getEnv } from "@/internals/env.js";
 import { IamAuthenticator, UserOptions } from "ibm-cloud-sdk-core";
+import { BackendClient } from "@/backend/client.js";
 
 export interface WatsonXClientSettings extends Pick<UserOptions, "authenticator" | "version"> {
   spaceId?: string;
@@ -24,39 +25,44 @@ export interface WatsonXClientSettings extends Pick<UserOptions, "authenticator"
   region?: string;
   projectId?: string;
   apiKey?: string;
-  headers?: Record<string, any>;
 }
 
-export function createWatsonXClient(overrides?: WatsonXClientSettings) {
-  const region = overrides?.region || getEnv("WATSONX_REGION");
-  const baseUrl =
-    overrides?.baseUrl || getEnv("WATSONX_BASE_URL") || `https://${region}.ml.cloud.ibm.com`;
+export class WatsonXClient extends BackendClient<WatsonXClientSettings, WatsonXAI> {
+  constructor(settings: WatsonXClientSettings) {
+    const region = settings?.region || getEnv("WATSONX_REGION");
+    const baseUrl =
+      settings?.baseUrl || getEnv("WATSONX_BASE_URL") || `https://${region}.ml.cloud.ibm.com`;
 
-  const projectId = overrides?.projectId || getEnv("WATSONX_PROJECT_ID");
-  const spaceId = projectId ? undefined : overrides?.spaceId || getEnv("WATSONX_SPACE_ID");
+    const projectId = settings?.projectId || getEnv("WATSONX_PROJECT_ID");
+    const spaceId = projectId ? undefined : settings?.spaceId || getEnv("WATSONX_SPACE_ID");
+    const version = settings?.version || getEnv("WATSONX_VERSION") || "2024-05-31";
 
-  const options = {
-    baseUrl,
-    headers: overrides?.headers,
-    region,
-    projectId,
-    spaceId,
-    version: overrides?.version || getEnv("WATSONX_VERSION") || "2024-05-31",
-    authenticator:
-      overrides?.authenticator || // TODO
-      new IamAuthenticator({
-        apikey: getEnv("WATSONX_API_KEY", overrides?.apiKey ?? ""),
-        url: "https://iam.cloud.ibm.com",
-      }),
-  };
+    super({
+      ...settings,
+      baseUrl,
+      projectId,
+      spaceId,
+      version,
+    });
+  }
+  get spaceId() {
+    return this.settings.spaceId;
+  }
 
-  const instance = WatsonXAI.newInstance({
-    version: options.version,
-    serviceUrl: options.baseUrl,
-    authenticator: options.authenticator,
-  });
+  get projectId() {
+    return this.settings.projectId;
+  }
 
-  return { instance, options };
+  protected create(): WatsonXAI {
+    return WatsonXAI.newInstance({
+      version: this.settings.version,
+      serviceUrl: this.settings.baseUrl,
+      authenticator:
+        this.settings?.authenticator ||
+        new IamAuthenticator({
+          apikey: getEnv("WATSONX_API_KEY", this.settings?.apiKey ?? ""),
+          url: "https://iam.cloud.ibm.com",
+        }),
+    });
+  }
 }
-
-export type WatsonXClient = ReturnType<typeof createWatsonXClient>;

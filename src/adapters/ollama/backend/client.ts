@@ -15,11 +15,16 @@
  */
 
 import { getEnv } from "@/internals/env.js";
-import { createOllama, OllamaProviderSettings } from "ollama-ai-provider";
+import { createOllama, OllamaProvider, OllamaProviderSettings } from "ollama-ai-provider";
+import { BackendClient } from "@/backend/client.js";
 
-export function createOllamaClient(options?: OllamaProviderSettings) {
-  return createOllama({
-    ...options,
-    baseURL: getEnv("OLLAMA_BASE_URL"),
-  });
+export type OllamaClientSettings = OllamaProviderSettings;
+
+export class OllamaClient extends BackendClient<OllamaClientSettings, OllamaProvider> {
+  protected create(settings?: OllamaClientSettings): OllamaProvider {
+    return createOllama({
+      ...settings,
+      baseURL: getEnv("OLLAMA_BASE_URL"),
+    });
+  }
 }
