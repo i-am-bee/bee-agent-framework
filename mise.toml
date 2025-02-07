@@ -5,6 +5,7 @@ uv = "latest"
 pnpm = "latest"
 
 [settings]
+experimental = true # for python.uv_venv_auto
 python.uv_venv_auto = true
 
 # TASKS
