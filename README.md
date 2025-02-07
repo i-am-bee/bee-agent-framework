@@ -8,10 +8,6 @@ mise install
 mise setup
 ```
 
-## Configuration
-
-This project is configurable by environment variables. Edit them in `mise.local.toml` in the project root (run `mise setup` if you don't see it).
-
 ## Server
 
 ```sh
@@ -73,4 +69,6 @@ mise activate fish | source
 # other shells: see https://mise.jdx.dev/installing-mise.html#shells
 ```
 
-To configure env vars, create a file `mise.local.toml` in the repo root, and use the `[env]` section to configure them ((documentation)[https://mise.jdx.dev/environments/]). You may start with the example file: `mv mise.local.toml-example mise.local.toml`.
+## Configuration
+
+Edit `[env]` in `mise.local.toml` in the project root ((documentation)[https://mise.jdx.dev/environments/]). Run `mise setup` if you don't see the file.
