@@ -61,17 +61,17 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 
 ## LLMs (Language Models)
 
-- [`chat.ts`](/examples/llms/chat.ts): Chat-based language model usage
-- [`chatCallback.ts`](/examples/llms/chatCallback.ts): Callbacks for chat models
-- [`structured.ts`](/examples/llms/structured.ts): Structured output from language models
+- [`chat.ts`](/examples/backend/chat.ts): Chat-based language model usage
+- [`chatCallback.ts`](/examples/backend/chatStream.ts): Callbacks for chat models
+- [`structured.ts`](/examples/backend/structured.ts): Structured output from language models
 
 ### LLM Providers
 
-- [`groq.ts`](/examples/llms/providers/groq.ts): Groq language model integration
-- [`langchain.ts`](/examples/llms/providers/langchain.ts): LangChain integration
-- [`ollama.ts`](/examples/llms/providers/ollama.ts): Ollama model usage
-- [`openai.ts`](/examples/llms/providers/openai.ts): OpenAI integration
-- [`watsonx.ts`](/examples/llms/providers/watsonx.ts): WatsonX integration
+- [`groq.ts`](/examples/backend/providers/groq.ts): Groq language model integration
+- [`langchain.ts`](/examples/backend/providers/langchain.ts): LangChain integration
+- [`ollama.ts`](/examples/backend/providers/ollama.ts): Ollama model usage
+- [`openai.ts`](/examples/backend/providers/openai.ts): OpenAI integration
+- [`watsonx.ts`](/examples/backend/providers/watsonx.ts): WatsonX integration
 
 ## Logger
 

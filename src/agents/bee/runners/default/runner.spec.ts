@@ -115,7 +115,7 @@ describe("Bee Agent Runner", () => {
       ],
       instance.memory.messages.filter((msg) => msg.role === Role.USER),
     )) {
-      expect(template.render({ input: a.text, meta: undefined })).toStrictEqual(b.getTextContent());
+      expect(template.render({ input: a.text, meta: undefined })).toStrictEqual(b.text);
     }
   });
 });

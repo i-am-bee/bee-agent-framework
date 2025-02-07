@@ -24,14 +24,15 @@ export type OllamaChatModelId = NonNullable<OllamaParameters[0]>;
 export type OllamaChatModelSettings = NonNullable<OllamaParameters[1]>;
 
 export class OllamaChatModel extends VercelChatModel {
+  readonly supportsToolStreaming = false;
+
   constructor(
-    modelId: OllamaChatModelId = getEnv("OLLAMA_API_CHAT_MODEL", "llama3.1:8b"),
+    modelId: OllamaChatModelId = getEnv("OLLAMA_CHAT_MODEL", "llama3.1:8b"),
     settings: OllamaChatModelSettings = {},
     client?: OllamaClient | OllamaClientSettings,
   ) {
     const model = OllamaClient.ensure(client).instance.chat(modelId, {
       ...settings,
-      simulateStreaming: true, // otherwise breaks event propagation
       structuredOutputs: true, // otherwise breaks generated structure
     });
     super(model);

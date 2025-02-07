@@ -150,7 +150,6 @@ export abstract class ChatModel extends Serializable {
       { params: [input] as const, signal: input?.abortSignal },
       async (run) => {
         const cacheEntry = await this.createCacheAccessor(input);
-        console.info(cacheEntry.key);
 
         try {
           await run.emitter.emit("start", { input });
@@ -384,7 +383,7 @@ export class ChatModelOutput extends Serializable {
   getTextContent(): string {
     return this.messages
       .filter((r) => r instanceof AssistantMessage)
-      .flatMap((r) => r.getTextContent())
+      .flatMap((r) => r.text)
       .filter(Boolean)
       .join("");
   }

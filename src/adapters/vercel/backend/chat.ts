@@ -36,7 +36,7 @@ import { Emitter } from "@/emitter/emitter.js";
 import { AssistantMessage, Message, ToolMessage } from "@/backend/message.js";
 import { GetRunContext } from "@/context.js";
 import { ValueError } from "@/errors.js";
-import { mapToObj, toCamelCase } from "remeda";
+import { isEmpty, mapToObj, toCamelCase } from "remeda";
 import { FullModelName } from "@/backend/utils.js";
 import { ChatModelError } from "@/backend/errors.js";
 
@@ -44,6 +44,7 @@ export abstract class VercelChatModel<
   M extends LanguageModelV1 = LanguageModelV1,
 > extends ChatModel {
   public readonly emitter: Emitter<ChatModelEvents>;
+  public readonly supportsToolStreaming: boolean = true;
 
   constructor(private readonly model: M) {
     super();
@@ -93,6 +94,12 @@ export abstract class VercelChatModel<
   }
 
   async *_createStream(input: ChatModelInput, run: GetRunContext<this>) {
+    if (!this.supportsToolStreaming && !isEmpty(input.tools ?? [])) {
+      const response = await this._create(input, run);
+      yield response;
+      return;
+    }
+
     const { fullStream, usage, finishReason, response } = streamText({
       ...(await this.transformInput(input)),
       abortSignal: run.signal,
@@ -114,7 +121,7 @@ export abstract class VercelChatModel<
           });
           break;
         case "error":
-          throw new Error("Unhandled error", { cause: event.error });
+          throw new ChatModelError("Unhandled error", [event.error as Error]);
         case "step-finish":
         case "step-start":
           continue;
@@ -163,7 +170,7 @@ export abstract class VercelChatModel<
       } else if (msg instanceof ToolMessage) {
         return { role: "tool", content: msg.content };
       }
-      return { role: msg.role as "user" | "system", content: msg.getTextContent() };
+      return { role: msg.role as "user" | "system", content: msg.text };
     });
 
     return {

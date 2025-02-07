@@ -133,7 +133,7 @@ describe.runIf(Boolean(googleSearchApiKey && googleSearchCseId))("Bee Agent", ()
 
     userLogger.info("==================END=====================");
     expect(response.result).toBeDefined();
-    expect(response.result.getTextContent()).toMatch(/petr pavel/i);
+    expect(response.result.text).toMatch(/petr pavel/i);
 
     callbacks.verify(({ fn }) => {
       for (const [_, event, ...extra] of fn.mock.calls) {

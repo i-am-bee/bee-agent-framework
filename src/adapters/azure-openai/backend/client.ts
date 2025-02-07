@@ -18,10 +18,13 @@ import { AzureOpenAIProvider, AzureOpenAIProviderSettings, createAzure } from "@
 import { getEnv } from "@/internals/env.js";
 import { BackendClient } from "@/backend/client.js";
 
-export type AzureClientSettings = AzureOpenAIProviderSettings;
+export type AzureOpenAIClientSettings = AzureOpenAIProviderSettings;
 
-export class AzureClient extends BackendClient<AzureClientSettings, AzureOpenAIProvider> {
-  protected create(options?: AzureClientSettings): AzureOpenAIProvider {
+export class AzureOpenAIClient extends BackendClient<
+  AzureOpenAIClientSettings,
+  AzureOpenAIProvider
+> {
+  protected create(options?: AzureOpenAIClientSettings): AzureOpenAIProvider {
     return createAzure({
       ...options,
       apiKey: options?.apiKey || getEnv("AZURE_OPENAI_API_KEY"),

@@ -23,7 +23,9 @@ export type FullModelName = `${ProviderName}:${string}`;
 
 function findProviderDef(value: string): ProviderDef | null {
   return (
-    Object.values(BackendProviders).find((p) => p.name === value || p.module === value) ?? null
+    Object.values(BackendProviders).find(
+      (p) => p.name === value || p.module === value || p.aliases.includes(value),
+    ) ?? null
   );
 }
 

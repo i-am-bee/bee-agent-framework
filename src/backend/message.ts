@@ -88,19 +88,14 @@ export abstract class Message<
     }
   }
 
-  /* @deprecated */
   get text() {
-    return this.getTextContent();
+    return this.getTexts()
+      .map((c) => c.text)
+      .join("");
   }
 
   getTexts() {
     return this.content.filter(isText) as TextPart[];
-  }
-
-  getTextContent() {
-    return this.getTexts()
-      .map((c) => c.text)
-      .join("");
   }
 
   createSnapshot() {

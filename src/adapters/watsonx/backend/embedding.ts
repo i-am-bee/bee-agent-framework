@@ -37,7 +37,7 @@ export class WatsonXEmbeddingModel extends EmbeddingModel {
 
   constructor(
     public readonly modelId: string = getEnv(
-      "WATSONX_API_EMBEDDING_MODEL",
+      "WATSONX_EMBEDDING_MODEL",
       "ibm/granite-embedding-107m-multilingual",
     ),
     public readonly parameters: WatsonXEmbeddingModelParameters = {},

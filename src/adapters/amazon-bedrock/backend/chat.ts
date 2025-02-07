@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-import { BedrockClient, BedrockClientSettings } from "@/adapters/bedrock/backend/client.js";
+import {
+  AmazonBedrockClient,
+  AmazonBedrockClientSettings,
+} from "@/adapters/amazon-bedrock/backend/client.js";
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 import { getEnv } from "@/internals/env.js";
 import { AmazonBedrockProvider } from "@ai-sdk/amazon-bedrock";
 
-type BedrockParameters = Parameters<AmazonBedrockProvider["languageModel"]>;
-export type BedrockChatModelId = NonNullable<BedrockParameters[0]>;
-export type BedrockChatModelSettings = NonNullable<BedrockParameters[1]>;
+type AmazonBedrockParameters = Parameters<AmazonBedrockProvider["languageModel"]>;
+export type AmazonBedrockChatModelId = NonNullable<AmazonBedrockParameters[0]>;
+export type AmazonBedrockChatModelSettings = NonNullable<AmazonBedrockParameters[1]>;
 
-export class BedrockChatModel extends VercelChatModel {
+export class AmazonBedrockChatModel extends VercelChatModel {
   constructor(
-    modelId: BedrockChatModelId = getEnv("BEDROCK_API_CHAT_MODEL", "meta.llama3-70b-instruct-v1:0"),
-    settings: BedrockChatModelSettings = {},
-    client?: BedrockClient | BedrockClientSettings,
+    modelId: AmazonBedrockChatModelId = getEnv("AWS_CHAT_MODEL", "meta.llama3-70b-instruct-v1:0"),
+    settings: AmazonBedrockChatModelSettings = {},
+    client?: AmazonBedrockClient | AmazonBedrockClientSettings,
   ) {
-    const model = BedrockClient.ensure(client).instance.languageModel(modelId, settings);
+    const model = AmazonBedrockClient.ensure(client).instance.languageModel(modelId, settings);
     super(model);
   }
 }

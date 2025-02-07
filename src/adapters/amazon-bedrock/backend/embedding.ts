@@ -15,24 +15,24 @@
  */
 
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
-import { AzureClient, AzureClientSettings } from "@/adapters/azure/backend/client.js";
+import { AmazonBedrockProvider } from "@ai-sdk/amazon-bedrock";
 import { getEnv } from "@/internals/env.js";
-import { AzureOpenAIProvider } from "@ai-sdk/azure";
+import {
+  AmazonBedrockClient,
+  AmazonBedrockClientSettings,
+} from "@/adapters/amazon-bedrock/backend/client.js";
 
-type AzureParameters = Parameters<AzureOpenAIProvider["textEmbeddingModel"]>;
-export type AzureEmbeddingModelId = NonNullable<AzureParameters[0]>;
-export type AzureEmbeddingModelSettings = Record<string, any>;
+type Params = Parameters<AmazonBedrockProvider["embedding"]>;
+export type BedrockEmbeddingModelId = NonNullable<Params[0]>;
+export type BedrockEmbeddingSettings = NonNullable<Params[1]>;
 
-export class AzureEmbeddingModel extends VercelEmbeddingModel {
+export class BedrockEmbeddingModel extends VercelEmbeddingModel {
   constructor(
-    modelId: AzureEmbeddingModelId = getEnv(
-      "AZURE_OPENAI_API_EMBEDDING_DEPLOYMENT",
-      "text-embedding-3-small",
-    ),
-    settings: AzureEmbeddingModelSettings = {},
-    client?: AzureClient | AzureClientSettings,
+    modelId: BedrockEmbeddingModelId = getEnv("AWS_EMBEDDING_MODEL", "amazon.titan-embed-text-v1"),
+    settings: BedrockEmbeddingSettings = {},
+    client?: AmazonBedrockClient | AmazonBedrockClientSettings,
   ) {
-    const model = AzureClient.ensure(client).instance.textEmbeddingModel(modelId, settings);
+    const model = AmazonBedrockClient.ensure(client).instance.embedding(modelId, settings);
     super(model);
   }
 }

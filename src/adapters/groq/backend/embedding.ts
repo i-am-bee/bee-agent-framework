@@ -26,7 +26,7 @@ export type GroqEmbeddingModelSettings = Record<string, any>;
 
 export class GroqEmbeddingModel extends VercelEmbeddingModel {
   constructor(
-    modelId: GroqEmbeddingModelId = getEnv("GROQ_API_EMBEDDING_MODEL", ""),
+    modelId: GroqEmbeddingModelId = getEnv("GROQ_EMBEDDING_MODEL", ""),
     _settings: GroqEmbeddingModelSettings = {},
     client?: GroqClientSettings | GroqClient,
   ) {

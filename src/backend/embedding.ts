@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { embedMany } from "ai";
 import { Serializable } from "@/internals/serializable.js";
 import { Callback } from "@/emitter/types.js";
 import { FrameworkError } from "@/errors.js";
@@ -26,7 +25,11 @@ import { FullModelName, loadModel, parseModel } from "@/backend/utils.js";
 import { ProviderName } from "@/backend/constants.js";
 import { EmbeddingModelError } from "@/backend/errors.js";
 
-export type EmbeddingModelInput = Omit<Parameters<typeof embedMany<string>>[0], "model">;
+export interface EmbeddingModelInput {
+  values: string[];
+  abortSignal?: AbortSignal;
+  maxRetries?: number;
+}
 
 export interface EmbeddingModelOutput {
   values: string[];

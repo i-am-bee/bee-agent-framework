@@ -1,8 +1,8 @@
-import "dotenv/config";
-import { BedrockChatModel } from "bee-agent-framework/adapters/bedrock/backend/chat";
+import "dotenv/config.js";
 import { UserMessage } from "bee-agent-framework/backend/message";
+import { GoogleVertexChatModel } from "bee-agent-framework/adapters/google-vertex/backend/chat";
 
-const llm = new BedrockChatModel("amazon.titan-text-lite-v1");
+const llm = new GoogleVertexChatModel("gemini-1.5-flash-001");
 
 const response = await llm.create({
   messages: [new UserMessage("Hello world!")],

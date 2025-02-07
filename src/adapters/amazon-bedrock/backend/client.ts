@@ -21,14 +21,13 @@ import {
 } from "@ai-sdk/amazon-bedrock";
 import { BackendClient } from "@/backend/client.js";
 
-export type BedrockClientSettings = AmazonBedrockProviderSettings;
+export type AmazonBedrockClientSettings = AmazonBedrockProviderSettings;
 
-export class BedrockClient extends BackendClient<BedrockClientSettings, AmazonBedrockProvider> {
+export class AmazonBedrockClient extends BackendClient<
+  AmazonBedrockClientSettings,
+  AmazonBedrockProvider
+> {
   protected create(): AmazonBedrockProvider {
-    // TODO
-    // AWS_ACCESS_KEY_ID=YOUR_ACCESS_KEY_ID
-    // AWS_SECRET_ACCESS_KEY=YOUR_SECRET_ACCESS_KEY
-    // AWS_REGION=YOUR_REGION
     return createAmazonBedrock({
       ...this.settings,
     });

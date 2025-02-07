@@ -22,16 +22,18 @@ import {
 } from "@ai-sdk/google-vertex";
 import { BackendClient } from "@/backend/client.js";
 
-export type VertexAIClientSettings = GoogleVertexProviderSettings;
+export type GoogleVertexClientSettings = GoogleVertexProviderSettings;
 
-export class VertexAIClient extends BackendClient<VertexAIClientSettings, GoogleVertexProvider> {
+export class GoogleVertexClient extends BackendClient<
+  GoogleVertexClientSettings,
+  GoogleVertexProvider
+> {
   protected create(): GoogleVertexProvider {
     return createVertex({
       ...this.settings,
       project: this.settings?.project || getEnv("GOOGLE_VERTEX_PROJECT"),
       baseURL: this.settings?.baseURL || getEnv("GOOGLE_VERTEX_ENDPOINT"),
       location: this.settings?.baseURL || getEnv("GOOGLE_VERTEX_LOCATION"),
-      // TODO: handle auth options
     });
   }
 }

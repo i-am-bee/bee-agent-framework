@@ -38,8 +38,7 @@ const workflow = new Workflow({
       { prompt: null },
       { signal: ctx.signal, execution: { maxIterations: 5 } },
     );
-    const answer = response.result.getTextContent();
-    return { next: Workflow.END, update: { answer } };
+    return { next: Workflow.END, update: { answer: response.result.text } };
   })
   .addStep("langgraph", async (state, ctx) => {
     const langGraphAgent = createLangGraphReactAgent({
@@ -49,7 +48,7 @@ const workflow = new Workflow({
     const response = await langGraphAgent.invoke(
       {
         messages: state.memory.messages.map(
-          (msg) => new LangChainMessage({ role: msg.role, content: msg.getTextContent() }),
+          (msg) => new LangChainMessage({ role: msg.role, content: msg.text }),
         ),
       },
       { signal: ctx.signal, recursionLimit: 5 },

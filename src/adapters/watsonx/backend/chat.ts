@@ -45,7 +45,7 @@ export class WatsonXChatModel extends ChatModel {
   }
 
   constructor(
-    public readonly modelId = getEnv("WATSONX_API_CHAT_MODEL", "ibm/granite-3-8b-instruct"),
+    public readonly modelId = getEnv("WATSONX_CHAT_MODEL", "ibm/granite-3-8b-instruct"),
     client?: WatsonXClient | WatsonXClientSettings,
   ) {
     super();

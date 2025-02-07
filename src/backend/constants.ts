@@ -15,14 +15,22 @@
  */
 
 export const BackendProviders = {
-  OpenAI: { name: "OpenAI", module: "openai" },
-  Azure: { name: "Azure", module: "azure" },
-  WatsonX: { name: "WatsonX", module: "watsonx" },
-  Ollama: { name: "Ollama", module: "ollama" },
-  VertexAI: { name: "VertexAI", module: "vertexai" },
-  Bedrock: { name: "Bedrock", module: "bedrock" },
-  Groq: { name: "Groq", module: "groq" },
-  Dummy: { name: "Dummy", module: "dummy" },
+  OpenAI: { name: "OpenAI", module: "openai", aliases: ["openai"] as string[] },
+  Azure: { name: "Azure", module: "azure", aliases: ["microsoft", "microsoft-azure"] as string[] },
+  WatsonX: { name: "WatsonX", module: "watsonx", aliases: ["watsonx", "ibm"] as string[] },
+  Ollama: { name: "Ollama", module: "ollama", aliases: [] as string[] },
+  GoogleVertex: {
+    name: "GoogleVertex",
+    module: "google-vertex",
+    aliases: ["google", "vertex"] as string[],
+  },
+  Bedrock: {
+    name: "Bedrock",
+    module: "amazon-bedrock",
+    aliases: ["amazon", "bedrock"] as string[],
+  },
+  Groq: { name: "Groq", module: "groq", aliases: [] as string[] },
+  Dummy: { name: "Dummy", module: "dummy", aliases: [] as string[] },
 } as const;
 
 export type ProviderName = (typeof BackendProviders)[keyof typeof BackendProviders]["module"];

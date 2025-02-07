@@ -25,7 +25,7 @@ export type OllamaEmbeddingModelSettings = NonNullable<OllamaParameters[1]>;
 
 export class OllamaEmbeddingModel extends VercelEmbeddingModel {
   constructor(
-    modelId: OllamaEmbeddingModelId = getEnv("OLLAMA_API_EMBEDDING_MODEL", "nomic-embed-text"),
+    modelId: OllamaEmbeddingModelId = getEnv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text"),
     settings: OllamaEmbeddingModelSettings = {},
     client?: OllamaClient | OllamaClientSettings,
   ) {

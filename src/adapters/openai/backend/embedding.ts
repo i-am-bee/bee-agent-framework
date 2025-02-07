@@ -19,16 +19,13 @@ import { OpenAIProvider, OpenAIProviderSettings } from "@ai-sdk/openai";
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
 import { getEnv } from "@/internals/env.js";
 
-type OpenAIParameters = Parameters<OpenAIProvider["textEmbeddingModel"]>;
+type OpenAIParameters = Parameters<OpenAIProvider["embedding"]>;
 export type OpenAIEmbeddingModelId = NonNullable<OpenAIParameters[0]>;
 export type OpenAIEmbeddingModelSettings = NonNullable<OpenAIParameters[1]>;
 
 export class OpenAIEmbeddingModel extends VercelEmbeddingModel {
   constructor(
-    modelId: OpenAIEmbeddingModelId = getEnv(
-      "OPENAI_API_EMBEDDING_MODEL",
-      "text-embedding-3-small",
-    ),
+    modelId: OpenAIEmbeddingModelId = getEnv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"),
     settings: OpenAIEmbeddingModelSettings = {},
     client?: OpenAIProviderSettings | OpenAIClient,
   ) {

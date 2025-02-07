@@ -1,11 +1,8 @@
-import "dotenv/config.js";
+import { ChatModel, Message, Role } from "bee-agent-framework/backend/core";
 import { z } from "zod";
-import { Message } from "bee-agent-framework/backend/message";
-import { Role } from "bee-agent-framework/backend/message";
-import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
-const llm = new OllamaChatModel("llama3.1");
-const response = await llm.createStructure({
+const model = await ChatModel.fromName("ollama:llama3.1");
+const response = await model.createStructure({
   schema: z.union([
     z.object({
       firstName: z.string().min(1),
@@ -25,4 +22,4 @@ const response = await llm.createStructure({
     }),
   ],
 });
-console.info(response);
+console.log(response.object);

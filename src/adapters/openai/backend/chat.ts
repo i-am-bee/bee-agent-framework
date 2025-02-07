@@ -19,13 +19,13 @@ import { OpenAIClient, OpenAIClientSettings } from "@/adapters/openai/backend/cl
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
 import { getEnv } from "@/internals/env.js";
 
-type OpenAIParameters = Parameters<OpenAIProvider["languageModel"]>;
+type OpenAIParameters = Parameters<OpenAIProvider["chat"]>;
 export type OpenAIChatModelId = NonNullable<OpenAIParameters[0]>;
 export type OpenAIChatModelSettings = NonNullable<OpenAIParameters[1]>;
 
 export class OpenAIChatModel extends VercelChatModel {
   constructor(
-    modelId: OpenAIChatModelId = getEnv("OPENAI_API_CHAT_MODEL", "gpt-4o"),
+    modelId: OpenAIChatModelId = getEnv("OPENAI_CHAT_MODEL", "gpt-4o"),
     settings: OpenAIChatModelSettings = {},
     client?: OpenAIClient | OpenAIClientSettings,
   ) {

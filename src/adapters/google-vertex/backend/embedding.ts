@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
+import { GoogleVertexClient, GoogleVertexClientSettings } from "./client.js";
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
-import { AmazonBedrockProvider } from "@ai-sdk/amazon-bedrock";
 import { getEnv } from "@/internals/env.js";
-import { BedrockClient, BedrockClientSettings } from "@/adapters/bedrock/backend/client.js";
+import { GoogleVertexProvider } from "@ai-sdk/google-vertex";
 
-type Params = Parameters<AmazonBedrockProvider["embedding"]>;
-export type BedrockEmbeddingModelId = NonNullable<Params[0]>;
-export type BedrockEmbeddingSettings = NonNullable<Params[1]>;
+type GoogleVertexParameters = Parameters<GoogleVertexProvider["textEmbeddingModel"]>;
+export type GoogleVertexChatModelId = NonNullable<GoogleVertexParameters[0]>;
+export type GoogleVertexChatModelSettings = Record<string, any>;
 
-export class BedrockEmbeddingModel extends VercelEmbeddingModel {
+export class GoogleVertexEmbeddingModel extends VercelEmbeddingModel {
   constructor(
-    modelId: BedrockEmbeddingModelId = getEnv(
-      "BEDROCK_EMBEDDING_MODEL",
-      "amazon.titan-embed-text-v1",
+    modelId: GoogleVertexChatModelId = getEnv(
+      "GOOGLE_VERTEX_EMBEDDING_MODEL",
+      "text-embedding-004",
     ),
-    settings: BedrockEmbeddingSettings = {},
-    client?: BedrockClient | BedrockClientSettings,
+    _settings: GoogleVertexChatModelSettings = {},
+    client?: GoogleVertexClient | GoogleVertexClientSettings,
   ) {
-    const model = BedrockClient.ensure(client).instance.embedding(modelId, settings);
+    const model = GoogleVertexClient.ensure(client).instance.textEmbeddingModel(modelId);
     super(model);
   }
 }

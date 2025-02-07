@@ -16,20 +16,23 @@
 
 import { GoogleVertexProvider } from "@ai-sdk/google-vertex";
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
-import { VertexAIClient, VertexAIClientSettings } from "@/adapters/vertexai/backend/client.js";
+import {
+  GoogleVertexClient,
+  GoogleVertexClientSettings,
+} from "@/adapters/google-vertex/backend/client.js";
 import { getEnv } from "@/internals/env.js";
 
-type VertexAIParameters = Parameters<GoogleVertexProvider["languageModel"]>;
-export type VertexAIChatModelId = NonNullable<VertexAIParameters[0]>;
-export type VertexAIChatModelSettings = NonNullable<VertexAIParameters[1]>;
+type GoogleVertexParameters = Parameters<GoogleVertexProvider["languageModel"]>;
+export type GoogleVertexChatModelId = NonNullable<GoogleVertexParameters[0]>;
+export type GoogleVertexChatModelSettings = NonNullable<GoogleVertexParameters[1]>;
 
-export class VertexAIChatModel extends VercelChatModel {
+export class GoogleVertexChatModel extends VercelChatModel {
   constructor(
-    modelId: VertexAIChatModelId = getEnv("GOOGLE_VERTEX_API_CHAT_MODEL", "gemini-1.5-pro"),
-    settings: VertexAIChatModelSettings = {},
-    client?: VertexAIClientSettings | VertexAIClient,
+    modelId: GoogleVertexChatModelId = getEnv("GOOGLE_VERTEX_CHAT_MODEL", "gemini-1.5-pro"),
+    settings: GoogleVertexChatModelSettings = {},
+    client?: GoogleVertexClientSettings | GoogleVertexClient,
   ) {
-    const model = VertexAIClient.ensure(client).instance.languageModel(modelId, settings);
+    const model = GoogleVertexClient.ensure(client).instance.languageModel(modelId, settings);
     super(model);
   }
 }

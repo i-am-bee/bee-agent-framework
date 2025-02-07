@@ -25,9 +25,9 @@ export type GroqChatModelSettings = NonNullable<GroqParameters[1]>;
 
 export class GroqChatModel extends VercelChatModel {
   constructor(
-    modelId: GroqChatModelId = getEnv("GROQ_API_CHAT_MODEL", "gemma2-9b-it"),
+    modelId: GroqChatModelId = getEnv("GROQ_CHAT_MODEL", "gemma2-9b-it"),
     settings: GroqChatModelSettings = {},
-    client?: GroqClient | GroqClientSettings,
+    client?: GroqClientSettings | GroqClient,
   ) {
     const model = GroqClient.ensure(client).instance.languageModel(modelId, settings);
     super(model);
