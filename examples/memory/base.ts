@@ -1,21 +1,13 @@
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { Message } from "bee-agent-framework/backend/message";
+import { AssistantMessage, SystemMessage, UserMessage } from "bee-agent-framework/backend/message";
 
 const memory = new UnconstrainedMemory();
 
 // Single message
-await memory.add(
-  Message.of({
-    role: "system",
-    text: `You are a helpful assistant.`,
-  }),
-);
+await memory.add(new SystemMessage(`You are a helpful assistant.`));
 
 // Multiple messages
-await memory.addMany([
-  Message.of({ role: "user", text: `What can you do?` }),
-  Message.of({ role: "assistant", text: `Everything!` }),
-]);
+await memory.addMany([new UserMessage(`What can you do?`), new AssistantMessage(`Everything!`)]);
 
 console.info(memory.isEmpty()); // false
 console.info(memory.messages); // prints all saved messages

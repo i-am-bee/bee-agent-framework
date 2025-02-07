@@ -1,12 +1,16 @@
 import { BaseAgent, BaseAgentRunOptions } from "bee-agent-framework/agents/base";
-import { Message, SystemMessage, UserMessage } from "bee-agent-framework/backend/message";
+import {
+  AssistantMessage,
+  Message,
+  SystemMessage,
+  UserMessage,
+} from "bee-agent-framework/backend/message";
 import { Emitter } from "bee-agent-framework/emitter/emitter";
 import { GetRunContext } from "bee-agent-framework/context";
 import { z } from "zod";
 import { AgentMeta } from "bee-agent-framework/agents/types";
 import { BaseMemory } from "bee-agent-framework/memory/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { Role } from "bee-agent-framework/backend/message";
 import { ChatModel } from "bee-agent-framework/backend/chat";
 import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
@@ -68,10 +72,7 @@ export class CustomAgent extends BaseAgent<RunInput, RunOutput, RunOptions> {
       abortSignal: run.signal,
     });
 
-    const result = Message.of({
-      role: Role.ASSISTANT,
-      text: response.object.final_answer,
-    });
+    const result = new AssistantMessage(response.object.final_answer);
     await this.memory.add(result);
 
     return {

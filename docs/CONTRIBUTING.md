@@ -61,25 +61,6 @@ yarn prepare
 
 5.  **Setup environmental variables:** To run E2E Tests, you should set the following variables in your `.env` file in the repository’s root.
 
-```bash
-# At least one provider API key or an OLLAMA_BASE_URL must be defined!
-OPENAI_API_KEY=""
-GROQ_API_KEY=""
-WATSONX_API_KEY=""
-WATSONX_PROJECT_ID=""
-OLLAMA_BASE_URL=""
-AZURE_OPENAI_API_VERSION=""
-AZURE_OPENAI_DEPLOYMENT=""
-AZURE_OPENAI_API_KEY=""
-AZURE_OPENAI_API_ENDPOINT=""
-GOOGLE_APPLICATION_CREDENTIALS=""
-GCP_VERTEXAI_PROJECT=""
-GCP_VERTEXAI_LOCATION=""
-
-WATSONX_SPACE_ID="" # optional
-WATSONX_DEPLOYMENT_ID=""  # optional
-```
-
 6.  **Follow Conventional Commit Messages:** We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) to structure our commit messages. This helps maintain a clean and manageable commit history. Please use the following format:
 
 ```

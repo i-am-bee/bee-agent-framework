@@ -1,4 +1,4 @@
-import { ChatModel, Message, Role } from "bee-agent-framework/backend/core";
+import { ChatModel, UserMessage } from "bee-agent-framework/backend/core";
 import { z } from "zod";
 
 const model = await ChatModel.fromName("ollama:llama3.1");
@@ -15,11 +15,6 @@ const response = await model.createStructure({
       error: z.string(),
     }),
   ]),
-  messages: [
-    Message.of({
-      role: Role.USER,
-      text: "Generate a profile of a citizen of Europe.",
-    }),
-  ],
+  messages: [new UserMessage("Generate a profile of a citizen of Europe.")],
 });
 console.log(response.object);

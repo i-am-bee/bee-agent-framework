@@ -74,7 +74,7 @@ export abstract class Message<
 
   protected abstract fromString(input: string): T;
 
-  static of({ role, text, meta }: MessageInput) {
+  static of({ role, text, meta }: MessageInput): Message {
     if (role === "user") {
       return new UserMessage(text, meta);
     } else if (role === "assistant") {

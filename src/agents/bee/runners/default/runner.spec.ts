@@ -16,7 +16,7 @@
 
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
-import { AssistantMessage, Message, Role, UserMessage } from "@/backend/message.js";
+import { AssistantMessage, Role, UserMessage } from "@/backend/message.js";
 import { BaseMemory } from "@/memory/base.js";
 import { BeeUserPrompt } from "@/agents/bee/prompts.js";
 import { zip } from "remeda";
@@ -69,9 +69,7 @@ describe("Bee Agent Runner", () => {
     const instance = await createInstance(memory, prompt);
 
     const memory2 = await createMemory();
-    await memory2.add(
-      Message.of({ role: Role.USER, text: prompt, meta: { createdAt: new Date() } }),
-    );
+    await memory2.add(new UserMessage(prompt, { createdAt: new Date() }));
     const instance2 = await createInstance(memory2, null);
     expect(instance.memory.messages).toEqual(instance2.memory.messages);
   });
@@ -109,10 +107,7 @@ describe("Bee Agent Runner", () => {
     await instance.init({ prompt });
 
     for (const [a, b] of zip(
-      [
-        ...memory.messages.filter((msg) => msg.role === Role.USER),
-        Message.of({ role: Role.USER, text: prompt }),
-      ],
+      [...memory.messages.filter((msg) => msg.role === Role.USER), new UserMessage(prompt)],
       instance.memory.messages.filter((msg) => msg.role === Role.USER),
     )) {
       expect(template.render({ input: a.text, meta: undefined })).toStrictEqual(b.text);

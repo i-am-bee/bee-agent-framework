@@ -191,7 +191,7 @@ _Source: [examples/emitter/agentMatchers.ts](/examples/emitter/agentMatchers.ts)
 
 > [!IMPORTANT]
 >
-> The `observe` method is also supported on [`Tools`](./tools.md) and [`LLMs`](./llms.md).
+> The `observe` method is also supported on [`Tools`](./tools.md) and [`Backend`](./backend.md).
 
 > [!TIP]
 >

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Message } from "@/backend/message.js";
+import { AssistantMessage, Message, SystemMessage } from "@/backend/message.js";
 import { BaseMemory } from "@/memory/base.js";
 import { PromptTemplate } from "@/template.js";
 import { shallowCopy } from "@/serializer/utils.js";
@@ -57,12 +57,7 @@ export class SummarizeMemory extends BaseMemory {
       return [];
     }
 
-    return [
-      Message.of({
-        role: "assistant",
-        text: currentSummary,
-      }),
-    ];
+    return [new AssistantMessage(currentSummary)];
   }
 
   // eslint-disable-next-line unused-imports/no-unused-vars
@@ -73,20 +68,16 @@ export class SummarizeMemory extends BaseMemory {
   async add(message: Message, _index?: number) {
     const response = await this.llm.create({
       messages: [
-        Message.of({
-          role: "system",
-          text: this.template.render({
+        new SystemMessage(
+          this.template.render({
             summary: this.summary,
           }),
-        }),
-        Message.of({
-          role: "assistant",
-          text: `New lines of conversation:
+        ),
+        new AssistantMessage(`New lines of conversation:
 ${message.role}: ${message.text}
 
 New summary:
-`,
-        }),
+`),
       ],
     });
     this.summary = response.getTextContent();

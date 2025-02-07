@@ -35,7 +35,7 @@ import { isTruthy, last } from "remeda";
 import { LinePrefixParser, LinePrefixParserError } from "@/parsers/linePrefix.js";
 import { JSONParserField, ZodParserField } from "@/parsers/field.js";
 import { z } from "zod";
-import { Message, Role, UserMessage } from "@/backend/message.js";
+import { AssistantMessage, Role, SystemMessage, UserMessage } from "@/backend/message.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { getProp } from "@/internals/helpers/object.js";
 import { BaseMemory } from "@/memory/base.js";
@@ -77,22 +77,14 @@ export class DefaultRunner extends BaseRunner {
           // Prevent hanging on EOT
           if (error.reason === LinePrefixParserError.Reason.NoDataReceived) {
             await this.memory.add(
-              Message.of({
-                role: Role.ASSISTANT,
-                text: "\n",
-                meta: {
-                  [tempMessageKey]: true,
-                },
+              new AssistantMessage("\n", {
+                [tempMessageKey]: true,
               }),
             );
           } else {
             await this.memory.add(
-              Message.of({
-                role: Role.USER,
-                text: this.templates.schemaError.render({}),
-                meta: {
-                  [tempMessageKey]: true,
-                },
+              new UserMessage(this.templates.schemaError.render({}), {
+                [tempMessageKey]: true,
               }),
             );
           }
@@ -300,17 +292,16 @@ export class DefaultRunner extends BaseRunner {
           },
         },
         message: async () =>
-          Message.of({
-            role: Role.SYSTEM,
-            text: this.templates.system.render({
+          new SystemMessage(
+            this.templates.system.render({
               tools: await self.system.variables.tools(),
               instructions: undefined,
               createdAt: new Date().toISOString(),
             }),
-            meta: {
+            {
               createdAt: new Date(),
             },
-          }),
+          ),
       },
     };
     return self;
@@ -334,11 +325,7 @@ export class DefaultRunner extends BaseRunner {
                 },
               });
 
-          return Message.of({
-            role: Role.USER,
-            text,
-            meta: message.meta,
-          });
+          return new UserMessage(text, message.meta);
         }
         return message;
       });
