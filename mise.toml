@@ -15,7 +15,7 @@ python.uv_venv_auto = true
 [tasks."prepare:ensure-submodules"]
 hide = true
 dir = "{{config_root}}"
-run = "git submodule init"
+run = "git submodule update --init"
 sources = [".gitmodules"]
 outputs = { auto = true }
 
