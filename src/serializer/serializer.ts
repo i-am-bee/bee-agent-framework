@@ -50,7 +50,7 @@ import { hasMinLength } from "@/internals/helpers/array.js";
 export interface SerializeFactory<A = unknown, B = unknown> {
   ref: ClassConstructor<A> | NamedFunction<A>;
   createEmpty?: () => A;
-  updateInstance?: (instance: A, update: A) => void;
+  updateInstance?: (instance: A, update: A) => void | Promise<void>;
   toPlain: (value: A) => B | Promise<B>;
   fromPlain: (value: B, ref: ClassConstructor<A> | NamedFunction<A>) => A | Promise<A>;
 }
@@ -349,7 +349,7 @@ Serializer.register(Task<any>, {
     return task;
   },
   createEmpty: () => new Task(),
-  updateInstance: (instance, value) => {
+  updateInstance: async (instance, value) => {
     instance.resolve(value);
   },
 });

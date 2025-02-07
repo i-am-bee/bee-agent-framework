@@ -30,6 +30,7 @@ import { customsearch_v1 } from "@googleapis/customsearch";
 import { LangChainTool } from "@/adapters/langchain/tools.js";
 import { Client as esClient } from "@elastic/elasticsearch";
 import { VercelChatModel } from "@/adapters/vercel/backend/chat.js";
+import { isWeakKey } from "@/internals/helpers/weakRef.js";
 
 interface CallbackOptions<T> {
   required?: boolean;
@@ -73,7 +74,15 @@ export function verifyDeserialization(
   parent?: any,
   path: string[] = [],
   ignoredPaths: string[] = [],
+  seen = new WeakSet(),
 ) {
+  if (isWeakKey(ref)) {
+    if (seen.has(ref)) {
+      return;
+    }
+    seen.add(ref);
+  }
+
   if (R.isPromise(ref) || R.isPromise(deserialized)) {
     throw new TypeError('Value passed to "verifyDeserialization" is promise (forgotten await)!');
   }
@@ -88,7 +97,7 @@ export function verifyDeserialization(
       new Set(
         Object.entries(instance)
           .filter(([key, value]) => !verifyDeserialization.isIgnored(key, value, instance))
-          .map(([key, _]) => key)
+          .map(([key, _]) => String(key))
           .sort(),
       );
 
@@ -96,7 +105,7 @@ export function verifyDeserialization(
     const keysB = getNonIgnoredKeys(deserialized);
     expect(keysB).toStrictEqual(refKeys);
 
-    for (const key of refKeys.values()) {
+    for (const key of Array.from(refKeys.values())) {
       const fullPath = path.concat(key).join(".");
       if (ignoredPaths.includes(fullPath)) {
         continue;
@@ -112,7 +121,7 @@ export function verifyDeserialization(
         target = toJsonSchema(target);
       }
       Serializer.findFactory(target);
-      verifyDeserialization(value, target, parent, path.concat(key), ignoredPaths);
+      verifyDeserialization(value, target, parent, path.concat(key), ignoredPaths, seen);
     }
   } else {
     expect(deserialized).toStrictEqual(ref);

@@ -54,7 +54,7 @@ export class RefPlaceholder<T = unknown> {
       return finalInstance;
     }
 
-    this.factory.updateInstance!(this.partialResult, finalInstance);
+    await this.factory.updateInstance!(this.partialResult, finalInstance);
     return this.partialResult;
   }
 }
