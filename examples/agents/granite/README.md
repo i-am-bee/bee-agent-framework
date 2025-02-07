@@ -53,7 +53,7 @@ The [granite_bee](/examples/agents/granite/granite_bee.ts) example agent is set 
 
       ```.env
       LLM_BACKEND=ollama
-      OLLAMA_HOST={http://0.0.0.0:11434}
+      OLLAMA_BASE_URL={http://0.0.0.0:11434}
       ```
 
 1. Run the [granite_bee](/examples/agents/granite/granite_bee.ts) agent:

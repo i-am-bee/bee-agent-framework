@@ -91,7 +91,7 @@ export abstract class BaseAgent<
   }
 
   createSnapshot() {
-    return { isRunning: false };
+    return { isRunning: false, emitter: this.emitter };
   }
 
   loadSnapshot(snapshot: ReturnType<typeof this.createSnapshot>) {

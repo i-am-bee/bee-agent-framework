@@ -196,6 +196,7 @@ export abstract class VercelChatModel<
       ...super.createSnapshot(),
       providerId: this.providerId,
       modelId: this.modelId,
+      supportsToolStreaming: this.supportsToolStreaming,
     };
   }
 

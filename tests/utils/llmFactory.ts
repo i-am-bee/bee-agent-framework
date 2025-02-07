@@ -32,7 +32,7 @@ export function createChatLLM(): ChatModel {
     return new WatsonXChatModel("meta-llama/llama-3-3-70b-instruct");
   } else if (process.env.GROQ_API_KEY) {
     return new GroqChatModel(`llama-3.3-70b-versatile`);
-  } else if (process.env.OLLAMA_HOST) {
+  } else if (process.env.OLLAMA_BASE_URL) {
     // the undici definition of RequestInit does not extend the default
     // fetch RequestInit so we can't use its type directly. Define
     // and interface that adds the field we need to the default fetch
@@ -45,7 +45,7 @@ export function createChatLLM(): ChatModel {
       "llama3.1:8b",
       {},
       {
-        baseURL: process.env.OLLAMA_HOST,
+        baseURL: process.env.OLLAMA_BASE_URL,
         fetch: (input, init?) => {
           const someInit = init || {};
           const requestInit: UndiciRequestInit = {

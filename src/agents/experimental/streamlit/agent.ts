@@ -108,7 +108,7 @@ export class StreamlitAgent extends BaseAgent<StreamlitRunInput, StreamlitRunOut
         abortSignal: run.signal,
       })
       .observe((emitter) => {
-        emitter.on("update", async ({ value: chunk }) => {
+        emitter.on("newToken", async ({ value: chunk }) => {
           const delta = chunk.getTextContent();
           if (delta) {
             content += delta;

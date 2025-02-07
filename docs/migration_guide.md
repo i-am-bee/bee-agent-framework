@@ -1,40 +1,135 @@
 # Migration Guide
 
-## 0.0.X -> 0.0.1 (2025-02-07)
+## 0.0.X -> 0.1.0 (2025-02-07)
 
-### Notes
+### Summary
 
-- Tokenization has been removed
-- IBMvLLM adapter has been removed
-- Non-chat LLMs have been removed
-- `ChatLLM` class were replaced by `ChatModel` class.
-- `BaseMessage` class were replaced by `Message` and its subtypes (`UserMessage`, `AssistantMessage`, `SystemMessage`, `ToolMessage`).
-- `TokenMemory` no longer uses `LLM` instance to infer `maxTokens`, user needs to that manually (if needed).
+- Tokenization has been removed.
+- Non-chat LLMs have been removed.
+- `ChatLLM` class was replaced by `ChatModel` class and embedding functionality has been replaced by `EmbeddingModel` class.
+- `BaseMessage` class was replaced by `Message` and its subtypes (`UserMessage`, `AssistantMessage`, `SystemMessage`, `ToolMessage`).
+- `TokenMemory` no longer uses `LLM` instance to infer `maxTokens`, user needs to do that manually (if needed).
+- The`IBMvLLM` adapter has been removed.
 
-### LLMs
+### Models
 
-#### Old
-
-```ts
-
-```
-
-#### New
+#### Before
 
 ```ts
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 
+const model = new OllamaChatLLM({
+  modelId: "llama3.1",
+});
+
+const response = await model.generate(
+  [
+    BaseMessage.of({
+      role: "user",
+      text: "Hello Bee!",
+    }),
+  ],
+  {
+    stream: true,
+  },
+);
+console.log(response.getTextContent());
 ```
+
+#### Now
+
+```ts
+import { ChatModel, UserMessage } from "bee-agent-framework/backend/core";
+
+const model = await ChatModel.fromName("ollama:llama3.1");
+const response = await model.create({
+  messages: [new UserMessage("Hello Bee!")],
+});
+console.log(response.getTextContent());
+```
+
+or you can initiate the provider directly
+
+```ts
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/chat";
+import { UserMessage } from "bee-agent-framework/backend/core";
+
+const model = new OllamaChatModel("llama3.1");
+const response = await model.create({
+  messages: [new UserMessage("Hello Bee!")],
+});
+console.log(response.getTextContent());
+```
+
+More examples can be found in [Backend Documentation Page](/docs/backend.md).
+
+### Messages
+
+The `BaseMessage` class was replaced by `Message` and its subtypes (`UserMessage`, `AssistantMessage`, `SystemMessage`, `ToolMessage`).
+
+#### Before
+
+```ts
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+const a = BaseMessage.of({ role: "user", text: "hello", meta: { createdAt: new Date() } });
+```
+
+#### Now
+
+```ts
+import { Message } from "bee-agent-framework/backend/core";
+
+const a = Message.of({ role: "user", text: "Hello", meta: { createdAt: new Date() } });
+```
+
+The new version supports more complex content types.
+
+```ts
+import { UserMessage } from "bee-agent-framework/backend/core";
+
+// using a factory function
+const msg = new UserMessage({
+  type: "file",
+  data: await fs.promises.readFile("document.txt"),
+  mimeType: "text/plain",
+});
+```
+
+More examples can be found in [Backend Documentation Page](/docs/backend.md).
 
 ### Serialization
 
-Following methods are now asynchronous (they were synchronous).
+The following methods present in `Serializable` class are now asynchronous.
 
-#### Serializable objects
+- `serialize`
+- `deserialize`
+- `createSnapshot`
+- `loadSnapshot`
 
-- `serialize()`
-- `deserialize()`
-- `createSnapshot()`
-- `loadSnapshot()`
+The same applies to the following static methods.
 
-- `Serializer.fromSerialized()`
-- `Serializer.fromSnapshot()`
+- `fromSerialized`
+- `fromSnapshot`
+
+#### Before
+
+```ts
+import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
+
+const a = new TokenMemory();
+const json = a.serialize();
+
+const b = TokenMemory.fromSerialized(json);
+```
+
+#### Now
+
+```ts
+import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
+
+const a = new TokenMemory();
+const json = await a.serialize();
+
+const b = await TokenMemory.fromSerialized(json);
+```

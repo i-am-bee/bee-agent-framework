@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
 import { StreamlitAgent } from "./agent.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
+import { verifyDeserialization } from "@tests/e2e/utils.js";
 
 describe("Streamlit agent", () => {
   it("Serializes", async () => {

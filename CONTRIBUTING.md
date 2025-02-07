@@ -62,12 +62,12 @@ yarn prepare
 5.  **Setup environmental variables:** To run E2E Tests, you should set the following variables in your `.env` file in the repository’s root.
 
 ```bash
-# At least one provider API key or an OLLAMA_HOST must be defined!
+# At least one provider API key or an OLLAMA_BASE_URL must be defined!
 OPENAI_API_KEY=""
 GROQ_API_KEY=""
 WATSONX_API_KEY=""
 WATSONX_PROJECT_ID=""
-OLLAMA_HOST=""
+OLLAMA_BASE_URL=""
 AZURE_OPENAI_API_VERSION=""
 AZURE_OPENAI_DEPLOYMENT=""
 AZURE_OPENAI_API_KEY=""

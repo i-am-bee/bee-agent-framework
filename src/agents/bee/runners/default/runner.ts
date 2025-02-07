@@ -130,7 +130,7 @@ export class DefaultRunner extends BaseRunner {
               });
             });
 
-            llmEmitter.on("update", async ({ value, callbacks }) => {
+            llmEmitter.on("newToken", async ({ value, callbacks }) => {
               if (parser.isDone) {
                 callbacks.abort();
                 return;

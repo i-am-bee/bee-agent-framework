@@ -13,7 +13,7 @@
 
 ## Latest updates
 
-- 🚀 **2025-02-07**: Introduce the [Backend](/docs/backend.md) module to simplify working with AI services (chat, embedding, ...).
+- 🚀 **2025-02-07**: Introduced [Backend](/docs/backend.md) module to simplify working with AI services (chat, embedding). See [migration guide](/docs/migration_guide.md).
 - 🧠 **2025-01-28**: Added support for [DeepSeek R1](https://api-docs.deepseek.com/news/news250120), check out the [Competitive Analysis Workflow example](https://github.com/i-am-bee/bee-agent-framework/tree/main/examples/workflows/competitive-analysis)
 - 🚀 **2025-01-09**:
   - Introduced [Workflows](/docs/workflows.md), a way of building multi-agent systems.

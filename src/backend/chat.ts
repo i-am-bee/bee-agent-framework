@@ -116,7 +116,7 @@ export interface ChatModelUsage {
 }
 
 export interface ChatModelEvents {
-  update?: Callback<{ value: ChatModelOutput; callbacks: { abort: () => void } }>;
+  newToken?: Callback<{ value: ChatModelOutput; callbacks: { abort: () => void } }>;
   success?: Callback<{ value: ChatModelOutput }>;
   start?: Callback<{ input: ChatModelInput }>;
   error?: Callback<{ input: ChatModelInput; error: FrameworkError }>;
@@ -164,7 +164,7 @@ export abstract class ChatModel extends Serializable {
           const controller = new AbortController();
           for await (const value of generator) {
             chunks.push(value);
-            await run.emitter.emit("update", {
+            await run.emitter.emit("newToken", {
               value,
               callbacks: { abort: () => controller.abort() },
             });
@@ -301,7 +301,7 @@ Validation Errors: {{errors}}`,
   }
 
   createSnapshot() {
-    return { cache: this.cache, emitter: this.emitter, settings: shallowCopy(this.parameters) };
+    return { cache: this.cache, emitter: this.emitter, parameters: shallowCopy(this.parameters) };
   }
 
   destroy() {
