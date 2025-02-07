@@ -1,3 +1,2 @@
 [env]
-BEEAI_HOST = "http://localhost:8333"
-VITE_MCP_CLIENT_SERVER_URL = "{{env.BEEAI_HOST}}/mcp/sse"
+BEEAI_HOST = "http://localhost:8333" # TODO: unused
