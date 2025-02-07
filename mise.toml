@@ -18,11 +18,18 @@ run = "git submodule init"
 sources = [".gitmodules"]
 outputs = { auto = true }
 
+[tasks."prepare:create-mise-local-toml"]
+hide = true
+dir = "{{config_root}}"
+run = "test -f mise.local.toml || cp mise.local.toml-example mise.local.toml"
+sources = ["mise.local.toml-example"]
+outputs = { auto = true }
+
 ## dependencies
 
 [tasks."dependencies:nodejs"]
 hide = true
-depends = ["prepare:*"]
+depends = ["prepare:ensure-submodules"]
 dir = "{{config_root}}"
 run = "pnpm install"
 sources = ["pnpm-lock.yaml", "pnpm-workspace.yaml", "**/package.json"]
@@ -30,11 +37,17 @@ outputs = { auto = true }
 
 [tasks."dependencies:python"]
 hide = true
-depends = ["prepare:*"]
+depends = ["prepare:ensure-submodules"]
 dir = "{{config_root}}"
 run = "uv sync"
 sources = ["uv.lock", "pyproject.toml", "**/pyproject.toml"]
 outputs = { auto = true }
+
+## setup
+
+[tasks."setup"]
+description = "Set-up repo and install dependencies"
+depends = ["prepare:*", "dependencies:*"]
 
 ## build
 

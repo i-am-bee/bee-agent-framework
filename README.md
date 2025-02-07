@@ -5,7 +5,12 @@ This project uses [Mise-en-place](https://mise.jdx.dev/). You **don't need to in
 ```sh
 brew install mise  # more ways to install: https://mise.jdx.dev/installing-mise.html
 mise install
+mise setup
 ```
+
+## Configuration
+
+This project is configurable by environment variables. Edit them in `mise.local.toml` in the project root (run `mise setup` if you don't see it).
 
 ## Server
 
