@@ -81,31 +81,31 @@ outputs = { auto = true }
 [tasks."run:beeai-ui"]
 description = "Run the Vite development server for `beeai-ui` -- NOTE: you also need to have `beeai-server` running for the backend"
 depends = ["dependencies:nodejs"]
-dir = "{{config_root}}/apps/beeai-ui"
+dir = "{{cwd}}"
 run = "pnpm --filter=@beeai/ui dev"
 
 [tasks."run:beeai-cli"]
 description = "Run the `beeai-cli`, use double dash to pass extra args, like `mise run:beeai-cli -- provider list`"
 depends = ["dependencies:python", "build:beeai-ui"]
-dir = "{{config_root}}/apps/beeai-cli"
+dir = "{{cwd}}"
 run = "uv run beeai"
 
 [tasks."run:beeai-server"]
 description = "Run the `beeai-server`, including the UI in static mode"
 depends = ["dependencies:python", "build:beeai-ui"]
-dir = "{{config_root}}/apps/beeai-server"
+dir = "{{cwd}}"
 run = "uv run beeai-server"
 
 [tasks."run:example:mcp-simple-agent"]
 description = "Run an example MCP agent provider"
 depends = ["dependencies:python"]
-dir = "{{config_root}}/examples/simple-agent"
+dir = "{{cwd}}"
 run = "uv run mcp-simple-agent"
 
 [tasks."run:example:mcp-simple-tool"]
 description = "Run an example MCP tool provider"
 depends = ["dependencies:python"]
-dir = "{{config_root}}/examples/simple-tool"
+dir = "{{cwd}}"
 run = "uv run mcp-simple-tool"
 
 ## publish
