@@ -5,6 +5,20 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
+"@agentcommunicationprotocol/sdk@npm:0.0.2":
+  version: 0.0.2
+  resolution: "@agentcommunicationprotocol/sdk@npm:0.0.2"
+  dependencies:
+    "@opentelemetry/api": "npm:^1.9.0"
+    content-type: "npm:^1.0.5"
+    eventsource: "npm:^3.0.2"
+    raw-body: "npm:^3.0.0"
+    zod: "npm:^3.23.8"
+    zod-to-json-schema: "npm:^3.24.1"
+  checksum: 10c0/20c1650e79f56b1571d7fc3e715284679fd1dd30a5e3cd44ff0575cdefa33f9422cc4bf93922d5f0e18cbeb1cea39bf218b8c364de9e945d10470fb916f54ae5
+  languageName: node
+  linkType: hard
+
 "@ai-sdk/amazon-bedrock@npm:^1.1.5":
   version: 1.1.5
   resolution: "@ai-sdk/amazon-bedrock@npm:1.1.5"
@@ -5067,6 +5081,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "bee-agent-framework@workspace:."
   dependencies:
+    "@agentcommunicationprotocol/sdk": "npm:0.0.2"
     "@ai-sdk/amazon-bedrock": "npm:^1.1.5"
     "@ai-sdk/azure": "npm:^1.1.2"
     "@ai-sdk/google-vertex": "npm:^2.1.6"
@@ -5206,6 +5221,8 @@ __metadata:
       optional: true
     yaml:
       optional: true
+  bin:
+    acp-server: ./scripts/acpServer.ts
   languageName: unknown
   linkType: soft
 
@@ -7399,6 +7416,15 @@ __metadata:
   version: 3.0.0
   resolution: "eventsource-parser@npm:3.0.0"
   checksum: 10c0/74ded91ff93330bd95243bd5a8fc61c805ea1843dd7ffac8e8ac36287fff419a7eec21b2fadf50d4e554ce0506de72f47928513e3c5b886fa4613fd49ef0024f
+  languageName: node
+  linkType: hard
+
+"eventsource@npm:^3.0.2":
+  version: 3.0.5
+  resolution: "eventsource@npm:3.0.5"
+  dependencies:
+    eventsource-parser: "npm:^3.0.0"
+  checksum: 10c0/0283045a70b7ab7501fc290e60ee5ebd6e24648e0f0a6d6a1c1bbb7a421971e8140b85d6239d08c360e0a0b196205ca86b4ff7f9efe3c06877ba628136856489
   languageName: node
   linkType: hard
 
