@@ -4,7 +4,7 @@ import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
 import { UserMessage } from "bee-agent-framework/backend/message";
-import { WatsonXChatModel } from "bee-agent-framework/adapters/watsonx/backend/chat";
+import { WatsonxChatModel } from "bee-agent-framework/adapters/watsonx/backend/chat";
 
 const workflow = new AgentWorkflow();
 
@@ -12,14 +12,14 @@ workflow.addAgent({
   name: "Researcher",
   instructions: "You are a researcher assistant. Respond only if you can provide a useful answer.",
   tools: [new WikipediaTool()],
-  llm: new WatsonXChatModel("meta-llama/llama-3-3-70b-instruct"),
+  llm: new WatsonxChatModel("meta-llama/llama-3-3-70b-instruct"),
 });
 
 workflow.addAgent({
   name: "WeatherForecaster",
   instructions: "You are a weather assistant. Respond only if you can provide a useful answer.",
   tools: [new OpenMeteoTool()],
-  llm: new WatsonXChatModel("meta-llama/llama-3-3-70b-instruct"),
+  llm: new WatsonxChatModel("meta-llama/llama-3-3-70b-instruct"),
   execution: { maxIterations: 3 },
 });
 
@@ -27,7 +27,7 @@ workflow.addAgent({
   name: "Solver",
   instructions:
     "Your task is to provide the most useful final answer based on the assistants' responses which all are relevant. Ignore those where assistant do not know.",
-  llm: new WatsonXChatModel("meta-llama/llama-3-3-70b-instruct"),
+  llm: new WatsonxChatModel("meta-llama/llama-3-3-70b-instruct"),
 });
 
 const memory = new UnconstrainedMemory();

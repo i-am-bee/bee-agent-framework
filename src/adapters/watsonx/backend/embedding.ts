@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { WatsonXClient, WatsonXClientSettings } from "@/adapters/watsonx/backend/client.js";
+import { WatsonxClient, WatsonxClientSettings } from "@/adapters/watsonx/backend/client.js";
 import {
   EmbeddingModel,
   EmbeddingModelInput,
@@ -25,10 +25,10 @@ import { EmbeddingParameters as WXEmbeddingParameters } from "@ibm-cloud/watsonx
 import { Emitter } from "@/emitter/emitter.js";
 import { getEnv } from "@/internals/env.js";
 
-export type WatsonXEmbeddingModelParameters = WXEmbeddingParameters;
+export type WatsonxEmbeddingModelParameters = WXEmbeddingParameters;
 
-export class WatsonXEmbeddingModel extends EmbeddingModel {
-  protected readonly client: WatsonXClient;
+export class WatsonxEmbeddingModel extends EmbeddingModel {
+  protected readonly client: WatsonxClient;
   public readonly emitter: Emitter<EmbeddingModelEvents>;
 
   get providerId() {
@@ -40,11 +40,11 @@ export class WatsonXEmbeddingModel extends EmbeddingModel {
       "WATSONX_EMBEDDING_MODEL",
       "ibm/granite-embedding-107m-multilingual",
     ),
-    public readonly parameters: WatsonXEmbeddingModelParameters = {},
-    client?: WatsonXClient | WatsonXClientSettings,
+    public readonly parameters: WatsonxEmbeddingModelParameters = {},
+    client?: WatsonxClient | WatsonxClientSettings,
   ) {
     super();
-    this.client = WatsonXClient.ensure(client);
+    this.client = WatsonxClient.ensure(client);
     this.emitter = Emitter.root.child({
       namespace: ["backend", "watsonx", "embedding"],
       creator: this,

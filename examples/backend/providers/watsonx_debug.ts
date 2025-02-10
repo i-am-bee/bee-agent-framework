@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { UserMessage } from "bee-agent-framework/backend/message";
-import { WatsonXChatModel } from "bee-agent-framework/adapters/watsonx/backend/chat";
+import { WatsonxChatModel } from "bee-agent-framework/adapters/watsonx/backend/chat";
 
-const chatLLM = new WatsonXChatModel("meta-llama/llama-3-1-70b-instruct");
+const chatLLM = new WatsonxChatModel("meta-llama/llama-3-1-70b-instruct");
 
 // Log every request
 chatLLM.emitter.match("*", async (data, event) => {

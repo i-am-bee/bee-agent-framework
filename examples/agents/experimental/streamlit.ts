@@ -3,9 +3,9 @@ import { FrameworkError } from "bee-agent-framework/errors";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { StreamlitAgent } from "bee-agent-framework/agents/experimental/streamlit/agent";
-import { WatsonXChatModel } from "bee-agent-framework/adapters/watsonx/backend/chat";
+import { WatsonxChatModel } from "bee-agent-framework/adapters/watsonx/backend/chat";
 
-const llm = new WatsonXChatModel("meta-llama/llama-3-3-70b-instruct");
+const llm = new WatsonxChatModel("meta-llama/llama-3-3-70b-instruct");
 
 const agent = new StreamlitAgent({
   llm,

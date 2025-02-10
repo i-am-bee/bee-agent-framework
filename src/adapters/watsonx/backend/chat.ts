@@ -15,7 +15,7 @@
  */
 
 import { ChatModel, ChatModelEmitter, ChatModelInput, ChatModelOutput } from "@/backend/chat.js";
-import { WatsonXClient, WatsonXClientSettings } from "@/adapters/watsonx/backend/client.js";
+import { WatsonxClient, WatsonxClientSettings } from "@/adapters/watsonx/backend/client.js";
 import { findLast, isEmpty, isTruthy } from "remeda";
 import WatsonxAiMlVml_v1, {
   TextChatMessages,
@@ -33,8 +33,8 @@ import Type = WatsonxAiMlVml_v1.TextChatResponseFormat.Constants.Type;
 import { parseBrokenJson } from "@/internals/helpers/schema.js";
 import { getEnv } from "@/internals/env.js";
 
-export class WatsonXChatModel extends ChatModel {
-  protected readonly client: WatsonXClient;
+export class WatsonxChatModel extends ChatModel {
+  protected readonly client: WatsonxClient;
   public readonly emitter: ChatModelEmitter = Emitter.root.child({
     namespace: ["backend", "watsonx", "chat"],
     creator: this,
@@ -46,10 +46,10 @@ export class WatsonXChatModel extends ChatModel {
 
   constructor(
     public readonly modelId = getEnv("WATSONX_CHAT_MODEL", "ibm/granite-3-8b-instruct"),
-    client?: WatsonXClient | WatsonXClientSettings,
+    client?: WatsonxClient | WatsonxClientSettings,
   ) {
     super();
-    this.client = WatsonXClient.ensure(client);
+    this.client = WatsonxClient.ensure(client);
   }
 
   protected async _create(input: ChatModelInput) {

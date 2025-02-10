@@ -19,7 +19,7 @@ import { getEnv } from "@/internals/env.js";
 import { IamAuthenticator, UserOptions } from "ibm-cloud-sdk-core";
 import { BackendClient } from "@/backend/client.js";
 
-export interface WatsonXClientSettings extends Pick<UserOptions, "authenticator" | "version"> {
+export interface WatsonxClientSettings extends Pick<UserOptions, "authenticator" | "version"> {
   spaceId?: string;
   baseUrl?: string;
   region?: string;
@@ -27,8 +27,8 @@ export interface WatsonXClientSettings extends Pick<UserOptions, "authenticator"
   apiKey?: string;
 }
 
-export class WatsonXClient extends BackendClient<WatsonXClientSettings, WatsonXAI> {
-  constructor(settings: WatsonXClientSettings) {
+export class WatsonxClient extends BackendClient<WatsonxClientSettings, WatsonXAI> {
+  constructor(settings: WatsonxClientSettings) {
     const region = settings?.region || getEnv("WATSONX_REGION");
     const baseUrl =
       settings?.baseUrl || getEnv("WATSONX_BASE_URL") || `https://${region}.ml.cloud.ibm.com`;
@@ -53,7 +53,7 @@ export class WatsonXClient extends BackendClient<WatsonXClientSettings, WatsonXA
     return this.settings.projectId;
   }
 
-  protected create(): WatsonXAI {
+  protected create() {
     return WatsonXAI.newInstance({
       version: this.settings.version,
       serviceUrl: this.settings.baseUrl,

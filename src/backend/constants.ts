@@ -17,7 +17,7 @@
 export const BackendProviders = {
   OpenAI: { name: "OpenAI", module: "openai", aliases: ["openai"] as string[] },
   Azure: { name: "Azure", module: "azure", aliases: ["microsoft", "microsoft-azure"] as string[] },
-  WatsonX: { name: "WatsonX", module: "watsonx", aliases: ["watsonx", "ibm"] as string[] },
+  Watsonx: { name: "Watsonx", module: "watsonx", aliases: ["watsonx", "ibm"] as string[] },
   Ollama: { name: "Ollama", module: "ollama", aliases: [] as string[] },
   GoogleVertex: {
     name: "GoogleVertex",

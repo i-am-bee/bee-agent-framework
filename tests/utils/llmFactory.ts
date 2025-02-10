@@ -18,7 +18,7 @@ import process from "node:process";
 import { Agent, Dispatcher } from "undici";
 import { OpenAIChatModel } from "@/adapters/openai/backend/chat.js";
 import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
-import { WatsonXChatModel } from "@/adapters/watsonx/backend/chat.js";
+import { WatsonxChatModel } from "@/adapters/watsonx/backend/chat.js";
 import { ChatModel } from "@/backend/chat.js";
 import { GroqChatModel } from "@/adapters/groq/backend/chat.js";
 import { AzureOpenAIChatModel } from "@/adapters/azure-openai/backend/chat.js";
@@ -29,7 +29,7 @@ export function createChatLLM(): ChatModel {
   } else if (process.env.AZURE_OPENAI_API_KEY) {
     return new AzureOpenAIChatModel("gpt-4o");
   } else if (process.env.WATSONX_API_KEY && process.env.WATSONX_PROJECT_ID) {
-    return new WatsonXChatModel("meta-llama/llama-3-3-70b-instruct");
+    return new WatsonxChatModel("meta-llama/llama-3-3-70b-instruct");
   } else if (process.env.GROQ_API_KEY) {
     return new GroqChatModel(`llama-3.3-70b-versatile`);
   } else if (process.env.OLLAMA_BASE_URL) {
