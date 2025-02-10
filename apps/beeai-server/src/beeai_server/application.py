@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from fastapi.staticfiles import StaticFiles
 from kink import di
 
+
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
@@ -15,7 +16,7 @@ configure_logging()
 logger = logging.getLogger(__name__)
 
 
-def register_exception_handlers(app):
+def register_exception_handlers(app: "FastAPI"):
     from fastapi import HTTPException
     from fastapi.exception_handlers import http_exception_handler
     from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
@@ -27,6 +28,7 @@ def register_exception_handlers(app):
         This is not the beset security practice as it can reveal details about the internal workings of this service,
         but this is an open-source service anyway, so the risk is acceptable
         """
+        logger.error("Error during HTTP request: %s", exc)
         return await http_exception_handler(
             request, HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
         )

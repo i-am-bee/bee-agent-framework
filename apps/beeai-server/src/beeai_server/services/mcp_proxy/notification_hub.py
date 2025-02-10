@@ -7,6 +7,7 @@ from typing import Callable, Coroutine, TYPE_CHECKING
 import anyio
 from anyio.abc import TaskGroup
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
+from mcp.types import AgentRunProgressNotification
 
 from beeai_server.domain.model import Provider
 from beeai_server.services.mcp_proxy.constants import NotificationStreamType
@@ -62,7 +63,7 @@ class NotificationHub:
             try:
                 match streams:
                     case NotificationStreamType.PROGRESS:
-                        if not isinstance(notification, ProgressNotification):
+                        if not isinstance(notification, (ProgressNotification, AgentRunProgressNotification)):
                             return
                         if not (request_context.meta and request_context.meta.progressToken):
                             logger.warning("Could not dispatch progress notification, missing progress Token")
@@ -71,7 +72,7 @@ class NotificationHub:
                         await session.send_notification(notification)
 
                     case NotificationStreamType.BROADCAST:
-                        if isinstance(notification, ProgressNotification):
+                        if isinstance(notification, (ProgressNotification, AgentRunProgressNotification)):
                             return
                         notification.model_extra.pop("jsonrpc", None)
                         await session.send_notification(notification)

@@ -18,10 +18,12 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
 ]
-dependencies = ["anyio>=4.5", "click>=8.1.0", "httpx>=0.27", "mcp"]
-
-[tool.uv.sources]
-mcp = { workspace = true }
+dependencies = [
+    "agentcommunicationprotocol>=0.0.4",
+    "anyio>=4.5",
+    "click>=8.1.0",
+    "httpx>=0.27",
+]
 
 [project.scripts]
 mcp-simple-tool = "mcp_simple_tool.server:main"

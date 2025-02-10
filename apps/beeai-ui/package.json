@@ -11,9 +11,9 @@
     "clean": "rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
+    "@agentcommunicationprotocol/sdk": "^0.0.2",
     "@carbon/react": "^1.75.0",
     "@carbon/styles": "^1.74.0",
-    "@modelcontextprotocol/sdk": "workspace:",
     "@tanstack/react-query": "^5.66.0",
     "clsx": "^2.1.1",
     "react": "^19.0.0",

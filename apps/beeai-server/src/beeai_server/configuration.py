@@ -2,16 +2,22 @@ import logging
 from functools import cache
 from pathlib import Path
 
-from pydantic import BaseModel, field_validator, ValidationError
+from pydantic import BaseModel, field_validator, ValidationError, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class LoggingConfiguration(BaseModel):
     level: int = logging.INFO
-    level_flows: int = logging.INFO
+    level_uvicorn: int = Field(logging.FATAL, validate_default=True)
 
-    @field_validator("level", "level_flows", mode="before")
-    def validate_level(cls, v: str | int):
+    @model_validator(mode="after")
+    def level_uvicorn_validator(self):
+        if self.level == logging.DEBUG:
+            self.level_uvicorn = logging.WARNING
+        return self
+
+    @field_validator("level", "level_uvicorn", mode="before")
+    def validate_level(cls, v: str | int | None):
         return v if isinstance(v, int) else logging.getLevelNamesMapping()[v]
 
 

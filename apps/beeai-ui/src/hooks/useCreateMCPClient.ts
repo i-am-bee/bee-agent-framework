@@ -1,5 +1,5 @@
-import { Client as MCPClient } from '@modelcontextprotocol/sdk/client/index.js';
-import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
+import { Client as MCPClient } from '@agentcommunicationprotocol/sdk/client/index.js';
+import { SSEClientTransport } from '@agentcommunicationprotocol/sdk/client/sse.js';
 import { useEffect, useState } from 'react';
 
 export function useCreateMCPClient(config: { serverUrl: string }) {

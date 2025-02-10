@@ -1,7 +1,0 @@
-[submodule "packages/mcp-python-sdk"]
-	path = packages/mcp-python-sdk
-	url = ../mcp-python-sdk
-
-[submodule "packages/mcp-typescript-sdk"]
-	path = packages/mcp-typescript-sdk
-	url = ../acp-typescript-sdk

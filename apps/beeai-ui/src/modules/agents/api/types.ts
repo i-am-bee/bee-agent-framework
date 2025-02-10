@@ -1,3 +1,3 @@
-import { ListAgentsRequest } from '@modelcontextprotocol/sdk/types.js';
+import { ListAgentsRequest } from '@agentcommunicationprotocol/sdk/types.js';
 
 export type ListAgentsParams = ListAgentsRequest['params'];

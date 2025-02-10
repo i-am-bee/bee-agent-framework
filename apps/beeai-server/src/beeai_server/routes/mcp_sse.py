@@ -1,16 +1,17 @@
 import logging
+from asyncio import CancelledError
 
 import anyio
 from anyio.abc import TaskGroup
+from fastapi import FastAPI, HTTPException
 from kink import inject
-from starlette.applications import Starlette
+from mcp.server.sse import SseServerTransport
 from starlette.requests import Request
 from starlette.responses import Response
-from starlette.status import HTTP_408_REQUEST_TIMEOUT, HTTP_200_OK
+from starlette.status import HTTP_200_OK, HTTP_503_SERVICE_UNAVAILABLE
 
 from beeai_server.configuration import Configuration
 from beeai_server.services.mcp_proxy.proxy_server import MCPProxyServer
-from mcp.server.sse import SseServerTransport
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +43,8 @@ def _listen_for_disconnect(request: Request, task_group: TaskGroup):
 
 
 @inject
-def create_sse_app(sse: SseServerTransport, mcp_proxy: MCPProxyServer, config: Configuration) -> Starlette:
+def create_sse_app(sse: SseServerTransport, mcp_proxy: MCPProxyServer, config: Configuration) -> FastAPI:
     """Run the server using SSE transport (taken directly from MCP SDK)."""
-    from starlette.applications import Starlette
     from starlette.routing import Mount, Route
 
     async def handle_sse(request: Request):
@@ -54,12 +54,13 @@ def create_sse_app(sse: SseServerTransport, mcp_proxy: MCPProxyServer, config: C
                 async with sse.connect_sse(request.scope, receive, request._send) as (read_stream, write_stream):
                     await mcp_proxy.run_server(read_stream, write_stream, mcp_proxy.app.create_initialization_options())
         except anyio.BrokenResourceError as ex:
-            logger.warning(f"Client disconnected abruptly: {ex}")
-            return Response(status_code=HTTP_408_REQUEST_TIMEOUT)
+            raise HTTPException(HTTP_503_SERVICE_UNAVAILABLE, "Client disconnected abruptly") from ex
+        except (CancelledError, anyio.WouldBlock) as ex:
+            raise HTTPException(HTTP_503_SERVICE_UNAVAILABLE, "Task cancelled probably due to server shutdown") from ex
         logger.debug("Client disconnected.")
         return Response(status_code=HTTP_200_OK)
 
-    return Starlette(
+    return FastAPI(
         debug=config.logging.level == logging.DEBUG,
         routes=[
             Route("/sse", endpoint=handle_sse),

@@ -19,15 +19,13 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 dependencies = [
+    "agentcommunicationprotocol>=0.0.4",
     "anyio>=4.5",
     "click>=8.1.0",
     "httpx>=0.27",
     "legacy-cgi>=2.6.2",
     "smolagents[litellm]>=1.7.0",
 ]
-
-[tool.uv.sources]
-mcp = { workspace = true }
 
 [project.scripts]
 mcp-simple-agent = "mcp_simple_agent.server:main"

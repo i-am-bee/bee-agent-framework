@@ -10,7 +10,14 @@ from kink import inject
 from beeai_server.adapters.interface import IProviderRepository
 from beeai_server.services.mcp_proxy.provider import ProviderContainer
 from beeai_server.services.mcp_proxy.constants import NotificationStreamType
-from mcp import ClientSession, ServerRequest
+from mcp import (
+    ClientSession,
+    CreateAgentRequest,
+    CreateAgentResult,
+    RunAgentResult,
+    ListAgentsResult,
+    ListAgentTemplatesResult,
+)
 from mcp import ServerSession, types
 from mcp.server import Server
 from mcp.server.models import InitializationOptions
@@ -21,8 +28,10 @@ from mcp.types import (
     CallToolRequest,
     CallToolResult,
     RequestParams,
-    RunAgentRequestParams,
     RunAgentRequest,
+    Request,
+    DestroyAgentRequest,
+    DestroyAgentResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -55,20 +64,19 @@ class MCPProxyServer:
         self,
         client_session: ClientSession,
         server: Server,
-        request: ServerRequest,
+        request: Request,
         result_type: type[ReceiveResultT],
         forward_progress_notifications=True,
     ):
+        request.model_extra.clear()
         if forward_progress_notifications:
             async with self._forward_progress_notifications(server):
                 request.params.meta = server.request_context.meta or RequestParams.Meta()
                 request.params.meta.progressToken = request.params.meta.progressToken or uuid.uuid4().hex
                 resp = await client_session.send_request(ClientRequest(request), result_type)
         else:
+            request = request.model_dump(exclude={"jsonrpc"})
             resp = await client_session.send_request(ClientRequest(request), result_type)
-
-        if resp.isError:
-            raise Exception(str(resp.content[0].text))
         return resp
 
     @cached_property
@@ -88,8 +96,12 @@ class MCPProxyServer:
             return self._client_container.prompts
 
         @server.list_agent_templates()
-        async def list_agent_templates():
-            return self._client_container.agent_templates
+        async def list_agent_templates(_req):
+            return ListAgentTemplatesResult(agentTemplates=self._client_container.agent_templates)
+
+        @server.list_agents()
+        async def list_agents(_req):
+            return ListAgentsResult(agents=self._client_container.agents)
 
         @server.call_tool()
         async def call_tool(name: str, arguments: dict | None = None):
@@ -102,18 +114,20 @@ class MCPProxyServer:
             )
             return resp.content
 
+        @server.create_agent()
+        async def create_agent(req: CreateAgentRequest) -> CreateAgentResult:
+            provider = self._client_container.routing_table[f"agent_template/{req.params.templateName}"]
+            return await self._send_request_with_token(provider.session, server, req, CreateAgentResult)
+
         @server.run_agent()
-        async def run_agent(name: str, config: dict, prompt: str):
-            provider = self._client_container.routing_table[f"agent/{name}"]
-            resp = await self._send_request_with_token(
-                provider.session,
-                server,
-                RunAgentRequest(
-                    method="agents/run", params=RunAgentRequestParams(name=name, prompt=prompt, config=config)
-                ),
-                CallToolResult,
-            )
-            return resp.content
+        async def run_agent(req: RunAgentRequest) -> RunAgentResult:
+            provider = self._client_container.routing_table[f"agent/{req.params.name}"]
+            return await self._send_request_with_token(provider.session, server, req, RunAgentResult)
+
+        @server.destroy_agent()
+        async def destroy_agent(req: DestroyAgentRequest) -> DestroyAgentResult:
+            provider = self._client_container.routing_table[f"agent/{req.params.name}"]
+            return await self._send_request_with_token(provider.session, server, req, DestroyAgentResult)
 
         return server
 
@@ -135,8 +149,9 @@ class MCPProxyServer:
                         logger.debug(f"Received message: {message}")
 
                         match message:
-                            case RequestResponder(request=types.ClientRequest(root=req)):
-                                await self.app._handle_request(message, req, session, raise_exceptions)
+                            case RequestResponder(request=types.ClientRequest(root=req)) as responder:
+                                with responder:
+                                    await self.app._handle_request(message, req, session, raise_exceptions)
                             case types.ClientNotification(root=notify):
                                 await self.app._handle_notification(notify)
 

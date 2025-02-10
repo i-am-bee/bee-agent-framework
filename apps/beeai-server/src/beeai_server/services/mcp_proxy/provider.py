@@ -17,7 +17,7 @@ from beeai_server.utils.periodic import Periodic
 from mcp import ClientSession, Tool, Resource, InitializeResult, types, ServerSession
 from mcp.shared.context import RequestContext
 from mcp.shared.session import RequestResponder, ReceiveRequestT, SendResultT, ReceiveNotificationT
-from mcp.types import AgentTemplate, Prompt
+from mcp.types import AgentTemplate, Prompt, Agent
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +40,7 @@ class LoadedProvider:
     ]
     provider: Provider
     agent_templates: list[AgentTemplate] = []
+    agents: list[Agent] = []
     tools: list[Tool] = []
     resources: list[Resource] = []
     prompts: list[Prompt] = []
@@ -68,6 +69,7 @@ class LoadedProvider:
 
     class _LoadFeature(StrEnum):
         agent_templates = "agent_templates"
+        agents = "agents"
         tools = "tools"
         resources = "resources"
         prompts = "prompts"
@@ -83,9 +85,16 @@ class LoadedProvider:
         features = self._LoadFeature.all() if features == "all" else features
         logger.info(f"Loading features for provider {self.provider}: {list(features)}.")
         try:
-            if self._initialize_result.capabilities.agents and self._LoadFeature.agent_templates in features:
+            if (
+                self._initialize_result.capabilities.agents
+                and self._initialize_result.capabilities.agents.templates
+                and self._LoadFeature.agent_templates in features
+            ):
                 self.agent_templates = (await self.session.list_agent_templates()).agentTemplates
                 logger.info(f"Loaded {len(self.agent_templates)} agent templates")
+            if self._initialize_result.capabilities.agents and self._LoadFeature.agents in features:
+                self.agents = (await self.session.list_agents()).agents
+                logger.info(f"Loaded {len(self.agents)} agents")
             if self._initialize_result.capabilities.tools and self._LoadFeature.tools in features:
                 self.tools = (await self.session.list_tools()).tools
                 logger.info(f"Loaded {len(self.tools)} tools")
@@ -109,7 +118,7 @@ class LoadedProvider:
                 case types.ServerNotification(root=types.PromptListChangedNotification()):
                     task_group.start_soon(self._load_features, {self._LoadFeature.prompts})
                 case types.ServerNotification(root=types.AgentListChangedNotification()):
-                    task_group.start_soon(self._load_features, {self._LoadFeature.agent_templates})
+                    task_group.start_soon(self._load_features, {self._LoadFeature.agents})
             await self._write_messages.send(message)
 
     async def _initialize_session(self):
@@ -191,6 +200,10 @@ class ProviderContainer:
         return [template for p in self.loaded_providers for template in p.agent_templates]
 
     @property
+    def agents(self) -> list[Agent]:
+        return [agent for p in self.loaded_providers for agent in p.agents]
+
+    @property
     def resources(self) -> list[Resource]:
         return [resource for p in self.loaded_providers for resource in p.resources]
 
@@ -204,7 +217,8 @@ class ProviderContainer:
             **{f"tool/{tool.name}": p for p in self.loaded_providers for tool in p.tools},
             **{f"prompt/{prompt.name}": p for p in self.loaded_providers for prompt in p.prompts},
             **{f"resource/{resource.uri}": p for p in self.loaded_providers for resource in p.resources},
-            **{f"agent/{templ.name}": p for p in self.loaded_providers for templ in p.agent_templates},
+            **{f"agent/{agent.name}": p for p in self.loaded_providers for agent in p.agents},
+            **{f"agent_template/{templ.name}": p for p in self.loaded_providers for templ in p.agent_templates},
         }
 
     def forward_notifications(

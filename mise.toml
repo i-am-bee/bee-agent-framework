@@ -12,13 +12,6 @@ python.uv_venv_auto = true
 
 ## prepare
 
-[tasks."prepare:ensure-submodules"]
-hide = true
-dir = "{{config_root}}"
-run = "git submodule update --init"
-sources = [".gitmodules"]
-outputs = { auto = true }
-
 [tasks."prepare:create-mise-local-toml"]
 hide = true
 dir = "{{config_root}}"
@@ -30,7 +23,6 @@ outputs = { auto = true }
 
 [tasks."dependencies:nodejs"]
 hide = true
-depends = ["prepare:ensure-submodules"]
 dir = "{{config_root}}"
 run = "pnpm install"
 sources = ["pnpm-lock.yaml", "pnpm-workspace.yaml", "**/package.json"]
@@ -38,7 +30,6 @@ outputs = { auto = true }
 
 [tasks."dependencies:python"]
 hide = true
-depends = ["prepare:ensure-submodules"]
 dir = "{{config_root}}"
 run = "uv sync"
 sources = ["uv.lock", "pyproject.toml", "**/pyproject.toml"]

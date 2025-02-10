@@ -8,8 +8,8 @@ from typing import Final
 import anyio
 import click
 import mcp.types as types
+from mcp import ListAgentsResult, RunAgentRequest
 from mcp.server.lowlevel import Server
-from mcp.types import TextContent
 from smolagents import AgentText, CodeAgent, LiteLLMModel, VisitWebpageTool
 from smolagents.memory import MemoryStep
 
@@ -33,22 +33,29 @@ logging.basicConfig(
 def main(port: int, transport: str) -> int:
     app = Server("mcp-website-fetcher")
 
-    @app.list_agent_templates()
-    async def list_agent_templates():
-        return [
-            types.AgentTemplate(
-                name="website_summarizer",
-                description="Summarizes a website",
-                configSchema={"type": "object"},
-            )
-        ]
+    @app.list_agents()
+    async def list_agents(_req):
+        return ListAgentsResult(
+            agents=[
+                types.Agent(
+                    name="website_summarizer",
+                    description="Summarizes a website",
+                    inputSchema={
+                        "type": "object",
+                        "required": ["prompt"],
+                        "properties": {"prompt": {"type": "string"}},
+                    },
+                    outputSchema={"type": "object"},
+                )
+            ]
+        )
 
     @app.run_agent()
     async def run_agent(
-        name: str, _config: dict, prompt: str
-    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-        if name != "website_summarizer":
-            raise ValueError(f"Unknown tool: {name}")
+        req: RunAgentRequest,
+    ) -> types.RunAgentResult:
+        if req.params.name != "website_summarizer":
+            raise ValueError(f"Unknown agent: {req.params.name}")
 
         agent = CodeAgent(
             tools=[VisitWebpageTool()],
@@ -62,19 +69,19 @@ def main(port: int, transport: str) -> int:
         async def send_progress(step_no: int, text: str):
             await session.send_notification(
                 types.ServerNotification(
-                    types.ProgressNotification(
-                        method="notifications/progress",
-                        params=types.ProgressNotificationParams(
-                            progressToken=progress_token,
-                            progress=step_no / MAX_STEPS,
-                            total=1.0,
-                            text=text,
+                    types.AgentRunProgressNotification(
+                        method="notifications/agents/run/progress",
+                        params=types.AgentRunProgressNotificationParams(
+                            progressToken=progress_token, delta={"text": text}
                         ),
                     )
                 )
             )
 
         tasks = []
+        prompt = req.params.input.get("prompt", None)
+        if not prompt:
+            raise ValueError("Missing prompt in agent run input")
 
         def run_agent():
             nonlocal tasks
@@ -95,7 +102,7 @@ def main(port: int, transport: str) -> int:
                     send_progress(step_no=MAX_STEPS, text=json.dumps(output))
                 )
             ]
-            return [TextContent(type="text", text=json.dumps(output))]
+            return types.RunAgentResult(output={"messages": output})
 
         result = await loop.run_in_executor(
             ThreadPoolExecutor(max_workers=10), run_agent
