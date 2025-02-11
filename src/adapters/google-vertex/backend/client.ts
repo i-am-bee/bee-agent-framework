@@ -33,7 +33,7 @@ export class GoogleVertexClient extends BackendClient<
       ...this.settings,
       project: this.settings?.project || getEnv("GOOGLE_VERTEX_PROJECT"),
       baseURL: this.settings?.baseURL || getEnv("GOOGLE_VERTEX_ENDPOINT"),
-      location: this.settings?.baseURL || getEnv("GOOGLE_VERTEX_LOCATION"),
+      location: this.settings?.location || getEnv("GOOGLE_VERTEX_LOCATION"),
     });
   }
 }

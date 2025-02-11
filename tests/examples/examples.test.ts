@@ -41,7 +41,7 @@ const exclude: string[] = [
   "examples/playground/**/*.ts",
   // prevents 'Too many requests' error on Free Tier
   !getEnv("WATSONX_API_KEY") && [
-    "examples/llms/providers/watson*.ts",
+    "examples/backend/providers/watson*.ts",
     "examples/agents/experimental/replan.ts",
     "examples/agents/experimental/streamlit.ts",
     "examples/agents/granite/*.ts",
@@ -49,19 +49,19 @@ const exclude: string[] = [
   ],
   !getEnv("GROQ_API_KEY") && [
     "examples/agents/sql.ts",
-    "examples/llms/providers/groq.ts",
+    "examples/backend/providers/groq.ts",
     "examples/workflows/*",
   ],
   !getEnv("OPENAI_API_KEY") && [
     "examples/agents/bee_reusable.ts",
-    "examples/llms/providers/openai.ts",
+    "examples/backend/providers/openai.ts",
   ],
-  !getEnv("AZURE_OPENAI_API_KEY") && ["examples/llms/providers/azure_openai.ts"],
-  !getEnv("COHERE_API_KEY") && ["examples/llms/providers/langchain.ts"],
+  !getEnv("AZURE_OPENAI_API_KEY") && ["examples/backend/providers/azure-openai.ts"],
+  !getEnv("COHERE_API_KEY") && ["examples/backend/providers/langchain.ts"],
   !getEnv("CODE_INTERPRETER_URL") && ["examples/tools/custom/python.ts"],
   !getEnv("ELASTICSEARCH_NODE") && ["examples/agents/elasticsearch.ts"],
-  !getEnv("AWS_REGION") && ["examples/llms/providers/bedrock.ts"],
-  !getEnv("GOOGLE_APPLICATION_CREDENTIALS") && ["examples/llms/providers/vertexai.ts"],
+  !getEnv("AWS_REGION") && ["examples/backend/providers/amazon-bedrock.ts"],
+  !getEnv("GOOGLE_APPLICATION_CREDENTIALS") && ["examples/backend/providers/vertexai.ts"],
 ]
   .filter(isTruthy)
   .flat(); // list of examples that are excluded

@@ -211,9 +211,9 @@ export abstract class ChatModel extends Serializable {
   }
 
   static async fromName(name: FullModelName | ProviderName, options?: ChatModelParameters) {
-    const { providerId, modelId = "" } = parseModel(name);
+    const { providerId, modelId } = parseModel(name);
     const Target = await loadModel<ChatModel>(providerId, "chat");
-    return new Target(modelId, options);
+    return new Target(modelId || undefined, options);
   }
 
   protected abstract _create(

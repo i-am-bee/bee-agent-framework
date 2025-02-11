@@ -29,7 +29,7 @@
         [
           "adapters",
           "agents",
-          "llms",
+          "backend",
           "tools",
           "cache",
           "emitter",

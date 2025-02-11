@@ -11,10 +11,11 @@
 - Non-Chat LLM class (`LLM`) has been removed.
 - The`IBMvLLM` adapter has been removed.
 - Parsers were moved from `bee-agent-framework/agents/parsers` to `bee-agent-framework/parsers`
+- Parsers were moved from `bee-agent-framework/agents/parsers` to `bee-agent-framework/parsers`.
 
 ### Models
 
-#### Before
+#### ❌ Old Way
 
 ```ts
 import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
@@ -38,7 +39,7 @@ const response = await model.generate(
 console.log(response.getTextContent());
 ```
 
-#### Now
+#### ✅ New Way
 
 ```ts
 import { ChatModel, UserMessage } from "bee-agent-framework/backend/core";
@@ -69,14 +70,14 @@ More examples can be found in [Backend Documentation Page](/docs/backend.md).
 
 The `BaseMessage` class was replaced by `Message` and its subtypes (`UserMessage`, `AssistantMessage`, `SystemMessage`, `ToolMessage`).
 
-#### Before
+#### ❌ Old Way
 
 ```ts
 import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 const a = BaseMessage.of({ role: "user", text: "hello", meta: { createdAt: new Date() } });
 ```
 
-#### Now
+#### ✅ New Way
 
 ```ts
 import { Message } from "bee-agent-framework/backend/core";
@@ -131,7 +132,7 @@ The same applies to the following static methods.
 - `fromSerialized`
 - `fromSnapshot`
 
-#### Before
+#### ❌ Old Way
 
 ```ts
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
@@ -142,7 +143,7 @@ const json = a.serialize();
 const b = TokenMemory.fromSerialized(json);
 ```
 
-#### Now
+#### ✅ New Way
 
 ```ts
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
