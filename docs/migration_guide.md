@@ -12,6 +12,7 @@
 - The`IBMvLLM` adapter has been removed.
 - Parsers were moved from `bee-agent-framework/agents/parsers` to `bee-agent-framework/parsers`.
 - Workflows are no longer experimental and were moved from `bee-agent-framework/experimental/workflows` to `bee-agent-framework/workflows`.
+- LLM Drivers concept has been replaced by Structured Outputs via `model.createStructure` method.
 
 ### Models
 
@@ -218,4 +219,38 @@ const workflow = new Workflow({ schema })
     state.value += 1;
     return "router";
   });
+```
+
+### LLM Drivers
+
+#### ✅ New Way
+
+```ts
+import { ChatModel, UserMessage } from "bee-agent-framework/backend/core";
+
+const model = await ChatModel.fromName("ollama:llama3.1");
+const { object } = await model.createStructure({
+  schema: { answer: z.string() },
+  messages: [new UserMessage("What has keys but can’t open locks?")],
+  maxRetries: 3,
+});
+console.log(`Answer: ${object.answer}`);
+```
+
+#### ❌ Old Way
+
+```ts
+import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
+import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+
+const llm = new OllamaChatLLM({ modelId: "llama3.1" });
+const driver = new JsonDriver(llm);
+
+const { parsed } = await driver.generate(
+  z.object({ name: z.string() }),
+  [BaseMessage.of({ role: "user", text: "What has keys but can’t open locks?" })],
+  { maxRetries: 3 },
+);
+console.log(`Answer: ${parsed.answer}`);
 ```
