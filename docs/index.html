@@ -7,9 +7,19 @@
     <meta name="description" content="Description" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
+    <link
+      rel="stylesheet"
+      href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/dark.css"
+      media="(prefers-color-scheme: dark)"
+    />
     <style>
       aside.sidebar {
         padding-top: 0;
+      }
+      @media (prefers-color-scheme: dark) {
+        .app-name-link img {
+          filter: invert(1);
+        }
       }
     </style>
   </head>
@@ -31,7 +41,6 @@
           }
           if (url.match(docsMatch)) {
             url = url.replace(docsMatch, "$1");
-            console.info({ url });
           }
           if (url.match(exampleRegex) || url.match(srcRegex) || url === "/package.json") {
             url = main.concat(url);
@@ -69,7 +78,7 @@
               return this.origin.link.apply(this, [fixLink(link), renderer, text]);
             },
             html: function (html) {
-              var regex = /(src|href)\s*=\s*(['"])[\.]{0,1}\/docs\/(.+?)\2/gi;
+              var regex = /(src|href|srcset)\s*=\s*(['"])[\.]{0,1}\/docs\/(.+?)\2/gi;
               html = html.replace(regex, "$1=$2" + basePath + "$3$2");
               return html;
             },
