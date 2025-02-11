@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.1](https://github.com/i-am-bee/bee-agent-framework/compare/v0.1.0...v0.1.1) (2025-02-11)
+
+### Features
+
+- **backend:** throw correct error message when no name passed ([0dffc8f](https://github.com/i-am-bee/bee-agent-framework/commit/0dffc8fe1f33fecb3fbbf36f7ae0d4903590d9d5)), closes [#298](https://github.com/i-am-bee/bee-agent-framework/issues/298)
+
+### Bug Fixes
+
+- **workflows:** state propagation ([df1e2bf](https://github.com/i-am-bee/bee-agent-framework/commit/df1e2bf0215d1c7191485b85b4be62df87ff66d6)), closes [#309](https://github.com/i-am-bee/bee-agent-framework/issues/309)
+
 ## [0.1.0](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.61...v0.1.0) (2025-02-11)
 
 ### ⚠ BREAKING CHANGES
