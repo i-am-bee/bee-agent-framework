@@ -39,8 +39,8 @@ describe("UnconstrainedCache", () => {
   it("Serializes", async () => {
     const instance = new UnconstrainedCache();
     await instance.set("1", 1);
-    const serialized = instance.serialize();
-    const deserialized = UnconstrainedCache.fromSerialized(serialized);
+    const serialized = await instance.serialize();
+    const deserialized = await UnconstrainedCache.fromSerialized(serialized);
     verifyDeserialization(instance, deserialized);
   });
 });

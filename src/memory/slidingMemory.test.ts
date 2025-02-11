@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { verifyDeserialization } from "@tests/e2e/utils.js";
 import { SlidingMemory } from "@/memory/slidingMemory.js";
+import { Message, UserMessage } from "@/backend/message.js";
 
 describe("Sliding Memory", () => {
   it("Removes old messages", async () => {
     const instance = new SlidingMemory({
       size: 2,
     });
-    await instance.addMany(["A", "B", "C"].map((text) => BaseMessage.of({ role: "user", text })));
+    await instance.addMany(["A", "B", "C"].map((text) => Message.of({ role: "user", text })));
     expect(Array.from(instance).map((msg) => msg.text)).toStrictEqual(["B", "C"]);
   });
 
@@ -34,8 +34,8 @@ describe("Sliding Memory", () => {
         removalSelector: (messages) => messages.find((msg) => msg.role !== "system")!,
       },
     });
-    await instance.add(BaseMessage.of({ role: "system", text: "You are a helpful assistant." }));
-    await instance.addMany(["A", "B", "C"].map((text) => BaseMessage.of({ role: "user", text })));
+    await instance.add(Message.of({ role: "system", text: "You are a helpful assistant." }));
+    await instance.addMany(["A", "B", "C"].map((text) => new UserMessage(text)));
     expect(Array.from(instance).map((msg) => msg.text)).toStrictEqual([
       "You are a helpful assistant.",
       "C",
@@ -61,11 +61,8 @@ describe("Sliding Memory", () => {
         },
       },
     });
-    await instance.addMany(
-      ["user", "assistant", "user", "assistant", "user", "user"].map((role, i) =>
-        BaseMessage.of({ role, text: `${i + 1}` }),
-      ),
-    );
+    const roles = ["user", "assistant", "user", "assistant", "user", "user"] as const;
+    await instance.addMany(roles.map((role, i) => Message.of({ role, text: `${i + 1}` })));
     expect(Array.from(instance).map((msg) => msg.text)).toStrictEqual(["3", "4", "5", "6"]);
   });
 
@@ -73,14 +70,9 @@ describe("Sliding Memory", () => {
     const instance = new SlidingMemory({
       size: 5,
     });
-    await instance.add(
-      BaseMessage.of({
-        text: "Hello!",
-        role: Role.USER,
-      }),
-    );
-    const serialized = instance.serialize();
-    const deserialized = SlidingMemory.fromSerialized(serialized);
+    await instance.add(new UserMessage("Hello!"));
+    const serialized = await instance.serialize();
+    const deserialized = await SlidingMemory.fromSerialized(serialized);
     verifyDeserialization(instance, deserialized);
   });
 });

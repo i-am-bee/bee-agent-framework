@@ -27,14 +27,14 @@ import { z } from "zod";
 import { GetRunContext } from "@/context.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { PromptTemplate } from "@/template.js";
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
 import { getProp } from "@/internals/helpers/object.js";
 import type { BaseMemory } from "@/memory/base.js";
-import type { AnyChatLLM } from "@/llms/chat.js";
 import { toCamelCase } from "remeda";
+import { Role, SystemMessage, UserMessage } from "@/backend/message.js";
+import { ChatModel } from "@/backend/chat.js";
 
 export interface LLMToolInput extends BaseToolOptions {
-  llm: AnyChatLLM;
+  llm: ChatModel;
   name?: string;
   description?: string;
   template?: typeof LLMTool.template;
@@ -85,21 +85,21 @@ The Task: {{task}}`,
     }
 
     const template = this.options?.template ?? LLMTool.template;
-    const output = await this.input.llm.generate([
-      BaseMessage.of({
-        role: Role.SYSTEM,
-        text: template.render({
-          task: input.task,
-        }),
-      }),
-      ...memory.messages.filter((msg) => msg.role !== Role.SYSTEM),
-      BaseMessage.of({
-        role: Role.USER,
-        text: template.render({
-          task: input.task,
-        }),
-      }),
-    ]);
+    const output = await this.input.llm.create({
+      messages: [
+        new SystemMessage(
+          template.render({
+            task: input.task,
+          }),
+        ),
+        ...memory.messages.filter((msg) => msg.role !== Role.SYSTEM),
+        new UserMessage(
+          template.render({
+            task: input.task,
+          }),
+        ),
+      ],
+    });
 
     return new StringToolOutput(output.getTextContent());
   }

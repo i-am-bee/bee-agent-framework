@@ -15,8 +15,8 @@
  */
 
 import { PromptTemplate } from "@/template.js";
-import { BaseMessageMeta } from "@/llms/primitives/message.js";
 import { z } from "zod";
+import { MessageMeta } from "@/backend/message.js";
 
 export const BeeSystemPrompt = new PromptTemplate({
   schema: z.object({
@@ -129,7 +129,7 @@ export const BeeUserPrompt = new PromptTemplate({
     .passthrough(),
   functions: {
     formatMeta: function () {
-      const meta = this.meta as BaseMessageMeta;
+      const meta = this.meta as MessageMeta;
       if (!meta) {
         return "";
       }

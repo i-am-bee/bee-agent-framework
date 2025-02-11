@@ -16,9 +16,8 @@
 
 import { BeeAgent } from "@/agents/bee/agent.js";
 import { Workflow, WorkflowRunOptions } from "@/experimental/workflows/workflow.js";
-import { BaseMessage } from "@/llms/primitives/message.js";
+import { AssistantMessage, Message } from "@/backend/message.js";
 import { AnyTool } from "@/tools/base.js";
-import { AnyChatLLM } from "@/llms/chat.js";
 import { BaseMemory, ReadOnlyMemory } from "@/memory/base.js";
 import { z } from "zod";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
@@ -30,12 +29,13 @@ import {
   BeeRunOutput,
 } from "@/agents/bee/types.js";
 import { isFunction, randomString } from "remeda";
+import { ChatModel } from "@/backend/chat.js";
 
 type AgentInstance = BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions>;
 type AgentFactory = (memory: ReadOnlyMemory) => AgentInstance | Promise<AgentInstance>;
 interface AgentFactoryInput {
   name: string;
-  llm: AnyChatLLM;
+  llm: ChatModel;
   instructions?: string;
   tools?: AnyTool[];
   execution?: BeeAgentExecutionConfig;
@@ -45,10 +45,10 @@ export class AgentWorkflow {
   protected readonly workflow;
 
   static readonly schema = z.object({
-    messages: z.array(z.instanceof(BaseMessage)).min(1),
+    messages: z.array(z.instanceof(Message)).min(1),
 
     finalAnswer: z.string().optional(),
-    newMessages: z.array(z.instanceof(BaseMessage)).default([]),
+    newMessages: z.array(z.instanceof(Message)).default([]),
   });
 
   constructor(name = "AgentWorkflow") {
@@ -59,7 +59,7 @@ export class AgentWorkflow {
     });
   }
 
-  run(messages: BaseMessage[], options: WorkflowRunOptions<string> = {}) {
+  run(messages: Message[], options: WorkflowRunOptions<string> = {}) {
     return this.workflow.run(
       {
         messages,
@@ -68,14 +68,17 @@ export class AgentWorkflow {
     );
   }
 
-  addAgent(agent: AgentInstance | AgentFactory | AgentFactoryInput) {
+  addAgent(agent: AgentFactory | AgentFactoryInput): this;
+  addAgent(agent: AgentInstance): Promise<this>;
+  addAgent(agent: AgentInstance | AgentFactory | AgentFactoryInput): this | Promise<this> {
     if (agent instanceof BaseAgent) {
-      const clone = agent.clone();
-      const factory: AgentFactory = (memory) => {
-        clone.memory = memory;
-        return clone;
-      };
-      return this._add(clone.meta.name, factory);
+      return agent.clone().then((clone) => {
+        const factory: AgentFactory = (memory) => {
+          clone.memory = memory;
+          return clone;
+        };
+        return this._add(clone.meta.name, factory);
+      });
     }
 
     const name = agent.name || `Agent${randomString(4)}`;
@@ -120,10 +123,9 @@ export class AgentWorkflow {
         update: {
           finalAnswer: result.text,
           newMessages: state.newMessages.concat(
-            BaseMessage.of({
-              ...result,
-              text: [`Assistant Name: ${name}`, `Assistant Response: ${result.text}`].join("\n"),
-            }),
+            new AssistantMessage(
+              [`Assistant Name: ${name}`, `Assistant Response: ${result.text}`].join("\n"),
+            ),
           ),
         },
       };

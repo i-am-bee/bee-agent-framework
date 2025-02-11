@@ -1,22 +1,16 @@
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Message } from "bee-agent-framework/backend/message";
 import { SummarizeMemory } from "bee-agent-framework/memory/summarizeMemory";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const memory = new SummarizeMemory({
-  llm: new OllamaChatLLM({
-    modelId: "llama3.1",
-    parameters: {
-      temperature: 0,
-      num_predict: 250,
-    },
-  }),
+  llm: new OllamaChatModel("llama3.1"),
 });
 
 await memory.addMany([
-  BaseMessage.of({ role: "system", text: "You are a guide through France." }),
-  BaseMessage.of({ role: "user", text: "What is the capital?" }),
-  BaseMessage.of({ role: "assistant", text: "Paris" }),
-  BaseMessage.of({ role: "user", text: "What language is spoken there?" }),
+  Message.of({ role: "system", text: "You are a guide through France." }),
+  Message.of({ role: "user", text: "What is the capital?" }),
+  Message.of({ role: "assistant", text: "Paris" }),
+  Message.of({ role: "user", text: "What language is spoken there?" }),
 ]);
 
 console.info(memory.isEmpty()); // false

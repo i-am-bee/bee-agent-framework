@@ -23,8 +23,6 @@ import {
   ToolInput,
 } from "@/tools/base.js";
 import { z } from "zod";
-import { BaseLLMOutput } from "@/llms/base.js";
-import { LLM } from "@/llms/llm.js";
 import { PromptTemplate } from "@/template.js";
 import { filter, isIncludedIn, map, pipe, unique, uniqueBy } from "remeda";
 import { PythonFile, PythonStorage } from "@/tools/python/storage.js";
@@ -35,6 +33,8 @@ import { RunContext } from "@/context.js";
 import { hasMinLength } from "@/internals/helpers/array.js";
 import { Emitter } from "@/emitter/emitter.js";
 import { shallowCopy } from "@/serializer/utils.js";
+import { ChatModel } from "@/backend/chat.js";
+import { UserMessage } from "@/backend/message.js";
 
 export interface CodeInterpreterOptions {
   url: string;
@@ -44,7 +44,7 @@ export interface CodeInterpreterOptions {
 export interface PythonToolOptions extends BaseToolOptions {
   codeInterpreter: CodeInterpreterOptions;
   preprocess?: {
-    llm: LLM<BaseLLMOutput>;
+    llm: ChatModel;
     promptTemplate: PromptTemplate.infer<{ input: string }>;
   };
   storage: PythonStorage;
@@ -135,9 +135,9 @@ export class PythonTool extends Tool<PythonToolOutput, PythonToolOptions> {
     const getSourceCode = async () => {
       if (this.preprocess) {
         const { llm, promptTemplate } = this.preprocess;
-        const response = await llm.generate(promptTemplate.render({ input: input.code }), {
-          signal: run.signal,
-          stream: false,
+        const response = await llm.create({
+          messages: [new UserMessage(promptTemplate.render({ input: input.code }))],
+          abortSignal: run.signal,
         });
         return response.getTextContent().trim();
       }

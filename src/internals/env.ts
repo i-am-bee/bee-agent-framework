@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-import { z } from "zod";
+import { z, ZodSchema } from "zod";
 import { FrameworkError } from "@/errors.js";
 import { getProp } from "@/internals/helpers/object.js";
 
-export function getEnv(key: string) {
-  return getProp(process.env, [key], undefined);
+export function getEnv(key: string, fallback?: never): string | undefined;
+export function getEnv(key: string, fallback: string): string;
+export function getEnv(key: string, fallback?: string) {
+  return getProp(process.env, [key], fallback);
 }
 
-export function parseEnv<T>(key: string, schema: z.ZodType<T>, defaultValue?: T): T {
+export function parseEnv<T extends ZodSchema>(
+  key: string,
+  schema: T,
+  defaultValue?: string,
+): z.output<T> {
   const value = getEnv(key) ?? defaultValue;
   const result = schema.safeParse(value);
   if (!result.success) {

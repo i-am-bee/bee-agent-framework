@@ -24,3 +24,7 @@ export async function* transformAsyncIterable<A, B, A2>(
   }
   return next.value;
 }
+
+export function isAsyncIterable<T>(value: any): value is AsyncIterable<T> {
+  return Boolean(value && Symbol.asyncIterator in value);
+}

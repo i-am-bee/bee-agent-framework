@@ -1,21 +1,12 @@
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { getEnv } from "bee-agent-framework/internals/env";
 import "dotenv/config";
-import { Ollama } from "ollama";
 import { State } from "./state.js";
 import { Steps } from "./workflow.js";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 export function getChatLLM() {
-  return new OllamaChatLLM({
-    modelId: getEnv("OLLAMA_MODEL") || "deepseek-r1:8b",
-    parameters: {
-      temperature: 0,
-    },
-    client: new Ollama({
-      host: getEnv("OLLAMA_HOST") || "http://0.0.0.0:11434",
-    }),
-  });
+  return new OllamaChatModel(getEnv("OLLAMA_CHAT_MODEL") || "deepseek-r1:8b");
 }
 
 export interface SearchResult {

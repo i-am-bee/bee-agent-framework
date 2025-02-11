@@ -1,22 +1,10 @@
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { AssistantMessage, UserMessage } from "bee-agent-framework/backend/message";
 
-const llm = new OllamaChatLLM();
-const memory = new TokenMemory({ llm });
-await memory.addMany([
-  BaseMessage.of({
-    role: "user",
-    text: "What is your name?",
-  }),
-]);
+const memory = new TokenMemory();
+await memory.add(new UserMessage("What is your name?"));
 
-const serialized = memory.serialize();
-const deserialized = TokenMemory.fromSerialized(serialized);
+const serialized = await memory.serialize();
+const deserialized = await TokenMemory.fromSerialized(serialized);
 
-await deserialized.add(
-  BaseMessage.of({
-    role: "assistant",
-    text: "Bee",
-  }),
-);
+await deserialized.add(new AssistantMessage("Bee"));

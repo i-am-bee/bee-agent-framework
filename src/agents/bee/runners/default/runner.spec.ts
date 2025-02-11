@@ -16,7 +16,7 @@
 
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
+import { AssistantMessage, Role, UserMessage } from "@/backend/message.js";
 import { BaseMemory } from "@/memory/base.js";
 import { BeeUserPrompt } from "@/agents/bee/prompts.js";
 import { zip } from "remeda";
@@ -43,14 +43,8 @@ describe("Bee Agent Runner", () => {
     const createMemory = async () => {
       const memory = new UnconstrainedMemory();
       await memory.addMany([
-        BaseMessage.of({
-          role: Role.USER,
-          text: "What is your name?",
-        }),
-        BaseMessage.of({
-          role: Role.ASSISTANT,
-          text: "I am Bee",
-        }),
+        new UserMessage("What is your name?"),
+        new AssistantMessage("I am Bee"),
       ]);
       return memory;
     };
@@ -75,9 +69,7 @@ describe("Bee Agent Runner", () => {
     const instance = await createInstance(memory, prompt);
 
     const memory2 = await createMemory();
-    await memory2.add(
-      BaseMessage.of({ role: Role.USER, text: prompt, meta: { createdAt: new Date() } }),
-    );
+    await memory2.add(new UserMessage(prompt, { createdAt: new Date() }));
     const instance2 = await createInstance(memory2, null);
     expect(instance.memory.messages).toEqual(instance2.memory.messages);
   });
@@ -93,22 +85,10 @@ describe("Bee Agent Runner", () => {
   ])("Correctly formats user input", async (template: typeof BeeUserPrompt) => {
     const memory = new UnconstrainedMemory();
     await memory.addMany([
-      BaseMessage.of({
-        role: Role.USER,
-        text: "What is your name?",
-      }),
-      BaseMessage.of({
-        role: Role.ASSISTANT,
-        text: "Bee",
-      }),
-      BaseMessage.of({
-        role: Role.USER,
-        text: "Who are you?",
-      }),
-      BaseMessage.of({
-        role: Role.ASSISTANT,
-        text: "I am a helpful assistant.",
-      }),
+      new UserMessage("What is your name?"),
+      new AssistantMessage("Bee"),
+      new UserMessage("Who are you?"),
+      new AssistantMessage("I am a helpful assistant."),
     ]);
 
     const prompt = "What can you do for me?";
@@ -127,10 +107,7 @@ describe("Bee Agent Runner", () => {
     await instance.init({ prompt });
 
     for (const [a, b] of zip(
-      [
-        ...memory.messages.filter((msg) => msg.role === Role.USER),
-        BaseMessage.of({ role: Role.USER, text: prompt }),
-      ],
+      [...memory.messages.filter((msg) => msg.role === Role.USER), new UserMessage(prompt)],
       instance.memory.messages.filter((msg) => msg.role === Role.USER),
     )) {
       expect(template.render({ input: a.text, meta: undefined })).toStrictEqual(b.text);

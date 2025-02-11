@@ -85,7 +85,7 @@ describe("Logger", () => {
     ]);
   });
 
-  it("Serializes", () => {
+  it("Serializes", async () => {
     const instance = new Logger({
       name: "Root",
       bindings: {
@@ -94,8 +94,8 @@ describe("Logger", () => {
     });
     instance.level = "fatal";
 
-    const serialized = instance.serialize();
-    const deserialized = Logger.fromSerialized(serialized);
+    const serialized = await instance.serialize();
+    const deserialized = await Logger.fromSerialized(serialized);
     verifyDeserialization(instance, deserialized);
   });
 });

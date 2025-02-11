@@ -1,17 +1,17 @@
+import "dotenv/config";
 import { DuckDuckGoSearch as LangChainDDG } from "@langchain/community/tools/duckduckgo_search";
-import { ChatMessage as LangChainMessage } from "@langchain/core/messages";
 import { createReactAgent as createLangGraphReactAgent } from "@langchain/langgraph/prebuilt";
-import { ChatOllama as LangChainOllamaChat } from "@langchain/ollama";
-import { OllamaChatLLM as BeeOllamaChat } from "bee-agent-framework/adapters/ollama/chat";
-import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { z } from "zod";
+import { createConsoleReader } from "examples/helpers/io.js";
+import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
+import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
+import { ChatOllama as LangChainOllamaChat } from "@langchain/ollama";
 import { ReadOnlyMemory } from "bee-agent-framework/memory/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
-import "dotenv/config";
-import { createConsoleReader } from "examples/helpers/io.js";
-import { z } from "zod";
+import { Message } from "bee-agent-framework/backend/message";
+import { ChatMessage as LangChainMessage } from "@langchain/core/messages";
+import { ChatModel } from "bee-agent-framework/backend/chat";
 
 const workflow = new Workflow({
   schema: z.object({ memory: z.instanceof(ReadOnlyMemory), answer: z.string().default("") }),
@@ -21,7 +21,7 @@ const workflow = new Workflow({
   }))
   .addStep("bee", async (state, ctx) => {
     const beeAgent = new BeeAgent({
-      llm: new BeeOllamaChat({ modelId: "llama3.1" }),
+      llm: await ChatModel.fromName("ollama:llama3.1"),
       tools: [new DuckDuckGoSearchTool()],
       memory: state.memory,
     });
@@ -29,8 +29,7 @@ const workflow = new Workflow({
       { prompt: null },
       { signal: ctx.signal, execution: { maxIterations: 5 } },
     );
-    const answer = response.result.text;
-    return { next: Workflow.END, update: { answer } };
+    return { next: Workflow.END, update: { answer: response.result.text } };
   })
   .addStep("langgraph", async (state, ctx) => {
     const langGraphAgent = createLangGraphReactAgent({
@@ -45,7 +44,7 @@ const workflow = new Workflow({
       },
       { signal: ctx.signal, recursionLimit: 5 },
     );
-    const answer = String(response.messages.at(-1)?.content);
+    const answer = response.messages.map((msg) => String(msg.content)).join("");
     return { next: Workflow.END, update: { answer } };
   });
 
@@ -53,9 +52,9 @@ const memory = new UnconstrainedMemory();
 const reader = createConsoleReader();
 
 for await (const { prompt } of reader) {
-  await memory.add(BaseMessage.of({ role: "user", text: prompt }));
+  await memory.add(Message.of({ role: "user", text: prompt }));
   const { result, steps } = await workflow.run({ memory: memory.asReadOnly() });
   reader.write(`LLM 🤖 : `, result.answer);
   reader.write(`-> solved by `, steps.at(-1)!.name);
-  await memory.add(BaseMessage.of({ role: "assistant", text: result.answer }));
+  await memory.add(Message.of({ role: "assistant", text: result.answer }));
 }

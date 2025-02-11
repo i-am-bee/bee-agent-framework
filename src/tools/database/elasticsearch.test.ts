@@ -103,8 +103,8 @@ describe("ElasticSearchTool", () => {
       Task.resolve(new JSONToolOutput([{ index: "index1", detail: "sample" }])),
     );
 
-    const serialized = elasticSearchTool.serialize();
-    const deserializedTool = ElasticSearchTool.fromSerialized(serialized);
+    const serialized = await elasticSearchTool.serialize();
+    const deserializedTool = await ElasticSearchTool.fromSerialized(serialized);
 
     expect(await deserializedTool.cache.get("connection")).toStrictEqual(
       await elasticSearchTool.cache.get("connection"),

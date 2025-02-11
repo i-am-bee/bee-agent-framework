@@ -4,14 +4,11 @@ import { createConsoleReader } from "examples/helpers/io.js";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { WatsonXChatLLM } from "bee-agent-framework/adapters/watsonx/chat";
+import { UserMessage } from "bee-agent-framework/backend/message";
+import { WatsonxChatModel } from "bee-agent-framework/adapters/watsonx/backend/chat";
 
 const workflow = new AgentWorkflow();
-const llm = WatsonXChatLLM.fromPreset("meta-llama/llama-3-3-70b-instruct", {
-  apiKey: process.env.WATSONX_API_KEY,
-  projectId: process.env.WATSONX_PROJECT_ID,
-});
+const llm = new WatsonxChatModel("meta-llama/llama-3-3-70b-instruct");
 
 workflow.addAgent({
   name: "WeatherForecaster",
@@ -37,13 +34,7 @@ const reader = createConsoleReader();
 const memory = new UnconstrainedMemory();
 
 for await (const { prompt } of reader) {
-  await memory.add(
-    BaseMessage.of({
-      role: Role.USER,
-      text: prompt,
-      meta: { createdAt: new Date() },
-    }),
-  );
+  await memory.add(new UserMessage(prompt, { createdAt: new Date() }));
 
   const { result } = await workflow.run(memory.messages).observe((emitter) => {
     emitter.on("success", (data) => {

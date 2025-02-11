@@ -45,13 +45,7 @@ Key Analysis Points:
 - Market positioning
 - Potential impact
 
-Provide concise, actionable insights about the competitor.
-
-Return JSON with:
-{
-  "key_insights": ["Critical findings"],
-  "unique_capabilities": ["Standout features"]
-}`,
+Provide concise, actionable insights about the competitor.`,
 });
 
 export const reflectionSchema = z.object({

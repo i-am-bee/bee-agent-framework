@@ -18,8 +18,8 @@ Serializer.register(MyClass, {
 });
 
 const instance = new MyClass("Bee");
-const serialized = Serializer.serialize(instance);
-const deserialized = Serializer.deserialize<MyClass>(serialized);
+const serialized = await Serializer.serialize(instance);
+const deserialized = await Serializer.deserialize<MyClass>(serialized);
 
 console.info(instance);
 console.info(deserialized);

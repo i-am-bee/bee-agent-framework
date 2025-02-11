@@ -66,8 +66,8 @@ describe("SlidingCache", () => {
     await instance.set("1", 1);
     await instance.set("2", 2);
     await instance.set("3", 3);
-    const serialized = instance.serialize();
-    const deserialized = SlidingCache.fromSerialized(serialized);
+    const serialized = await instance.serialize();
+    const deserialized = await SlidingCache.fromSerialized(serialized);
     verifyDeserialization(instance, deserialized);
   });
 });

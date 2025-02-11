@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-import { BaseLLM } from "@/llms/base.js";
-import { isFunction } from "remeda";
-import type { LLMChatTemplate } from "@/adapters/shared/llmChatTemplates.js";
+import { ChatModel } from "@/backend/chat.js";
 
-export function assertLLMWithMessagesToPromptFn(instance: object): instance is BaseLLM<any, any> & {
-  messagesToPrompt: LLMChatTemplate["messagesToPrompt"];
-} {
-  return Boolean(
-    instance instanceof BaseLLM &&
-      "messagesToPrompt" in instance &&
-      isFunction(instance.messagesToPrompt),
-  );
+export function assertLLMWithMessagesToPromptFn(instance: object): instance is ChatModel {
+  return Boolean(instance && instance instanceof ChatModel);
 }

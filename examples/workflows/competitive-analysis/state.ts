@@ -1,5 +1,5 @@
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
 import { z } from "zod";
+import { Message } from "bee-agent-framework/backend/message";
 
 export const InputSchema = z.object({
   industry: z.string(),
@@ -17,7 +17,7 @@ export const StateSchema = z.object({
   competitorFindings: z.record(z.string(), z.array(z.string())).default({}),
   researchLoopCount: z.number().default(0),
   runningSummary: z.string().optional(),
-  answer: z.instanceof(BaseMessage).optional(),
+  answer: z.instanceof(Message).optional(),
   reflectionFeedback: z.array(z.string()).optional(),
   reflectionIteration: z.number().default(0),
   maxReflectionIterations: z.number().default(3),

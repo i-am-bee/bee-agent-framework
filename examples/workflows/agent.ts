@@ -1,25 +1,24 @@
 import "dotenv/config";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { z } from "zod";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
+import { Message, UserMessage } from "bee-agent-framework/backend/message";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { ReadOnlyMemory } from "bee-agent-framework/memory/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
+import { GroqChatModel } from "bee-agent-framework/adapters/groq/backend/chat";
 
 const schema = z.object({
-  answer: z.instanceof(BaseMessage).optional(),
+  answer: z.instanceof(Message).optional(),
   memory: z.instanceof(ReadOnlyMemory),
 });
 
 const workflow = new Workflow({ schema: schema })
   .addStep("simpleAgent", async (state) => {
     const simpleAgent = new BeeAgent({
-      llm: new GroqChatLLM(),
+      llm: new GroqChatModel("llama-3.3-70b-versatile"),
       tools: [],
       memory: state.memory,
     });
@@ -32,18 +31,18 @@ const workflow = new Workflow({ schema: schema })
     };
   })
   .addStrictStep("critique", schema.required(), async (state) => {
-    const llm = new GroqChatLLM();
-    const { parsed: critiqueResponse } = await new JsonDriver(llm).generate(
-      z.object({ score: z.number().int().min(0).max(100) }),
-      [
-        BaseMessage.of({
+    const llm = new GroqChatModel("llama-3.3-70b-versatile");
+    const { object: critiqueResponse } = await llm.createStructure({
+      schema: z.object({ score: z.number().int().min(0).max(100) }),
+      messages: [
+        Message.of({
           role: "system",
           text: `You are an evaluation assistant who scores the credibility of the last assistant's response. Chitchatting always has a score of 100. If the assistant was unable to answer the user's query, then the score will be 0.`,
         }),
         ...state.memory.messages,
         state.answer,
       ],
-    );
+    });
     reader.write("🧠 Score", critiqueResponse.score.toString());
 
     return {
@@ -52,7 +51,7 @@ const workflow = new Workflow({ schema: schema })
   })
   .addStep("complexAgent", async (state) => {
     const complexAgent = new BeeAgent({
-      llm: new GroqChatLLM(),
+      llm: new GroqChatModel("llama-3.3-70b-versatile"),
       tools: [new WikipediaTool(), new OpenMeteoTool()],
       memory: state.memory,
     });
@@ -66,11 +65,7 @@ const reader = createConsoleReader();
 const memory = new UnconstrainedMemory();
 
 for await (const { prompt } of reader) {
-  const userMessage = BaseMessage.of({
-    role: Role.USER,
-    text: prompt,
-    meta: { createdAt: new Date() },
-  });
+  const userMessage = new UserMessage(prompt);
   await memory.add(userMessage);
 
   const response = await workflow.run({

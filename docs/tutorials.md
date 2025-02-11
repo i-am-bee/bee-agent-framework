@@ -64,7 +64,7 @@ Now, copy and paste the following code into `agent_slack.ts` module. Then, follo
 import { MCPTool } from "bee-agent-framework/tools/mcp";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
@@ -104,7 +104,7 @@ try {
   // Create Bee agent
   const agent = new BeeAgent({
     // We're using LLM ran locally via Ollama
-    llm: new OllamaChatLLM({ modelId: "llama3.1" }),
+    llm: new OllamaChatModel("llama3.1"),
     // Besides the Slack tools, we also provide DDG tool for web search
     tools: [new OpenMeteoTool(), ...filteredSlackTools],
     memory: new UnconstrainedMemory(),

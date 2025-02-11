@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
+import { AssistantMessage, Message, SystemMessage } from "@/backend/message.js";
 import { BaseMemory } from "@/memory/base.js";
 import { PromptTemplate } from "@/template.js";
 import { shallowCopy } from "@/serializer/utils.js";
 import { z } from "zod";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
+import { ChatModel } from "@/backend/chat.js";
 
 export interface SummarizeMemoryInput {
-  llm: ChatLLM<ChatLLMOutput>;
+  llm: ChatModel;
   template?: typeof SummarizeMemoryTemplate;
 }
 
@@ -51,42 +51,35 @@ export class SummarizeMemory extends BaseMemory {
     this.register();
   }
 
-  get messages(): BaseMessage[] {
+  get messages(): Message[] {
     const currentSummary = this.summary;
     if (!currentSummary) {
       return [];
     }
 
-    return [
-      BaseMessage.of({
-        role: Role.ASSISTANT,
-        text: currentSummary,
-      }),
-    ];
+    return [new AssistantMessage(currentSummary)];
   }
 
   // eslint-disable-next-line unused-imports/no-unused-vars
-  async delete(message: BaseMessage) {
+  async delete(message: Message) {
     return false;
   }
 
-  async add(message: BaseMessage, _index?: number) {
-    const response = await this.llm.generate([
-      BaseMessage.of({
-        role: Role.SYSTEM,
-        text: this.template.render({
-          summary: this.summary,
-        }),
-      }),
-      BaseMessage.of({
-        role: Role.ASSISTANT,
-        text: `New lines of conversation:
+  async add(message: Message, _index?: number) {
+    const response = await this.llm.create({
+      messages: [
+        new SystemMessage(
+          this.template.render({
+            summary: this.summary,
+          }),
+        ),
+        new AssistantMessage(`New lines of conversation:
 ${message.role}: ${message.text}
 
 New summary:
-`,
-      }),
-    ]);
+`),
+      ],
+    });
     this.summary = response.getTextContent();
   }
 

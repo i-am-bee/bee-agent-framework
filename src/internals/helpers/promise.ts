@@ -160,3 +160,7 @@ export async function executeSequentially(tasks: (() => Promise<any>)[]): Promis
     await task();
   }
 }
+
+export async function* toAsyncGenerator<T>(promise: T): AsyncGenerator<Awaited<T>> {
+  yield await promise;
+}

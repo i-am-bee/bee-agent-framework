@@ -21,10 +21,8 @@ import { getErrorSafe } from "./helpers/get-error-safe.js";
 import { findLast, isDeepEqual, isEmpty } from "remeda";
 import type { BeeCallbacks } from "@/agents/bee/types.js";
 import type { InferCallbackValue } from "@/emitter/types.js";
-import { type BaseLLMEvents } from "@/llms/base.js";
 import { FrameworkError } from "@/errors.js";
 import { Version } from "@/version.js";
-import { Role } from "@/llms/primitives/message.js";
 import type { GetRunContext, RunInstance } from "@/context.js";
 import type { GeneratedResponse, FrameworkSpan } from "./types.js";
 import { activeTracesMap, buildTraceTree } from "./tracer.js";
@@ -35,6 +33,8 @@ import type { BeeAgent } from "@/agents/bee/agent.js";
 import { instrumentationLogger } from "./logger.js";
 import { BaseAgent } from "@/agents/base.js";
 import { assertLLMWithMessagesToPromptFn } from "./helpers/utils.js";
+import { Role } from "@/backend/message.js";
+import { ChatModelEvents } from "@/backend/chat.js";
 
 export function createTelemetryMiddleware() {
   return (context: GetRunContext<RunInstance, unknown>) => {
@@ -73,12 +73,12 @@ export function createTelemetryMiddleware() {
 
     const idNameManager = new IdNameManager();
 
-    const newTokenEventName: keyof BaseLLMEvents = `newToken`;
+    const newTokenEventName: keyof ChatModelEvents = `newToken`;
     const partialUpdateEventName: keyof BeeCallbacks = "partialUpdate";
-    const successEventName: keyof BaseLLMEvents = `success`;
-    const finishEventName: keyof BaseLLMEvents = `finish`;
-    const startEventName: keyof BaseLLMEvents = `start`;
-    const errorEventName: keyof BaseLLMEvents = `error`;
+    const successEventName: keyof ChatModelEvents = `success`;
+    const finishEventName: keyof ChatModelEvents = `finish`;
+    const startEventName: keyof ChatModelEvents = `start`;
+    const errorEventName: keyof ChatModelEvents = `error`;
 
     const eventsIterationsMap = new Map<string, Map<string, string>>();
 
@@ -281,9 +281,8 @@ export function createTelemetryMiddleware() {
     // Read rawPrompt from llm input only for supported adapters and create the custom event with it
     emitter.match(
       (event) => assertLLMWithMessagesToPromptFn(event.creator) && event.name === startEventName,
-      ({ input }: InferCallbackValue<BaseLLMEvents[typeof startEventName]>, meta) => {
+      (_, meta) => {
         if (assertLLMWithMessagesToPromptFn(meta.creator) && meta.trace) {
-          const rawPrompt = meta.creator.messagesToPrompt(input);
           // create a custom path to prevent event duplication
           const path = `${meta.path}.custom`;
 
@@ -304,7 +303,7 @@ export function createTelemetryMiddleware() {
               startedAt: convertDateToPerformance(meta.createdAt),
               ...(parentSpanId && { parent: { id: parentSpanId } }),
               data: {
-                rawPrompt,
+                rawPrompt: undefined,
                 creator: meta.creator.createSnapshot(),
               },
             }),

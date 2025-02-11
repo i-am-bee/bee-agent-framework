@@ -40,9 +40,7 @@ const exclude: string[] = [
   "examples/workflows/competitive-analysis/**/*.ts",
   "examples/playground/**/*.ts",
   // prevents 'Too many requests' error on Free Tier
-  "examples/llms/providers/watsonx_verbose.ts",
   !getEnv("WATSONX_API_KEY") && [
-    "examples/llms/text.ts",
     "examples/llms/providers/watson*.ts",
     "examples/agents/experimental/replan.ts",
     "examples/agents/experimental/streamlit.ts",
@@ -59,10 +57,6 @@ const exclude: string[] = [
     "examples/llms/providers/openai.ts",
   ],
   !getEnv("AZURE_OPENAI_API_KEY") && ["examples/llms/providers/azure_openai.ts"],
-  !getEnv("IBM_VLLM_URL") && [
-    "examples/llms/providers/ibm-vllm.ts",
-    "examples/agents/granite/chat.ts",
-  ],
   !getEnv("COHERE_API_KEY") && ["examples/llms/providers/langchain.ts"],
   !getEnv("CODE_INTERPRETER_URL") && ["examples/tools/custom/python.ts"],
   !getEnv("ELASTICSEARCH_NODE") && ["examples/agents/elasticsearch.ts"],

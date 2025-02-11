@@ -47,12 +47,12 @@ In the following example, we will transform the knowledge gained into code.
 
 ```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
 const agent = new BeeAgent({
-  llm: new OllamaChatLLM(), // for more explore 'bee-agent-framework/adapters'
+  llm: new OllamaChatModel("llama3.1"), // for more explore 'bee-agent-framework/adapters'
   memory: new UnconstrainedMemory(), // for more explore 'bee-agent-framework/memory'
   tools: [new OpenMeteoTool()], // for more explore 'bee-agent-framework/tools'
 });

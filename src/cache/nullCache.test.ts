@@ -31,8 +31,8 @@ describe("NullCache", () => {
   it("Serializes", async () => {
     const instance = new NullCache();
     await instance.set("1", 1);
-    const serialized = instance.serialize();
-    const deserialized = NullCache.fromSerialized(serialized);
+    const serialized = await instance.serialize();
+    const deserialized = await NullCache.fromSerialized(serialized);
     verifyDeserialization(instance, deserialized);
   });
 });

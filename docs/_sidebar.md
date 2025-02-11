@@ -4,13 +4,14 @@
   - [Overview](overview.md)
   - [Examples](examples.md)
   - [Tutorials](tutorials.md)
+  - [Migration Guide](migration_guide.md)
   - [Changelog](CHANGELOG.md)
 
 - Modules
 
   - [Agents](agents.md)
   - [Workflows](workflows.md)
-  - [LLMs](llms.md)
+  - [Backend](backend.md)
   - [Templates](templates.md)
   - [Memory](memory.md)
   - [Emitter](emitter.md)

@@ -13,8 +13,8 @@ Serialization is a difficult task, and JavaScript does not provide a magic tool 
 import { Serializer } from "bee-agent-framework/serializer/serializer";
 
 const original = new Date("2024-01-01T00:00:00.000Z");
-const serialized = Serializer.serialize(original);
-const deserialized = Serializer.deserialize(serialized);
+const serialized = await Serializer.serialize(original);
+const deserialized = await Serializer.deserialize(serialized);
 
 console.info(deserialized instanceof Date); // true
 console.info(original.toISOString() === deserialized.toISOString()); // true
@@ -42,27 +42,15 @@ See the direct usage on the following memory example.
 
 ```ts
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { AssistantMessage, UserMessage } from "bee-agent-framework/backend/message";
 
-const llm = new OllamaChatLLM();
-const memory = new TokenMemory({ llm });
-await memory.addMany([
-  BaseMessage.of({
-    role: "user",
-    text: "What is your name?",
-  }),
-]);
+const memory = new TokenMemory();
+await memory.add(new UserMessage("What is your name?"));
 
-const serialized = memory.serialize();
-const deserialized = TokenMemory.fromSerialized(serialized);
+const serialized = await memory.serialize();
+const deserialized = await TokenMemory.fromSerialized(serialized);
 
-await deserialized.add(
-  BaseMessage.of({
-    role: "assistant",
-    text: "Bee",
-  }),
-);
+await deserialized.add(new AssistantMessage("Bee"));
 ```
 
 _Source: [examples/serialization/memory.ts](/examples/serialization/memory.ts)_
@@ -95,8 +83,8 @@ Serializer.register(MyClass, {
 });
 
 const instance = new MyClass("Bee");
-const serialized = Serializer.serialize(instance);
-const deserialized = Serializer.deserialize<MyClass>(serialized);
+const serialized = await Serializer.serialize(instance);
+const deserialized = await Serializer.deserialize<MyClass>(serialized);
 
 console.info(instance);
 console.info(deserialized);
@@ -133,8 +121,8 @@ class MyClass extends Serializable {
 }
 
 const instance = new MyClass("Bee");
-const serialized = instance.serialize();
-const deserialized = MyClass.fromSerialized(serialized);
+const serialized = await instance.serialize();
+const deserialized = await MyClass.fromSerialized(serialized);
 
 console.info(instance);
 console.info(deserialized);
@@ -152,15 +140,15 @@ _Source: [examples/serialization/customInternal.ts](/examples/serialization/cust
 
 ```ts
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { UserMessage } from "bee-agent-framework/backend/message";
 
 // String containing serialized `UnconstrainedMemory` instance with one message in it.
-const serialized = `{"__version":"0.0.0","__root":{"__serializer":true,"__class":"Object","__ref":"5","__value":{"target":"UnconstrainedMemory","snapshot":{"__serializer":true,"__class":"Object","__ref":"4","__value":{"messages":{"__serializer":true,"__class":"Array","__ref":"1","__value":[{"__serializer":true,"__class":"BaseMessage","__ref":"2","__value":{"role":"user","text":"Serialization is amazing, isn't?","meta":{"__serializer":true,"__class":"Undefined","__ref":"3"}}}]}}}}}}`;
+const serialized = `{"__version":"0.0.0","__root":{"__serializer":true,"__class":"Object","__ref":"18","__value":{"target":"UnconstrainedMemory","snapshot":{"__serializer":true,"__class":"Object","__ref":"17","__value":{"messages":{"__serializer":true,"__class":"Array","__ref":"1","__value":[{"__serializer":true,"__class":"SystemMessage","__ref":"2","__value":{"content":{"__serializer":true,"__class":"Array","__ref":"3","__value":[{"__serializer":true,"__class":"Object","__ref":"4","__value":{"type":"text","text":"You are a helpful assistant."}}]},"meta":{"__serializer":true,"__class":"Object","__ref":"5","__value":{"createdAt":{"__serializer":true,"__class":"Date","__ref":"6","__value":"2025-02-06T14:51:01.459Z"}}},"role":"system"}},{"__serializer":true,"__class":"UserMessage","__ref":"7","__value":{"content":{"__serializer":true,"__class":"Array","__ref":"8","__value":[{"__serializer":true,"__class":"Object","__ref":"9","__value":{"type":"text","text":"Hello!"}}]},"meta":{"__serializer":true,"__class":"Object","__ref":"10","__value":{"createdAt":{"__serializer":true,"__class":"Date","__ref":"11","__value":"2025-02-06T14:51:01.459Z"}}},"role":"user"}},{"__serializer":true,"__class":"AssistantMessage","__ref":"12","__value":{"content":{"__serializer":true,"__class":"Array","__ref":"13","__value":[{"__serializer":true,"__class":"Object","__ref":"14","__value":{"type":"text","text":"Hello, how can I help you?"}}]},"meta":{"__serializer":true,"__class":"Object","__ref":"15","__value":{"createdAt":{"__serializer":true,"__class":"Date","__ref":"16","__value":"2025-02-06T14:51:01.459Z"}}},"role":"assistant"}}]}}}}}}`;
 
-// If `BaseMessage` was not imported the serialization would fail because the `BaseMessage` had no chance to register itself.
-const memory = UnconstrainedMemory.fromSerialized(serialized, {
+// If `Message` was not imported the serialization would fail because the `Message` had no chance to register itself.
+const memory = await UnconstrainedMemory.fromSerialized(serialized, {
   // this part can be omitted if all classes used in the serialized string are imported (and have `static` register block) or at least one initiated
-  extraClasses: [BaseMessage],
+  extraClasses: [UserMessage],
 });
 console.info(memory.messages);
 ```

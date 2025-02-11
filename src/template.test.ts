@@ -181,9 +181,9 @@ describe("Prompt Template", () => {
       });
     };
 
-    it("Clones", () => {
+    it("Clones", async () => {
       const template = createTemplate();
-      const cloned = template.clone();
+      const cloned = await template.clone();
       expect(cloned).toEqual(template);
     });
 

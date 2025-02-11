@@ -1,5 +1,5 @@
 import { Callback, Emitter } from "bee-agent-framework/emitter/emitter";
-import { BaseLLM } from "bee-agent-framework/llms/base";
+import { ChatModel } from "bee-agent-framework/backend/chat";
 
 interface Events {
   update: Callback<{ data: string }>;
@@ -20,7 +20,7 @@ emitter.match("*.*", async (data, event) => {});
 
 // Match events by providing a filter function
 emitter.match(
-  (event) => event.creator instanceof BaseLLM,
+  (event) => event.creator instanceof ChatModel,
   async (data, event) => {},
 );
 

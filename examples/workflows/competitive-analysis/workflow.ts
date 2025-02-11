@@ -1,6 +1,4 @@
 import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
-import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
 import {
   categorizationPromptTemplate,
   competitorsPromptTemplate,
@@ -12,6 +10,7 @@ import {
 import { State, StateSchema } from "./state.js";
 import { deduplicateAndFormatSources, formatSources, getChatLLM, tavilySearch } from "./utils.js";
 import { isEmpty, mapValues } from "remeda";
+import { AssistantMessage, SystemMessage } from "bee-agent-framework/backend/message";
 
 export enum Steps {
   GENERATE_COMPETITORS = "GENERATE_COMPETITORS",
@@ -34,21 +33,22 @@ async function generateCompetitors(state: State) {
   }
 
   const llm = getChatLLM();
-  const llmJsonMode = new JsonDriver(llm);
-  const result = await llmJsonMode.generate(competitorsSchema, [
-    BaseMessage.of({
-      role: Role.SYSTEM,
-      text: competitorsPromptTemplate.render({
-        industry: state.industry,
-        specifiedCompetitors: undefined,
-      }),
-    }),
-  ]);
+  const result = await llm.createStructure({
+    schema: competitorsSchema,
+    messages: [
+      new SystemMessage(
+        competitorsPromptTemplate.render({
+          industry: state.industry,
+          specifiedCompetitors: undefined,
+        }),
+      ),
+    ],
+  });
 
   return {
     update: {
-      competitors: result.parsed.competitors,
-      runningSummary: result.parsed.overview,
+      competitors: result.object.competitors,
+      runningSummary: result.object.overview,
       competitorFindings: mapValues(state.competitors, () => []),
     },
   };
@@ -98,22 +98,23 @@ async function categorizeFindings(state: State) {
   }
 
   const llm = getChatLLM();
-  const llmJsonMode = new JsonDriver(llm);
-  const result = await llmJsonMode.generate(findingsSchema, [
-    BaseMessage.of({
-      role: Role.SYSTEM,
-      text: categorizationPromptTemplate.render({
-        competitor: state.currentCompetitor,
-        searchResults: state.webResearchResults[state.webResearchResults.length - 1],
-      }),
-    }),
-  ]);
+  const result = await llm.createStructure({
+    schema: findingsSchema,
+    messages: [
+      new SystemMessage(
+        categorizationPromptTemplate.render({
+          competitor: state.currentCompetitor,
+          searchResults: state.webResearchResults[state.webResearchResults.length - 1],
+        }),
+      ),
+    ],
+  });
 
   const updatedFindings = {
     ...state.competitorFindings,
     [state.currentCompetitor]: [
-      ...(result.parsed.key_insights || []),
-      ...(result.parsed.unique_capabilities || []),
+      ...(result.object.key_insights || []),
+      ...(result.object.unique_capabilities || []),
     ],
   };
 
@@ -142,7 +143,7 @@ ${competitorSections}
 ${state.sourcesGathered.join("\n")}`;
 
   return {
-    update: { answer: BaseMessage.of({ role: Role.ASSISTANT, text: finalSummary }) },
+    update: { answer: new AssistantMessage(finalSummary) },
     next: Steps.REFLECTION,
   };
 }
@@ -153,21 +154,21 @@ async function reflectAndImprove(state: State) {
   }
 
   const llm = getChatLLM();
-  const llmJsonMode = new JsonDriver(llm);
+  const result = await llm.createStructure({
+    schema: reflectionSchema,
+    messages: [
+      new SystemMessage(
+        reflectionPromptTemplate.render({
+          analysis: state.answer.text,
+          previous_feedback: state.reflectionFeedback,
+        }),
+      ),
+    ],
+  });
 
-  const result = await llmJsonMode.generate(reflectionSchema, [
-    BaseMessage.of({
-      role: Role.SYSTEM,
-      text: reflectionPromptTemplate.render({
-        analysis: state.answer.text,
-        previous_feedback: state.reflectionFeedback,
-      }),
-    }),
-  ]);
+  const feedback = [...(result.object.critique || []), ...(result.object.suggestions || [])];
 
-  const feedback = [...(result.parsed.critique || []), ...(result.parsed.suggestions || [])];
-
-  if (result.parsed.should_iterate && state.reflectionIteration < state.maxReflectionIterations) {
+  if (result.object.should_iterate && state.reflectionIteration < state.maxReflectionIterations) {
     return {
       update: {
         reflectionFeedback: feedback,
@@ -177,10 +178,9 @@ async function reflectAndImprove(state: State) {
     };
   }
 
-  const finalAnalysis = BaseMessage.of({
-    role: Role.ASSISTANT,
-    text: `${state.answer.text}\n\n## Reflection Notes\n${feedback.map((f) => `* ${f}`).join("\n")}`,
-  });
+  const finalAnalysis = new AssistantMessage(
+    `${state.answer.text}\n\n## Reflection Notes\n${feedback.map((f) => `* ${f}`).join("\n")}`,
+  );
 
   return {
     update: { answer: finalAnalysis },

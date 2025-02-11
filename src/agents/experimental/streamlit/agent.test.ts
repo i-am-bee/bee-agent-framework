@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import { verifyDeserialization } from "@tests/e2e/utils.js";
-import { StreamlitAgent } from "@/agents/experimental/streamlit/agent.js";
+import { OllamaChatModel } from "@/adapters/ollama/backend/chat.js";
+import { StreamlitAgent } from "./agent.js";
 import { UnconstrainedMemory } from "@/memory/unconstrainedMemory.js";
-import { OllamaChatLLM } from "@/adapters/ollama/chat.js";
+import { verifyDeserialization } from "@tests/e2e/utils.js";
 
 describe("Streamlit agent", () => {
   it("Serializes", async () => {
     const instance = new StreamlitAgent({
-      llm: new OllamaChatLLM(),
+      llm: new OllamaChatModel("llama3.1"),
       memory: new UnconstrainedMemory(),
     });
-    const serialized = instance.serialize();
-    const deserialized = StreamlitAgent.fromSerialized(serialized);
+    const serialized = await instance.serialize();
+    const deserialized = await StreamlitAgent.fromSerialized(serialized);
     verifyDeserialization(instance, deserialized);
   });
 });

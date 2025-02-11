@@ -17,8 +17,7 @@
 import { BaseAgent } from "@/agents/base.js";
 import { AnyTool } from "@/tools/base.js";
 import { BaseMemory } from "@/memory/base.js";
-import { ChatLLM, ChatLLMOutput } from "@/llms/chat.js";
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
+import { AssistantMessage, Message, UserMessage } from "@/backend/message.js";
 import { AgentMeta } from "@/agents/types.js";
 import { Emitter } from "@/emitter/emitter.js";
 import {
@@ -37,13 +36,14 @@ import { GraniteRunner } from "@/agents/bee/runners/granite/runner.js";
 import { DeepThinkRunner } from "@/agents/bee/runners/deep-think/runner.js";
 import { ValueError } from "@/errors.js";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
+import { ChatModel } from "@/backend/chat.js";
 
 export type BeeTemplateFactory<K extends keyof BeeAgentTemplates> = (
   template: BeeAgentTemplates[K],
 ) => BeeAgentTemplates[K];
 
 export interface BeeInput {
-  llm: ChatLLM<ChatLLMOutput>;
+  llm: ChatModel;
   tools: AnyTool[];
   memory: BaseMemory;
   meta?: Omit<AgentMeta, "tools">;
@@ -51,6 +51,7 @@ export interface BeeInput {
     [K in keyof BeeAgentTemplates]: BeeAgentTemplates[K] | BeeTemplateFactory<K>;
   }>;
   execution?: BeeAgentExecutionConfig;
+  stream?: boolean;
 }
 
 export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions> {
@@ -134,7 +135,7 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
     );
     await runner.init(input);
 
-    let finalMessage: BaseMessage | undefined;
+    let finalMessage: Message | undefined;
     while (!finalMessage) {
       const { state, meta, emitter, signal } = await runner.createIteration();
 
@@ -146,17 +147,16 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
           signal,
         });
         await runner.memory.add(
-          BaseMessage.of({
-            role: Role.ASSISTANT,
-            text: runner.templates.assistant.render({
+          new AssistantMessage(
+            runner.templates.assistant.render({
               thought: [state.thought].filter(R.isTruthy),
               toolName: [state.tool_name].filter(R.isTruthy),
               toolInput: [state.tool_input].filter(R.isTruthy).map((call) => JSON.stringify(call)),
               toolOutput: [output],
               finalAnswer: [state.final_answer].filter(R.isTruthy),
             }),
-            meta: { success },
-          }),
+            { success },
+          ),
         );
         assign(state, { tool_output: output });
 
@@ -170,12 +170,8 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
         }
       }
       if (state.final_answer) {
-        finalMessage = BaseMessage.of({
-          role: Role.ASSISTANT,
-          text: state.final_answer,
-          meta: {
-            createdAt: new Date(),
-          },
+        finalMessage = new AssistantMessage(state.final_answer, {
+          createdAt: new Date(),
         });
         await runner.memory.add(finalMessage);
         await emitter.emit("success", {
@@ -189,12 +185,8 @@ export class BeeAgent extends BaseAgent<BeeRunInput, BeeRunOutput, BeeRunOptions
 
     if (input.prompt !== null) {
       await this.input.memory.add(
-        BaseMessage.of({
-          role: Role.USER,
-          text: input.prompt,
-          meta: {
-            createdAt: run.createdAt,
-          },
+        new UserMessage(input.prompt, {
+          createdAt: run.createdAt,
         }),
       );
     }

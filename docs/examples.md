@@ -43,7 +43,6 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 - [`decoratorCacheComplex.ts`](/examples/cache/decoratorCacheComplex.ts): Complex cache decorator example
 - [`fileCache.ts`](/examples/cache/fileCache.ts): File-based caching
 - [`fileCacheCustomProvider.ts`](/examples/cache/fileCacheCustomProvider.ts): Custom provider for file cache
-- [`llmCache.ts`](/examples/cache/llmCache.ts): Caching for language models
 - [`slidingCache.ts`](/examples/cache/slidingCache.ts): Sliding window cache implementation
 - [`toolCache.ts`](/examples/cache/toolCache.ts): Caching for tools
 - [`unconstrainedCache.ts`](/examples/cache/unconstrainedCache.ts): Unconstrained cache example
@@ -62,23 +61,17 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 
 ## LLMs (Language Models)
 
-- [`chat.ts`](/examples/llms/chat.ts): Chat-based language model usage
-- [`chatCallback.ts`](/examples/llms/chatCallback.ts): Callbacks for chat models
-- [`chatStream.ts`](/examples/llms/chatStream.ts): Streaming with chat models
-- [`structured.ts`](/examples/llms/structured.ts): Structured output from language models
-- [`text.ts`](/examples/llms/text.ts): Text-based language model usage
+- [`chat.ts`](/examples/backend/chat.ts): Chat-based language model usage
+- [`chatCallback.ts`](/examples/backend/chatStream.ts): Callbacks for chat models
+- [`structured.ts`](/examples/backend/structured.ts): Structured output from language models
 
 ### LLM Providers
 
-- [`customChatProvider.ts`](/examples/llms/providers/customChatProvider.ts): Custom chat provider implementation
-- [`customProvider.ts`](/examples/llms/providers/customProvider.ts): Custom language model provider
-- [`groq.ts`](/examples/llms/providers/groq.ts): Groq language model integration
-- [`ibm-vllm.ts`](/examples/llms/providers/ibm-vllm.ts): IBM vLLM integration
-- [`langchain.ts`](/examples/llms/providers/langchain.ts): LangChain integration
-- [`ollama.ts`](/examples/llms/providers/ollama.ts): Ollama model usage
-- [`openai.ts`](/examples/llms/providers/openai.ts): OpenAI integration
-- [`watsonx.ts`](/examples/llms/providers/watsonx.ts): WatsonX integration
-- [`watsonx_verbose.ts`](/examples/llms/providers/watsonx_verbose.ts): Verbose WatsonX usage
+- [`groq.ts`](/examples/backend/providers/groq.ts): Groq language model integration
+- [`langchain.ts`](/examples/backend/providers/langchain.ts): LangChain integration
+- [`ollama.ts`](/examples/backend/providers/ollama.ts): Ollama model usage
+- [`openai.ts`](/examples/backend/providers/openai.ts): OpenAI integration
+- [`watsonx.ts`](/examples/backend/providers/watsonx.ts): Watsonx integration
 
 ## Logger
 

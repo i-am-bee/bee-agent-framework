@@ -1,22 +1,25 @@
 import { BaseAgent, BaseAgentRunOptions } from "bee-agent-framework/agents/base";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
+import {
+  AssistantMessage,
+  Message,
+  SystemMessage,
+  UserMessage,
+} from "bee-agent-framework/backend/message";
 import { Emitter } from "bee-agent-framework/emitter/emitter";
 import { GetRunContext } from "bee-agent-framework/context";
-import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
 import { z } from "zod";
-import { PromptTemplate } from "bee-agent-framework/template";
 import { AgentMeta } from "bee-agent-framework/agents/types";
-import { ChatLLM, ChatLLMOutput } from "bee-agent-framework/llms/chat";
 import { BaseMemory } from "bee-agent-framework/memory/base";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
+import { ChatModel } from "bee-agent-framework/backend/chat";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 interface RunInput {
-  message: BaseMessage;
+  message: Message;
 }
 
 interface RunOutput {
-  message: BaseMessage;
+  message: Message;
   state: {
     thought: string;
     final_answer: string;
@@ -28,35 +31,21 @@ interface RunOptions extends BaseAgentRunOptions {
 }
 
 interface AgentInput {
-  llm: ChatLLM<ChatLLMOutput>;
+  llm: ChatModel;
   memory: BaseMemory;
 }
 
 export class CustomAgent extends BaseAgent<RunInput, RunOutput, RunOptions> {
-  protected driver: JsonDriver;
   public readonly memory: BaseMemory;
+  protected readonly model: ChatModel;
   public emitter = Emitter.root.child({
     namespace: ["agent", "custom"],
     creator: this,
   });
 
-  protected static systemPrompt = new PromptTemplate({
-    schema: z.object({
-      schema: z.string().min(1),
-    }),
-    template: `You are a helpful assistant that generates only valid JSON adhering to the following JSON Schema.
-
-\`\`\`
-{{schema}}
-\`\`\`
-
-IMPORTANT: Every message must be a parsable JSON string without additional output.
-`,
-  });
-
   constructor(input: AgentInput) {
     super();
-    this.driver = JsonDriver.fromTemplate(CustomAgent.systemPrompt, input.llm);
+    this.model = input.llm;
     this.memory = input.memory;
   }
 
@@ -65,8 +54,8 @@ IMPORTANT: Every message must be a parsable JSON string without additional outpu
     options: RunOptions,
     run: GetRunContext<this>,
   ): Promise<RunOutput> {
-    const response = await this.driver.generate(
-      z.object({
+    const response = await this.model.createStructure({
+      schema: z.object({
         thought: z
           .string()
           .describe("Describe your thought process before coming with a final answer"),
@@ -74,22 +63,21 @@ IMPORTANT: Every message must be a parsable JSON string without additional outpu
           .string()
           .describe("Here you should provide concise answer to the original question."),
       }),
-      [...this.memory.messages, input.message],
-      {
-        maxRetries: options?.maxRetries,
-        options: { signal: run.signal },
-      },
-    );
-
-    const result = BaseMessage.of({
-      role: Role.ASSISTANT,
-      text: response.parsed.final_answer,
+      messages: [
+        new SystemMessage("You are a helpful assistant. Always use JSON format for you responses."),
+        ...this.memory.messages,
+        input.message,
+      ],
+      maxRetries: options?.maxRetries,
+      abortSignal: run.signal,
     });
+
+    const result = new AssistantMessage(response.object.final_answer);
     await this.memory.add(result);
 
     return {
       message: result,
-      state: response.parsed,
+      state: response.object,
     };
   }
 
@@ -104,7 +92,6 @@ IMPORTANT: Every message must be a parsable JSON string without additional outpu
   createSnapshot() {
     return {
       ...super.createSnapshot(),
-      driver: this.driver,
       emitter: this.emitter,
       memory: this.memory,
     };
@@ -116,10 +103,11 @@ IMPORTANT: Every message must be a parsable JSON string without additional outpu
 }
 
 const agent = new CustomAgent({
-  llm: new OllamaChatLLM(),
+  llm: new OllamaChatModel("granite3.1-dense"),
   memory: new UnconstrainedMemory(),
 });
+
 const response = await agent.run({
-  message: BaseMessage.of({ role: Role.USER, text: "Why is the sky blue?" }),
+  message: new UserMessage("Why is the sky blue?"),
 });
 console.info(response.state);

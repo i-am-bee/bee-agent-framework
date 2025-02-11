@@ -31,11 +31,11 @@ import {
 } from "@/agents/bee/prompts.js";
 import { AnyTool, Tool, ToolError, ToolInputValidationError, ToolOutput } from "@/tools/base.js";
 import { FrameworkError } from "@/errors.js";
-import { isEmpty, isTruthy, last } from "remeda";
-import { LinePrefixParser, LinePrefixParserError } from "@/agents/parsers/linePrefix.js";
-import { JSONParserField, ZodParserField } from "@/agents/parsers/field.js";
+import { isTruthy, last } from "remeda";
+import { LinePrefixParser, LinePrefixParserError } from "@/parsers/linePrefix.js";
+import { JSONParserField, ZodParserField } from "@/parsers/field.js";
 import { z } from "zod";
-import { BaseMessage, Role } from "@/llms/primitives/message.js";
+import { AssistantMessage, Role, SystemMessage, UserMessage } from "@/backend/message.js";
 import { TokenMemory } from "@/memory/tokenMemory.js";
 import { getProp } from "@/internals/helpers/object.js";
 import { BaseMemory } from "@/memory/base.js";
@@ -43,6 +43,8 @@ import { Cache } from "@/cache/decoratorCache.js";
 import { shallowCopy } from "@/serializer/utils.js";
 
 export class DefaultRunner extends BaseRunner {
+  protected useNativeToolCalling = false;
+
   @Cache({ enumerable: false })
   public get defaultTemplates() {
     return {
@@ -75,22 +77,14 @@ export class DefaultRunner extends BaseRunner {
           // Prevent hanging on EOT
           if (error.reason === LinePrefixParserError.Reason.NoDataReceived) {
             await this.memory.add(
-              BaseMessage.of({
-                role: Role.ASSISTANT,
-                text: "\n",
-                meta: {
-                  [tempMessageKey]: true,
-                },
+              new AssistantMessage("\n", {
+                [tempMessageKey]: true,
               }),
             );
           } else {
             await this.memory.add(
-              BaseMessage.of({
-                role: Role.USER,
-                text: this.templates.schemaError.render({}),
-                meta: {
-                  [tempMessageKey]: true,
-                },
+              new UserMessage(this.templates.schemaError.render({}), {
+                [tempMessageKey]: true,
               }),
             );
           }
@@ -100,14 +94,13 @@ export class DefaultRunner extends BaseRunner {
         const tools = this.input.tools.slice();
         await emitter.emit("start", { meta, tools, memory: this.memory });
 
-        const { parser, parserRegex } = this.createParser(tools);
-        const llmOutput = await this.input.llm
-          .generate(this.memory.messages.slice(), {
-            signal,
-            stream: true,
-            guided: {
-              regex: parserRegex.source,
-            },
+        const { parser } = this.createParser(tools);
+        const raw = await this.input.llm
+          .create({
+            messages: this.memory.messages.slice(),
+            tools: this.useNativeToolCalling ? tools : undefined,
+            abortSignal: signal,
+            stream: this.input.stream !== false,
           })
           .observe((llmEmitter) => {
             parser.emitter.on("update", async ({ value, key, field }) => {
@@ -149,7 +142,7 @@ export class DefaultRunner extends BaseRunner {
 
         return {
           state: parser.finalState,
-          raw: llmOutput,
+          raw,
         };
       },
       config: {
@@ -277,13 +270,7 @@ export class DefaultRunner extends BaseRunner {
       user: {
         message: ({ prompt }: BeeRunInput) =>
           prompt !== null || this.input.memory.isEmpty()
-            ? BaseMessage.of({
-                role: Role.USER,
-                text: prompt || this.templates.userEmpty.render({}),
-                meta: {
-                  createdAt: new Date(),
-                },
-              })
+            ? new UserMessage(prompt || this.templates.userEmpty.render({}))
             : undefined,
       },
       system: {
@@ -305,24 +292,23 @@ export class DefaultRunner extends BaseRunner {
           },
         },
         message: async () =>
-          BaseMessage.of({
-            role: Role.SYSTEM,
-            text: this.templates.system.render({
+          new SystemMessage(
+            this.templates.system.render({
               tools: await self.system.variables.tools(),
               instructions: undefined,
               createdAt: new Date().toISOString(),
             }),
-            meta: {
+            {
               createdAt: new Date(),
             },
-          }),
+          ),
       },
     };
     return self;
   }
 
   protected async initMemory({ prompt }: BeeRunInput): Promise<BaseMemory> {
-    const { memory: history, llm } = this.input;
+    const { memory: history } = this.input;
 
     const prevConversation = [...history.messages, this.renderers.user.message({ prompt })]
       .filter(isTruthy)
@@ -339,17 +325,12 @@ export class DefaultRunner extends BaseRunner {
                 },
               });
 
-          return BaseMessage.of({
-            role: Role.USER,
-            text,
-            meta: message.meta,
-          });
+          return new UserMessage(text, message.meta);
         }
         return message;
       });
 
     const memory = new TokenMemory({
-      llm,
       capacityThreshold: 0.85,
       syncThreshold: 0.5,
       handlers: {
@@ -380,12 +361,6 @@ export class DefaultRunner extends BaseRunner {
   }
 
   protected createParser(tools: AnyTool[]) {
-    const parserRegex = isEmpty(tools)
-      ? new RegExp(`Thought: .+\\nFinal Answer: [\\s\\S]+`)
-      : new RegExp(
-          `Thought: .+\\n(?:Final Answer: [\\s\\S]+|Function Name: (${tools.map((tool) => tool.name).join("|")})\\nFunction Input: \\{.*\\}\\nFunction Output:)`,
-        );
-
     const parser = new LinePrefixParser<BeeParserInput>(
       {
         thought: {
@@ -443,7 +418,6 @@ export class DefaultRunner extends BaseRunner {
 
     return {
       parser,
-      parserRegex,
     } as const;
   }
 }

@@ -14,10 +14,11 @@
   <h4 align="center">Open-source framework for building, deploying, and serving powerful multi-agent workflows at scale.</h4>
 </p>
 
-🐝 **Bee Agent Framework** is an open-source TypeScript library for building **production-ready multi-agent systems**. Pick from a variety of [🌐 LLM providers](/docs/llms.md#providers-adapters), customize the [📜 prompt templates](/docs/templates.md), create [🤖 agents](/docs/agents.md), equip agents with pre-made [🛠️ tools](/docs/tools.md), and orchestrate [🤖🤝🤖 multi-agent workflows](/docs/workflows.md)! 🪄
+🐝 **Bee Agent Framework** is an open-source TypeScript library for building **production-ready multi-agent systems**. Pick from a variety of [🌐 AI Providers](/docs/backend.md), customize the [📜 prompt templates](/docs/templates.md), create [🤖 agents](/docs/agents.md), equip agents with pre-made [🛠️ tools](/docs/tools.md), and orchestrate [🤖🤝🤖 multi-agent workflows](/docs/workflows.md)! 🪄
 
 ## Latest updates
 
+- 🚀 **2025-02-07**: Introduced [Backend](/docs/backend.md) module to simplify working with AI services (chat, embedding). See [migration guide](/docs/migration_guide.md).
 - 🧠 **2025-01-28**: Added support for [DeepSeek R1](https://api-docs.deepseek.com/news/news250120), check out the [Competitive Analysis Workflow example](https://github.com/i-am-bee/bee-agent-framework/tree/main/examples/workflows/competitive-analysis)
 - 🚀 **2025-01-09**:
   - Introduced [Workflows](/docs/workflows.md), a way of building multi-agent systems.
@@ -30,7 +31,7 @@ For a full changelog, see the [releases page](https://github.com/i-am-bee/bee-ag
 ## Why pick Bee?
 
 - ⚔️ **Battle-tested.** Bee Agent Framework is at the core of [BeeAI](https://iambee.ai), a powerful platform for building chat assistants and custom AI-powered apps. BeeAI is in a closed beta, but already used by hundreds of users. And it's [fully open-source](https://github.com/i-am-bee/bee-ui) too!
-- 🚀 **Production-grade.** In an actual product, you have to reduce token spend through [memory strategies](/docs/memory.md), store and restore the agent state through [(de)serialization](/docs/serialization.md), generate [structured output](/examples/llms/structured.ts), or execute generated code in a [sandboxed environment](https://github.com/i-am-bee/bee-code-interpreter). Leave all that to Bee and focus on building!
+- 🚀 **Production-grade.** In an actual product, you have to reduce token spend through [memory strategies](/docs/memory.md), store and restore the agent state through [(de)serialization](/docs/serialization.md), generate [structured output](/examples/backend/structured.ts), or execute generated code in a [sandboxed environment](https://github.com/i-am-bee/bee-code-interpreter). Leave all that to Bee and focus on building!
 - 🤗 **Built for open-source models.** Pick any LLM you want – including small and open-source models. The framework is designed to perform robustly with [Granite](https://www.ibm.com/granite/docs/) and [Llama 3.x](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct). A full agentic workflow can run on your laptop!
 - 😢 **Bee cares about the sad path too.** Real-world applications encounter errors and failures. Bee lets you observe the full agent workflow through [events](/docs/emitter.md), collect [telemetry](/docs/instrumentation.md), [log](/docs/logger.md) diagnostic data, and throws clear and well-defined [exceptions](/docs/errors.md). Bees may be insects, but not bugs!
 - 🌳 **A part of something greater.** Bee isn't just a framework, but a full ecosystem. Use [Bee UI](https://github.com/i-am-bee/bee-ui) to chat with your agents visually. [Bee Observe](https://github.com/i-am-bee/bee-observe) collects and manages telemetry. [Bee Code Interpreter](https://github.com/i-am-bee/bee-code-interpreter) runs generated code safely in a secure sandbox. The Bee ecosystem also integrates with [Model Context Protocol](https://i-am-bee.github.io/bee-agent-framework/#/tools?id=using-the-mcptool-class), allowing interoperability with the wider agent ecosystem!
@@ -47,7 +48,7 @@ import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMem
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
+import { Message, Role } from "bee-agent-framework/llms/primitives/message";
 import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
 
 const workflow = new AgentWorkflow();
@@ -77,7 +78,7 @@ workflow.addAgent({
 const memory = new UnconstrainedMemory();
 
 await memory.add(
-  BaseMessage.of({
+  Message.of({
     role: Role.USER,
     text: "What is the capital of France and what is the current weather there?",
     meta: { createdAt: new Date() },
@@ -119,16 +120,16 @@ yarn add bee-agent-framework
 
 ```ts
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
 import { DuckDuckGoSearchTool } from "bee-agent-framework/tools/search/duckDuckGoSearch";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 
-const llm = new OllamaChatLLM(); // default is llama3.1 (8B), it is recommended to use 70B model
+const llm = new OllamaChatModel("llama3.1"); // default is llama3.1 (8B), it is recommended to use 70B model
 
 const agent = new BeeAgent({
   llm, // for more explore 'bee-agent-framework/adapters'
-  memory: new TokenMemory({ llm }), // for more explore 'bee-agent-framework/memory'
+  memory: new TokenMemory(), // for more explore 'bee-agent-framework/memory'
   tools: [new DuckDuckGoSearchTool(), new OpenMeteoTool()], // for more explore 'bee-agent-framework/tools'
 });
 
@@ -174,22 +175,21 @@ console.log(`Agent 🤖 : `, response.result.text);
 
 The source directory (`src`) provides numerous modules that one can use.
 
-| Name                                             | Description                                                                                 |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| [**agents**](/docs/agents.md)                    | Base classes defining the common interface for agent.                                       |
-| [**workflows**](/docs/workflows.md)              | Build agentic applications in a declarative way via [workflows](/docs/workflows.md).        |
-| [**llms**](/docs/llms.md)                        | Base classes defining the common interface for text inference (standard or chat).           |
-| [**template**](/docs/templates.md)               | Prompt Templating system based on `Mustache` with various improvements.                     |
-| [**memory**](/docs/memory.md)                    | Various types of memories to use with agent.                                                |
-| [**tools**](/docs/tools.md)                      | Tools that an agent can use.                                                                |
-| [**cache**](/docs/cache.md)                      | Preset of different caching approaches that can be used together with tools.                |
-| [**errors**](/docs/errors.md)                    | Error classes and helpers to catch errors fast.                                             |
-| [**adapters**](/docs/llms.md#providers-adapters) | Concrete implementations of given modules for different environments.                       |
-| [**logger**](/docs/logger.md)                    | Core component for logging all actions within the framework.                                |
-| [**serializer**](/docs/serialization.md)         | Core component for the ability to serialize/deserialize modules into the serialized format. |
-| [**version**](/docs/version.md)                  | Constants representing the framework (e.g., latest version)                                 |
-| [**emitter**](/docs/emitter.md)                  | Bringing visibility to the system by emitting events.                                       |
-| **internals**                                    | Modules used by other modules within the framework.                                         |
+| Name                                     | Description                                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [**agents**](/docs/agents.md)            | Base classes defining the common interface for agent.                                       |
+| [**workflows**](/docs/workflows.md)      | Build agentic applications in a declarative way via [workflows](/docs/workflows.md).        |
+| [**backend**](/docs/backend.md)          | Functionalities that relates to AI models (chat, embedding, image, tool calling, ...)       |
+| [**template**](/docs/templates.md)       | Prompt Templating system based on `Mustache` with various improvements.                     |
+| [**memory**](/docs/memory.md)            | Various types of memories to use with agent.                                                |
+| [**tools**](/docs/tools.md)              | Tools that an agent can use.                                                                |
+| [**cache**](/docs/cache.md)              | Preset of different caching approaches that can be used together with tools.                |
+| [**errors**](/docs/errors.md)            | Error classes and helpers to catch errors fast.                                             |
+| [**logger**](/docs/logger.md)            | Core component for logging all actions within the framework.                                |
+| [**serializer**](/docs/serialization.md) | Core component for the ability to serialize/deserialize modules into the serialized format. |
+| [**version**](/docs/version.md)          | Constants representing the framework (e.g., latest version)                                 |
+| [**emitter**](/docs/emitter.md)          | Bringing visibility to the system by emitting events.                                       |
+| **internals**                            | Modules used by other modules within the framework.                                         |
 
 To see more in-depth explanation see [overview](/docs/overview.md).
 

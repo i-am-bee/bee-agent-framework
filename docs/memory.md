@@ -14,23 +14,15 @@ Memory in the context of an agent refers to the system's capability to store, re
 
 ```ts
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { AssistantMessage, SystemMessage, UserMessage } from "bee-agent-framework/backend/message";
 
 const memory = new UnconstrainedMemory();
 
 // Single message
-await memory.add(
-  BaseMessage.of({
-    role: "system",
-    text: `You are a helpful assistant.`,
-  }),
-);
+await memory.add(new SystemMessage(`You are a helpful assistant.`));
 
 // Multiple messages
-await memory.addMany([
-  BaseMessage.of({ role: "user", text: `What can you do?` }),
-  BaseMessage.of({ role: "assistant", text: `Everything!` }),
-]);
+await memory.addMany([new UserMessage(`What can you do?`), new AssistantMessage(`Everything!`)]);
 
 console.info(memory.isEmpty()); // false
 console.info(memory.messages); // prints all saved messages
@@ -45,23 +37,23 @@ _Source: [examples/memory/base.ts](/examples/memory/base.ts)_
 <!-- embedme examples/memory/llmMemory.ts -->
 
 ```ts
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Message } from "bee-agent-framework/backend/message";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const memory = new UnconstrainedMemory();
 await memory.addMany([
-  BaseMessage.of({
+  Message.of({
     role: "system",
     text: `Always respond very concisely.`,
   }),
-  BaseMessage.of({ role: "user", text: `Give me first 5 prime numbers.` }),
+  Message.of({ role: "user", text: `Give me first 5 prime numbers.` }),
 ]);
 
 // Generate response
-const llm = new OllamaChatLLM();
-const response = await llm.generate(memory.messages);
-await memory.add(BaseMessage.of({ role: "assistant", text: response.getTextContent() }));
+const llm = new OllamaChatModel("llama3.1");
+const response = await llm.create({ messages: memory.messages });
+await memory.add(Message.of({ role: "assistant", text: response.getTextContent() }));
 
 console.log(`Conversation history`);
 for (const message of memory) {
@@ -82,11 +74,11 @@ _Source: [examples/memory/llmMemory.ts](/examples/memory/llmMemory.ts)_
 ```ts
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const agent = new BeeAgent({
   memory: new UnconstrainedMemory(),
-  llm: new OllamaChatLLM(),
+  llm: new OllamaChatModel("llama3.1"),
   tools: [],
 });
 await agent.run({ prompt: "Hello world!" });
@@ -126,11 +118,11 @@ Unlimited in size.
 
 ```ts
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Message } from "bee-agent-framework/backend/message";
 
 const memory = new UnconstrainedMemory();
 await memory.add(
-  BaseMessage.of({
+  Message.of({
     role: "user",
     text: `Hello world!`,
   }),
@@ -151,7 +143,7 @@ Keeps last `k` entries in the memory. The oldest ones are deleted (unless specif
 
 ```ts
 import { SlidingMemory } from "bee-agent-framework/memory/slidingMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Message } from "bee-agent-framework/backend/message";
 
 const memory = new SlidingMemory({
   size: 3, // (required) number of messages that can be in the memory at a single moment
@@ -162,11 +154,11 @@ const memory = new SlidingMemory({
   },
 });
 
-await memory.add(BaseMessage.of({ role: "system", text: "You are a guide through France." }));
-await memory.add(BaseMessage.of({ role: "user", text: "What is the capital?" }));
-await memory.add(BaseMessage.of({ role: "assistant", text: "Paris" }));
-await memory.add(BaseMessage.of({ role: "user", text: "What language is spoken there?" })); // removes the first user's message
-await memory.add(BaseMessage.of({ role: "assistant", text: "French" })); // removes the first assistant's message
+await memory.add(Message.of({ role: "system", text: "You are a guide through France." }));
+await memory.add(Message.of({ role: "user", text: "What is the capital?" }));
+await memory.add(Message.of({ role: "assistant", text: "Paris" }));
+await memory.add(Message.of({ role: "user", text: "What language is spoken there?" })); // removes the first user's message
+await memory.add(Message.of({ role: "assistant", text: "French" })); // removes the first assistant's message
 
 console.info(memory.isEmpty()); // false
 console.log(memory.messages.length); // 3
@@ -184,13 +176,10 @@ If overflow occurs, the oldest message will be removed.
 
 ```ts
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { Message } from "bee-agent-framework/backend/message";
 
-const llm = new OllamaChatLLM();
 const memory = new TokenMemory({
-  llm,
-  maxTokens: undefined, // optional (default is inferred from the passed LLM instance),
+  maxTokens: undefined, // optional (default is 128k),
   capacityThreshold: 0.75, // maxTokens*capacityThreshold = threshold where we start removing old messages
   syncThreshold: 0.25, // maxTokens*syncThreshold = threshold where we start to use a real tokenization endpoint instead of guessing the number of tokens
   handlers: {
@@ -202,8 +191,8 @@ const memory = new TokenMemory({
   },
 });
 
-await memory.add(BaseMessage.of({ role: "system", text: "You are a helpful assistant." }));
-await memory.add(BaseMessage.of({ role: "user", text: "Hello world!" }));
+await memory.add(Message.of({ role: "system", text: "You are a helpful assistant." }));
+await memory.add(Message.of({ role: "user", text: "Hello world!" }));
 
 console.info(memory.isDirty); // is the consumed token count estimated or retrieved via the tokenize endpoint?
 console.log(memory.tokensUsed); // number of used tokens
@@ -220,25 +209,19 @@ Only a single summarization of the conversation is preserved. Summarization is u
 <!-- embedme examples/memory/summarizeMemory.ts -->
 
 ```ts
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Message } from "bee-agent-framework/backend/message";
 import { SummarizeMemory } from "bee-agent-framework/memory/summarizeMemory";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 const memory = new SummarizeMemory({
-  llm: new OllamaChatLLM({
-    modelId: "llama3.1",
-    parameters: {
-      temperature: 0,
-      num_predict: 250,
-    },
-  }),
+  llm: new OllamaChatModel("llama3.1"),
 });
 
 await memory.addMany([
-  BaseMessage.of({ role: "system", text: "You are a guide through France." }),
-  BaseMessage.of({ role: "user", text: "What is the capital?" }),
-  BaseMessage.of({ role: "assistant", text: "Paris" }),
-  BaseMessage.of({ role: "user", text: "What language is spoken there?" }),
+  Message.of({ role: "system", text: "You are a guide through France." }),
+  Message.of({ role: "user", text: "What is the capital?" }),
+  Message.of({ role: "assistant", text: "Paris" }),
+  Message.of({ role: "user", text: "What language is spoken there?" }),
 ]);
 
 console.info(memory.isEmpty()); // false
@@ -256,19 +239,19 @@ To create your memory implementation, you must implement the `BaseMemory` class.
 
 ```ts
 import { BaseMemory } from "bee-agent-framework/memory/base";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Message } from "bee-agent-framework/backend/message";
 import { NotImplementedError } from "bee-agent-framework/errors";
 
 export class MyMemory extends BaseMemory {
-  get messages(): readonly BaseMessage[] {
+  get messages(): readonly Message[] {
     throw new NotImplementedError("Method not implemented.");
   }
 
-  add(message: BaseMessage, index?: number): Promise<void> {
+  add(message: Message, index?: number): Promise<void> {
     throw new NotImplementedError("Method not implemented.");
   }
 
-  delete(message: BaseMessage): Promise<boolean> {
+  delete(message: Message): Promise<boolean> {
     throw new NotImplementedError("Method not implemented.");
   }
 

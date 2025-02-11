@@ -1,12 +1,12 @@
 import "dotenv/config.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
-import { OpenAIChatLLM } from "bee-agent-framework/adapters/openai/chat";
+import { OpenAIChatModel } from "bee-agent-framework/adapters/openai/backend/chat";
 import { ElasticSearchTool } from "bee-agent-framework/tools/database/elasticsearch";
 import { FrameworkError } from "bee-agent-framework/errors";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { createConsoleReader } from "../helpers/io.js";
 
-const llm = new OpenAIChatLLM();
+const llm = new OpenAIChatModel("gpt-4o");
 
 const elasticSearchTool = new ElasticSearchTool({
   connection: {

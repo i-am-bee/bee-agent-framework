@@ -571,7 +571,7 @@ describe("Base Tool", () => {
       `);
     });
 
-    it("Serializes", () => {
+    it("Serializes", async () => {
       const tool = new DynamicTool({
         name: toolDef.name,
         description: toolDef.description,
@@ -588,8 +588,8 @@ describe("Base Tool", () => {
         },
       });
 
-      const serialized = tool.serialize();
-      const deserialized = DynamicTool.fromSerialized(serialized);
+      const serialized = await tool.serialize();
+      const deserialized = await DynamicTool.fromSerialized(serialized);
       verifyDeserialization(tool, deserialized);
     });
   });

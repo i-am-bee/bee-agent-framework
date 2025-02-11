@@ -1,9 +1,9 @@
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
+import { Message } from "bee-agent-framework/backend/message";
 
 const memory = new UnconstrainedMemory();
 await memory.add(
-  BaseMessage.of({
+  Message.of({
     role: "user",
     text: `Hello world!`,
   }),

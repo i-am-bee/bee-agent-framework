@@ -1,11 +1,8 @@
 import { TokenMemory } from "bee-agent-framework/memory/tokenMemory";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { Message } from "bee-agent-framework/backend/message";
 
-const llm = new OllamaChatLLM();
 const memory = new TokenMemory({
-  llm,
-  maxTokens: undefined, // optional (default is inferred from the passed LLM instance),
+  maxTokens: undefined, // optional (default is 128k),
   capacityThreshold: 0.75, // maxTokens*capacityThreshold = threshold where we start removing old messages
   syncThreshold: 0.25, // maxTokens*syncThreshold = threshold where we start to use a real tokenization endpoint instead of guessing the number of tokens
   handlers: {
@@ -17,8 +14,8 @@ const memory = new TokenMemory({
   },
 });
 
-await memory.add(BaseMessage.of({ role: "system", text: "You are a helpful assistant." }));
-await memory.add(BaseMessage.of({ role: "user", text: "Hello world!" }));
+await memory.add(Message.of({ role: "system", text: "You are a helpful assistant." }));
+await memory.add(Message.of({ role: "user", text: "Hello world!" }));
 
 console.info(memory.isDirty); // is the consumed token count estimated or retrieved via the tokenize endpoint?
 console.log(memory.tokensUsed); // number of used tokens

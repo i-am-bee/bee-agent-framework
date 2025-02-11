@@ -97,25 +97,24 @@ _Source: [examples/workflows/nesting.ts](/examples/workflows/nesting.ts)_
 import "dotenv/config";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { z } from "zod";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
+import { Message, UserMessage } from "bee-agent-framework/backend/message";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { ReadOnlyMemory } from "bee-agent-framework/memory/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
+import { GroqChatModel } from "bee-agent-framework/adapters/groq/backend/chat";
 
 const schema = z.object({
-  answer: z.instanceof(BaseMessage).optional(),
+  answer: z.instanceof(Message).optional(),
   memory: z.instanceof(ReadOnlyMemory),
 });
 
 const workflow = new Workflow({ schema: schema })
   .addStep("simpleAgent", async (state) => {
     const simpleAgent = new BeeAgent({
-      llm: new GroqChatLLM(),
+      llm: new GroqChatModel("llama-3.3-70b-versatile"),
       tools: [],
       memory: state.memory,
     });
@@ -128,18 +127,18 @@ const workflow = new Workflow({ schema: schema })
     };
   })
   .addStrictStep("critique", schema.required(), async (state) => {
-    const llm = new GroqChatLLM();
-    const { parsed: critiqueResponse } = await new JsonDriver(llm).generate(
-      z.object({ score: z.number().int().min(0).max(100) }),
-      [
-        BaseMessage.of({
+    const llm = new GroqChatModel("llama-3.3-70b-versatile");
+    const { object: critiqueResponse } = await llm.createStructure({
+      schema: z.object({ score: z.number().int().min(0).max(100) }),
+      messages: [
+        Message.of({
           role: "system",
           text: `You are an evaluation assistant who scores the credibility of the last assistant's response. Chitchatting always has a score of 100. If the assistant was unable to answer the user's query, then the score will be 0.`,
         }),
         ...state.memory.messages,
         state.answer,
       ],
-    );
+    });
     reader.write("🧠 Score", critiqueResponse.score.toString());
 
     return {
@@ -148,7 +147,7 @@ const workflow = new Workflow({ schema: schema })
   })
   .addStep("complexAgent", async (state) => {
     const complexAgent = new BeeAgent({
-      llm: new GroqChatLLM(),
+      llm: new GroqChatModel("llama-3.3-70b-versatile"),
       tools: [new WikipediaTool(), new OpenMeteoTool()],
       memory: state.memory,
     });
@@ -162,11 +161,7 @@ const reader = createConsoleReader();
 const memory = new UnconstrainedMemory();
 
 for await (const { prompt } of reader) {
-  const userMessage = BaseMessage.of({
-    role: Role.USER,
-    text: prompt,
-    meta: { createdAt: new Date() },
-  });
+  const userMessage = new UserMessage(prompt);
   await memory.add(userMessage);
 
   const response = await workflow.run({
@@ -191,12 +186,11 @@ import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { createConsoleReader } from "examples/helpers/io.js";
-import { BaseMessage } from "bee-agent-framework/llms/primitives/message";
-import { JsonDriver } from "bee-agent-framework/llms/drivers/json";
+import { Message } from "bee-agent-framework/backend/message";
 import { isEmpty, pick } from "remeda";
 import { LLMTool } from "bee-agent-framework/tools/llm";
 import { GoogleSearchTool } from "bee-agent-framework/tools/search/googleSearch";
-import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
+import { GroqChatModel } from "bee-agent-framework/adapters/groq/backend/chat";
 
 const schema = z.object({
   input: z.string(),
@@ -213,19 +207,18 @@ const workflow = new Workflow({
   outputSchema: schema.required({ output: true }),
 })
   .addStep("preprocess", async (state) => {
-    const llm = new GroqChatLLM();
-    const driver = new JsonDriver(llm);
+    const llm = new GroqChatModel("llama-3.3-70b-versatile");
 
-    const { parsed } = await driver.generate(
-      schema.pick({ topic: true, notes: true }).or(
+    const { object: parsed } = await llm.createStructure({
+      schema: schema.pick({ topic: true, notes: true }).or(
         z.object({
           error: z
             .string()
             .describe("Use when the input query does not make sense or you need clarification."),
         }),
       ),
-      [
-        BaseMessage.of({
+      messages: [
+        Message.of({
           role: `user`,
           text: [
             "Your task is to rewrite the user query so that it guides the content planner and editor to craft a blog post that perfectly aligns with the user's needs. Notes should be used only if the user complains about something.",
@@ -240,14 +233,14 @@ const workflow = new Workflow({
             .join("\n"),
         }),
       ],
-    );
+    });
 
     return "error" in parsed
       ? { update: { output: parsed.error }, next: Workflow.END }
       : { update: pick(parsed, ["notes", "topic"]) };
   })
   .addStrictStep("planner", schema.required({ topic: true }), async (state) => {
-    const llm = new GroqChatLLM();
+    const llm = new GroqChatModel("llama-3.3-70b-versatile");
     const agent = new BeeAgent({
       llm,
       memory: new UnconstrainedMemory(),
@@ -280,54 +273,58 @@ const workflow = new Workflow({
     };
   })
   .addStrictStep("writer", schema.required({ plan: true }), async (state) => {
-    const llm = new GroqChatLLM();
-    const output = await llm.generate([
-      BaseMessage.of({
-        role: `system`,
-        text: [
-          `You are a Content Writer. Your task is to write a compelling blog post based on the provided context.`,
-          ``,
-          `# Context`,
-          `${state.plan}`,
-          ``,
-          `# Objectives`,
-          `- An engaging introduction`,
-          `- Insightful body paragraphs (2-3 per section)`,
-          `- Properly named sections/subtitles`,
-          `- A summarizing conclusion`,
-          `- Format: Markdown`,
-          ``,
-          ...[!isEmpty(state.notes) && ["# Notes", ...state.notes, ""]],
-          `Ensure the content flows naturally, incorporates SEO keywords, and is well-structured.`,
-        ].join("\n"),
-      }),
-    ]);
+    const llm = new GroqChatModel("llama-3.3-70b-versatile");
+    const output = await llm.create({
+      messages: [
+        Message.of({
+          role: `system`,
+          text: [
+            `You are a Content Writer. Your task is to write a compelling blog post based on the provided context.`,
+            ``,
+            `# Context`,
+            `${state.plan}`,
+            ``,
+            `# Objectives`,
+            `- An engaging introduction`,
+            `- Insightful body paragraphs (2-3 per section)`,
+            `- Properly named sections/subtitles`,
+            `- A summarizing conclusion`,
+            `- Format: Markdown`,
+            ``,
+            ...[!isEmpty(state.notes) && ["# Notes", ...state.notes, ""]],
+            `Ensure the content flows naturally, incorporates SEO keywords, and is well-structured.`,
+          ].join("\n"),
+        }),
+      ],
+    });
 
     return {
       update: { draft: output.getTextContent() },
     };
   })
   .addStrictStep("editor", schema.required({ draft: true }), async (state) => {
-    const llm = new GroqChatLLM();
-    const output = await llm.generate([
-      BaseMessage.of({
-        role: `system`,
-        text: [
-          `You are an Editor. Your task is to transform the following draft blog post to a final version.`,
-          ``,
-          `# Draft`,
-          `${state.draft}`,
-          ``,
-          `# Objectives`,
-          `- Fix Grammatical errors`,
-          `- Journalistic best practices`,
-          ``,
-          ...[!isEmpty(state.notes) && ["# Notes", ...state.notes, ""]],
-          ``,
-          `IMPORTANT: The final version must not contain any editor's comments.`,
-        ].join("\n"),
-      }),
-    ]);
+    const llm = new GroqChatModel("llama-3.3-70b-versatile");
+    const output = await llm.create({
+      messages: [
+        Message.of({
+          role: `system`,
+          text: [
+            `You are an Editor. Your task is to transform the following draft blog post to a final version.`,
+            ``,
+            `# Draft`,
+            `${state.draft}`,
+            ``,
+            `# Objectives`,
+            `- Fix Grammatical errors`,
+            `- Journalistic best practices`,
+            ``,
+            ...[!isEmpty(state.notes) && ["# Notes", ...state.notes, ""]],
+            ``,
+            `IMPORTANT: The final version must not contain any editor's comments.`,
+          ].join("\n"),
+        }),
+      ],
+    });
 
     return {
       update: { output: output.getTextContent() },
@@ -367,14 +364,11 @@ import { createConsoleReader } from "examples/helpers/io.js";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
-import { BaseMessage, Role } from "bee-agent-framework/llms/primitives/message";
-import { WatsonXChatLLM } from "bee-agent-framework/adapters/watsonx/chat";
+import { UserMessage } from "bee-agent-framework/backend/message";
+import { WatsonxChatModel } from "bee-agent-framework/adapters/watsonx/backend/chat";
 
 const workflow = new AgentWorkflow();
-const llm = WatsonXChatLLM.fromPreset("meta-llama/llama-3-3-70b-instruct", {
-  apiKey: process.env.WATSONX_API_KEY,
-  projectId: process.env.WATSONX_PROJECT_ID,
-});
+const llm = new WatsonxChatModel("meta-llama/llama-3-3-70b-instruct");
 
 workflow.addAgent({
   name: "WeatherForecaster",
@@ -400,13 +394,7 @@ const reader = createConsoleReader();
 const memory = new UnconstrainedMemory();
 
 for await (const { prompt } of reader) {
-  await memory.add(
-    BaseMessage.of({
-      role: Role.USER,
-      text: prompt,
-      meta: { createdAt: new Date() },
-    }),
-  );
+  await memory.add(new UserMessage(prompt, { createdAt: new Date() }));
 
   const { result } = await workflow.run(memory.messages).observe((emitter) => {
     emitter.on("success", (data) => {

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isEmpty } from "remeda";
 import type { AnyTool } from "@/tools/base.js";
 import { DefaultRunner } from "@/agents/bee/runners/default/runner.js";
 import {
@@ -28,12 +27,12 @@ import {
 } from "@/agents/bee/runners/deep-think/prompts.js";
 import { BeeToolNoResultsPrompt, BeeUserEmptyPrompt } from "@/agents/bee/prompts.js";
 import { Cache } from "@/cache/decoratorCache.js";
-import { ZodParserField } from "@/agents/parsers/field.js";
+import { ZodParserField } from "@/parsers/field.js";
 import { z } from "zod";
 import { BeeInput, BeeAgent } from "@/agents/bee/agent.js";
 import { BeeRunOptions } from "@/agents/bee/types.js";
-import { BaseMessage } from "@/llms/primitives/message.js";
 import { GetRunContext } from "@/context.js";
+import { UserMessage } from "@/backend/message.js";
 
 export class DeepThinkRunner extends DefaultRunner {
   @Cache({ enumerable: false })
@@ -64,11 +63,7 @@ export class DeepThinkRunner extends DefaultRunner {
       async ({ update, meta, memory }) => {
         if (update.key === "tool_output") {
           await memory.add(
-            BaseMessage.of({
-              role: "user",
-              text: update.value,
-              meta: { success: meta.success },
-            }),
+            new UserMessage(update.value, { success: meta.success, createdAt: new Date() }),
           );
         }
       },
@@ -81,14 +76,7 @@ export class DeepThinkRunner extends DefaultRunner {
   protected createParser(tools: AnyTool[]) {
     const { parser } = super.createParser(tools);
 
-    const parserRegex = isEmpty(tools)
-      ? new RegExp(`<think>.+?</think>\\n\\nFinal Answer: [\\s\\S]+`)
-      : new RegExp(
-          `<think>.+?</think>\\n\\n(?:Final Answer: [\\s\\S]+|Tool Name: (${tools.map((tool) => tool.name).join("|")})\\nTool Input: \\{.*\\})`,
-        );
-
     return {
-      parserRegex,
       parser: parser.fork((nodes, options) => ({
         options: {
           ...options,

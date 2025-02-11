@@ -68,8 +68,8 @@ describe("PythonTool", () => {
 
   it("serializes", async () => {
     const tool = getPythonTool();
-    const serialized = tool.serialize();
-    const deserializedTool = PythonTool.fromSerialized(serialized);
+    const serialized = await tool.serialize();
+    const deserializedTool = await PythonTool.fromSerialized(serialized);
     verifyDeserialization(tool, deserializedTool);
   });
 });

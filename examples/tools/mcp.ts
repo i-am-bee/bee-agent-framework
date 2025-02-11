@@ -3,7 +3,7 @@ import { MCPTool } from "bee-agent-framework/tools/mcp";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { OllamaChatLLM } from "bee-agent-framework/adapters/ollama/chat";
+import { OllamaChatModel } from "bee-agent-framework/adapters/ollama/backend/chat";
 
 // Create MCP Client
 const client = new Client(
@@ -28,7 +28,7 @@ try {
   // Server usually supports several tools, use the factory for automatic discovery
   const tools = await MCPTool.fromClient(client);
   const agent = new BeeAgent({
-    llm: new OllamaChatLLM(),
+    llm: new OllamaChatModel("llama3.1"),
     memory: new UnconstrainedMemory(),
     tools,
   });
