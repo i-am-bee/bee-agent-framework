@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.0](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.61...v0.1.0) (2025-02-11)
+
+### ⚠ BREAKING CHANGES
+
+- add backend module (#301)
+- update workflows interface (#310)
+
+### Features
+
+- add backend module ([#301](https://github.com/i-am-bee/bee-agent-framework/issues/301)) ([06bf1e4](https://github.com/i-am-bee/bee-agent-framework/commit/06bf1e4ff5fc3c6b4881a4cc5be13beede98bcc2)), closes [#208](https://github.com/i-am-bee/bee-agent-framework/issues/208)
+- **agents:** support external instrumentation ([#304](https://github.com/i-am-bee/bee-agent-framework/issues/304)) ([5774416](https://github.com/i-am-bee/bee-agent-framework/commit/577441659dcc5defb61b90f13c45c08fd3db729b))
+- **workflows:** update interface ([#310](https://github.com/i-am-bee/bee-agent-framework/issues/310)) ([aa4d5e6](https://github.com/i-am-bee/bee-agent-framework/commit/aa4d5e6091ed3bab8096492707ceb03d3b03863b)), closes [#309](https://github.com/i-am-bee/bee-agent-framework/issues/309)
+
+### Bug Fixes
+
+- **emitter:** matching nested events ([0af22ef](https://github.com/i-am-bee/bee-agent-framework/commit/0af22ef86163b79caa7076278741214590a8079b))
+
 ## [0.0.61](https://github.com/i-am-bee/bee-agent-framework/compare/v0.0.60...v0.0.61) (2025-02-03)
 
 ### Features
