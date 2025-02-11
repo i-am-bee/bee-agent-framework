@@ -15,7 +15,7 @@
  */
 
 import { BeeAgent } from "@/agents/bee/agent.js";
-import { Workflow, WorkflowRunOptions } from "@/experimental/workflows/workflow.js";
+import { Workflow, WorkflowRunOptions } from "@/workflows/workflow.js";
 import { AssistantMessage, Message } from "@/backend/message.js";
 import { AnyTool } from "@/tools/base.js";
 import { BaseMemory, ReadOnlyMemory } from "@/memory/base.js";
@@ -118,17 +118,12 @@ export class AgentWorkflow {
 
       const agent = await factory(memory.asReadOnly());
       const { result } = await agent.run({ prompt: null }, { signal: ctx.signal });
-
-      return {
-        update: {
-          finalAnswer: result.text,
-          newMessages: state.newMessages.concat(
-            new AssistantMessage(
-              [`Assistant Name: ${name}`, `Assistant Response: ${result.text}`].join("\n"),
-            ),
-          ),
-        },
-      };
+      state.finalAnswer = result.text;
+      state.newMessages.push(
+        new AssistantMessage(
+          [`Assistant Name: ${name}`, `Assistant Response: ${result.text}`].join("\n"),
+        ),
+      );
     });
     return this;
   }

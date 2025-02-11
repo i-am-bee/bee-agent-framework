@@ -10,7 +10,7 @@ Bee Agent Framework is open-source framework for building, deploying, and servin
 import "dotenv/config";
 import { DuckDuckGoSearch as LangChainDDG } from "@langchain/community/tools/duckduckgo_search";
 import { createReactAgent as createLangGraphReactAgent } from "@langchain/langgraph/prebuilt";
-import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+import { Workflow } from "bee-agent-framework/workflows/workflow";
 import { z } from "zod";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
@@ -25,9 +25,7 @@ import { ChatModel } from "bee-agent-framework/backend/chat";
 const workflow = new Workflow({
   schema: z.object({ memory: z.instanceof(ReadOnlyMemory), answer: z.string().default("") }),
 })
-  .addStep("router", () => ({
-    next: Math.random() >= 0.5 ? "bee" : "langgraph",
-  }))
+  .addStep("router", () => (Math.random() >= 0.5 ? "bee" : "langgraph"))
   .addStep("bee", async (state, ctx) => {
     const beeAgent = new BeeAgent({
       llm: await ChatModel.fromName("ollama:llama3.1"),
@@ -38,7 +36,8 @@ const workflow = new Workflow({
       { prompt: null },
       { signal: ctx.signal, execution: { maxIterations: 5 } },
     );
-    return { next: Workflow.END, update: { answer: response.result.text } };
+    state.answer = response.result.text;
+    return Workflow.END;
   })
   .addStep("langgraph", async (state, ctx) => {
     const langGraphAgent = createLangGraphReactAgent({
@@ -53,8 +52,8 @@ const workflow = new Workflow({
       },
       { signal: ctx.signal, recursionLimit: 5 },
     );
-    const answer = response.messages.map((msg) => String(msg.content)).join("");
-    return { next: Workflow.END, update: { answer } };
+    state.answer = response.messages.map((msg) => String(msg.content)).join("");
+    return Workflow.END;
   });
 
 const memory = new UnconstrainedMemory();

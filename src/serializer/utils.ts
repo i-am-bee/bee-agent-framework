@@ -18,9 +18,10 @@ import * as R from "remeda";
 import { SafeWeakSet } from "@/internals/helpers/weakRef.js";
 import { AnyConstructable, AnyFn, ClassConstructor, NamedFunction } from "@/internals/types.js";
 import { SerializeFactory } from "@/serializer/serializer.js";
-import { getProp, hasProp } from "@/internals/helpers/object.js";
+import { getProp, hasProp, setProp } from "@/internals/helpers/object.js";
 import { isDirectInstanceOf } from "@/internals/helpers/prototype.js";
 import { SerializerError } from "@/serializer/error.js";
+import { isFunction, isObjectType } from "remeda";
 
 export const SerializerSelfRefIdentifier = "__self_ref";
 export const SerializerRefIdentifier = "__ref";
@@ -218,6 +219,18 @@ export function shallowCopy<T>(value: T): T {
     return new Date(value) as T;
   }
   return value;
+}
+
+export async function deepCopy<T>(source: T): Promise<T> {
+  if (isObjectType(source) && "clone" in source && isFunction(source.clone)) {
+    return await source.clone();
+  }
+  const copy = shallowCopy(source);
+  await traverseObject(source, async ({ value, path }) => {
+    const result = await deepCopy(value);
+    setProp(copy, path, result);
+  });
+  return copy;
 }
 
 type Bounded =

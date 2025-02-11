@@ -18,7 +18,7 @@ Workflows provide a flexible and extensible component for managing and executing
 <!-- embedme examples/workflows/simple.ts -->
 
 ```ts
-import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+import { Workflow } from "bee-agent-framework/workflows/workflow";
 import { z } from "zod";
 
 const schema = z.object({
@@ -26,12 +26,10 @@ const schema = z.object({
 });
 
 const workflow = new Workflow({ schema })
-  .addStep("a", async (state) => ({
-    update: { hops: state.hops + 1 },
-  }))
-  .addStep("b", () => ({
-    next: Math.random() > 0.5 ? Workflow.PREV : Workflow.END,
-  }));
+  .addStep("a", async (state) => {
+    state.hops += 1;
+  })
+  .addStep("b", () => (Math.random() > 0.5 ? Workflow.PREV : Workflow.END));
 
 const response = await workflow.run({ hops: 0 }).observe((emitter) => {
   emitter.on("start", (data) => console.log(`-> start ${data.step}`));
@@ -50,7 +48,7 @@ _Source: [examples/workflows/simple.ts](/examples/workflows/simple.ts)_
 <!-- embedme examples/workflows/nesting.ts -->
 
 ```ts
-import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+import { Workflow } from "bee-agent-framework/workflows/workflow";
 import { z } from "zod";
 
 const schema = z.object({
@@ -58,24 +56,24 @@ const schema = z.object({
   counter: z.number().default(0),
 });
 
-const addFlow = new Workflow({ schema }).addStep("run", async (state) => ({
-  next: Math.random() > 0.5 ? Workflow.SELF : Workflow.END,
-  update: { counter: state.counter + 1 },
-}));
+const addFlow = new Workflow({ schema }).addStep("run", async (state) => {
+  state.counter += 1;
+  return Math.random() > 0.5 ? Workflow.SELF : Workflow.END;
+});
 
 const subtractFlow = new Workflow({
   schema,
-}).addStep("run", async (state) => ({
-  update: { counter: state.counter - 1 },
-  next: Math.random() > 0.5 ? Workflow.SELF : Workflow.END,
-}));
+}).addStep("run", async (state) => {
+  state.counter -= 1;
+  return Math.random() > 0.5 ? Workflow.SELF : Workflow.END;
+});
 
 const workflow = new Workflow({
   schema,
 })
-  .addStep("start", (state) => ({
-    next: Math.random() > state.threshold ? "delegateAdd" : "delegateSubtract",
-  }))
+  .addStep("start", (state) =>
+    Math.random() > state.threshold ? "delegateAdd" : "delegateSubtract",
+  )
   .addStep("delegateAdd", addFlow.asStep({ next: Workflow.END }))
   .addStep("delegateSubtract", subtractFlow.asStep({ next: Workflow.END }));
 
@@ -102,7 +100,7 @@ import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { ReadOnlyMemory } from "bee-agent-framework/memory/base";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+import { Workflow } from "bee-agent-framework/workflows/workflow";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { GroqChatModel } from "bee-agent-framework/adapters/groq/backend/chat";
 
@@ -121,10 +119,8 @@ const workflow = new Workflow({ schema: schema })
     const answer = await simpleAgent.run({ prompt: null });
     reader.write("🤖 Simple Agent", answer.result.text);
 
-    return {
-      update: { answer: answer.result },
-      next: "critique",
-    };
+    state.answer = answer.result;
+    return "critique";
   })
   .addStrictStep("critique", schema.required(), async (state) => {
     const llm = new GroqChatModel("llama-3.3-70b-versatile");
@@ -141,9 +137,7 @@ const workflow = new Workflow({ schema: schema })
     });
     reader.write("🧠 Score", critiqueResponse.score.toString());
 
-    return {
-      next: critiqueResponse.score < 75 ? "complexAgent" : Workflow.END,
-    };
+    return critiqueResponse.score < 75 ? "complexAgent" : Workflow.END;
   })
   .addStep("complexAgent", async (state) => {
     const complexAgent = new BeeAgent({
@@ -153,7 +147,7 @@ const workflow = new Workflow({ schema: schema })
     });
     const { result } = await complexAgent.run({ prompt: null });
     reader.write("🤖 Complex Agent", result.text);
-    return { update: { answer: result } };
+    state.answer = result;
   })
   .setStart("simpleAgent");
 
@@ -182,12 +176,12 @@ _Source: [examples/workflows/agent.ts](/examples/workflows/agent.ts)_
 ```ts
 import "dotenv/config";
 import { z } from "zod";
-import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+import { Workflow } from "bee-agent-framework/workflows/workflow";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { Message } from "bee-agent-framework/backend/message";
-import { isEmpty, pick } from "remeda";
+import { isEmpty } from "remeda";
 import { LLMTool } from "bee-agent-framework/tools/llm";
 import { GoogleSearchTool } from "bee-agent-framework/tools/search/googleSearch";
 import { GroqChatModel } from "bee-agent-framework/adapters/groq/backend/chat";
@@ -235,9 +229,13 @@ const workflow = new Workflow({
       ],
     });
 
-    return "error" in parsed
-      ? { update: { output: parsed.error }, next: Workflow.END }
-      : { update: pick(parsed, ["notes", "topic"]) };
+    if ("error" in parsed) {
+      state.output = parsed.error;
+      return Workflow.END;
+    }
+
+    state.notes = parsed.notes ?? [];
+    state.topic = parsed.topic;
   })
   .addStrictStep("planner", schema.required({ topic: true }), async (state) => {
     const llm = new GroqChatModel("llama-3.3-70b-versatile");
@@ -266,11 +264,7 @@ const workflow = new Workflow({
       ].join("\n"),
     });
 
-    return {
-      update: {
-        plan: result.text,
-      },
-    };
+    state.plan = result.text;
   })
   .addStrictStep("writer", schema.required({ plan: true }), async (state) => {
     const llm = new GroqChatModel("llama-3.3-70b-versatile");
@@ -298,9 +292,7 @@ const workflow = new Workflow({
       ],
     });
 
-    return {
-      update: { draft: output.getTextContent() },
-    };
+    state.draft = output.getTextContent();
   })
   .addStrictStep("editor", schema.required({ draft: true }), async (state) => {
     const llm = new GroqChatModel("llama-3.3-70b-versatile");
@@ -326,9 +318,7 @@ const workflow = new Workflow({
       ],
     });
 
-    return {
-      update: { output: output.getTextContent() },
-    };
+    state.output = output.getTextContent();
   });
 
 let lastResult = {} as Workflow.output<typeof workflow>;
@@ -363,7 +353,7 @@ import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMem
 import { createConsoleReader } from "examples/helpers/io.js";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
-import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
+import { AgentWorkflow } from "bee-agent-framework/workflows/agent";
 import { UserMessage } from "bee-agent-framework/backend/message";
 import { WatsonxChatModel } from "bee-agent-framework/adapters/watsonx/backend/chat";
 
@@ -398,7 +388,7 @@ for await (const { prompt } of reader) {
 
   const { result } = await workflow.run(memory.messages).observe((emitter) => {
     emitter.on("success", (data) => {
-      reader.write(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
+      reader.write(`-> ${data.step}`, data.state?.finalAnswer ?? "-");
     });
   });
 
