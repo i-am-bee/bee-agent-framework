@@ -19,13 +19,11 @@ import { Serializable } from "@/internals/serializable.js";
 import { Callback, Emitter } from "@/emitter/emitter.js";
 import { RunContext } from "@/context.js";
 import { omit, pick, toCamelCase } from "remeda";
-import { shallowCopy } from "@/serializer/utils.js";
+import { deepCopy, shallowCopy } from "@/serializer/utils.js";
 import { FrameworkError, ValueError } from "@/errors.js";
 
-export interface WorkflowStepResponse<T extends ZodSchema, K extends string> {
-  update?: Partial<z.output<T>>;
-  next?: FlowStepName<K>;
-}
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+type WorkflowStepHandlerReturn<K extends string> = K | ReservedStep | void;
 
 export interface WorkflowRun<T extends ZodSchema, T2 extends ZodSchema, K extends string> {
   result: z.output<T2>;
@@ -57,7 +55,7 @@ export interface WorkflowRunContext<T extends ZodSchema, K extends string> {
 export type WorkflowStepHandler<T extends ZodSchema, K extends string> = (
   state: z.output<T>,
   context: WorkflowRunContext<T, K>,
-) => Promise<WorkflowStepResponse<T, K>> | WorkflowStepResponse<T, K>;
+) => Promise<WorkflowStepHandlerReturn<K>> | WorkflowStepHandlerReturn<K>;
 
 export interface WorkflowEvents<T extends ZodSchema, T2 extends ZodSchema, K extends string> {
   start: Callback<{ step: K; run: WorkflowRun<T, T2, K> }>;
@@ -68,7 +66,8 @@ export interface WorkflowEvents<T extends ZodSchema, T2 extends ZodSchema, K ext
   }>;
   success: Callback<{
     step: K;
-    response: WorkflowStepResponse<T, K>;
+    next: K | ReservedStep;
+    state: z.output<T>;
     run: WorkflowRun<T, T2, K>;
   }>;
 }
@@ -227,36 +226,40 @@ export class Workflow<
           if (!step) {
             throw new WorkflowError(`Step '${next}' was not found.`, { run });
           }
-          run.steps.push({ name: next, state: run.state });
+          const stepResult: WorkflowStepRes<TInput, TKeys> = {
+            name: next,
+            state: await deepCopy(run.state),
+          };
+          run.steps.push(stepResult);
           await runContext.emitter.emit("start", { run, step: next });
           try {
-            const stepInput = await step.schema.parseAsync(run.state).catch((err: Error) => {
+            const stepInput = await step.schema.parseAsync(run.state).catch(async (err: Error) => {
               throw new WorkflowError(
                 `Step '${next}' cannot be executed because the provided input doesn't adhere to the step's schema.`,
                 { run: shallowCopy(run), errors: [err] },
               );
             });
-            const response = await step.handler(stepInput, handlers);
-            if (response.update) {
-              run.state = { ...run.state, ...response.update };
-            }
-            await runContext.emitter.emit("success", {
-              run: shallowCopy(run),
-              response,
-              step: next,
-            });
+            const newStep = await step.handler(stepInput, handlers);
+            run.state = stepResult.state;
 
-            if (response.next === Workflow.START) {
+            if (newStep === Workflow.START) {
               next = run.steps.at(0)?.name!;
-            } else if (response.next === Workflow.PREV) {
+            } else if (newStep === Workflow.PREV) {
               next = run.steps.at(-2)?.name!;
-            } else if (response.next === Workflow.SELF) {
+            } else if (newStep === Workflow.SELF) {
               next = run.steps.at(-1)?.name!;
-            } else if (!response.next || response.next === Workflow.NEXT) {
+            } else if (!newStep || newStep === Workflow.NEXT) {
               next = this.findStep(next).next || Workflow.END;
             } else {
-              next = response.next;
+              next = newStep;
             }
+
+            await runContext.emitter.emit("success", {
+              run: shallowCopy(run),
+              state: stepResult.state,
+              step: stepResult.name,
+              next,
+            });
           } catch (error) {
             await runContext.emitter.emit("error", {
               run: shallowCopy(run),
@@ -298,15 +301,12 @@ export class Workflow<
     start?: TKeys;
     next?: FlowStepName<TKeys2>;
   }): WorkflowStepHandler<TInput2, TKeys | TKeys2> {
-    return async (input, ctx) => {
-      const mappedInput = overrides?.input ? overrides.input(input) : input;
+    return async (state, ctx) => {
+      const mappedInput = overrides?.input ? overrides.input(state) : state;
       const result = await this.run(mappedInput, { start: overrides?.start, signal: ctx.signal });
       const mappedOutput = overrides?.output ? overrides.output(result.state) : result.state;
-
-      return {
-        update: mappedOutput,
-        next: overrides?.next,
-      };
+      Object.assign(state, mappedOutput);
+      return overrides.next;
     };
   }
 

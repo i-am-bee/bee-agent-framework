@@ -1,11 +1,11 @@
 import "dotenv/config";
 import { z } from "zod";
-import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+import { Workflow } from "bee-agent-framework/workflows/workflow";
 import { BeeAgent } from "bee-agent-framework/agents/bee/agent";
 import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
 import { createConsoleReader } from "examples/helpers/io.js";
 import { Message } from "bee-agent-framework/backend/message";
-import { isEmpty, pick } from "remeda";
+import { isEmpty } from "remeda";
 import { LLMTool } from "bee-agent-framework/tools/llm";
 import { GoogleSearchTool } from "bee-agent-framework/tools/search/googleSearch";
 import { GroqChatModel } from "bee-agent-framework/adapters/groq/backend/chat";
@@ -53,9 +53,13 @@ const workflow = new Workflow({
       ],
     });
 
-    return "error" in parsed
-      ? { update: { output: parsed.error }, next: Workflow.END }
-      : { update: pick(parsed, ["notes", "topic"]) };
+    if ("error" in parsed) {
+      state.output = parsed.error;
+      return Workflow.END;
+    }
+
+    state.notes = parsed.notes ?? [];
+    state.topic = parsed.topic;
   })
   .addStrictStep("planner", schema.required({ topic: true }), async (state) => {
     const llm = new GroqChatModel("llama-3.3-70b-versatile");
@@ -84,11 +88,7 @@ const workflow = new Workflow({
       ].join("\n"),
     });
 
-    return {
-      update: {
-        plan: result.text,
-      },
-    };
+    state.plan = result.text;
   })
   .addStrictStep("writer", schema.required({ plan: true }), async (state) => {
     const llm = new GroqChatModel("llama-3.3-70b-versatile");
@@ -116,9 +116,7 @@ const workflow = new Workflow({
       ],
     });
 
-    return {
-      update: { draft: output.getTextContent() },
-    };
+    state.draft = output.getTextContent();
   })
   .addStrictStep("editor", schema.required({ draft: true }), async (state) => {
     const llm = new GroqChatModel("llama-3.3-70b-versatile");
@@ -144,9 +142,7 @@ const workflow = new Workflow({
       ],
     });
 
-    return {
-      update: { output: output.getTextContent() },
-    };
+    state.output = output.getTextContent();
   });
 
 let lastResult = {} as Workflow.output<typeof workflow>;

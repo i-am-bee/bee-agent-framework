@@ -1,4 +1,4 @@
-import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+import { Workflow } from "bee-agent-framework/workflows/workflow";
 import {
   categorizationPromptTemplate,
   competitorsPromptTemplate,
@@ -23,13 +23,10 @@ export enum Steps {
 
 async function generateCompetitors(state: State) {
   if (state.specifiedCompetitors?.length) {
-    return {
-      update: {
-        competitors: state.specifiedCompetitors,
-        runningSummary: `Competitive analysis of ${state.specifiedCompetitors.join(", ")}`,
-        competitorFindings: mapValues(state.specifiedCompetitors, () => []),
-      },
-    };
+    state.competitors = state.specifiedCompetitors;
+    state.runningSummary = `Competitive analysis of ${state.specifiedCompetitors.join(", ")}`;
+    state.competitorFindings = mapValues(state.specifiedCompetitors, () => []);
+    return;
   }
 
   const llm = getChatLLM();
@@ -45,13 +42,9 @@ async function generateCompetitors(state: State) {
     ],
   });
 
-  return {
-    update: {
-      competitors: result.object.competitors,
-      runningSummary: result.object.overview,
-      competitorFindings: mapValues(state.competitors, () => []),
-    },
-  };
+  state.competitors = result.object.competitors;
+  state.runningSummary = result.object.overview;
+  state.competitorFindings = mapValues(state.competitors, () => []);
 }
 
 async function selectCompetitor(state: State) {
@@ -60,32 +53,24 @@ async function selectCompetitor(state: State) {
   );
 
   if (isEmpty(unprocessedCompetitors)) {
-    return { next: Steps.FINALIZE_SUMMARY };
+    return Steps.FINALIZE_SUMMARY;
   }
 
   const currentCompetitor = unprocessedCompetitors[0];
   const searchTerms = `${currentCompetitor} comprehensive overview key capabilities`;
 
-  return {
-    update: {
-      currentCompetitor,
-      searchQuery: searchTerms,
-    },
-    next: Steps.WEB_RESEARCH,
-  };
+  state.currentCompetitor = currentCompetitor;
+  state.searchQuery = searchTerms;
+  return Steps.WEB_RESEARCH;
 }
 
 async function webResearch(state: State) {
   const searchResults = await tavilySearch(state.searchQuery);
   const searchResultsString = deduplicateAndFormatSources(searchResults, 1000, true);
 
-  return {
-    update: {
-      sourcesGathered: [...state.sourcesGathered, formatSources(searchResults)],
-      researchLoopCount: state.researchLoopCount + 1,
-      webResearchResults: [...state.webResearchResults, searchResultsString],
-    },
-  };
+  state.sourcesGathered.push(formatSources(searchResults));
+  state.researchLoopCount += 1;
+  state.webResearchResults.push(searchResultsString);
 }
 
 async function categorizeFindings(state: State) {
@@ -110,20 +95,14 @@ async function categorizeFindings(state: State) {
     ],
   });
 
-  const updatedFindings = {
+  state.competitorFindings = {
     ...state.competitorFindings,
     [state.currentCompetitor]: [
       ...(result.object.key_insights || []),
       ...(result.object.unique_capabilities || []),
     ],
   };
-
-  return {
-    update: {
-      competitorFindings: updatedFindings,
-    },
-    next: Steps.SELECT_COMPETITOR,
-  };
+  return Steps.SELECT_COMPETITOR;
 }
 
 async function finalizeSummary(state: State) {
@@ -142,10 +121,8 @@ ${competitorSections}
 ### Sources
 ${state.sourcesGathered.join("\n")}`;
 
-  return {
-    update: { answer: new AssistantMessage(finalSummary) },
-    next: Steps.REFLECTION,
-  };
+  state.answer = new AssistantMessage(finalSummary);
+  return Steps.REFLECTION;
 }
 
 async function reflectAndImprove(state: State) {
@@ -169,23 +146,15 @@ async function reflectAndImprove(state: State) {
   const feedback = [...(result.object.critique || []), ...(result.object.suggestions || [])];
 
   if (result.object.should_iterate && state.reflectionIteration < state.maxReflectionIterations) {
-    return {
-      update: {
-        reflectionFeedback: feedback,
-        reflectionIteration: state.reflectionIteration + 1,
-      },
-      next: Steps.GENERATE_COMPETITORS,
-    };
+    state.reflectionFeedback = feedback;
+    state.reflectionIteration = state.reflectionIteration + 1;
+    return Steps.GENERATE_COMPETITORS;
   }
 
-  const finalAnalysis = new AssistantMessage(
+  state.answer = new AssistantMessage(
     `${state.answer.text}\n\n## Reflection Notes\n${feedback.map((f) => `* ${f}`).join("\n")}`,
   );
-
-  return {
-    update: { answer: finalAnalysis },
-    next: Workflow.END,
-  };
+  return Workflow.END;
 }
 
 export const workflow = new Workflow({ schema: StateSchema })

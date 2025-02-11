@@ -1,4 +1,4 @@
-import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+import { Workflow } from "bee-agent-framework/workflows/workflow";
 import { z } from "zod";
 
 const schema = z.object({
@@ -6,12 +6,10 @@ const schema = z.object({
 });
 
 const workflow = new Workflow({ schema })
-  .addStep("a", async (state) => ({
-    update: { hops: state.hops + 1 },
-  }))
-  .addStep("b", () => ({
-    next: Math.random() > 0.5 ? Workflow.PREV : Workflow.END,
-  }));
+  .addStep("a", async (state) => {
+    state.hops += 1;
+  })
+  .addStep("b", () => (Math.random() > 0.5 ? Workflow.PREV : Workflow.END));
 
 const response = await workflow.run({ hops: 0 }).observe((emitter) => {
   emitter.on("start", (data) => console.log(`-> start ${data.step}`));

@@ -10,8 +10,8 @@
 - Tokenization has been removed.
 - Non-Chat LLM class (`LLM`) has been removed.
 - The`IBMvLLM` adapter has been removed.
-- Parsers were moved from `bee-agent-framework/agents/parsers` to `bee-agent-framework/parsers`
 - Parsers were moved from `bee-agent-framework/agents/parsers` to `bee-agent-framework/parsers`.
+- Workflows are no longer experimental and were moved from `bee-agent-framework/experimental/workflows` to `bee-agent-framework/workflows`.
 
 ### Models
 
@@ -152,4 +152,70 @@ const a = new TokenMemory();
 const json = await a.serialize();
 
 const b = await TokenMemory.fromSerialized(json);
+```
+
+### Workflows
+
+#### ❌ Old Way
+
+```ts
+import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+
+const schema = z.object({
+  value: z.number(),
+  hops: z.number().default(0),
+});
+
+const workflow = new Workflow({ schema })
+  .addStep("router", async (state) => {
+    if (state.hops > 20) {
+      return { next: Workflow.END };
+    }
+    return {
+      update: { hops: state.hops + 1 },
+      next: Math.random() > 0.5 ? "increment" : "decrement",
+    };
+  })
+  .addStep("decrement", async (state) => {
+    return {
+      update: { hops: state.hops + 1, value: state.value - 1 },
+      next: "router",
+    };
+  })
+  .addStep("increment", async (state) => {
+    return {
+      update: { hops: state.hops + 1, value: state.value + 1 },
+      next: "router",
+    };
+  });
+```
+
+#### ✅ New Way
+
+```ts
+import { Workflow } from "bee-agent-framework/workflows/workflow";
+
+const schema = z.object({
+  value: z.number(),
+  hops: z.number().default(0),
+});
+
+const workflow = new Workflow({ schema })
+  .addStep("router", async (state) => {
+    if (state.hops > 20) {
+      return Workflow.END;
+    }
+    state.hops += 1;
+    return Math.random() > 0.5 ? "increment" : "decrement";
+  })
+  .addStep("decrement", async (state) => {
+    state.hops += 1;
+    state.value -= 1;
+    return "router";
+  })
+  .addStep("increment", async (state) => {
+    state.hops += 1;
+    state.value += 1;
+    return "router";
+  });
 ```

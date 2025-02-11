@@ -3,7 +3,7 @@ import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMem
 import { createConsoleReader } from "examples/helpers/io.js";
 import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
 import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
-import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
+import { AgentWorkflow } from "bee-agent-framework/workflows/agent";
 import { UserMessage } from "bee-agent-framework/backend/message";
 import { WatsonxChatModel } from "bee-agent-framework/adapters/watsonx/backend/chat";
 
@@ -38,7 +38,7 @@ for await (const { prompt } of reader) {
 
   const { result } = await workflow.run(memory.messages).observe((emitter) => {
     emitter.on("success", (data) => {
-      reader.write(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
+      reader.write(`-> ${data.step}`, data.state?.finalAnswer ?? "-");
     });
   });
 

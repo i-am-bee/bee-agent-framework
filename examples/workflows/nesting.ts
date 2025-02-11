@@ -1,4 +1,4 @@
-import { Workflow } from "bee-agent-framework/experimental/workflows/workflow";
+import { Workflow } from "bee-agent-framework/workflows/workflow";
 import { z } from "zod";
 
 const schema = z.object({
@@ -6,24 +6,24 @@ const schema = z.object({
   counter: z.number().default(0),
 });
 
-const addFlow = new Workflow({ schema }).addStep("run", async (state) => ({
-  next: Math.random() > 0.5 ? Workflow.SELF : Workflow.END,
-  update: { counter: state.counter + 1 },
-}));
+const addFlow = new Workflow({ schema }).addStep("run", async (state) => {
+  state.counter += 1;
+  return Math.random() > 0.5 ? Workflow.SELF : Workflow.END;
+});
 
 const subtractFlow = new Workflow({
   schema,
-}).addStep("run", async (state) => ({
-  update: { counter: state.counter - 1 },
-  next: Math.random() > 0.5 ? Workflow.SELF : Workflow.END,
-}));
+}).addStep("run", async (state) => {
+  state.counter -= 1;
+  return Math.random() > 0.5 ? Workflow.SELF : Workflow.END;
+});
 
 const workflow = new Workflow({
   schema,
 })
-  .addStep("start", (state) => ({
-    next: Math.random() > state.threshold ? "delegateAdd" : "delegateSubtract",
-  }))
+  .addStep("start", (state) =>
+    Math.random() > state.threshold ? "delegateAdd" : "delegateSubtract",
+  )
   .addStep("delegateAdd", addFlow.asStep({ next: Workflow.END }))
   .addStep("delegateSubtract", subtractFlow.asStep({ next: Workflow.END }));
 
