@@ -43,6 +43,7 @@ export interface WorkflowStepDef<T extends ZodSchema, K extends string> {
 
 export interface WorkflowStepRes<T extends ZodSchema, K extends string> {
   name: K;
+  next: K | ReservedStep;
   state: z.output<T>;
 }
 
@@ -222,43 +223,49 @@ export class Workflow<
           Workflow.END;
 
         while (next && next !== Workflow.END) {
+          const name = next;
           const step = this.steps.get(next);
           if (!step) {
             throw new WorkflowError(`Step '${next}' was not found.`, { run });
           }
-          const stepResult: WorkflowStepRes<TInput, TKeys> = {
-            name: next,
-            state: await deepCopy(run.state),
-          };
-          run.steps.push(stepResult);
           await runContext.emitter.emit("start", { run, step: next });
           try {
-            const stepInput = await step.schema.parseAsync(run.state).catch(async (err: Error) => {
-              throw new WorkflowError(
-                `Step '${next}' cannot be executed because the provided input doesn't adhere to the step's schema.`,
-                { run: shallowCopy(run), errors: [err] },
-              );
-            });
-            const newStep = await step.handler(stepInput, handlers);
-            run.state = stepResult.state;
+            const state = await step.schema
+              .parseAsync(run.state)
+              .catch(async (err: Error) => {
+                throw new WorkflowError(
+                  `Step '${next}' cannot be executed because the provided input doesn't adhere to the step's schema.`,
+                  { run: shallowCopy(run), errors: [err] },
+                );
+              })
+              .then(deepCopy);
 
-            if (newStep === Workflow.START) {
+            const nextStepRaw = await step.handler(state, handlers);
+            if (nextStepRaw === Workflow.START) {
               next = run.steps.at(0)?.name!;
-            } else if (newStep === Workflow.PREV) {
+            } else if (nextStepRaw === Workflow.PREV) {
               next = run.steps.at(-2)?.name!;
-            } else if (newStep === Workflow.SELF) {
+            } else if (nextStepRaw === Workflow.SELF) {
               next = run.steps.at(-1)?.name!;
-            } else if (!newStep || newStep === Workflow.NEXT) {
+            } else if (!nextStepRaw || nextStepRaw === Workflow.NEXT) {
               next = this.findStep(next).next || Workflow.END;
             } else {
-              next = newStep;
+              next = nextStepRaw;
             }
+
+            const stepResult: WorkflowStepRes<TInput, TKeys> = {
+              name,
+              state,
+              next,
+            };
+            run.steps.push(stepResult);
+            run.state = stepResult.state;
 
             await runContext.emitter.emit("success", {
               run: shallowCopy(run),
               state: stepResult.state,
               step: stepResult.name,
-              next,
+              next: stepResult.next,
             });
           } catch (error) {
             await runContext.emitter.emit("error", {
