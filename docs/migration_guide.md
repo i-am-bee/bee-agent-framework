@@ -10,6 +10,7 @@
 - Tokenization has been removed.
 - Non-Chat LLM class (`LLM`) has been removed.
 - The`IBMvLLM` adapter has been removed.
+- Parsers were moved from `bee-agent-framework/agents/parsers` to `bee-agent-framework/parsers`
 
 ### Models
 
