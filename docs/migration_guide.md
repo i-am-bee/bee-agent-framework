@@ -1,14 +1,14 @@
 # Migration Guide
 
-## 0.0.X -> 0.1.0 (2025-02-07)
+## 0.0.X -> 0.1.0 (2025-02-11)
 
 ### Summary
 
-- Tokenization has been removed.
-- Non-chat LLMs have been removed.
 - `ChatLLM` class was replaced by `ChatModel` class and embedding functionality has been replaced by `EmbeddingModel` class.
 - `BaseMessage` class was replaced by `Message` and its subtypes (`UserMessage`, `AssistantMessage`, `SystemMessage`, `ToolMessage`).
 - `TokenMemory` no longer uses `LLM` instance to infer `maxTokens`, user needs to do that manually (if needed).
+- Tokenization has been removed.
+- Non-Chat LLM class (`LLM`) has been removed.
 - The`IBMvLLM` adapter has been removed.
 
 ### Models
