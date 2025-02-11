@@ -30,6 +30,9 @@ function findProviderDef(value: string): ProviderDef | null {
 }
 
 export function parseModel(name: string) {
+  if (!name) {
+    throw new ValueError("Neither 'provider' nor 'provider:model' was specified.");
+  }
   const [providerId, modelId] = name.split(":") as [ProviderName, string];
   const providerDef = findProviderDef(providerId);
   if (!providerDef) {
