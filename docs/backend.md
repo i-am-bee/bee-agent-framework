@@ -41,7 +41,7 @@ console.log(backend.chat.modelId); // uses provider's default model or the one s
 console.log(backend.embedding.modelId); // uses provider's default model or the one specified via env
 ```
 
-All providers' examples can be found in [examples/backend/providers](/examples/backend/providers).
+All providers examples can be found in [examples/backend/providers](/examples/backend/providers).
 
 ## Chat Model
 

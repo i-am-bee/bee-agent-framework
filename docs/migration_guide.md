@@ -96,6 +96,24 @@ const msg = new UserMessage({
 });
 ```
 
+```ts
+import { UserMessage } from "bee-agent-framework/backend/core";
+
+// using a factory function
+const msg = new UserMessage({
+  type: "file",
+  data: await fs.promises.readFile("document.txt"),
+  mimeType: "text/plain",
+});
+```
+
+```ts
+import { UserMessage, AssistantMessage, SystemMessage } from "bee-agent-framework/backend/core";
+const a = new UserMessage("Hello assistant!");
+const b = new AssistantMessage("Hello user!");
+const c = new SystemMessage("You are a helpful assistant.");
+```
+
 More examples can be found in [Backend Documentation Page](/docs/backend.md).
 
 ### Serialization
