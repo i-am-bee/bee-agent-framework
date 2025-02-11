@@ -59,7 +59,7 @@ yarn install --immutable
 yarn prepare
 ```
 
-5.  **Setup environmental variables:** To run E2E Tests, you should set the following variables in your `.env` file in the repository’s root.
+5.  **Setup environmental variables:** To run E2E Tests, you should set the requisite environmental variables in your `.env` file.
 
 6.  **Follow Conventional Commit Messages:** We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) to structure our commit messages. This helps maintain a clean and manageable commit history. Please use the following format:
 

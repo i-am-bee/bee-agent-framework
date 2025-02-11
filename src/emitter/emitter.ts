@@ -246,7 +246,7 @@ export class Emitter<T = Record<keyof any, Callback<unknown>>> extends Serializa
       createdAt: new Date(),
       source: this,
       creator: this.creator!,
-      context: Object.assign({}, this.context, {}), // TODO: use createInStone
+      context: Object.assign({}, this.context, {}),
       trace: shallowCopy(this.trace), // TODO
     };
   }

@@ -75,7 +75,6 @@ export interface ChatModelObjectOutput<T> {
   object: T;
 }
 
-//export type ChatModelInp2ut = Omit<Parameters<typeof generateText>[0], "model" | "prompt">;
 export interface ChatModelInput extends ChatModelParameters {
   tools?: AnyTool[];
   abortSignal?: AbortSignal;
