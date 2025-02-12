@@ -17,7 +17,6 @@
 import { VercelEmbeddingModel } from "@/adapters/vercel/backend/embedding.js";
 import { getEnv } from "@/internals/env.js";
 import { AnthropicClient, AnthropicClientSettings } from "@/adapters/anthropic/backend/client.js";
-import { ValueError } from "@/errors.js";
 import { AnthropicProvider } from "@ai-sdk/anthropic";
 
 type AnthropicParameters = Parameters<AnthropicProvider["textEmbeddingModel"]>;
@@ -30,9 +29,6 @@ export class AnthropicEmbeddingModel extends VercelEmbeddingModel {
     _settings: AnthropicEmbeddingModelSettings = {},
     client?: AnthropicClientSettings | AnthropicClient,
   ) {
-    if (!modelId) {
-      throw new ValueError("Missing modelId!");
-    }
     const model = AnthropicClient.ensure(client).instance.textEmbeddingModel(modelId);
     super(model);
   }
