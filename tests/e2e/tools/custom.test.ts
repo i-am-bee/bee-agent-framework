@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { CustomTool } from "@/tools/custom.js";
+import { CustomTool, CustomToolCreateError } from "@/tools/custom.js";
 import { StringToolOutput } from "@/tools/base.js";
 
 describe.runIf(process.env.CODE_INTERPRETER_URL)("CustomTool", () => {
@@ -48,7 +48,7 @@ describe.runIf(process.env.CODE_INTERPRETER_URL)("CustomTool", () => {
   it("should throw InvalidCustomToolError on parse error", async () => {
     await expect(
       CustomTool.fromSourceCode({ url: process.env.CODE_INTERPRETER_URL! }, "source code"),
-    ).rejects.toThrow("Error parsing custom tool!");
+    ).rejects.toThrowError(CustomToolCreateError);
   });
 
   it("should run the custom tool", async () => {

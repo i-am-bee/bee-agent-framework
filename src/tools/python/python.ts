@@ -194,7 +194,7 @@ export async function callCodeInterpreter({
   url: string;
   body: unknown;
   signal?: AbortSignal;
-}) {
+}): Promise<Record<string, any>> {
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -214,7 +214,7 @@ export async function callCodeInterpreter({
     }
   });
 
-  if (!response?.ok) {
+  if (!response?.ok && response.status > 400) {
     throw new ToolError(
       `Request to bee-code-interpreter has failed with HTTP status code ${response.status}.`,
       [new Error(await response.text())],

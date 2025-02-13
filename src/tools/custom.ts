@@ -126,7 +126,7 @@ export class CustomTool extends Tool<StringToolOutput, CustomToolOptions, Custom
       });
 
       if (result.error_messages) {
-        throw new CustomToolCreateError(result.errorMessages.join("\n"));
+        throw new CustomToolCreateError(result.error_messages.join("\n"));
       }
 
       return new CustomTool({
