@@ -34,7 +34,6 @@ describe.runIf(process.env.CODE_INTERPRETER_URL)("PythonTool", () => {
     const result = await getPythonTool().run({
       language: "python",
       code: "print('hello')",
-      inputFiles: [],
     });
 
     expect(result.exitCode).toBe(0);
@@ -45,7 +44,6 @@ describe.runIf(process.env.CODE_INTERPRETER_URL)("PythonTool", () => {
     const result = await getPythonTool().run({
       language: "python",
       code: "PUT LIST (((ARR(I,J) DO I = 1 TO 5) DO J = 1 TO 5))",
-      inputFiles: [],
     });
 
     expect(result.exitCode).toBe(1);
