@@ -72,6 +72,7 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 - [`ollama.ts`](/examples/backend/providers/ollama.ts): Ollama model usage
 - [`openai.ts`](/examples/backend/providers/openai.ts): OpenAI integration
 - [`watsonx.ts`](/examples/backend/providers/watsonx.ts): Watsonx integration
+- [`anthropic.ts`](/examples/backend/providers/anthropic.ts): Anthropic integration
 
 ## Logger
 
