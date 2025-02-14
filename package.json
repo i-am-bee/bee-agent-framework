@@ -273,7 +273,7 @@
     "@eslint/js": "^9.16.0",
     "@eslint/markdown": "^6.2.1",
     "@googleapis/customsearch": "^3.2.0",
-    "@ibm-cloud/watsonx-ai": "^1.4.0",
+    "@ibm-cloud/watsonx-ai": "^1.5.0",
     "@langchain/community": "~0.3.28",
     "@langchain/core": "~0.3.37",
     "@langchain/langgraph": "^0.2.44",

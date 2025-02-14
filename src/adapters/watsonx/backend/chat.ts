@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import { ChatModel, ChatModelEmitter, ChatModelInput, ChatModelOutput } from "@/backend/chat.js";
+import {
+  ChatConfig,
+  ChatModel,
+  ChatModelEmitter,
+  ChatModelInput,
+  ChatModelOutput,
+  ChatModelParameters,
+} from "@/backend/chat.js";
 import { WatsonxClient, WatsonxClientSettings } from "@/adapters/watsonx/backend/client.js";
 import { findLast, isEmpty, isTruthy } from "remeda";
 import WatsonxAiMlVml_v1, {
@@ -32,6 +39,7 @@ import { ToolCallPart } from "ai";
 import Type = WatsonxAiMlVml_v1.TextChatResponseFormat.Constants.Type;
 import { parseBrokenJson } from "@/internals/helpers/schema.js";
 import { getEnv } from "@/internals/env.js";
+import { NotImplementedError } from "@/errors.js";
 
 export class WatsonxChatModel extends ChatModel {
   protected readonly client: WatsonxClient;
@@ -50,6 +58,20 @@ export class WatsonxChatModel extends ChatModel {
   ) {
     super();
     this.client = WatsonxClient.ensure(client);
+  }
+
+  config(config: ChatConfig) {
+    super.config(config);
+    // TODO: missing parameters https://github.com/IBM/watsonx-ai-node-sdk/issues/4
+    for (const name of ["topK", "seed", "stopSequences"] as (keyof ChatModelParameters)[]) {
+      if (this.parameters[name] !== undefined) {
+        this.parameters[name] = undefined;
+        throw new NotImplementedError(
+          `Setting "${name}" parameter is not supported for WatsonX Chat Models.`,
+        );
+      }
+    }
+    return this;
   }
 
   protected async _create(input: ChatModelInput) {
@@ -121,7 +143,8 @@ export class WatsonxChatModel extends ChatModel {
     };
   }
 
-  protected async prepareInput(input: ChatModelInput): Promise<TextChatParams> {
+  protected async prepareInput(overrides: ChatModelInput): Promise<TextChatParams> {
+    const input: ChatModelInput = { ...this.parameters, ...overrides };
     const tools: TextChatParameterTools[] = await Promise.all(
       (input.tools ?? []).map(async (tool) => ({
         type: "function",
@@ -134,7 +157,6 @@ export class WatsonxChatModel extends ChatModel {
     );
 
     return {
-      ...this.parameters,
       modelId: this.modelId,
       messages: input.messages.flatMap((message): TextChatMessages[] => {
         if (message instanceof ToolMessage) {
@@ -170,15 +192,20 @@ export class WatsonxChatModel extends ChatModel {
       spaceId: this.client.spaceId,
       projectId: this.client.projectId,
       tools: isEmpty(tools) ? undefined : tools,
-      maxTokens: input.maxTokens ?? this.parameters.maxTokens,
-      topP: input.topP ?? this.parameters.topP,
-      frequencyPenalty: input.frequencyPenalty ?? this.parameters.frequencyPenalty,
-      temperature: input.temperature ?? this.parameters.temperature,
-      n: input.topK ?? this.parameters.topK,
-      presencePenalty: input.presencePenalty ?? this.parameters.presencePenalty,
+      responseFormat: undefined,
       ...(input.responseFormat?.type === "object-json" && {
         responseFormat: { type: Type.JSON_OBJECT },
       }),
+      topP: input.topP,
+      frequencyPenalty: input.frequencyPenalty,
+      temperature: input.temperature,
+      n: input.n,
+      maxTokens: input.maxTokens,
+      presencePenalty: input.presencePenalty,
+      toolChoice: input.toolChoice,
+      // TODO: missing parameters https://github.com/IBM/watsonx-ai-node-sdk/issues/4
+      // stop: input.stopSequences,
+      // seed: input.seed,
     };
   }
 

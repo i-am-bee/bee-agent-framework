@@ -1718,15 +1718,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ibm-cloud/watsonx-ai@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "@ibm-cloud/watsonx-ai@npm:1.4.0"
+"@ibm-cloud/watsonx-ai@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@ibm-cloud/watsonx-ai@npm:1.5.0"
   dependencies:
     "@langchain/textsplitters": "npm:^0.1.0"
     "@types/node": "npm:^18.0.0"
     extend: "npm:3.0.2"
     ibm-cloud-sdk-core: "npm:^5.0.2"
-  checksum: 10c0/1833e07188e3b650de355334f9fff2216477c7c610aee7b69e005a86b77a5ec92e5a5ce8c92a1903a7a76001ebefa99e0d02fd2c82730b78cf968bc410d205d1
+  checksum: 10c0/02180fbd273ccf4d581ff4944b9bd92f231d4a2c2c6dc5f038275cce7efaebfaec68b879ef1abb66fa378d7434c66be0c5cc36fdf2bbd1494075622cbba96169
   languageName: node
   linkType: hard
 
@@ -5092,7 +5092,7 @@ __metadata:
     "@eslint/js": "npm:^9.16.0"
     "@eslint/markdown": "npm:^6.2.1"
     "@googleapis/customsearch": "npm:^3.2.0"
-    "@ibm-cloud/watsonx-ai": "npm:^1.4.0"
+    "@ibm-cloud/watsonx-ai": "npm:^1.5.0"
     "@langchain/community": "npm:~0.3.28"
     "@langchain/core": "npm:~0.3.37"
     "@langchain/langgraph": "npm:^0.2.44"
