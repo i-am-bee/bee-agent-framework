@@ -65,16 +65,14 @@ This repository contains examples demonstrating the usage of the Bee Agent Frame
 - [`chatCallback.ts`](/examples/backend/chatStream.ts): Callbacks for chat models
 - [`structured.ts`](/examples/backend/structured.ts): Structured output from language models
 
-### Backend providers
+### LLM Providers
 
-- [`backend/providers/ollama.ts`](/examples/backend/providers/ollama.ts): Ollama
-- [`backend/providers/openai.ts`](/examples/backend/providers/openai.ts): OpenAI
-- [`backend/providers/groq.ts`](/examples/backend/providers/groq.ts): Groq
-- [`backend/providers/amazon-bedrock.ts`](/examples/backend/providers/amazon-bedrock.ts): Amazon Bedrock
-- [`backend/providers/vertexai.ts`](/examples/backend/providers/vertexai.ts): Google Vertex
-- [`backend/providers/watsonx.ts`](/examples/backend/providers/watsonx.ts): Watsonx
-- [`backend/providers/azure-openai.ts`](/examples/backend/providers/azure-openai.ts): Azure OpenAI
-- [`backend/providers/anthropic.ts`](/examples/backend/providers/anthropic.ts): Anthropic
+- [`groq.ts`](/examples/backend/providers/groq.ts): Groq language model integration
+- [`langchain.ts`](/examples/backend/providers/langchain.ts): LangChain integration
+- [`ollama.ts`](/examples/backend/providers/ollama.ts): Ollama model usage
+- [`openai.ts`](/examples/backend/providers/openai.ts): OpenAI integration
+- [`watsonx.ts`](/examples/backend/providers/watsonx.ts): Watsonx integration
+- [`anthropic.ts`](/examples/backend/providers/anthropic.ts): Anthropic integration
 
 ## Logger
 

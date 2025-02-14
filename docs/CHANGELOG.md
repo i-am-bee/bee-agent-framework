@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.2](https://github.com/i-am-bee/bee-agent-framework/compare/v0.1.1...v0.1.2) (2025-02-14)
+
+### Features
+
+- **adapters:** add Anthropic provider ([#311](https://github.com/i-am-bee/bee-agent-framework/issues/311)) ([bc3c490](https://github.com/i-am-bee/bee-agent-framework/commit/bc3c490ebcfedf8654e7680c105a1c6f1881892d)), closes [#233](https://github.com/i-am-bee/bee-agent-framework/issues/233)
+
+### Bug Fixes
+
+- **adapters:** update watsonx chat model parameters ([35b608f](https://github.com/i-am-bee/bee-agent-framework/commit/35b608fd1e7d522919079d01b5dff647af2b6edf)), closes [#313](https://github.com/i-am-bee/bee-agent-framework/issues/313)
+- **tools:** python tool error handling ([12d983a](https://github.com/i-am-bee/bee-agent-framework/commit/12d983a9783f2e5b6f7b2f10bb89eeb45aeb3793))
+
 ## [0.1.1](https://github.com/i-am-bee/bee-agent-framework/compare/v0.1.0...v0.1.1) (2025-02-11)
 
 ### Features
