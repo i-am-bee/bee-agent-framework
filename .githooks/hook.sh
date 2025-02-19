@@ -4,13 +4,15 @@ set -e
 
 HOOK_NAME=$(basename "$0")
 STAGED_FILES=$(git diff --staged --name-only)
+STAGED_EXISTING_FILES=$(git diff --staged --name-only --diff-filter=ACM)
+
 if [ -z "$STAGED_FILES" ] && [ "$HOOK_NAME" = "pre-commit" ]; then
   echo "Error: Stash is empty. Aborting."
   exit 1
 fi
 
 COMMIT_MSG_FILE="$1"
-HOOK_ARGS=${COMMIT_MSG_FILE:-$STAGED_FILES}
+HOOK_ARGS=${COMMIT_MSG_FILE:-$STAGED_EXISTING_FILES}
 
 TS_DIR="typescript"
 HAS_TS_FILES=$(echo "$STAGED_FILES" | grep -q "^$TS_DIR/" && echo 1 || echo 0)
