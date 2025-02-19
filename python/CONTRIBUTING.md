@@ -80,6 +80,9 @@ cd beeai-framework
 # Ensure you have the pre-commit hooks installed
 .githooks/install.sh
 
+# Enter the repository
+cd python
+
 # Use Poetry to install the project dependencies and activate a virtual environment
 poetry install
 poetry shell
