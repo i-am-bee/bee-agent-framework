@@ -51,7 +51,7 @@ warn_required_dynamic_aliases = true
 
 [tool.commitizen]
 name = "cz_monorepo_commits"
-tag_format = "python_$version"
+tag_format = "python_v$version"
 version_scheme = "semver"
 version_provider = "pep621"
 update_changelog_on_bump = true
@@ -188,7 +188,7 @@ sequence = [
     { shell = '[ -z "$(git status -uno --porcelain)" ] || { echo "Your index contains uncommitted changes! Commit them and try again." && exit 1; }' },
     { "ref" = "clean"},
     { "cmd" = "cz bump"},
-    { "cmd" = "poetry publish --build --dry-run" },
+    { "cmd" = "poetry publish --build" },
     { "cmd" = "git push && git push origin $(git describe --tags --exact-match)"}
 ]
 
