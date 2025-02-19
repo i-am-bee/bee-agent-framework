@@ -31,7 +31,7 @@
         var main = "https://github.com/i-am-bee/beeai-framework/tree/main";
         var exampleRegex = /^[\/]{0,1}examples\/(.*)/;
         var srcRegex = /^[\/]{0,1}src\/(.*)/;
-        var docsMatch = /(^|\/)docs\//;
+        var docsMatch = /(^|\/)docs($|\/)/;
 
         return function (url) {
           if (url === "LICENSE") {
