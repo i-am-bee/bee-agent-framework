@@ -1,6 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
-
-
 def prompt_input(default: str | None = None) -> str:
     prompt: str = ""
 

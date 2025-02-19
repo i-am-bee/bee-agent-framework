@@ -7,8 +7,7 @@ STAGED_FILES=$(git diff --staged --name-only)
 STAGED_EXISTING_FILES=$(git diff --staged --name-only --diff-filter=ACM)
 
 if [ -z "$STAGED_FILES" ] && [ "$HOOK_NAME" = "pre-commit" ]; then
-  echo "Error: Stash is empty. Aborting."
-  exit 1
+  exit 0
 fi
 
 COMMIT_MSG_FILE="$1"
