@@ -3,9 +3,9 @@
 import asyncio
 import sys
 
-from beeai import BeeAgent
 from dotenv import load_dotenv
 
+from beeai_framework.agents.bee import BeeAgent
 from beeai_framework.agents.types import BeeInput, BeeRunInput
 from beeai_framework.backend.chat import ChatModel
 from beeai_framework.memory.unconstrained_memory import UnconstrainedMemory
