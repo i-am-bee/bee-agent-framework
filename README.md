@@ -14,7 +14,7 @@ We are committed to maintaining parity between the two.
 
 ## Latest updates
 
-- 🚀 **2025-02-18**: Launched an alpha of the Python library and rebranded to BeeAI Framework. See our [getting started guide].
+- 🚀 **2025-02-19**: Launched an alpha of the Python library and rebranded to BeeAI Framework. See our [getting started guide](/python/docs).
 - 🚀 **2025-02-07**: Introduced [Backend](/typescript/docs/backend.md) module to simplify working with AI services (chat, embedding). See our [migration guide](/typescript/docs/migration_guide.md).
 - 🧠 **2025-01-28**: Added support for [DeepSeek R1](https://api-docs.deepseek.com/news/news250120), check out the [Competitive Analysis Workflow example](/typescript/examples/workflows/competitive-analysis)
 - 🚀 **2025-01-09**:
