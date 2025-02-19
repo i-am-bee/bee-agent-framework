@@ -13,19 +13,6 @@
   <h4 align="center">BeeAI Framework is an open-source library for building production-ready multi-agent systems.</h4>
 </p>
 
-## Latest updates
-
-- 🚀 **2025-02-19**: Launched an alpha of the Python library and rebranded to BeeAI Framework. See our [getting started guide](/python/docs/README.md).
-- 🚀 **2025-02-07**: Introduced [Backend](/typescript/docs/backend.md) module to simplify working with AI services (chat, embedding). See our [migration guide](/typescript/docs/migration_guide.md).
-- 🧠 **2025-01-28**: Added support for [DeepSeek R1](https://api-docs.deepseek.com/news/news250120), check out the [Competitive Analysis Workflow example](/typescript/examples/workflows/competitive-analysis)
-- 🚀 **2025-01-09**:
-  - Introduced [Workflows](/typescript/docs/workflows.md), a way of building multi-agent systems.
-  - Added support for [Model Context Protocol](https://i-am-bee.github.io/bee-agent-framework/#/tools?id=using-the-mcptool-class), featured on the [official page](https://modelcontextprotocol.io/clients#bee-agent-framework).
-- 🚀 **2024-12-09**: Added support for [LLaMa 3.3](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct).
-- 🚀 **2024-11-21**: Added an experimental [Streamlit agent](typescript/examples/agents/experimental/streamlit.ts).
-
-For a full changelog, see our [releases page](https://github.com/i-am-bee/beeai-framework/releases).
-
 ## Why pick BeeAI?
 
 **🏆 Build the optimal agent architecture for your use case.** To design the right architecture for your use case, you need flexibility in both orchestrating agents and defining their roles and behaviors. With the BeeAI framework, you can implement any multi-agent pattern using [Workflows](/typescript/docs/workflows.md). Start with our out-of-the-box [ReActAgent](/typescript/examples/agents/bee.ts), or easily [customize your own agent](/typescript/docs/agents.md#creating-your-own-agent).
