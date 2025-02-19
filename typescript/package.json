@@ -155,6 +155,7 @@
     "docs:links:check": "yarn docs:links docs/**/*.md",
     "docs:watch": "docsify serve ./docs --open",
     "lint": "yarn eslint",
+    "prepare": "../.githooks/install.sh",
     "lint:fix": "yarn eslint --fix",
     "format": "yarn prettier --check .",
     "format:fix": "yarn prettier --write .",
