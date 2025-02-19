@@ -56,7 +56,6 @@ The source directory (`src`) provides numerous modules that one can use.
 
 ## Installation
 
-To install the Python library:
 ```shell
 pip install beeai-framework
 ```
@@ -66,11 +65,22 @@ pip install beeai-framework
 The following example demonstrates how to create and run a simple AI agent using the BeeAI Framework. This agent leverages an LLM to process queries and generate responses.
 
 ```py
-from beeai import BeeAgent, LLM
+import asyncio
 
-agent = BeeAgent(llm=LLM())
+from beeai_framework.agents.bee.agent import BeeAgent
+from beeai_framework.agents.types import BeeInput, BeeRunInput, BeeRunOutput
+from beeai_framework.backend.chat import ChatModel
+from beeai_framework.memory.unconstrained_memory import UnconstrainedMemory
+from beeai_framework.tools.weather.openmeteo import OpenMeteoTool
 
-agent.run("What is the capital of Massachusetts")
+async def main() -> None:
+  llm = await ChatModel.from_name("ollama:granite3.1-dense:8b")
+  agent = BeeAgent(bee_input=BeeInput(llm=llm, tools=[OpenMeteoTool()], memory=UnconstrainedMemory()))
+  result: BeeRunOutput = await agent.run(run_input=BeeRunInput(prompt="How is the weather in White Plains?"))
+  print(result.result.text)
+
+if __name__ == "__main__":
+  asyncio.run(main())
 ```
 
 > [!TIP]
@@ -78,11 +88,12 @@ agent.run("What is the capital of Massachusetts")
 > To run this example, be sure that you have installed [ollama](https://ollama.com) with the [llama3.1](https://ollama.com/library/llama3.1) model downloaded.
 
 To run other examples, use the following command, replacing [example_name] with the desired script:
+
 ```bash
-python -m examples.beeai.[example_name]
+python examples/[example_name].py
 ```
 
-➡️ Explore all examples in our [examples library](/examples).
+➡️ Explore all examples in our [examples library](./examples).
 
 ## Roadmap
 

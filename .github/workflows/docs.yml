@@ -24,7 +24,10 @@ jobs:
           cp ./typescript/examples/README.md docs/typescript/examples.md
 
       - name: Copy Python Documentation
-        run: cp -r ./python/docs docs/python
+        run: |
+          cp -r ./python/docs docs/python
+          cp ./python/*.md docs/python
+          cp ./python/examples/README.md docs/python/examples.md
 
       - name: Upload Documentation Artifact
         uses: actions/upload-pages-artifact@v3
