@@ -145,7 +145,7 @@ default = "pass"
         { "ref" = "copyright ${TARGET}"},
         { "ref" = "format --fix ${TARGET}"},
         { "ref" = "lint --fix ${TARGET}" },
-        { "shell" = "git add -u ${TARGET}" }
+        { "shell" = "echo ${TARGET} | xargs -r git add" }
     ]
 
 [tool.poe.tasks.docs]
