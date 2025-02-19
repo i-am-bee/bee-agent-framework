@@ -21,11 +21,11 @@ import { getEnv } from "@/internals/env.js";
 export type GroqClientSettings = GroqProviderSettings;
 
 export class GroqClient extends BackendClient<GroqClientSettings, GroqProvider> {
-  protected create(settings?: GroqClientSettings): GroqProvider {
+  protected create(): GroqProvider {
     return createGroq({
-      ...settings,
       baseURL: getEnv("GROQ_API_BASE_URL"),
       apiKey: getEnv("GROQ_API_KEY"),
+      ...this.settings,
     });
   }
 }

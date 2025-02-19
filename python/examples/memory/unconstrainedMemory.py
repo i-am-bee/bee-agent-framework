@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
-
 import asyncio
 
 from beeai_framework.backend import Message, Role

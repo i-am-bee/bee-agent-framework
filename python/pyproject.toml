@@ -145,7 +145,7 @@ default = "pass"
         { "ref" = "copyright ${TARGET}"},
         { "ref" = "format --fix ${TARGET}"},
         { "ref" = "lint --fix ${TARGET}" },
-        { "shell" = "git add -u ${TARGET}" }
+        { "shell" = "echo ${TARGET} | xargs -r git add" }
     ]
 
 [tool.poe.tasks.docs]
@@ -157,7 +157,6 @@ args = ["type"]
     case = "build"
     help = "Update sources for the documentation"
     sequence = [
-        { shell = "cp *.md docs/ && cp examples/README.md docs/examples.md" },
         { shell = "npx --yes embedme --source-root=. docs/**/*.md" },
         { "ref" = "format --fix docs"},
         { "ref" = "lint --fix docs" },

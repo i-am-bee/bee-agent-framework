@@ -18,10 +18,16 @@ jobs:
         run: cp *.md docs/
 
       - name: Copy TypeScript Documentation
-        run: cp -r ./typescript/docs docs/typescript
+        run: |
+          cp -r ./typescript/docs docs/typescript
+          cp ./typescript/*.md docs/typescript
+          cp ./typescript/examples/README.md docs/typescript/examples.md
 
       - name: Copy Python Documentation
-        run: cp -r ./python/docs docs/python
+        run: |
+          cp -r ./python/docs docs/python
+          cp ./python/*.md docs/python
+          cp ./python/examples/README.md docs/python/examples.md
 
       - name: Upload Documentation Artifact
         uses: actions/upload-pages-artifact@v3
