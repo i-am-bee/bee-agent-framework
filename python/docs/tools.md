@@ -70,8 +70,6 @@ _Source: agent.py TODO
 <!-- embedme examples/tools/decorator.py -->
 
 ```py
-
-
 import asyncio
 import json
 from urllib.parse import quote
@@ -139,8 +137,6 @@ _Source: [examples/tools/decorator.py](/examples/tools/decorator.py)_
 <!-- embedme examples/tools/duckduckgo.py -->
 
 ```py
-
-
 import asyncio
 
 from beeai_framework.agents.bee import BeeAgent
@@ -171,8 +167,6 @@ _Source: [examples/tools/duckduckgo.py](/examples/tools/duckduckgo.py)_
 <!-- embedme examples/tools/openmeteo.py -->
 
 ```py
-
-
 import asyncio
 
 from beeai_framework.agents.bee import BeeAgent

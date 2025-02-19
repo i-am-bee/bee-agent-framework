@@ -34,8 +34,6 @@ _Source: /examples/memory/llmMemory.py TODO
 <!-- embedme examples/memory/agentMemory.py -->
 
 ```py
-
-
 import asyncio
 
 from beeai_framework.agents.bee.agent import BeeAgent
@@ -141,8 +139,6 @@ Unlimited in size.
 <!-- embedme examples/memory/unconstrainedMemory.py -->
 
 ```py
-
-
 import asyncio
 
 from beeai_framework.backend import Message, Role
@@ -186,8 +182,6 @@ Keeps last `k` entries in the memory. The oldest ones are deleted (unless specif
 <!-- embedme examples/memory/slidingMemory.py -->
 
 ```py
-
-
 import asyncio
 
 from beeai_framework.backend import Message, Role
@@ -241,8 +235,6 @@ If overflow occurs, the oldest message will be removed.
 <!-- embedme examples/memory/tokenMemory.py -->
 
 ```py
-
-
 import asyncio
 import math
 
@@ -315,8 +307,6 @@ Only a single summarization of the conversation is preserved. Summarization is u
 <!-- embedme examples/memory/summarizeMemory.py -->
 
 ```py
-
-
 import asyncio
 
 from beeai_framework.backend.chat import ChatModel
