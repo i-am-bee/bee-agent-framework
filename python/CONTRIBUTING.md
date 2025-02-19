@@ -74,8 +74,11 @@ Follow these steps:
 # Clone the repository
 git clone https://github.com/i-am-bee/beeai-framework.git
 
+# Enter the repository
+cd beeai-framework
+
 # Ensure you have the pre-commit hooks installed
-pre-commit install
+.githooks/install.sh
 
 # Use Poetry to install the project dependencies and activate a virtual environment
 poetry install
@@ -84,8 +87,6 @@ poetry shell
 # Copy .env.example to .env and fill in required values
 cp .env.example .env
 ```
-
-### Build the pip package
 
 #### Build the package:
 
@@ -107,39 +108,41 @@ source test_env/bin/activate  # On Windows: test_env\Scripts\activate
 pip install dist/beeai-framework-0.1.0.tar.gz
 ```
 
-#### Publish to TestPyPI
-
-```bash
-# Configure Poetry:
-poetry config repositories.testpypi https://test.pypi.org/legacy/
-# Publish
-poetry publish -r testpypi
-#Test the installation
-pip install --index-url https://test.pypi.org/simple/ beeai-framework
-```
-
 #### Run Linters/Formatters
+
 Ensure your changes meet code quality standards:
 
 - lint: use the next command run Black and Ruff:
 
 ```bash
-poetry run lint
+poe lint # poe lint --fix
+poe format # poe format --fix
 ```
 
 #### Run Tests
+
 Ensure your changes pass all tests:
 
 ```bash
-# Run unit tests
-pytest tests/unit
+# Run Unit tests
+poe test --type unit
+
 # Run integration tests
-pytest tests/integration
+poe test --type integration
+
 # Run E2E tests
-pytest tests/e2e
+poe test --type e2e
 ```
 
+### Other useful commands
+
+- `poe build`
+- `poe commit`
+- `poe copyright` and `poe copyright --type check`
+- `poe docs --type build` and `poe docs --type check`
+
 #### Follow Conventional Commit Messages
+
 We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) to structure our commit messages. Please use the following format:
 
 ```
@@ -163,18 +166,19 @@ Ref: #15
    - commit: for convenience you can use the following command to sign-off your commit with `-s` and generate the commit.
 
 ```bash
-poetry run commit "<type>(<scope>): <subject>"
+poe commit "<type>(<scope>): <subject>"
 ```
 
 By following these steps, you'll be all set to contribute to our project! If you encounter any issues during the setup process, please feel free to open an issue.
 
 ## Updating examples and embedding
+
 Currently [embedme](https://github.com/zakhenry/embedme) is used to embed code examples directly in documentation.  Supported file types can be found [here](https://github.com/zakhenry/embedme?tab=readme-ov-file#multi-language).
 
 Once an example is edited or a new one is created and referenced running the following command will update the documentation.
 
 ```bash
-poetry run embedme
+poe docs --type build
 ```
 
 ## Legal
