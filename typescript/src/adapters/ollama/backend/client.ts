@@ -21,10 +21,10 @@ import { BackendClient } from "@/backend/client.js";
 export type OllamaClientSettings = OllamaProviderSettings;
 
 export class OllamaClient extends BackendClient<OllamaClientSettings, OllamaProvider> {
-  protected create(settings?: OllamaClientSettings): OllamaProvider {
+  protected create(): OllamaProvider {
     return createOllama({
-      ...settings,
-      baseURL: getEnv("OLLAMA_BASE_URL"),
+      ...(this.settings ?? {}),
+      baseURL: this.settings?.baseURL ?? getEnv("OLLAMA_BASE_URL"),
     });
   }
 }
