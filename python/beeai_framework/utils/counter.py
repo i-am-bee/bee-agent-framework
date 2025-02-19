@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 class RetryCounter:
     def __init__(self, error_type: type[BaseException], max_retries: int = 0) -> None:
         self._max_retries = max_retries

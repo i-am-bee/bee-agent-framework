@@ -246,13 +246,12 @@ If overflow occurs, the oldest message will be removed.
 import asyncio
 import math
 
-from beeai import LLM
-
+from beeai_framework.adapters.ollama.backend.chat import OllamaChatModel
 from beeai_framework.backend import Message, Role
 from beeai_framework.memory import TokenMemory
 
 # Initialize the LLM
-llm = LLM()
+llm = OllamaChatModel()
 
 # Initialize TokenMemory with handlers
 memory = TokenMemory(
