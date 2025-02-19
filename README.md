@@ -45,6 +45,11 @@ To install the TypeScript library:
 npm install beeai-framework
 ```
 
+To install using Yarn:
+```shell
+yarn add beeai-framework
+```
+
 For more guidance and starter examples in your desired language, head to the docs pages for [Python](/python/docs) and [TypeScript](/typescript/docs).
 
 ## Quick example
