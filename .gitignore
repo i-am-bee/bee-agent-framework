@@ -131,6 +131,7 @@ dist
 .pnp.*
 
 .idea
+.vscode
 /experiments
 .npmrc
 .DS_Store

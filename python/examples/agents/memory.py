@@ -1,7 +1,6 @@
 import asyncio
 
-from beeai import LLM
-
+from beeai_framework import LLM
 from beeai_framework.agents.bee import BeeAgent
 from beeai_framework.agents.types import BeeInput, BeeRunInput
 from beeai_framework.backend.message import UserMessage

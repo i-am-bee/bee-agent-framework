@@ -58,10 +58,10 @@ class LangChainWikipediaTool(Tool):
             return f"Error searching Wikipedia: {e!s}"
 
 
-async def create_agent() -> BeeAgent:
+def create_agent() -> BeeAgent:
     """Create and configure the agent with tools and LLM"""
 
-    llm = await ChatModel.from_name(
+    llm = ChatModel.from_name(
         "ollama:granite3.1-dense:8b",
         # ChatModelParameters(temperature=0, presence_penalty=1.0),
     )
@@ -107,7 +107,7 @@ async def main() -> None:
 
     try:
         # Create agent
-        agent = await create_agent()
+        agent = create_agent()
 
         # Log code interpreter status if configured
         code_interpreter_url = get_env_var("CODE_INTERPRETER_URL")
