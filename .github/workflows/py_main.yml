@@ -1,0 +1,52 @@
+name: Python - Lint, Build, Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - 'python/**'
+  pull_request:
+    branches: ["main"]
+    paths:
+      - 'python/**'
+
+defaults:
+  run:
+    working-directory: python
+
+jobs:
+  main:
+    timeout-minutes: 20
+    name: Lint & Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install poetry
+        run: pipx install poetry
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "poetry"
+      - name: Install dependencies
+        run: poetry install --no-interaction
+      - name: Code Lint
+        run: poetry run poe lint
+      - name: Code Format
+        run: poetry run poe format
+      - name: Commits Lint
+        run: poetry run cz check --rev-range HEAD~1..HEAD
+      - name: Documentation - code snippet embeddings
+        run: poetry run poe docs --type check
+      - name: Build
+        run: poetry build
+      - name: Unit Tests
+        run: poetry run poe test --type unit
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.23"
+      - name: Check Copyright Header
+        run: poetry run poe copyright --type check
