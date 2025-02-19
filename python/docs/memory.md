@@ -34,7 +34,7 @@ _Source: /examples/memory/llmMemory.py TODO
 <!-- embedme examples/memory/agentMemory.py -->
 
 ```py
-# SPDX-License-Identifier: Apache-2.0
+
 
 import asyncio
 
@@ -141,7 +141,7 @@ Unlimited in size.
 <!-- embedme examples/memory/unconstrainedMemory.py -->
 
 ```py
-# SPDX-License-Identifier: Apache-2.0
+
 
 import asyncio
 
@@ -186,7 +186,7 @@ Keeps last `k` entries in the memory. The oldest ones are deleted (unless specif
 <!-- embedme examples/memory/slidingMemory.py -->
 
 ```py
-# SPDX-License-Identifier: Apache-2.0
+
 
 import asyncio
 
@@ -241,7 +241,7 @@ If overflow occurs, the oldest message will be removed.
 <!-- embedme examples/memory/tokenMemory.py -->
 
 ```py
-# SPDX-License-Identifier: Apache-2.0
+
 
 import asyncio
 import math
@@ -315,7 +315,7 @@ Only a single summarization of the conversation is preserved. Summarization is u
 <!-- embedme examples/memory/summarizeMemory.py -->
 
 ```py
-# SPDX-License-Identifier: Apache-2.0
+
 
 import asyncio
 

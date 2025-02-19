@@ -70,7 +70,7 @@ _Source: agent.py TODO
 <!-- embedme examples/tools/decorator.py -->
 
 ```py
-# SPDX-License-Identifier: Apache-2.0
+
 
 import asyncio
 import json
@@ -139,7 +139,7 @@ _Source: [examples/tools/decorator.py](/examples/tools/decorator.py)_
 <!-- embedme examples/tools/duckduckgo.py -->
 
 ```py
-# SPDX-License-Identifier: Apache-2.0
+
 
 import asyncio
 
@@ -171,7 +171,7 @@ _Source: [examples/tools/duckduckgo.py](/examples/tools/duckduckgo.py)_
 <!-- embedme examples/tools/openmeteo.py -->
 
 ```py
-# SPDX-License-Identifier: Apache-2.0
+
 
 import asyncio
 
