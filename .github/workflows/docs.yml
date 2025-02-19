@@ -20,6 +20,9 @@ jobs:
       - name: Copy TypeScript Documentation
         run: cp -r ./typescript/docs docs/typescript
 
+      - name: Copy Python Documentation
+        run: cp -r ./python/docs docs/python
+
       - name: Upload Documentation Artifact
         uses: actions/upload-pages-artifact@v3
         with:
