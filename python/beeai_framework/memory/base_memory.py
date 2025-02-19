@@ -1,0 +1,83 @@
+# SPDX-License-Identifier: Apache-2.0
+
+from abc import ABC, abstractmethod
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any
+
+from beeai_framework.backend import Message
+
+if TYPE_CHECKING:
+    from beeai_framework.memory.readonly_memory import ReadOnlyMemory
+
+
+class BaseMemory(ABC):
+    """Abstract base class for all memory implementations."""
+
+    @property
+    @abstractmethod
+    def messages(self) -> list[Message]:
+        """Return list of stored messages."""
+        pass
+
+    @abstractmethod
+    async def add(self, message: Message, index: int | None = None) -> None:
+        """Add a message to memory."""
+        pass
+
+    @abstractmethod
+    async def delete(self, message: Message) -> bool:
+        """Delete a message from memory."""
+        pass
+
+    @abstractmethod
+    def reset(self) -> None:
+        """Clear all messages from memory."""
+        pass
+
+    async def add_many(self, messages: Iterable[Message], start: int | None = None) -> None:
+        """Add multiple messages to memory."""
+        for counter, msg in enumerate(messages):
+            index = None if start is None else start + counter
+            await self.add(msg, index)
+
+    async def delete_many(self, messages: Iterable[Message]) -> None:
+        """Delete multiple messages from memory."""
+        for msg in messages:
+            await self.delete(msg)
+
+    async def splice(self, start: int, delete_count: int, *items: Message) -> list[Message]:
+        """Remove and insert messages at a specific position."""
+        total = len(self.messages)
+        start = max(total + start, 0) if start < 0 else start
+        delete_count = min(delete_count, total - start)
+
+        deleted_items = self.messages[start : start + delete_count]
+        await self.delete_many(deleted_items)
+        await self.add_many(items, start)
+
+        return deleted_items
+
+    def is_empty(self) -> bool:
+        """Check if memory is empty."""
+        return len(self.messages) == 0
+
+    def __iter__(self) -> None:
+        return iter(self.messages)
+
+    @abstractmethod
+    def create_snapshot(self) -> Any:
+        """Create a serializable snapshot of current state."""
+        pass
+
+    @abstractmethod
+    def load_snapshot(self, state: Any) -> None:
+        """Restore state from a snapshot."""
+        pass
+
+    def as_read_only(self) -> "ReadOnlyMemory":
+        """Return a read-only view of this memory."""
+        from beeai_framework.memory.readonly_memory import (  # Import here to avoid circular import
+            ReadOnlyMemory,
+        )
+
+        return ReadOnlyMemory(self)
