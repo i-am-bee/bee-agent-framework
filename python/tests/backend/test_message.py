@@ -15,6 +15,7 @@ from beeai_framework.backend import (
     UserMessage,
 )
 
+
 @pytest.mark.unit
 def test_user_message() -> None:
     text = "this is a user message"
@@ -29,6 +30,7 @@ def test_user_message() -> None:
     assert isinstance(message, UserMessage)
     assert len(content) == 1
     assert content[0].get("text") == text
+
 
 @pytest.mark.unit
 def test_system_message() -> None:
@@ -45,6 +47,7 @@ def test_system_message() -> None:
     assert len(content) == 1
     assert content[0].get("text") == text
 
+
 @pytest.mark.unit
 def test_assistant_message() -> None:
     text = "this is an assistant message"
@@ -59,6 +62,7 @@ def test_assistant_message() -> None:
     assert isinstance(message, AssistantMessage)
     assert len(content) == 1
     assert content[0].get("text") == text
+
 
 @pytest.mark.unit
 def test_tool_message() -> None:
@@ -79,6 +83,7 @@ def test_tool_message() -> None:
     assert len(content) == 1
     assert content[0] == tool_result
     assert isinstance(message, ToolMessage)
+
 
 @pytest.mark.unit
 def test_custom_message() -> None:

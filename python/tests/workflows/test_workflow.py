@@ -57,6 +57,7 @@ async def test_workflow_basic() -> None:
     assert response.state.hops == 0
     assert response.state.output == "There are 0 hops remaining!"
 
+
 @pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_workflow_validation() -> None:
@@ -94,6 +95,7 @@ async def test_workflow_validation() -> None:
     with pytest.raises(ValidationError):
         await workflow.run(State(input="Hello there!", hops=10))
 
+
 @pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_workflow_step_delete() -> None:
@@ -124,6 +126,7 @@ async def test_workflow_step_delete() -> None:
 
     assert len(workflow.steps) == 2
     assert response.state.output is None
+
 
 @pytest.mark.e2e
 @pytest.mark.asyncio

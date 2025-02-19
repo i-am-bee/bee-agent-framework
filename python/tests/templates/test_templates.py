@@ -20,19 +20,23 @@ def template() -> PromptTemplate:
 
     return template
 
+
 @pytest.mark.unit
 def test_render_valid(template: PromptTemplate) -> None:
     assert template.render({"task": "Test", "count": 1}) == "This is the task: Test1"
+
 
 @pytest.mark.unit
 def test_render_invalid_missing(template: PromptTemplate) -> None:
     with pytest.raises(ValidationError):
         template.render({"task": "Test"})
 
+
 @pytest.mark.unit
 def test_render_invalid_type(template: PromptTemplate) -> None:
     with pytest.raises(ValidationError):
         template.render({"task": 1, "count": 1})
+
 
 @pytest.mark.unit
 def test_render_function(template: PromptTemplate) -> None:
@@ -46,6 +50,7 @@ def test_render_function(template: PromptTemplate) -> None:
     )
 
     template.render(TestPromptInputSchema(task="Here is a task!"))
+
 
 @pytest.mark.unit
 def test_render_function_clash(template: PromptTemplate) -> None:
