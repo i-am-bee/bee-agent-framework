@@ -1,0 +1,226 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="/docs/assets/Bee_logo_white.svg">
+    <source media="(prefers-color-scheme: light)" srcset="/docs/assets/Bee_logo_black.svg">
+    <img alt="Bee Framework logo" height="90">
+  </picture>
+</p>
+
+<h1 align="center">BeeAI Framework</h1>
+
+<p align="center">
+  <img align="center" alt="Project Status: Alpha" src="https://img.shields.io/badge/Status-Alpha-red">
+
+  <h4 align="center">Open-source framework for building, deploying, and serving powerful multi-agent workflows at scale.</h4>
+</p>
+
+🐝 **BeeAI Framework** is an open-source TypeScript library for building **production-ready multi-agent systems**. Pick from a variety of [🌐 AI Providers](/docs/backend.md), customize the [📜 prompt templates](/docs/templates.md), create [🤖 agents](/docs/agents.md), equip agents with pre-made [🛠️ tools](/docs/tools.md), and orchestrate [🤖🤝🤖 multi-agent workflows](/docs/workflows.md)! 🪄
+
+## Latest updates
+
+- 🚀 **2025-02-07**: Introduced [Backend](/docs/backend.md) module to simplify working with AI services (chat, embedding). See [migration guide](/docs/migration_guide.md).
+- 🧠 **2025-01-28**: Added support for [DeepSeek R1](https://api-docs.deepseek.com/news/news250120), check out the [Competitive Analysis Workflow example](https://github.com/i-am-bee/beeai-framework/tree/main/examples/workflows/competitive-analysis)
+- 🚀 **2025-01-09**:
+  - Introduced [Workflows](/docs/workflows.md), a way of building multi-agent systems.
+  - Added support for [Model Context Protocol](https://i-am-bee.github.io/beeai-framework/#/tools?id=using-the-mcptool-class), featured on the [official page](https://modelcontextprotocol.io/clients#beeai-framework).
+- 🚀 **2024-12-09**: Added support for [LLaMa 3.3](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct).
+- 🚀 **2024-11-21**: Added an experimental [Streamlit agent](https://github.com/i-am-bee/beeai-framework/blob/main/src/agents/experimental/streamlit/agent.ts).
+
+For a full changelog, see the [releases page](https://github.com/i-am-bee/beeai-framework/releases).
+
+## Why pick Bee?
+
+- ⚔️ **Battle-tested.** BeeAI Framework is at the core of [BeeAI](https://iambee.ai), a powerful platform for building chat assistants and custom AI-powered apps. BeeAI is in a closed beta, but already used by hundreds of users. And it's [fully open-source](https://github.com/i-am-bee/bee-ui) too!
+- 🚀 **Production-grade.** In an actual product, you have to reduce token spend through [memory strategies](/docs/memory.md), store and restore the agent state through [(de)serialization](/docs/serialization.md), generate [structured output](/examples/backend/structured.ts), or execute generated code in a [sandboxed environment](https://github.com/i-am-bee/bee-code-interpreter). Leave all that to Bee and focus on building!
+- 🤗 **Built for open-source models.** Pick any LLM you want – including small and open-source models. The framework is designed to perform robustly with [Granite](https://www.ibm.com/granite/docs/) and [Llama 3.x](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct). A full agentic workflow can run on your laptop!
+- 😢 **Bee cares about the sad path too.** Real-world applications encounter errors and failures. Bee lets you observe the full agent workflow through [events](/docs/emitter.md), collect [telemetry](/docs/instrumentation.md), [log](/docs/logger.md) diagnostic data, and throws clear and well-defined [exceptions](/docs/errors.md). Bees may be insects, but not bugs!
+- 🌳 **A part of something greater.** Bee isn't just a framework, but a full ecosystem. Use [Bee UI](https://github.com/i-am-bee/bee-ui) to chat with your agents visually. [Bee Observe](https://github.com/i-am-bee/bee-observe) collects and manages telemetry. [Bee Code Interpreter](https://github.com/i-am-bee/bee-code-interpreter) runs generated code safely in a secure sandbox. The Bee ecosystem also integrates with [Model Context Protocol](https://i-am-bee.github.io/beeai-framework/#/tools?id=using-the-mcptool-class), allowing interoperability with the wider agent ecosystem!
+
+## Quick example
+
+This example demonstrates how to build a multi-agent workflow using BeeAI Framework:
+
+<!-- embedme examples/workflows/multiAgentsSimple.ts -->
+
+```ts
+import "dotenv/config";
+import { UnconstrainedMemory } from "beeai-framework/memory/unconstrainedMemory";
+import { OpenMeteoTool } from "beeai-framework/tools/weather/openMeteo";
+import { WikipediaTool } from "beeai-framework/tools/search/wikipedia";
+import { AgentWorkflow } from "beeai-framework/experimental/workflows/agent";
+import { Message, Role } from "beeai-framework/llms/primitives/message";
+import { GroqChatLLM } from "beeai-framework/adapters/groq/chat";
+
+const workflow = new AgentWorkflow();
+
+workflow.addAgent({
+  name: "Researcher",
+  instructions: "You are a researcher assistant. Respond only if you can provide a useful answer.",
+  tools: [new WikipediaTool()],
+  llm: new GroqChatLLM(),
+});
+
+workflow.addAgent({
+  name: "WeatherForecaster",
+  instructions: "You are a weather assistant. Respond only if you can provide a useful answer.",
+  tools: [new OpenMeteoTool()],
+  llm: new GroqChatLLM(),
+  execution: { maxIterations: 3 },
+});
+
+workflow.addAgent({
+  name: "Solver",
+  instructions:
+    "Your task is to provide the most useful final answer based on the assistants' responses which all are relevant. Ignore those where assistant do not know.",
+  llm: new GroqChatLLM(),
+});
+
+const memory = new UnconstrainedMemory();
+
+await memory.add(
+  Message.of({
+    role: Role.USER,
+    text: "What is the capital of France and what is the current weather there?",
+    meta: { createdAt: new Date() },
+  }),
+);
+
+const { result } = await workflow.run(memory.messages).observe((emitter) => {
+  emitter.on("success", (data) => {
+    console.log(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
+  });
+});
+
+console.log(`Agent 🤖`, result.finalAnswer);
+```
+
+## Getting started
+
+> [!TIP]
+>
+> 🚀 Would you like a fully set-up TypeScript project with Bee, Code Interpreter, and Observability? Check out our [Bee Framework Starter](https://github.com/i-am-bee/beeai-framework-starter).
+
+> [!TIP]
+>
+> 🚀 Would you like to work with Bee in your web browser? See [Bee Stack](https://github.com/i-am-bee/bee-stack)
+
+### Installation
+
+```shell
+npm install beeai-framework
+```
+
+or
+
+```shell
+yarn add beeai-framework
+```
+
+### Example
+
+```ts
+import { BeeAgent } from "beeai-framework/agents/bee/agent";
+import { OllamaChatModel } from "beeai-framework/adapters/ollama/backend/chat";
+import { TokenMemory } from "beeai-framework/memory/tokenMemory";
+import { DuckDuckGoSearchTool } from "beeai-framework/tools/search/duckDuckGoSearch";
+import { OpenMeteoTool } from "beeai-framework/tools/weather/openMeteo";
+
+const llm = new OllamaChatModel("llama3.1"); // default is llama3.1 (8B), it is recommended to use 70B model
+
+const agent = new BeeAgent({
+  llm, // for more explore 'beeai-framework/adapters'
+  memory: new TokenMemory(), // for more explore 'beeai-framework/memory'
+  tools: [new DuckDuckGoSearchTool(), new OpenMeteoTool()], // for more explore 'beeai-framework/tools'
+});
+
+const response = await agent
+  .run({ prompt: "What's the current weather in Las Vegas?" })
+  .observe((emitter) => {
+    emitter.on("update", async ({ data, update, meta }) => {
+      console.log(`Agent (${update.key}) 🤖 : `, update.value);
+    });
+  });
+
+console.log(`Agent 🤖 : `, response.result.text);
+```
+
+➡️ See a more [advanced example](/examples/agents/bee.ts).
+
+➡️ you can run this example after local installation, using the command `yarn start examples/agents/simple.ts`
+
+> [!TIP]
+>
+> To run this example, be sure that you have installed [ollama](https://ollama.com) with the [llama3.1](https://ollama.com/library/llama3.1) model downloaded.
+
+> [!TIP]
+>
+> Documentation is available at https://i-am-bee.github.io/beeai-framework/
+
+### Local Installation
+
+> [!NOTE]
+>
+> `yarn` should be installed via Corepack ([tutorial](https://yarnpkg.com/corepack))
+
+1. Clone the repository `git clone git@github.com:i-am-bee/beeai-framework`.
+2. Install dependencies `yarn install --immutable && yarn prepare`.
+3. Create `.env` (from `.env.template`) and fill in missing values (if any).
+4. Start the agent `yarn run start:bee` (it runs `/examples/agents/bee.ts` file).
+
+➡️ All examples can be found in the [examples](/examples) directory.
+
+➡️ To run an arbitrary example, use the following command `yarn start examples/agents/bee.ts` (just pass the appropriate path to the desired example).
+
+### 📦 Modules
+
+The source directory (`src`) provides numerous modules that one can use.
+
+| Name                                     | Description                                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [**agents**](/docs/agents.md)            | Base classes defining the common interface for agent.                                       |
+| [**workflows**](/docs/workflows.md)      | Build agentic applications in a declarative way via [workflows](/docs/workflows.md).        |
+| [**backend**](/docs/backend.md)          | Functionalities that relates to AI models (chat, embedding, image, tool calling, ...)       |
+| [**template**](/docs/templates.md)       | Prompt Templating system based on `Mustache` with various improvements.                     |
+| [**memory**](/docs/memory.md)            | Various types of memories to use with agent.                                                |
+| [**tools**](/docs/tools.md)              | Tools that an agent can use.                                                                |
+| [**cache**](/docs/cache.md)              | Preset of different caching approaches that can be used together with tools.                |
+| [**errors**](/docs/errors.md)            | Error classes and helpers to catch errors fast.                                             |
+| [**logger**](/docs/logger.md)            | Core component for logging all actions within the framework.                                |
+| [**serializer**](/docs/serialization.md) | Core component for the ability to serialize/deserialize modules into the serialized format. |
+| [**version**](/docs/version.md)          | Constants representing the framework (e.g., latest version)                                 |
+| [**emitter**](/docs/emitter.md)          | Bringing visibility to the system by emitting events.                                       |
+| **internals**                            | Modules used by other modules within the framework.                                         |
+
+To see more in-depth explanation see [overview](/docs/overview.md).
+
+## Roadmap
+
+- Python version
+- Multi-agent orchestration patterns
+- Catalog of agents
+
+## Contribution guidelines
+
+The BeeAI Framework is an open-source project and we ❤️ contributions.
+
+If you'd like to contribute to Bee, please take a look at our [contribution guidelines](./CONTRIBUTING.md).
+
+### Bugs
+
+We are using [GitHub Issues](https://github.com/i-am-bee/beeai-framework/issues) to manage our public bugs. We keep a close eye on this, so before filing a new issue, please check to make sure it hasn't already been logged.
+
+### Code of conduct
+
+This project and everyone participating in it are governed by the [Code of Conduct](./CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](./CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
+
+## Legal notice
+
+All content in these repositories including code has been provided by IBM under the associated open source software license and IBM is under no obligation to provide enhancements, updates, or support. IBM developers produced this code as an open source project (not as an IBM product), and IBM makes no assertions as to the level of quality nor security, and will not be maintaining this code going forward.
+
+## Contributors
+
+Special thanks to our contributors for helping us improve BeeAI Framework.
+
+<a href="https://github.com/i-am-bee/beeai-framework/graphs/contributors">
+  <img alt="Contributors list" src="https://contrib.rocks/image?repo=i-am-bee/beeai-framework" />
+</a>

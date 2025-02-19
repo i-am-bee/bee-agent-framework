@@ -134,3 +134,7 @@ dist
 /experiments
 .npmrc
 .DS_Store
+
+/docs/typescript
+/docs/python
+/docs/README.md

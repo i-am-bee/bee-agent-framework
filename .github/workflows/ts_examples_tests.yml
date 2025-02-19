@@ -1,0 +1,65 @@
+name: TypeScript - E2E Examples
+
+on:
+  # TODO: ollama hangs
+  #push:
+  #  branches: ["main"]
+  #  paths:
+  #    - 'typescript/**'
+  #  paths-ignore:
+  #    - "**/*.md"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: typescript
+
+jobs:
+  test:
+    name: Tests
+    timeout-minutes: 40
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+          cache-dependency-path: "typescript/yarn.lock"
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Install ollama
+        run: curl -fsSL https://ollama.com/install.sh | sh
+      - name: Run ollama
+        run: |
+          ollama serve &
+          ollama pull llama3.1
+      - name: Call ollama API
+        run: |
+          curl -d '{"model": "llama3.1:latest", "stream": false, "prompt":"Whatever I say, asnwer with Yes"}' http://localhost:11434/api/generate
+      - name: Example Tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
+          GOOGLE_CSE_ID: ${{ secrets.GOOGLE_SEARCH_CSE_ID }}
+          # TODO: enable Watsonx later
+          # WATSONX_API_KEY: ${{ secrets.WATSONX_API_KEY }}
+          # WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
+          # WATSONX_SPACE_ID: ${{ secrets.WATSONX_SPACE_ID }}
+          # WATSONX_DEPLOYMENT_ID: ${{ secrets.WATSONX_DEPLOYMENT_ID }}
+        shell: bash
+        run: |
+          yarn test:examples
