@@ -75,8 +75,8 @@ import json
 from urllib.parse import quote
 
 import requests
-from beeai_framework import BeeAgent, tool
 
+from beeai_framework import BeeAgent, tool
 from beeai_framework.agents.types import BeeInput, BeeRunInput
 from beeai_framework.backend.chat import ChatModel
 from beeai_framework.memory.unconstrained_memory import UnconstrainedMemory
