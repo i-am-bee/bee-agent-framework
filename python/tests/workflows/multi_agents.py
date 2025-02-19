@@ -22,6 +22,7 @@ from beeai_framework.memory import TokenMemory, UnconstrainedMemory
 from beeai_framework.workflows.agent import AgentFactoryInput, AgentWorkflow
 
 
+@pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_multi_agents_workflow_basic() -> None:
     llm = OllamaChatModel()
@@ -36,6 +37,7 @@ async def test_multi_agents_workflow_basic() -> None:
     assert "Hallo" in response.state.final_answer
 
 
+@pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_multi_agents_workflow_creation() -> None:
     llm = OllamaChatModel()
@@ -52,6 +54,7 @@ async def test_multi_agents_workflow_creation() -> None:
     assert "Ciao" in response.state.final_answer
 
 
+@pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_multi_agents_workflow_agent_delete() -> None:
     llm = OllamaChatModel()

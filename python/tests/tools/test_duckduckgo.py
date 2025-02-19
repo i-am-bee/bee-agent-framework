@@ -14,12 +14,12 @@ from beeai_framework.tools.search.duckduckgo import (
 def tool() -> DuckDuckGoSearchTool:
     return DuckDuckGoSearchTool()
 
-
+@pytest.mark.unit
 def test_call_invalid_input_type(tool: DuckDuckGoSearchTool) -> None:
     with pytest.raises(ToolInputValidationError):
         tool.run(input={"search": "Poland"})
 
-
+@pytest.mark.e2e
 def test_output(tool: DuckDuckGoSearchTool) -> None:
     result = tool.run(input=DuckDuckGoSearchToolInput(query="What is the area of the Poland?"))
     assert type(result) is DuckDuckGoSearchToolOutput

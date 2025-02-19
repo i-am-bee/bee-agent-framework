@@ -3,6 +3,8 @@
 import json
 from datetime import UTC, datetime
 
+import pytest
+
 from beeai_framework.backend import (
     AssistantMessage,
     CustomMessage,
@@ -13,7 +15,7 @@ from beeai_framework.backend import (
     UserMessage,
 )
 
-
+@pytest.mark.unit
 def test_user_message() -> None:
     text = "this is a user message"
     message = Message.of(
@@ -28,7 +30,7 @@ def test_user_message() -> None:
     assert len(content) == 1
     assert content[0].get("text") == text
 
-
+@pytest.mark.unit
 def test_system_message() -> None:
     text = "this is a system message"
     message = Message.of(
@@ -43,7 +45,7 @@ def test_system_message() -> None:
     assert len(content) == 1
     assert content[0].get("text") == text
 
-
+@pytest.mark.unit
 def test_assistant_message() -> None:
     text = "this is an assistant message"
     message = Message.of(
@@ -58,7 +60,7 @@ def test_assistant_message() -> None:
     assert len(content) == 1
     assert content[0].get("text") == text
 
-
+@pytest.mark.unit
 def test_tool_message() -> None:
     tool_result = {
         "type": "tool-result",
@@ -78,7 +80,7 @@ def test_tool_message() -> None:
     assert content[0] == tool_result
     assert isinstance(message, ToolMessage)
 
-
+@pytest.mark.unit
 def test_custom_message() -> None:
     text = "this is a custom message"
     message = Message.of(

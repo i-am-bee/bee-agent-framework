@@ -73,6 +73,7 @@ class TestMCPTool:
         assert tool.input_schema() == {}
 
     @pytest.mark.asyncio
+    @pytest.mark.unit
     async def test_mcp_tool_run(
         self, mock_client_session: ClientSession, mock_tool_info: Tool, call_tool_result: MCPToolOutput
     ) -> None:
@@ -103,6 +104,7 @@ class TestMCPTool:
 # Calculator Tool Tests
 class TestAddNumbersTool:
     @pytest.mark.asyncio
+    @pytest.mark.unit
     async def test_add_numbers_mcp(
         self, mock_client_session: ClientSession, add_numbers_tool_info: MCPToolInfo, add_result: Callable
     ) -> None:
@@ -118,6 +120,7 @@ class TestAddNumbersTool:
         assert result.result.content[0].text == "8"
 
     @pytest.mark.asyncio
+    @pytest.mark.unit
     async def test_add_numbers_from_client(
         self, mock_client_session: ClientSession, add_numbers_tool_info: MCPToolInfo
     ) -> None:

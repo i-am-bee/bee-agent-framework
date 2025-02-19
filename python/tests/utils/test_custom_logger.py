@@ -14,10 +14,12 @@
 
 import logging
 
+import pytest
+
 from beeai_framework.backend import Role
 from beeai_framework.utils import BeeLogger, MessageEvent
 
-
+@pytest.mark.unit
 def test_redefine_logging_methods() -> None:
     logger = BeeLogger("app", level=logging.DEBUG)
     logger.add_logging_level("TEST1", 1, "test")  # adds test log level
@@ -25,7 +27,7 @@ def test_redefine_logging_methods() -> None:
     logger.add_logging_level("INFO", logging.INFO)  # does not redefine info log level
     assert callable(logger.test)
 
-
+@pytest.mark.unit
 def test_log_events() -> None:
     logger = BeeLogger("app")
     event = MessageEvent(source=Role.USER, message="Test")

@@ -68,6 +68,7 @@ def chat_messages_list() -> list[Message]:
 
 
 @pytest.mark.asyncio
+@pytest.mark.unit
 async def test_chat_model_create(reverse_words_chat: ChatModel, chat_messages_list: list[Message]) -> None:
     response = await reverse_words_chat.create({"messages": chat_messages_list})
 
@@ -77,6 +78,7 @@ async def test_chat_model_create(reverse_words_chat: ChatModel, chat_messages_li
 
 
 @pytest.mark.asyncio
+@pytest.mark.unit
 async def test_chat_model_structure(reverse_words_chat: ChatModel, chat_messages_list: list[Message]) -> None:
     class ReverseWordsSchema(BaseModel):
         reversed: str
@@ -93,6 +95,7 @@ async def test_chat_model_structure(reverse_words_chat: ChatModel, chat_messages
 
 
 @pytest.mark.asyncio
+@pytest.mark.unit
 async def test_chat_model_stream(reverse_words_chat: ChatModel, chat_messages_list: list[Message]) -> None:
     response = await reverse_words_chat.create({"messages": chat_messages_list, "stream": True})
 
@@ -102,6 +105,7 @@ async def test_chat_model_stream(reverse_words_chat: ChatModel, chat_messages_li
 
 
 @pytest.mark.asyncio
+@pytest.mark.unit
 async def test_chat_model_abort(reverse_words_chat: ChatModel, chat_messages_list: list[Message]) -> None:
     response = await reverse_words_chat.create(
         {"messages": chat_messages_list, "stream": True, "abort_signal": AbortSignal.timeout(5)}
@@ -119,6 +123,7 @@ async def test_chat_model_abort(reverse_words_chat: ChatModel, chat_messages_lis
 
 
 @pytest.mark.asyncio
+@pytest.mark.unit
 async def test_chat_model_from() -> None:
     ollama_chat_model = await ChatModel.from_name("ollama:llama3.1")
     assert isinstance(ollama_chat_model, OllamaChatModel)

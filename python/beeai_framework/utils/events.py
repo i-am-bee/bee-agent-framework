@@ -6,6 +6,6 @@ from typing import Literal
 
 @dataclass
 class MessageEvent:
-    source: Literal["User", "Agent"]
+    source: str
     message: str
     state: str | None = None
