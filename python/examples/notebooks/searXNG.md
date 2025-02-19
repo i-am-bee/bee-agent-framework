@@ -40,10 +40,10 @@ search:
     - json
 ```
 
-Ensure the settings are globally readable, to avoid issues with mapping userids between the container and the host,
+> **Important:**  Ensure the settings are globally readable, to avoid issues with mapping userids between the container and the host.
 
 ```shell
-chmod guo+r searxng/settings.yml
+chmod guo+r ~/searxng/settings.yml
 ```
 
 Stop and restart the container.
