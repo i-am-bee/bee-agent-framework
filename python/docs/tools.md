@@ -30,7 +30,7 @@ These tools extend the agent's abilities, allowing it to interact with external 
 | `MilvusDatabaseTool`                                                      | Perform retrieval queries (search, insert, delete, manage collections) against a MilvusDatabaseTool database. |
 | `OpenAPITool`                                                             | Send requests to and receive responses from API server.                                                       |
 | `MCPTool`                                                                 | Discover and use tools exposed by arbitrary [MCP Server](https://modelcontextprotocol.io/examples).           |
-| ➕ [Request](https://github.com/i-am-bee/bee-py/discussions) |                                                                                                               |
+| ➕ [Request](https://github.com/i-am-bee/beeai-framework/discussions) |                                                                                                               |
 
 All examples can be found [here](/examples/tools).
 
@@ -242,7 +242,7 @@ _Source: examples/tools/custom/openLibrary.py TODO
 
   Note: Convention and best practice is to set the tool's name to the name of its class
 
-  ```pt
+  ```py
   name = "MyNewTool"
   ```
 
