@@ -25,10 +25,10 @@
 
 The source directory (`src`) contains the available modules:
 
-| Name                                        | Description                                                                                 |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Name                                                       | Description                                                                                 |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | [**agents**](/typescript/docs/agents.md)                   | Base classes defining the common interface for agent.                                       |
-| [**backend**](/typescript/docs/backend.md)             | Functionalities that relates to AI models (chat, embedding, image, tool calling, ...)       |
+| [**backend**](/typescript/docs/backend.md)                 | Functionalities that relates to AI models (chat, embedding, image, tool calling, ...)       |
 | [**template**](/typescript/docs/templates.md)              | Prompt Templating system based on `Mustache` with various improvements.                     |
 | [**memory**](/typescript/docs/memory.md)                   | Various types of memories to use with agent.                                                |
 | [**tools**](/typescript/docs/tools.md)                     | Tools that an agent can use.                                                                |
