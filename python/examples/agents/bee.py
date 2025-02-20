@@ -94,6 +94,8 @@ async def process_agent_events(event_data: dict[str, Any], event_meta: EventMeta
         reader.write(f"Agent({event_data['update']['key']}) 🤖 : ", event_data["update"]["parsedValue"])
     # elif event_meta.name == "start":
     #     reader.write("Agent 🤖 : ", "starting new iteration")
+    # elif event_meta.name == "success":
+    #     reader.write("Agent 🤖 : ", "success")
 
 
 async def observer(emitter: Emitter) -> None:
