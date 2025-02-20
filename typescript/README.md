@@ -13,19 +13,6 @@
   <h4 align="center">BeeAI Framework is an open-source library for building production-ready multi-agent systems.</h4>
 </p>
 
-## Latest updates
-
-- 🚀 **2025-02-19**: Launched an alpha of the Python library and rebranded to BeeAI Framework. See our [getting started guide](/python/docs/README.md).
-- 🚀 **2025-02-07**: Introduced [Backend](/typescript/docs/backend.md) module to simplify working with AI services (chat, embedding). See our [migration guide](/typescript/docs/migration_guide.md).
-- 🧠 **2025-01-28**: Added support for [DeepSeek R1](https://api-docs.deepseek.com/news/news250120), check out the [Competitive Analysis Workflow example](/typescript/examples/workflows/competitive-analysis)
-- 🚀 **2025-01-09**:
-  - Introduced [Workflows](/typescript/docs/workflows.md), a way of building multi-agent systems.
-  - Added support for [Model Context Protocol](https://i-am-bee.github.io/bee-agent-framework/#/tools?id=using-the-mcptool-class), featured on the [official page](https://modelcontextprotocol.io/clients#bee-agent-framework).
-- 🚀 **2024-12-09**: Added support for [LLaMa 3.3](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct).
-- 🚀 **2024-11-21**: Added an experimental [Streamlit agent](typescript/examples/agents/experimental/streamlit.ts).
-
-For a full changelog, see our [releases page](https://github.com/i-am-bee/beeai-framework/releases).
-
 ## Why pick BeeAI?
 
 **🏆 Build the optimal agent architecture for your use case.** To design the right architecture for your use case, you need flexibility in both orchestrating agents and defining their roles and behaviors. With the BeeAI framework, you can implement any multi-agent pattern using [Workflows](/typescript/docs/workflows.md). Start with our out-of-the-box [ReActAgent](/typescript/examples/agents/bee.ts), or easily [customize your own agent](/typescript/docs/agents.md#creating-your-own-agent).
@@ -36,33 +23,32 @@ For a full changelog, see our [releases page](https://github.com/i-am-bee/beeai-
 
 ## Modules
 
-The source directory (`src`) provides numerous modules that one can use.
+The source directory (`src`) contains the available modules:
 
 | Name                                        | Description                                                                                 |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [**agents**](./agents.md)                   | Base classes defining the common interface for agent.                                       |
-| [**backend**](/docs/backend.md)             | Functionalities that relates to AI models (chat, embedding, image, tool calling, ...)       |
-| [**template**](./templates.md)              | Prompt Templating system based on `Mustache` with various improvements.                     |
-| [**memory**](./memory.md)                   | Various types of memories to use with agent.                                                |
-| [**tools**](./tools.md)                     | Tools that an agent can use.                                                                |
-| [**cache**](./cache.md)                     | Preset of different caching approaches that can be used together with tools.                |
-| [**errors**](./errors.md)                   | Base framework error classes used by each module.                                           |
-| [**logger**](./logger.md)                   | Core component for logging all actions within the framework.                                |
-| [**serializer**](./serialization.md)        | Core component for the ability to serialize/deserialize modules into the serialized format. |
-| [**version**](./version.md)                 | Constants representing the framework (e.g., the latest version)                             |
-| [**emitter**](./emitter.md)                 | Bringing visibility to the system by emitting events.                                       |
-| [**instrumentation**](./instrumentation.md) | Integrate monitoring tools into your application.                                           |
-| **internals**                               | Modules used by other modules within the framework.                                         |
+| [**agents**](/typescript/docs/agents.md)                   | Base classes defining the common interface for agent.                                       |
+| [**backend**](/typescript/docs/backend.md)             | Functionalities that relates to AI models (chat, embedding, image, tool calling, ...)       |
+| [**template**](/typescript/docs/templates.md)              | Prompt Templating system based on `Mustache` with various improvements.                     |
+| [**memory**](/typescript/docs/memory.md)                   | Various types of memories to use with agent.                                                |
+| [**tools**](/typescript/docs/tools.md)                     | Tools that an agent can use.                                                                |
+| [**cache**](/typescript/docs/cache.md)                     | Preset of different caching approaches that can be used together with tools.                |
+| [**errors**](/typescript/docs/errors.md)                   | Base framework error classes used by each module.                                           |
+| [**logger**](/typescript/docs/logger.md)                   | Core component for logging all actions within the framework.                                |
+| [**serializer**](/typescript/docs/serialization.md)        | Core component for the ability to serialize/deserialize modules into the serialized format. |
+| [**version**](/typescript/docs/version.md)                 | Constants representing the framework (e.g., the latest version)                             |
+| [**emitter**](/typescript/docs/emitter.md)                 | Bringing visibility to the system by emitting events.                                       |
+| [**instrumentation**](/typescript/docs/instrumentation.md) | Integrate monitoring tools into your application.                                           |
 
 ## Installation
 
-To install the TypeScript library:
+Install the framework using npm:
 
 ```shell
 npm install beeai-framework
 ```
 
-or
+or yarn:
 
 ```shell
 yarn add beeai-framework
@@ -71,8 +57,6 @@ yarn add beeai-framework
 ## Quick example
 
 The following example demonstrates how to build a multi-agent workflow using the BeeAI Framework:
-
-<!-- embedme examples/workflows/multiAgentsSimple.ts -->
 
 ```ts
 import "dotenv/config";
@@ -126,36 +110,25 @@ const { result } = await workflow.run(memory.messages).observe((emitter) => {
 console.log(`Agent 🤖`, result.finalAnswer);
 ```
 
-Once you've installed the BeeAI Framework locally, you can run this example using either yarn or npm:
+### Running the example
 
-Using yarn:
+> [!Note]
+>
+> To run this example, be sure that you have installed [groq](/typescript/docs/backend.md) and the appropriate .env files set up.
+
+To run projects, use:
 
 ```shell
-yarn start examples/agents/simple.ts
+yarn start [project_name].ts
 ```
 
 Using npm:
 
 ```shell
-npm run start examples/agents/simple.ts
+npm run start [project_name].ts
 ```
 
-> [!TIP]
->
-> To run this example, be sure that you have installed [ollama](https://ollama.com) with the [llama3.1](https://ollama.com/library/llama3.1) model downloaded.
-
-➡️ Explore all examples in our [examples library](/examples).
-
-## Roadmap
-
-- Python parity with TypeScript
-- Standalone docs site
-- Integration with watsonx.ai for deployment
-- More multi-agent reference architecture implementations using workflows
-- More OTTB agent implementations
-- Native tool calling with supported LLM providers
-
-To stay up-to-date with out latest priorities, check out our [public roadmap](https://github.com/orgs/i-am-bee/projects/1/views/2).
+➡️ Explore more in our [examples library](/python/examples).
 
 ## Contribution guidelines
 
