@@ -10,21 +10,37 @@
 
 This series of notebooks will guide you through the features of the BeeAI framework. You'll learn how to create, manage, and optimize AI agents with the help of practical examples and explanations.
 
-## 🛠 Setup
+## ✅ Pre-requisites
 
-First clone the beeai-framework repo. 
+These notebooks use Ollama and the IBM Granite 3.1 8B LLM.
+
+Here are instructions for [installing Ollama and running Granite 3.1](https://ollama.com/download).
+
+Ollama is a free, open-source tool that lets you run large language models (LLMs) locally on your computer. 🚀
+
+## 🛠 Setup Instructions
+
+⚙️ First clone the beeai-framework repo. 
+
+If you frequently work with git and have ssh keys configured:
 
 ```shell
 git clone git@github.com:i-am-bee/beeai-framework.git
 ```
 
-Then, navigate to the example notebooks in the python subfolder:
+Otherwise you can use https if you don't want to set up SSH keys or are in an environment where SSH connections are restricted:
+
+```shell
+git clone https://github.com/i-am-bee/beeai-framework.git
+```
+
+🧭 Next you should navigate to the example notebooks in the python subfolder:
 
 ```shell
 cd beeai-framework/python/examples/notebooks
 ```
 
-You will need Python 3.11 or above. This can be checked with:
+🐍 You will need Python 3.11 or above. This can be checked with:
 
 ```shell
 python --version
@@ -33,7 +49,7 @@ python --version
 > [!NOTE] 
 > See the [Python documentation](https://www.python.org/) for further information on installing or upgrading.
 
-❗❗It is recommended to run the notebooks within a virtual environment. You can create one using the following commands:
+❗It is recommended to run the notebooks within a virtual environment. You can create one using the following commands:
 
 ```shell
 python -m venv .venv
@@ -51,7 +67,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-✨ You are now ready to spin up the first notebook ✨
+✨ And finally you can spin up the first notebook ✨
 
 ```shell
 jupyter-lab basics.ipynb --port 9999
