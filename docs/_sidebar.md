@@ -1,5 +1,5 @@
-- [Home](/)
+- [TypeScript](/typescript/)
+- [Python](/python/)
 
-- Implementations
-  - [TypeScript](typescript/)
-  - [Python](python/) 
+
+- [Home](/)

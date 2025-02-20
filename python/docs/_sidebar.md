@@ -1,3 +1,6 @@
+- [TypeScript](/typescript/)
+- [Python](/python/)
+
 - Getting started
 
   - [Home](/)
