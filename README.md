@@ -9,7 +9,7 @@
 <h1 align="center">BeeAI Framework</h1>
 <p align="center"> <b>Build production-ready multi-agent systems</b><br> </p>
 
-BeeAI framework is available both as a [Python](/python/docs) and [TypeScript](/typescript/docs) library. 
+BeeAI framework is available both as a [Python](/python) and [TypeScript](/typescript) library. 
 We are committed to maintaining parity between the two.
 
 ## Latest updates
