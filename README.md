@@ -27,11 +27,11 @@ For a full changelog, see our [releases page](https://github.com/i-am-bee/beeai-
 
 ## Why pick BeeAI?
 
-**🏆 Build the optimal agent architecture for your use case.** To design the right architecture for your use case, you need flexibility in both orchestrating agents and defining their roles and behaviors. With the BeeAI framework, you can implement any multi-agent pattern using [Workflows](/typescript/docs/workflows.md). Start with our out-of-the-box [ReActAgent](/typescript/examples/agents/bee.ts), or easily [customize your own agent](/typescript/docs/agents.md#creating-your-own-agent).
+**🏆 Build the optimal agent architecture for your use case.** To design the right architecture for your use case, you need flexibility in both orchestrating agents and defining their roles and behaviors. With the BeeAI framework, you can implement any multi-agent pattern using [Workflows](/python/docs/workflows.md). Start with our out-of-the-box [ReActAgent](/python/examples/agents/bee.py), or easily [customize your own agent](/python/docs/agents.md#creating-your-own-agent).
 
-**🚀 Scale effortlessly with production-grade controls.** Deploying multi-agent systems requires efficient resource management and reliability. With the BeeAI framework, you can optimize token usage through [memory strategies](/typescript/docs/memory.md), persist and restore agent state via  [(de)serialization](/typescript/docs/serialization.md), generate [structured outputs](typescript/examples/backend/structured.ts), and execute generated code in a sandboxed environment. When things go wrong, BeeAI helps you track the full agent workflow through [events](/typescript/docs/emitter.md), collect [telemetry](/typescript/docs/instrumentation.md), log diagnostic data, and handle errors with clear, well-defined [exceptions](/typescript/docs/errors.md).
+**🚀 Scale effortlessly with production-grade controls.** Deploying multi-agent systems requires efficient resource management and reliability. With the BeeAI framework, you can optimize token usage through [memory strategies](/python/docs/memory.md), persist and restore agent state via  [(de)serialization](/python/docs/serialization.md), generate structured outputs, and execute generated code in a sandboxed environment. When things go wrong, BeeAI helps you track the full agent workflow through [events](/python/docs/emitter.md), collect [telemetry](/python/docs/instrumentation.md), log diagnostic data, and handle errors with clear, well-defined [exceptions](/python/docs/errors.md).
 
-**🔌 Seamlessly integrate with your models and tools.** Get started with any model from [Ollama](/typescript/examples/backend/providers/ollama.ts), [Groq](/typescript/examples/backend/providers/groq.ts), [OpenAI](/typescript/examples/backend/providers/openai.ts), [watsonx.ai](/typescript/examples/backend/providers/watsonx.ts), and [more](/typescript/docs/backend.md). Leverage tools from [LangChain](https://python.langchain.com/docs/integrations/tools/), connect to any server using the [Model Context Protocol](/typescript/docs/tools.md#using-the-mcptool-class), or build your own [custom tools](/typescript/docs/tools.md#using-the-customtool-python-functions). BeeAI is designed for extensibility, allowing you to integrate with the systems and capabilities you need.
+**🔌 Seamlessly integrate with your models and tools.** Get started with any model from [Ollama](/python/examples/backend/providers/ollama.py), [watsonx.ai](/python/examples/backend/providers/watsonx.py), and [more](/python/docs/backend.md). Leverage tools from [LangChain](https://python.langchain.com/docs/integrations/tools/), connect to any server using the [Model Context Protocol](/python/docs/tools.md#using-the-mcptool-class), or build your own [custom tools](/python/docs/tools.md#using-the-customtool-python-functions). BeeAI is designed for extensibility, allowing you to integrate with the systems and capabilities you need.
 
 ## Installation
 
@@ -49,62 +49,86 @@ For more guidance and starter examples in your desired language, head to the doc
 
 ## Quick example
 
-This example demonstrates how to build a multi-agent workflow using BeeAI Framework in TypeScript:
+This example demonstrates how to build a multi-agent workflow using BeeAI Framework in Python:
 
-<!-- embedme typescript/examples/workflows/multiAgentsSimple.ts -->
+```py
+import asyncio
+import traceback
 
-```ts
-import "dotenv/config";
-import { UnconstrainedMemory } from "bee-agent-framework/memory/unconstrainedMemory";
-import { OpenMeteoTool } from "bee-agent-framework/tools/weather/openMeteo";
-import { WikipediaTool } from "bee-agent-framework/tools/search/wikipedia";
-import { AgentWorkflow } from "bee-agent-framework/experimental/workflows/agent";
-import { Message, Role } from "bee-agent-framework/llms/primitives/message";
-import { GroqChatLLM } from "bee-agent-framework/adapters/groq/chat";
+from pydantic import ValidationError
 
-const workflow = new AgentWorkflow();
+from beeai_framework.agents.bee.agent import BeeAgentExecutionConfig
+from beeai_framework.backend.chat import ChatModel
+from beeai_framework.backend.message import UserMessage
+from beeai_framework.memory import UnconstrainedMemory
+from beeai_framework.tools.search.duckduckgo import DuckDuckGoSearchTool
+from beeai_framework.tools.weather.openmeteo import OpenMeteoTool
+from beeai_framework.workflows.agent import AgentFactoryInput, AgentWorkflow
+from beeai_framework.workflows.workflow import WorkflowError
 
-workflow.addAgent({
-  name: "Researcher",
-  instructions: "You are a researcher assistant. Respond only if you can provide a useful answer.",
-  tools: [new WikipediaTool()],
-  llm: new GroqChatLLM(),
-});
 
-workflow.addAgent({
-  name: "WeatherForecaster",
-  instructions: "You are a weather assistant. Respond only if you can provide a useful answer.",
-  tools: [new OpenMeteoTool()],
-  llm: new GroqChatLLM(),
-  execution: { maxIterations: 3 },
-});
+async def main() -> None:
+    llm = await ChatModel.from_name("ollama:granite3.1-dense:8b")
 
-workflow.addAgent({
-  name: "Solver",
-  instructions:
-    "Your task is to provide the most useful final answer based on the assistants' responses which all are relevant. Ignore those where assistant do not know.",
-  llm: new GroqChatLLM(),
-});
+    try:
+        workflow = AgentWorkflow(name="Smart assistant")
+        workflow.add_agent(
+            agent=AgentFactoryInput(
+                name="WeatherForecaster",
+                instructions="You are a weather assistant. Respond only if you can provide a useful answer.",
+                tools=[OpenMeteoTool()],
+                llm=llm,
+                execution=BeeAgentExecutionConfig(max_iterations=3),
+            )
+        )
+        workflow.add_agent(
+            agent=AgentFactoryInput(
+                name="Researcher",
+                instructions="You are a researcher assistant. Respond only if you can provide a useful answer.",
+                tools=[DuckDuckGoSearchTool()],
+                llm=llm,
+            )
+        )
+        workflow.add_agent(
+            agent=AgentFactoryInput(
+                name="Solver",
+                instructions="""Your task is to provide the most useful final answer based on the assistants'
+responses which all are relevant. Ignore those where assistant do not know.""",
+                llm=llm,
+            )
+        )
 
-const memory = new UnconstrainedMemory();
+        prompt = "What is the weather in New York?"
+        memory = UnconstrainedMemory()
+        await memory.add(UserMessage(content=prompt))
+        response = await workflow.run(messages=memory.messages)
+        print(f"result: {response.state.final_answer}")
 
-await memory.add(
-  Message.of({
-    role: Role.USER,
-    text: "What is the capital of France and what is the current weather there?",
-    meta: { createdAt: new Date() },
-  }),
-);
+    except WorkflowError:
+        traceback.print_exc()
+    except ValidationError:
+        traceback.print_exc()
 
-const { result } = await workflow.run(memory.messages).observe((emitter) => {
-  emitter.on("success", (data) => {
-    console.log(`-> ${data.step}`, data.response?.update?.finalAnswer ?? "-");
-  });
-});
 
-console.log(`Agent 🤖`, result.finalAnswer);
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-Python version of this example coming soon.
+
+TypeScript version of this example can be found [here](/typescript/README.md).
+
+### Running the example
+
+> [!Note]
+>
+> To run this example, be sure that you have installed [ollama](https://ollama.com) with the [granite3.1-dense:8b](https://ollama.com/library/granite3.1-dense) model downloaded.
+
+To run projects, use:
+
+```shell
+python [project_name].py
+```
+
+➡️ Explore more in our [examples library](/typescript/examples).
 
 ## Roadmap
 

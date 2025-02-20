@@ -29,10 +29,9 @@
     <script>
       function fixLinkFactory() {
         var main = "https://github.com/i-am-bee/beeai-framework/tree/main";
-        var exampleRegex = /^[\/]{0,1}examples\/(.*)/;
+        var exampleRegex = /^\/?(typescript|python)?\/?examples\/(.*)/;
         var srcRegex = /^[\/]{0,1}src\/(.*)/;
         var docsMatch = /(^|\/)docs($|\/)/;
-
         return function (url) {
           if (url === "LICENSE") {
             return main.concat("/LICENSE");
@@ -44,9 +43,9 @@
             url = url.replace(docsMatch, "$1");
           }
           if (url.match(exampleRegex) || url.match(srcRegex) || url === "/package.json") {
-            if (window.location.href.includes("/typescript")) {
+            if (window.location.href.includes("/typescript") && !url.includes("/typescript")) {
               url = main.concat("/typescript").concat(url);
-            } else if (window.location.href.includes("/python")) {
+            } else if (window.location.href.includes("/python") && !url.includes("/python")) {
               url = main.concat("/python").concat(url);
             } else {
               url = main.concat(url);
@@ -80,6 +79,17 @@
             className: "note",
           },
         },
+        plugins: [
+          function (hook) {
+            hook.doneEach(function () {
+              // Example: Disable nesting for "Introduction" link
+              var links = document.querySelectorAll('.sidebar a[href$="#/typescript/"]', '.sidebar a[href$="#/python/"]');
+              for (const link of links) {
+                link.nextSibling.style.display = 'none'
+              }
+            });
+          }
+        ],
         "markdown": {
           smartypants: true,
           renderer: {
