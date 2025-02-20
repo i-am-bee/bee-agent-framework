@@ -10,7 +10,7 @@
 
 <p align="center">
   <img align="center" alt="Project Status: Alpha" src="https://img.shields.io/badge/Status-Alpha-red">
-  <h4 align="center">BeeAI Framework is an open-source library for building production-ready multi-agent systems.</h4>
+  <h4 align="center">Build production-ready multi-agent systems</h4>
 </p>
 
 ## Why pick BeeAI?
