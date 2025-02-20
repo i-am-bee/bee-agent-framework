@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="/docs/assets/Bee_logo_white.svg">
     <source media="(prefers-color-scheme: light)" srcset="/docs/assets/Bee_logo_black.svg">
-    <img alt="Bee Framework logo" height="90">
+    <img alt="Bee Framework logo" src="https://raw.githubusercontent.com/i-am-bee/beeai-framework/refs/heads/main/docs/assets/Bee_logo_black.svg" height="90">
   </picture>
 </p>
 
@@ -127,7 +127,7 @@ To run projects, use:
 python [project_name].py
 ```
 
-➡️ Explore more in our [examples library](/typescript/examples).
+➡️ Explore more in our [examples library](/python/examples).
 
 ## Contribution guidelines
 
@@ -141,7 +141,7 @@ We are using GitHub Issues to manage public bugs. We keep a close eye on this, s
 
 ## Code of conduct
 
-This project and everyone participating in it are governed by the [Code of Conduct](./CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](./CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
+This project and everyone participating in it are governed by the [Code of Conduct](/python/docs/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](./CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
 
 ## Legal notice
 
