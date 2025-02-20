@@ -21,9 +21,9 @@ async def main() -> None:
     async def on_update(emitter: Emitter) -> None:
         emitter.on("update", update_callback)
 
-    output: BeeRunOutput = await agent.run(run_input=BeeRunInput("What's the current weather in Las Vegas?")).observe(
-        on_update
-    )
+    output: BeeRunOutput = await agent.run(
+        run_input=BeeRunInput(prompt="What's the current weather in Las Vegas?")
+    ).observe(on_update)
 
     print("Agent 🤖 : ", output.result.text)
 

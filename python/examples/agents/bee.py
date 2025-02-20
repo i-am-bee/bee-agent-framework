@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from beeai_framework.agents.bee.agent import BeeAgent
 from beeai_framework.agents.types import BeeInput, BeeRunInput
 from beeai_framework.backend.chat import ChatModel
-from beeai_framework.emitter.emitter import Emitter
+from beeai_framework.emitter.emitter import Emitter, EventMeta
 from beeai_framework.emitter.types import EmitterOptions
 from beeai_framework.memory.token_memory import TokenMemory
 from beeai_framework.tools.tool import StringToolOutput, Tool
@@ -49,7 +49,7 @@ class LangChainWikipediaTool(Tool):
         wikipedia = WikipediaAPIWrapper()
         self.wikipedia = WikipediaQueryRun(api_wrapper=wikipedia)
 
-    def _run(self, input: LangChainWikipediaToolInput, _: Any | None = None) -> None:
+    def _run(self, input: LangChainWikipediaToolInput, _: Any | None = None) -> Any:
         query = input.query
         try:
             result = self.wikipedia.run(query)
@@ -83,7 +83,7 @@ def create_agent() -> BeeAgent:
     return agent
 
 
-async def process_agent_events(event_data: dict[str, Any] | None, event_meta: dict[str, Any]) -> None:
+async def process_agent_events(event_data: dict[str, Any], event_meta: EventMeta) -> None:
     """Process agent events and log appropriately"""
 
     if event_meta.name == "error":
@@ -96,8 +96,8 @@ async def process_agent_events(event_data: dict[str, Any] | None, event_meta: di
     #     reader.write("Agent 🤖 : ", "starting new iteration")
 
 
-async def observer(emmitter: Emitter) -> None:
-    emmitter.on("*.*", process_agent_events, EmitterOptions(match_nested=True))
+async def observer(emitter: Emitter) -> None:
+    emitter.on("*.*", process_agent_events, EmitterOptions(match_nested=True))
 
 
 async def main() -> None:
@@ -121,16 +121,14 @@ async def main() -> None:
         for prompt in reader:
             # Run agent with the prompt
             response = await agent.run(
-                BeeRunInput(
-                    prompt=prompt,
-                    options={
-                        "execution": {
-                            "max_retries_per_step": 3,
-                            "total_max_retries": 10,
-                            "max_iterations": 20,
-                        }
-                    },
-                )
+                BeeRunInput(prompt=prompt),
+                {
+                    "execution": {
+                        "max_retries_per_step": 3,
+                        "total_max_retries": 10,
+                        "max_iterations": 20,
+                    }
+                },
             ).observe(observer)
 
             reader.write("Agent 🤖 : ", response.result.text)
