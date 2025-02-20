@@ -198,7 +198,9 @@ sequence = [
     { shell = '[ -z "$(git status -uno --porcelain)" ] || { echo "Your index contains uncommitted changes! Commit them and try again." && exit 1; }' },
     { "ref" = "clean"},
     { "cmd" = "cz bump"},
-    { "cmd" = "poetry publish --build" },
+    { "script" = "scripts.absolute_links:update('README.md')"},
+    { "cmd" = "poetry publish --build --dry-run" },
+    { "shell" = "git add README.md >/dev/null && git checkout HEAD README.md >/dev/null" },
     { "cmd" = "git push && git push origin $(git describe --tags --exact-match)"}
 ]
 

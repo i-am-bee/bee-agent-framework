@@ -1,36 +1,88 @@
-# BeeAI Python Notebook Examples
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="/docs/assets/Bee_logo_white.svg">
+    <source media="(prefers-color-scheme: light)" srcset="/docs/assets/Bee_logo_black.svg">
+    <img alt="Bee Framework logo" height="90">
+  </picture>
+</p>
 
-These examples organize agentic topics from the BeeAI framework for Python into structured groups, making it easier to learn the framework.
+<h1 align="center">BeeAI Framework Notebooks</h1>
 
-## Pre-requisites
+This series of notebooks will guide you through the features of the BeeAI framework. You'll learn how to create, manage, and optimize AI agents with the help of practical examples and explanations.
 
-We do not assume any particular method/software for executing these notebooks. The minimum requirements are contained within the `requirements.txt` files. These can be installed after activating your Python virtual environment, as follows:
+## ✅ Pre-requisites
+
+These notebooks use Ollama and the IBM Granite 3.1 8B LLM.
+
+Here are instructions for [installing Ollama and running Granite 3.1](https://ollama.com/download).
+
+Ollama is a free, open-source tool that lets you run large language models (LLMs) locally on your computer. 🚀
+
+## 🛠 Setup Instructions
+
+⚙️ First clone the beeai-framework repo. 
+
+If you frequently work with git and have ssh keys configured:
 
 ```shell
-pip install -r examples/requirements.txt
-pip install -r examples/notebooks/requirements.txt
+git clone git@github.com:i-am-bee/beeai-framework.git
+```
+
+Otherwise you can use https if you don't want to set up SSH keys or are in an environment where SSH connections are restricted:
+
+```shell
+git clone https://github.com/i-am-bee/beeai-framework.git
+```
+
+🧭 Next you should navigate to the example notebooks in the python subfolder:
+
+```shell
+cd beeai-framework/python/examples/notebooks
+```
+
+🐍 You will need Python 3.11 or above. This can be checked with:
+
+```shell
+python --version
+```
+
+> [!NOTE] 
+> See the [Python documentation](https://www.python.org/) for further information on installing or upgrading.
+
+❗It is recommended to run the notebooks within a virtual environment. You can create one using the following commands:
+
+```shell
+python -m venv .venv
+```
+
+Ensure the Python environment is activated in each new terminal window:
+
+```shell
+source .venv/bin/activate
+```
+
+📦 You are now ready to install dependencies:
+
+```shell
+pip install -r requirements.txt
+```
+
+✨ And finally you can spin up the first notebook ✨
+
+```shell
+jupyter-lab basics.ipynb --port 9999
 ```
 
 > [!NOTE]
-> You can find out how to activate your Python virtual environment in the main [README](/README.md) of this repository.
-
-If you're not familiar with how to get started with Jupyter Notebooks you can read the [documentation](https://docs.jupyter.org). As a quick start, you can try using Jupyter Lab, as follows:
-
-```shell
-pip install jupyterlab
-jupyter-lab examples/notebooks/basic.ipynb
-```
+> If you're not familiar with how to get started with Jupyter Notebooks you can read the [documentation](https://docs.jupyter.org). 
 
 ## Notebooks
 
-The basics notebook introduces the core constructs provided by the BeeAI framework such as PromptTemplates, Messages, Memory and how to setup and generate output using a ChatModel.
+There are three notebooks available. It is recommended to start with [basics.ipynb](basics.ipynb), followed by [workflows.ipynb](workflows.ipynb), and finally [agents.ipynb](agents.ipynb). You can navigate through the notebooks using the embedded links.
 
-[basics.ipynb](basics.ipynb)
+The [basics.ipynb](basics.ipynb) notebook introduces the core components of the BeeAI framework, including PromptTemplates, Messages, and Memory. It also covers setting up a ChatModel and generating output.
 
-The workflows notebook describes how to use BeeAI Workflows to build AI agents of various complexities. This notebook builds on topics discussed in the [basics.ipynb](basics.ipynb).
+The [workflows.ipynb](workflows.ipynb) notebook explains how to use BeeAI Workflows to create AI agents of varying complexity. It builds upon the concepts introduced in [basics.ipynb](basics.ipynb).
 
-[workflows.ipynb](workflows.ipynb)
+Finally, the [agents.ipynb](agents.ipynb) notebook covers setting up and using the BeeAI ReActAgent. This pre-configured ReAct agent can be customized with tools and instructions to solve various problems.
 
-Finally the agents notebook describes how to setup and use the BeeAI ReActAgent. This is a pre canned ReAct agent that can be configured with tools, and instructions to solve problems.
-
-[agents.ipynb](agents.ipynb)
