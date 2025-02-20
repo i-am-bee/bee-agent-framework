@@ -5,8 +5,6 @@ import os
 from typing import Any
 
 from dotenv import load_dotenv
-
-# Import LangChain's Wikipedia tool from community package
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 from pydantic import BaseModel, Field
@@ -19,12 +17,15 @@ from beeai_framework.emitter.types import EmitterOptions
 from beeai_framework.memory.token_memory import TokenMemory
 from beeai_framework.tools.tool import StringToolOutput, Tool
 from beeai_framework.utils.custom_logger import BeeLogger
+from examples.helpers.io import ConsoleReader
 
 # Load environment variables
 load_dotenv()
 
 # Configure logging - using DEBUG instead of trace
 logger = BeeLogger("app", level=logging.DEBUG)
+
+reader = ConsoleReader()
 
 
 def get_env_var(key: str, default: str | None = None) -> str:
@@ -86,16 +87,13 @@ async def process_agent_events(event_data: dict[str, Any] | None, event_meta: di
     """Process agent events and log appropriately"""
 
     if event_meta.name == "start":
-        logger.info("Agent started")
+        reader.print("Agent 🤖 : ", "starting new iteration")
     elif event_meta.name == "error":
-        logger.info(f"Agent error: {event_data['error']}")
+        reader.print("Agent 🤖 : ", event_data["error"])
     elif event_meta.name == "retry":
-        logger.info("Agent: retrying the action...")
+        reader.print("Agent 🤖 : ", "retrying the action...")
     elif event_meta.name == "update":
-        update = event_data["update"]
-        logger.info(f"Agent ({update.get('key')}): {update.get('value')}")
-    elif event_meta.name == "finish":
-        logger.info("Agent finished")
+        reader.print(f"Agent({event_data['update']['key']}) 🤖 : ", event_data["update"]["parsedValue"])
 
 
 async def observer(emmitter: Emitter) -> None:
@@ -112,44 +110,32 @@ async def main() -> None:
         # Log code interpreter status if configured
         code_interpreter_url = get_env_var("CODE_INTERPRETER_URL")
         if code_interpreter_url:
-            logger.info(
-                f"🛠️ System: The code interpreter tool is enabled. Please ensure that it is running on {code_interpreter_url}"  # noqa: E501
+            reader.print(
+                "🛠️ System: ",
+                f"The code interpreter tool is enabled. Please ensure that it is running on {code_interpreter_url}",
             )
 
-        logger.info("Agent initialized with LangChain Wikipedia tool. Type 'exit' or 'quit' to end.")
+        reader.print("🛠️ System: ", "Agent initialized with LangChain Wikipedia tool.")
 
-        # Main interaction loop
-        while True:
-            try:
-                # Get user input
-                prompt = input("\nUser: ").strip()
-                if not prompt:
-                    continue
+        async def run_agent(prompt: str) -> None:
+            # Run agent with the prompt
+            response = await agent.run(
+                BeeRunInput(
+                    prompt=prompt,
+                    options={
+                        "execution": {
+                            "max_retries_per_step": 3,
+                            "total_max_retries": 10,
+                            "max_iterations": 20,
+                        }
+                    },
+                )
+            ).observe(observer)
 
-                if prompt.lower() in ["exit", "quit"]:
-                    break
+            reader.print("Agent 🤖 : ", response.result.text)
 
-                # Run agent with the prompt
-                result = await agent.run(
-                    BeeRunInput(
-                        prompt=prompt,
-                        options={
-                            "execution": {
-                                "max_retries_per_step": 3,
-                                "total_max_retries": 10,
-                                "max_iterations": 20,
-                            }
-                        },
-                    )
-                ).observe(observer)
-
-                print(f"Received response: {result.result.text}")
-
-            except KeyboardInterrupt:
-                logger.info("\nExiting...")
-                break
-            except Exception as e:
-                logger.error(f"Error processing prompt: {e!s}")
+        # Run agent with user input loop
+        await reader.run(run_agent)
 
     except Exception as e:
         logger.error(f"Application error: {e!s}")
