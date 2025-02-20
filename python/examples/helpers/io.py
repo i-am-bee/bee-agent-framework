@@ -1,4 +1,4 @@
-from collections.abc import Awaitable, Callable
+import sys
 
 from pydantic import BaseModel
 from termcolor import colored
@@ -19,14 +19,16 @@ class ConsoleReader:
         self.input = options.input
         self.allow_empty = options.allow_empty
 
-    def print(self, role: str, data: str) -> None:
-        print(colored(role, "red", attrs=["bold"]), data)
+    def __iter__(self) -> "ConsoleReader":
+        print("Interactive session has started. To escape, input 'q' and submit.")
+        return self
 
-    def prompt(self) -> str:
-        prompt: str = ""
-
-        while not prompt:
+    def __next__(self) -> str:
+        while True:
             prompt = input(colored(self.input, "cyan", attrs=["bold"])).strip()
+
+            if prompt == "q":
+                raise StopIteration
 
             prompt = prompt if prompt else self.fallback
 
@@ -34,25 +36,12 @@ class ConsoleReader:
                 print("Error: Empty prompt is not allowed. Please try again.")
                 continue
 
-        return prompt
+            return prompt
 
-    async def run(self, fn: Callable[[str], Awaitable[None]]) -> None:
-        print("Interactive session has started. To escape, input 'q' and submit.")
+    def write(self, role: str, data: str) -> None:
+        print(colored(role, "red", attrs=["bold"]), data)
 
-        while True:
-            try:
-                prompt = input(colored(self.input, "cyan", attrs=["bold"])).strip()
-
-                if prompt == "q":
-                    break
-
-                prompt = prompt if prompt else self.fallback
-
-                if not prompt and not self.allow_empty:
-                    print("Error: Empty prompt is not allowed. Please try again.")
-                    continue
-
-                await fn(prompt)
-
-            except KeyboardInterrupt:
-                break
+    def prompt(self) -> str | None:
+        for prompt in self:
+            return prompt
+        sys.exit()

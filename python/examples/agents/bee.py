@@ -86,14 +86,14 @@ def create_agent() -> BeeAgent:
 async def process_agent_events(event_data: dict[str, Any] | None, event_meta: dict[str, Any]) -> None:
     """Process agent events and log appropriately"""
 
-    if event_meta.name == "start":
-        reader.print("Agent 🤖 : ", "starting new iteration")
-    elif event_meta.name == "error":
-        reader.print("Agent 🤖 : ", event_data["error"])
+    if event_meta.name == "error":
+        reader.write("Agent 🤖 : ", event_data["error"])
     elif event_meta.name == "retry":
-        reader.print("Agent 🤖 : ", "retrying the action...")
+        reader.write("Agent 🤖 : ", "retrying the action...")
     elif event_meta.name == "update":
-        reader.print(f"Agent({event_data['update']['key']}) 🤖 : ", event_data["update"]["parsedValue"])
+        reader.write(f"Agent({event_data['update']['key']}) 🤖 : ", event_data["update"]["parsedValue"])
+    # elif event_meta.name == "start":
+    #     reader.write("Agent 🤖 : ", "starting new iteration")
 
 
 async def observer(emmitter: Emitter) -> None:
@@ -110,14 +110,15 @@ async def main() -> None:
         # Log code interpreter status if configured
         code_interpreter_url = get_env_var("CODE_INTERPRETER_URL")
         if code_interpreter_url:
-            reader.print(
+            reader.write(
                 "🛠️ System: ",
                 f"The code interpreter tool is enabled. Please ensure that it is running on {code_interpreter_url}",
             )
 
-        reader.print("🛠️ System: ", "Agent initialized with LangChain Wikipedia tool.")
+        reader.write("🛠️ System: ", "Agent initialized with LangChain Wikipedia tool.")
 
-        async def run_agent(prompt: str) -> None:
+        # Main interaction loop with user input
+        for prompt in reader:
             # Run agent with the prompt
             response = await agent.run(
                 BeeRunInput(
@@ -132,10 +133,7 @@ async def main() -> None:
                 )
             ).observe(observer)
 
-            reader.print("Agent 🤖 : ", response.result.text)
-
-        # Run agent with user input loop
-        await reader.run(run_agent)
+            reader.write("Agent 🤖 : ", response.result.text)
 
     except Exception as e:
         logger.error(f"Application error: {e!s}")

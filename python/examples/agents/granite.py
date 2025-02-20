@@ -24,7 +24,7 @@ async def main() -> None:
     prompt = reader.prompt()
 
     async def update_callback(data: dict, event: EventMeta) -> None:
-        reader.print(f"Agent({data['update']['key']}) 🤖 : ", data["update"]["parsedValue"])
+        reader.write(f"Agent({data['update']['key']}) 🤖 : ", data["update"]["parsedValue"])
 
     async def on_update(emitter: Emitter) -> None:
         emitter.on("update", update_callback)
@@ -34,7 +34,7 @@ async def main() -> None:
         {"execution": {"total_max_retries": 2, "max_retries_per_step": 3, "max_iterations": 8}},
     ).observe(on_update)
 
-    reader.print("Agent 🤖 : ", output.result.text)
+    reader.write("Agent 🤖 : ", output.result.text)
 
 
 if __name__ == "__main__":
